@@ -1,0 +1,64 @@
+.onetone-step-2 {
+    position:relative;
+    overflow:visible!important;
+    height: 0px;
+}
+
+.onetone-step-1 {
+    position: absolute;
+    top: 0;left: 0;
+    width: 100%;
+    height: 0;
+}
+.onetone-step-1:hover{
+	display:block!important;
+	}
+.wp-menu-open .onetone-step-1 {
+    display:none;
+}
+
+.wp-has-submenu:hover .onetone-step-1 {
+    display:none;
+}
+
+.onetone-step-1-text,
+.onetone-step-2-text {
+    position:absolute;
+    top: 0;
+    left: 100%;
+    margin-left: 2px;
+    background-color: #ffffff;
+    width: 230px;
+    box-shadow: 3px 3px 5px 0 rgba(0,0,0,.5);
+    padding: 0;
+}
+
+.onetone-step-1-text h2,
+.onetone-step-2-text h2 {
+    background-color:#D75761;
+    color: #fff;
+    padding: 10px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.onetone-step-1-text p,
+.onetone-step-2-text p {
+    padding: 10px;
+    color: #666;
+    margin: 0;
+}
+
+.onetone-step-1-text:before,
+.onetone-step-2-text:before {
+    position:absolute;
+    content: "";
+    right: 100%;
+    margin-right: -5px;
+    top: 12px;
+    width: 10px;height: 10px;
+    background-color: #D75761;
+    transform: rotate(45deg);
+    z-index: 9999;
+}

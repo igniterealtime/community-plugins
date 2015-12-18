@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ofmeet" default="jar" basedir = "..">
+	<description>Openfire Meetings Build</description>
+
+	<property name="openfire.home" 	value="./openfire_4_0_0/target/openfire" />
+	<property name="lib.ant.dir" 	value="./openfire_4_0_0/build/lib/ant" />	
+	<property name="ofmeet.dir" 	value="ofmeet" />
+	
+
+	<path id="build.classpath">
+		<fileset dir="${ofmeet.dir}/lib" includes="*.jar"/>
+		<fileset dir="${openfire.home}/lib" includes="*.jar"/>
+	</path>
+
+	<target name="init">
+		<!-- create our directories -->
+		<mkdir dir="${ofmeet.dir}/build/classes"/>
+		<mkdir dir="${ofmeet.dir}/build/jar"/>				
+	</target>
+	
+	<target name="clean">
+        <delete dir="${ofmeet.dir}/build/classes/*"/>
+        <delete file="${openfire.home}/plugins/ofmeet.jar"/>
+	</target>
+	
+	<target name="compile" depends="init">
+		<javac debug="true" deprecation="false" srcdir="${ofmeet.dir}/src" destdir="${ofmeet.dir}/build/classes">
+			<classpath refid="build.classpath"/>
+		</javac>
+	</target>
+
+	<target name="lib" depends="clean, compile">
+		<jar destfile="${ofmeet.dir}/lib/plugin-ofmeet.jar">
+			<fileset dir="${ofmeet.dir}/build/classes">
+				<include name="**" />
+			</fileset>
+		</jar>
+	</target>
+	
+	<target name="compile-jsps">
+		<mkdir dir="${ofmeet.dir}/build/jspc/java"/>
+		<mkdir dir="${ofmeet.dir}/build/jspc/classes"/>
+
+		<java classname="org.apache.jasper.JspC" fork="true">
+		    <classpath>
+			<pathelement location="${java.home}/../lib/tools.jar"/>		
+			<fileset dir="${ofmeet.dir}/lib" includes="*.jar"/>
+			<fileset dir="${openfire.home}/lib" includes="*.jar"/>			
+			<fileset dir="${lib.ant.dir}" includes="*.jar" />
+			<fileset dir="${ant.home}/lib" includes="ant.jar" />
+		    </classpath>
+		    <arg line="-uriroot '${ofmeet.dir}/src/web'"/>
+		    <arg line="-d '${ofmeet.dir}/build/jspc/java'"/>
+		    <arg line="-p org.jivesoftware.openfire.plugin.ofmeet"/>
+		    <arg line="-webxml '${ofmeet.dir}/build/jspc/web.xml'"/>
+		</java>	
+
+		<javac debug="true" deprecation="true" srcdir="${ofmeet.dir}/build/jspc/java" destdir="${ofmeet.dir}/build/jspc/classes">
+			<classpath refid="build.classpath"/>
+		</javac>
+		
+		<jar jarfile="${ofmeet.dir}/lib/plugin-ofmeet-jspc.jar">
+		    <fileset dir="${ofmeet.dir}/build/jspc/classes"
+			     includes="**/*.class"/>
+		</jar>	
+				
+		<copy todir="${ofmeet.dir}/src/web/WEB-INF"
+		      file="${ofmeet.dir}/build/jspc/web.xml"
+		      overwrite="${overwrite}"/>		
+				
+	  </target> 	
+	
+	<target name="jar" depends="lib, compile-jsps">
+		<copy todir="${ofmeet.dir}/build/jar" overwrite="true">
+			<fileset dir="${ofmeet.dir}/src">
+                        	<exclude name="java/**/*.java"/>
+                        	<exclude name="java/**"/>                        	
+			</fileset>
+		</copy>			
+		<copy todir="${ofmeet.dir}/build/jar/lib" overwrite="true">			
+			<fileset dir="${ofmeet.dir}/lib">				
+			</fileset>
+		</copy>			
+		<copy todir="${ofmeet.dir}/build/jar" overwrite="true">						
+			<fileset dir="${ofmeet.dir}">
+                        	<exclude name="build.*"/>		
+                        	<exclude name="build/**"/>	
+                        	<exclude name="src/**"/>                        	
+			</fileset>			
+		</copy>		
+		
+		<jar destfile="${openfire.home}/plugins/ofmeet.jar">
+			<fileset dir="${ofmeet.dir}/build/jar">				
+			</fileset>			
+		</jar>
+		
+                <delete dir="${ofmeet.dir}/build"/>	              
+	</target>
+</project>
+

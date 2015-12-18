@@ -1,0 +1,519 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Metro Creativex\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-09-08 11:37+0200\n"
+"PO-Revision-Date: 2015-09-08 11:37+0200\n"
+"Last-Translator: \n"
+"Language-Team: themeisle <friends@themeisle.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: gettext;gettext_noop;__;_e\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: inc\n"
+
+#: class-tgm-plugin-activation.php:333
+#: functions.php:208
+msgid "Install Required Plugins"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:334
+#: functions.php:210
+msgid "Install Plugins"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:335
+#: functions.php:212
+#, php-format
+msgid "Installing Plugin: %s"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:336
+#: functions.php:214
+msgid "Something went wrong with the plugin API."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:397
+#: functions.php:236
+msgid "Return to Required Plugins Installer"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:398
+msgid "Return to the dashboard"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:399
+#: class-tgm-plugin-activation.php:3029
+#: functions.php:238
+msgid "Plugin activated successfully."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:400
+msgid "The following plugin was activated successfully:"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:401
+#, php-format
+msgid "No action taken. Plugin %1$s was already active."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:402
+#, php-format
+msgid "Plugin not activated. A higher version of %s is needed for this theme. Please update the plugin."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:403
+#, php-format
+msgid "All plugins installed and activated successfully. %1$s"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:404
+msgid "Dismiss this notice"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:405
+msgid "Please contact the administrator of this site for help."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2167
+msgid "Required"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2170
+msgid "Recommended"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2186
+msgid "WordPress Repository"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2189
+msgid "External Source"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2192
+msgid "Pre-Packaged"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2209
+msgid "Not Installed"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2213
+msgid "Installed But Not Activated"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2215
+msgid "Active"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2221
+msgid "Required Update not Available"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2224
+msgid "Requires Update"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2227
+msgid "Update recommended"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2379
+msgid "Installed version:"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2387
+msgid "Minimum required version:"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2399
+msgid "Available version:"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2422
+#, php-format
+msgid "No plugins to install, update or activate. <a href=\"%1$s\">Return to the Dashboard</a>"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2436
+msgid "Plugin"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2437
+msgid "Source"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2438
+msgid "Type"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2442
+msgid "Version"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2443
+msgid "Status"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2603
+msgid "Install"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2609
+msgid "Update"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2612
+msgid "Activate"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2643
+msgid "No plugins were selected to be installed. No action taken."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2645
+msgid "No plugins were selected to be updated. No action taken."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2681
+msgid "No plugins are available to be installed at this time."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:2683
+msgid "No plugins are available to be updated at this time."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:3028
+msgid "Plugin activation failed."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:3362
+#, php-format
+msgid "Updating Plugin %1$s (%2$d/%3$d)"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:3364
+#, php-format
+msgid "An error occurred while installing %1$s: <strong>%2$s</strong>."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:3365
+#, php-format
+msgid "The installation of %1$s failed."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:3369
+msgid "The installation and activation process is starting. This process may take a while on some hosts, so please be patient."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:3370
+#, php-format
+msgid "%1$s installed and activated successfully."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:3371
+msgid "All installations and activations have been completed."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:3372
+#, php-format
+msgid "Installing and Activating Plugin %1$s (%2$d/%3$d)"
+msgstr ""
+
+#: class-tgm-plugin-activation.php:3375
+msgid "The installation process is starting. This process may take a while on some hosts, so please be patient."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:3377
+msgid "All installations have been completed."
+msgstr ""
+
+#: class-tgm-plugin-activation.php:3378
+#, php-format
+msgid "Installing Plugin %1$s (%2$d/%3$d)"
+msgstr ""
+
+#: comments.php:1
+msgid "Comment navigation"
+msgstr ""
+
+#: comments.php:1
+msgid "&larr; Older Comments"
+msgstr ""
+
+#: comments.php:1
+msgid "Newer Comments &rarr;"
+msgstr ""
+
+#: comments.php:1
+msgid "Comments are closed."
+msgstr ""
+
+#: content-none.php:1
+#, php-format
+msgid "Ready to publish your first post? <a href=\"%1$s\">Get started here</a>."
+msgstr ""
+
+#: content-none.php:1
+msgid "Sorry, but nothing matched your search terms. Please try again with different keywords."
+msgstr ""
+
+#: content-none.php:1
+msgid "It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help."
+msgstr ""
+
+#: footer.php:1
+#, php-format
+msgid "Powered by <a href=\"%s\">WordPress</a>"
+msgstr ""
+
+#: footer.php:1
+#, php-format
+msgid "Theme by <a rel=\"nofollow\" target=\"_blank\" href=\"%s\">ThemeIsle</a>"
+msgstr ""
+
+#: functions.php:19
+msgid "Header menu"
+msgstr ""
+
+#: functions.php:60
+msgid "Left sidebar"
+msgstr ""
+
+#: functions.php:91
+#, php-format
+msgid "Page %s"
+msgstr ""
+
+#: functions.php:146
+msgid "Older posts"
+msgstr ""
+
+#: functions.php:149
+msgid "Newer posts"
+msgstr ""
+
+#: functions.php:240
+#, php-format
+msgid "All plugins installed and activated successfully. %s"
+msgstr ""
+
+#: functions.php:275
+msgid "Pingback:"
+msgstr ""
+
+#: functions.php:275
+msgid "(Edit)"
+msgstr ""
+
+#: functions.php:295
+#, php-format
+msgid "%1$s at %2$s"
+msgstr ""
+
+#: functions.php:300
+msgid "Your comment is awaiting moderation."
+msgstr ""
+
+#: functions.php:302
+msgid "Edit"
+msgstr ""
+
+#: functions.php:304
+msgid "Reply"
+msgstr ""
+
+#: functions.php:437
+msgid "Latest articles"
+msgstr ""
+
+#: functions.php:487
+msgid "Get unlimited customization possibilities"
+msgstr ""
+
+#: functions.php:488
+msgid "Fonts, colors, layout, everything is customizable. Super easy, super fast!"
+msgstr ""
+
+#: functions.php:489
+msgid "Get Metro CustomizR now!"
+msgstr ""
+
+#: functions.php:494
+msgid "What You Will Get"
+msgstr ""
+
+#: functions.php:498
+msgid "Metro CustomizR is an addon plugin for Metro CreativeX that allows you to customize your theme the way you want. No more child themes or support needed. Just install it and you're ready to customize your website. Easy peasy!"
+msgstr ""
+
+#: functions.php:505
+msgid "Palette picker"
+msgstr ""
+
+#: functions.php:506
+msgid "Change your page colors in just a few clicks with our palette picker control."
+msgstr ""
+
+#: functions.php:510
+msgid "Individual post color"
+msgstr ""
+
+#: functions.php:511
+msgid "No more child theme required.Customize each post background color."
+msgstr ""
+
+#: functions.php:517
+msgid "Website layout"
+msgstr ""
+
+#: functions.php:518
+msgid "With just one click you can change the sidebar position."
+msgstr ""
+
+#: functions.php:522
+msgid "Fonts"
+msgstr ""
+
+#: functions.php:523
+msgid "Choose from over 100 fonts to style your page."
+msgstr ""
+
+#: functions.php:569
+#, php-format
+msgid "Daily Archives: %s"
+msgstr ""
+
+#: functions.php:571
+#, php-format
+msgid "Monthly Archives: %s"
+msgstr ""
+
+#: functions.php:573
+#, php-format
+msgid "Yearly Archives: %s"
+msgstr ""
+
+#: header.php:83
+msgid "Menu"
+msgstr ""
+
+#: index.php:13
+msgid "404 - not found"
+msgstr ""
+
+#: page.php:18
+msgid "Edit page"
+msgstr ""
+
+#: search.php:1
+msgid "Search Results for: "
+msgstr ""
+
+#: single.php:28
+msgid "Edit post"
+msgstr ""
+
+#: tag.php:1
+#, php-format
+msgid "Tag Archives: %s"
+msgstr ""
+
+#: inc/customizer.php:33
+msgid "ThemeIsle theme notes"
+msgstr ""
+
+#: inc/customizer.php:34
+msgid ""
+"Thank you for being part of this! We've spent almost 6 months building ThemeIsle without really knowing if anyone will ever use a theme or not, so we're very grateful that you've decided to work with us. Wanna <a href='http://themeisle.com/contact/' target='_blank'>say hi</a>?\n"
+"\t\t<br/><br/><a href='http://themeisle.com/demo/?theme=MetroX' target='_blank'>View Theme Demo</a> | <a href='https://themeisle.com/forums/forum/metrox/' target='_blank'>Get theme support</a>"
+msgstr ""
+
+#: inc/customizer.php:49
+#: inc/customizer.php:59
+msgid "Logo"
+msgstr ""
+
+#: inc/customizer.php:51
+msgid "Upload a logo to replace the default site name and description in the header"
+msgstr ""
+
+#: inc/customizer.php:68
+msgid "General"
+msgstr ""
+
+#: inc/customizer.php:78
+msgid "Font"
+msgstr ""
+
+#: inc/customizer.php:81
+#, php-format
+msgid "Choose the font that suits your page.<br/>Font picker is available in <a href=\"%s\" target=\"_blank\">Metro CustomizR</a>."
+msgstr ""
+
+#: inc/customizer.php:91
+msgid "Sidebar position"
+msgstr ""
+
+#: inc/customizer.php:94
+#, php-format
+msgid "Change the sidebar position.<br/>Sidebar position is available in <a href=\"%s\" target=\"_blank\">Metro CustomizR</a>."
+msgstr ""
+
+#: inc/customizer.php:100
+msgid "Socials"
+msgstr ""
+
+#: inc/customizer.php:110
+msgid "Add new social icon"
+msgstr ""
+
+#: inc/customizer.php:113
+#, php-format
+msgid "More icons?<br/>Icon repeater is available in <a href=\"%s\" target=\"_blank\">Metro CustomizR</a>."
+msgstr ""
+
+#: inc/customizer.php:119
+msgid "Facebook link"
+msgstr ""
+
+#: inc/customizer.php:127
+msgid "Twitter link"
+msgstr ""
+
+#: inc/customizer.php:139
+msgid "Change the color scheme"
+msgstr ""
+
+#: inc/customizer.php:142
+#, php-format
+msgid "Change all colors with just two clicks.<br/>Pallete picker is available in <a href=\"%s\" target=\"_blank\">Metro CustomizR</a>."
+msgstr ""
+
+#: inc/customizer.php:155
+msgid "Texts color"
+msgstr ""
+
+#: inc/customizer.php:171
+msgid "Links color"
+msgstr ""
+
+#: inc/customizer.php:187
+msgid "Links color - hover"
+msgstr ""
+
+#: inc/customizer.php:203
+msgid "Navigation menu color"
+msgstr ""
+
+#: inc/customizer.php:219
+msgid "Navigation menu color - hover"
+msgstr ""
+
+#: inc/customizer.php:235
+msgid "Sidebar title color"
+msgstr ""
+

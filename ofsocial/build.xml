@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ofsocial" default="jar" basedir = "..">
+	<description>Openfire Social Build</description>
+
+	<property name="openfire.home" 	value="./openfire_4_0_0/target/openfire" />
+	<property name="lib.ant.dir" 	value="./openfire_4_0_0/build/lib/ant" />	
+	<property name="ofsocial.dir" 	value="ofsocial" />
+	
+
+	<path id="build.classpath">
+		<fileset dir="${ofsocial.dir}/lib" includes="*.jar"/>
+		<fileset dir="${openfire.home}/lib" includes="*.jar"/>
+	</path>
+
+	<target name="init">
+		<!-- create our directories -->
+		<mkdir dir="${ofsocial.dir}/build/classes"/>
+		<mkdir dir="${ofsocial.dir}/build/jar"/>					
+	</target>
+	
+	<target name="clean">
+        <delete dir="${ofsocial.dir}/build/classes/*"/>
+        <delete file="${openfire.home}/plugins/ofsocial.jar"/>
+	</target>
+	
+	<target name="compile" depends="init">
+		<javac debug="true" deprecation="false" srcdir="${ofsocial.dir}/src" destdir="${ofsocial.dir}/build/classes">
+			<classpath refid="build.classpath"/>
+		</javac>
+	</target>
+
+	<target name="lib" depends="clean, compile">
+		<jar destfile="${ofsocial.dir}/lib/plugin-ofsocial.jar">
+			<fileset dir="${ofsocial.dir}/build/classes">
+				<include name="**" />
+			</fileset>
+		</jar>
+	</target>	
+	
+	<target name="jar" depends="lib">
+		<copy todir="${ofsocial.dir}/build/jar" overwrite="true">
+			<fileset dir="${ofsocial.dir}/src">
+                        	<exclude name="java/**/*.java"/>				
+			</fileset>
+		</copy>			
+		<copy todir="${ofsocial.dir}/build/jar/lib" overwrite="true">			
+			<fileset dir="${ofsocial.dir}/lib">				
+			</fileset>
+		</copy>			
+		<copy todir="${ofsocial.dir}/build/jar" overwrite="true">						
+			<fileset dir="${ofsocial.dir}">
+                        	<exclude name="build.*"/>		
+                        	<exclude name="build/**"/>	
+                        	<exclude name="src/**"/>                        	
+			</fileset>			
+		</copy>
+				
+		<jar destfile="${openfire.home}/plugins/ofsocial.jar">
+			<fileset dir="${ofsocial.dir}/build/jar">				
+			</fileset>			
+		</jar>
+		
+                <delete dir="${ofsocial.dir}/build"/>	              
+	</target>
+</project>
+

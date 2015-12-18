@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+<!--
+Automatically created by Apache Tomcat JspC.
+-->
+<web-app>
+
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dcalendar_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dcalendar_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dexpire_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dexpire_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dplanner_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dplanner_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dsettings_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dsettings_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dsummary_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dsummary_jsp</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dcalendar_jsp</servlet-name>
+        <url-pattern>/ofmeet-calendar.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dexpire_jsp</servlet-name>
+        <url-pattern>/ofmeet-expire.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dplanner_jsp</servlet-name>
+        <url-pattern>/ofmeet-planner.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dsettings_jsp</servlet-name>
+        <url-pattern>/ofmeet-settings.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dsummary_jsp</servlet-name>
+        <url-pattern>/ofmeet-summary.jsp</url-pattern>
+    </servlet-mapping>
+
+</web-app>
+
