@@ -86,8 +86,16 @@ public class Config extends HttpServlet
 						{
 							if (bookmark.getType() == Bookmark.Type.group_chat)
 							{
+								String url = bookmark.getProperty("url");
+
+								if (url == null)
+								{
+									String id = bookmark.getBookmarkID() + "" + System.currentTimeMillis();
+									url = "https://" + hostname + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?b=" + id;
+									bookmark.setProperty("url", url);
+								}
 								conferences = conferences + (conferences.equals("[") ? "" : ",");
-								conferences = conferences + "{name: '" + bookmark.getName() + "', jid: '" + bookmark.getValue() + "'}";
+								conferences = conferences + "{url: '" + url + "', name: '" + bookmark.getName() + "', jid: '" + bookmark.getValue() + "'}";
 							}
 						}
 					}

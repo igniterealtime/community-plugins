@@ -259,6 +259,22 @@ function generateRoomName() {
 
     // determinde the room node from the url
     // TODO: just the roomnode or the whole bare jid?
+        
+    var bookmarkId = urlParam('b');	// BAO looking for &b=<bookmarkid>
+
+    console.log('generateRoomName', bookmarkId);
+
+    if (bookmarkId)
+    {
+	roomName = getRoomJidFromBookmarkUrl(bookmarkId);
+	
+	if (roomName) return;
+	
+	else {
+		window.location.href = window.location.protocol + "//" + window.location.host + "/ofmeet/index.html";
+	}
+    }
+	
     if (config.getroomnode && typeof config.getroomnode === 'function') {
         // custom function might be responsible for doing the pushstate
         roomnode = config.getroomnode(path);
@@ -1284,7 +1300,7 @@ $(document).ready(function () {
     if(APIConnector.isEnabled())
         APIConnector.init();
 
-    if(config.enableWelcomePage && window.location.href.indexOf("r=") == -1 &&	// BAO
+    if(config.enableWelcomePage && window.location.href.indexOf("r=") == -1 && window.location.href.indexOf("b=") == -1 &&	// BAO
         (!window.localStorage.welcomePageDisabled
                 || window.localStorage.welcomePageDisabled == "false"))
     {
@@ -1824,3 +1840,19 @@ $(document).on('videomuted.muc', function(event, jid, value) {
         }
     }
 });
+
+function getRoomJidFromBookmarkUrl(id)
+{
+	var jid = null;
+	
+	for (var i=0; i<config.conferences.length; i++)
+	{	
+		if (config.conferences[i].url.indexOf('b='+ id) > -1)
+		{
+			jid = config.conferences[i].jid;
+			break;
+		}
+	}
+	
+	return jid;
+}

@@ -1,5 +1,7 @@
 <%@ page import="org.jivesoftware.openfire.plugin.spark.Bookmark" %>
 <%@ page import="org.jivesoftware.openfire.plugin.spark.BookmarkManager" %>
+<%@ page import="org.jivesoftware.openfire.*" %>
+<%@ page import="org.jivesoftware.util.*" %>
 <%@ page import="org.jivesoftware.util.LocaleUtils" %>
 <%@ page import="java.util.Collection"%>
 <%@ page import="org.xmpp.packet.JID" %>
@@ -39,7 +41,7 @@
 
     <div class="div-border" style="padding: 12px; width: 95%;">
         <table class="jive-table" cellspacing="0" width="100%">
-            <th><fmt:message key="ofmeet.planner.name" /></th><th><fmt:message key="ofmeet.planner.address"/></th><th><fmt:message key="ofmeet.planner.users" /></th><th><fmt:message key="ofmeet.planner.groups" /></th>
+            <th><fmt:message key="ofmeet.planner.name" /></th><th><fmt:message key="ofmeet.planner.url"/></th><th><fmt:message key="ofmeet.planner.address"/></th><th><fmt:message key="ofmeet.planner.users" /></th><th><fmt:message key="ofmeet.planner.groups" /></th>
             <%
                 boolean hasBookmarks = false;
                 
@@ -66,11 +68,23 @@
 		    String room = (new JID(bookmark.getValue())).getNode();
 		    String roomHtml = "<a href='ofmeet-calendar.jsp?room=" + room + "&name=" + bookmark.getName() + "&id=" + bookmark.getBookmarkID() + "'>" + bookmark.getName() + "</a>";  
 		    
+		    String url = bookmark.getProperty("url");
+
+		    if (url == null)
+		    {
+			String id = bookmark.getBookmarkID() + "-" + System.currentTimeMillis();
+			url = "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?b=" + id;
+			bookmark.setProperty("url", url);
+		    }	
+		    
+		    String urlHtml = "<a target='_blank' href='" + url + "'>" + url + "</a>";  		    
+		    
 		    if (!"All".equals(users))
 		    {
             %>
 			    <tr style="border-left: none;">
 				<td><%= roomHtml%></td>
+				<td><%= urlHtml%></td>				
 				<td><%= bookmark.getValue()%></td>
 				<td><%= users%></td>
 				<td><%= groups%></td>

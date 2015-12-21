@@ -19,8 +19,9 @@
 
 package org.jivesoftware.openfire.plugin.ofmeet;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.*;
 import java.text.*;
@@ -196,6 +197,7 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 			ClusterManager.addListener(this);
 
 			Log.info("OfMeet Plugin - Initialize websockets ");
+
 			ServletContextHandler context = new ServletContextHandler(contexts, "/ofmeetws", ServletContextHandler.SESSIONS);
 			context.addServlet(new ServletHolder(new XMPPServlet()),"/server");
 			// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
@@ -203,6 +205,8 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 			initializers.add(new ContainerInitializer(new JettyJasperInitializer(), null));
 			context.setAttribute("org.eclipse.jetty.containerInitializers", initializers);
 			context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+
+			Log.info("OfMeet Plugin - Initialize webservice");
 
 			WebAppContext context2 = new WebAppContext(contexts, pluginDirectory.getPath(), "/ofmeet");
 			context2.setClassLoader(this.getClass().getClassLoader());
@@ -222,6 +226,11 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 				Log.info("OfMeet Plugin - Initialize security");
 				context2.setSecurityHandler(basicAuth("ofmeet"));
 			}
+
+			Log.info("OfMeet Plugin - Initialize email listener");
+
+			checkDownloadFolder(pluginDirectory);
+        	EmailListener.getInstance().start();
 
 		} catch (Exception e) {
 			Log.error("Could NOT start open fire meetings", e);
@@ -249,6 +258,8 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 			jicofoPlugin.destroyPlugin();
 
         	ClusterManager.removeListener(this);
+
+			EmailListener.getInstance().stop();
 
         } catch (Exception e) {
 
@@ -331,8 +342,22 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 
 		final Collection<Bookmark> bookmarks = BookmarkManager.getBookmarks();
 
+		String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
+
 		for (Bookmark bookmark : bookmarks)
 		{
+			if (bookmark.getType() == Bookmark.Type.group_chat)
+			{
+				String url = bookmark.getProperty("url");
+
+				if (url == null)
+				{
+					String id = bookmark.getBookmarkID() + "" + System.currentTimeMillis();
+					url = "https://" + hostname + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?b=" + id;
+					bookmark.setProperty("url", url);
+				}
+			}
+
 			String json = bookmark.getProperty("calendar");
 
 			if (json != null)
@@ -359,7 +384,7 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 					{
 						for (String user : bookmark.getUsers())
 						{
-							processMeeting(meeting, user);
+							processMeeting(meeting, user, bookmark.getProperty("url"));
 						}
 
 						for (String groupName : bookmark.getGroups())
@@ -369,7 +394,7 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 
 								for (JID memberJID : group.getMembers())
 								{
-									processMeeting(meeting, memberJID.getNode());
+									processMeeting(meeting, memberJID.getNode(), bookmark.getProperty("url"));
 								}
 
 							} catch (GroupNotFoundException e) { }
@@ -393,20 +418,20 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 		}
 	}
 
-	private void processMeeting(JSONObject meeting, String username)
+	public void processMeeting(JSONObject meeting, String username, String videourl)
 	{
 		Log.info("OfMeet Plugin - processMeeting " + username + " " + meeting);
 
 	   	try {
 			User user = userManager.getUser(username);
 			Date start = new Date(meeting.getLong("startTime"));
-			Date end = new Date(meeting.getLong("startTime"));
+			Date end = new Date(meeting.getLong("endTime"));
 			String name = user.getName();
 			String email = user.getEmail();
 			String description = meeting.getString("description");
 			String title = meeting.getString("title");
 			String room = meeting.getString("room");
-			String videourl = "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?r=" + room;
+			//String videourl = "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?r=" + room;
 			String audiourl = videourl + "&novideo=true";
 			String template = JiveGlobals.getProperty("ofmeet.email.template", "Dear [name],\n\nYou have an online meeting from [start] to [end]\n\n[description]\n\nTo join, please click\n[videourl]\nFor audio only with no webcan, please click\n[audiourl]\n\nAdministrator - [domain]");
 
@@ -467,5 +492,37 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 		}
 		matcher.appendTail(buffer);
 		return buffer.toString();
+	}
+
+    private void checkDownloadFolder(File pluginDirectory)
+    {
+		String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
+
+        try
+        {
+			File ofmeetFolderPath = new File(ofmeetHome);
+
+            if(!ofmeetFolderPath.exists())
+            {
+                ofmeetFolderPath.mkdirs();
+
+			}
+
+			File downloadHome = new File(ofmeetHome + File.separator + "download");
+
+            if(!downloadHome.exists())
+            {
+                downloadHome.mkdirs();
+
+			}
+
+			List<String> lines = Arrays.asList("Move on, nothing here....");
+			Path file = Paths.get(downloadHome + File.separator + "index.html");
+			Files.write(file, lines, Charset.forName("UTF-8"));
+        }
+        catch (Exception e)
+        {
+            Log.error("checkDownloadFolder", e);
+        }
 	}
 }

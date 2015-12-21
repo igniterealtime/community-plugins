@@ -15,6 +15,11 @@ Automatically created by Apache Tomcat JspC.
     </servlet>
 
     <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002demail_002dlistener_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002demail_002dlistener_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dexpire_jsp</servlet-name>
         <servlet-class>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dexpire_jsp</servlet-class>
     </servlet>
@@ -37,6 +42,11 @@ Automatically created by Apache Tomcat JspC.
     <servlet-mapping>
         <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002dcalendar_jsp</servlet-name>
         <url-pattern>/ofmeet-calendar.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofmeet.ofmeet_002demail_002dlistener_jsp</servlet-name>
+        <url-pattern>/ofmeet-email-listener.jsp</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
