@@ -1,4 +1,7 @@
-# community-plugins
+# Openfire Community Plugins
+========
+[![Build Status](https://travis-ci.org/igniterealtime/community-plugins.svg?branch=master)](https://travis-ci.org/igniterealtime/community-plugins)
+
 Home for Openfire plugins that are not included in the core set of plugins. They include:
 
 1. Openfire Meetings [(download from here)](https://github.com/igniterealtime/community-plugins/raw/master/openfire_4_0_0/target/openfire/plugins/ofmeet.jar) provides high quality, scalable video conferences using Jitsi Meet and Jitsi Videobridge
