@@ -12,6 +12,9 @@ var roomName = null;
 var ssrc2jid = {};
 var mediaStreams = {};
 var bridgeIsDown = false;
+var myFriends = {};
+
+
 //TODO: this array must be removed when firefox implement multistream support
 var notReceivedSSRCs = [];
 
@@ -73,7 +76,7 @@ var sessionTerminated = false;
 
 function init() {
     Toolbar.setupButtonsFromConfig();
-    RTC = setupRTC();
+
     if (RTC === null) {
         window.location.href = 'webrtcrequired.html';
         return;
@@ -110,23 +113,9 @@ function init() {
             startLocalRtpStatsCollector(stream);
 
         }
-
-
-
-
+        
         maybeDoJoin();
     });
-
-    var jid = document.getElementById('jid').value || config.hosts.anonymousdomain || config.hosts.domain || window.location.hostname;
-
-    // BAO
-    
-    if (config.userName)
-    {
-    	jid = config.userName +  "@" + config.hosts.domain;
-    	authenticatedUser = true;
-    } 
-    connect(jid);
 }
 
 function connect(jid, password) {
@@ -155,6 +144,7 @@ function connect(jid, password) {
         // for chrome, add multistream cap
     }
     connection.jingle.pc_constraints = RTC.pc_constraints;
+    
     if (config.useIPv6) {
         // https://code.google.com/p/webrtc/issues/detail?id=2828
         if (!connection.jingle.pc_constraints.optional) connection.jingle.pc_constraints.optional = [];
@@ -178,8 +168,25 @@ function connect(jid, password) {
             if(password)
                 authenticatedUser = true;
                 
-            connection.send($pres());    	// BAO                     
-            maybeDoJoin();
+            connection.send($pres());    	// BAO    
+            connection.roster.registerCallback(function(items)
+            {
+		for (var i=0; i<items.length; i++)
+		{    
+			myFriends[items[i].jid] = items[i].name; 
+			console.log("found friend", myFriends[items[i].jid]);
+		}
+		
+		return true; 		
+            });
+            
+            connection.roster.get();
+
+	    if(window.location.href.indexOf("r=") > -1 || window.location.href.indexOf("b=") > -1)
+	    {            
+            	maybeDoJoin();
+            }
+
         } else if (status === Strophe.Status.CONNFAIL) {
             if(msg === 'x-strophe-bad-non-anon-jid') {
                 anonymousConnectionFailed = true;
@@ -247,6 +254,8 @@ function obtainAudioAndVideoPermissions(callback) {
 }
 
 function maybeDoJoin() {
+console.log("maybeDoJoin");
+
     if (connection && connection.connected && Strophe.getResourceFromJid(connection.jid) // .connected is true while connecting?
         && (connection.jingle.localAudio || connection.jingle.localVideo)) {
         doJoin();
@@ -300,11 +309,12 @@ function generateRoomName() {
                     'Room: ' + word, window.location.pathname + word);
         }
     }
-
     roomName = roomnode + '@' + config.hosts.muc;
 }
 
 function doJoin() {
+console.log("doJoin");
+
     if (!roomName) {
         generateRoomName();
     }
@@ -577,10 +587,7 @@ function muteVideo(pc, unmute) {
                             console.log('mute SLD ok');
                         },
                         function (error) {
-                            console.log('mute SLD error');
-                            messageHandler.showError('Error',
-                                'Oops! Something went wrong and we failed to ' +
-                                    'mute! (SLD Failure)');
+                            console.error('mute SLD error', error);
                         }
                     );
                 },
@@ -591,11 +598,8 @@ function muteVideo(pc, unmute) {
             );
         },
         function (error) {
-            console.log('muteVideo SRD error');
-            messageHandler.showError('Error',
-                'Oops! Something went wrong and we failed to stop video!' +
-                    '(SRD Failure)');
-
+            console.error('muteVideo SRD error', error);
+ 
         }
     );
 }
@@ -1295,10 +1299,51 @@ function getCameraVideoSize(videoWidth,
     return [availableWidth, availableHeight];
 }
 
+$(document).bind('ofmuc.meeting.invite',
+    function (event, url, jid)
+    {
+        console.info("Meeting invite", url);
+        
+        var gotoMeeting = false;
+        
+        // if user sends self an IM with bookmark, go to room ASAP
+        // if friend sends user an IM with bookmark, go to room only if in home page
+        
+        if (jid == Strophe.getBareJidFromJid(connection.jid)) gotoMeeting = true;
+
+	if(config.enableWelcomePage && window.location.href.indexOf("r=") == -1 && window.location.href.indexOf("b=") == -1 && (!window.localStorage.welcomePageDisabled || window.localStorage.welcomePageDisabled == "false"))
+        {
+        	if (myFriends[jid]) gotoMeeting = true;
+        }
+        
+        if (gotoMeeting)
+        {
+	    disposeConference();
+	    sessionTerminated = true;
+	    connection.emuc.doLeave();  
+	    connection.disconnect();
+	    
+	    window.location.href = url;	    
+        }
+    }
+);
+
 $(document).ready(function () {
     document.title = interfaceConfig.APP_NAME;
     if(APIConnector.isEnabled())
         APIConnector.init();
+        
+    RTC = setupRTC();
+    var jid = document.getElementById('jid').value || config.hosts.anonymousdomain || config.hosts.domain || window.location.hostname;
+
+    // BAO
+    
+    if (config.userName)
+    {
+    	jid = config.userName +  "@" + config.hosts.domain;
+    	authenticatedUser = true;
+    } 
+    connect(jid);        
 
     if(config.enableWelcomePage && window.location.href.indexOf("r=") == -1 && window.location.href.indexOf("b=") == -1 &&	// BAO
         (!window.localStorage.welcomePageDisabled
@@ -1806,7 +1851,7 @@ function hangup() {
         setTimeout(function()
         {
             window.localStorage.welcomePageDisabled = false;
-            window.location.pathname = "/";
+            window.location.href = "/ofmeet";
         }, 10000);
 
     }

@@ -28,12 +28,19 @@ import org.jivesoftware.util.StringUtils;
 import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
-import org.jivesoftware.openfire.muc.MUCRoom;
-import org.jivesoftware.openfire.muc.NotAllowedException;
+import org.jivesoftware.openfire.SessionManager;
+import org.jivesoftware.openfire.session.ClientSession;
+import org.jivesoftware.openfire.muc.*;
+import org.jivesoftware.openfire.muc.spi.*;
+import org.jivesoftware.openfire.forms.spi.*;
+import org.jivesoftware.openfire.forms.*;
 import org.jivesoftware.openfire.plugin.spark.*;
 import org.jivesoftware.database.DbConnectionManager;
 
 import org.xmpp.packet.JID;
+import org.xmpp.packet.IQ;
+
+import org.dom4j.*;
 
 import javax.mail.*;
 import javax.mail.event.MessageCountAdapter;
@@ -195,30 +202,57 @@ public class EmailListener {
 
         Log.info("New email has been received " + subject);
 
-		if (subject.startsWith("Openfire Meetings:")) return;
+		if (subject.startsWith("Openfire Meetings: ")) return;		// email listener is a participant, ignore email
 
 		List<String> userCollection = new ArrayList<String>();
+		User fromUser = null;
 
   		for (Address address: message.getFrom())
   		{
-			addParticipant(address, userCollection);
+			User user = getUserFromEmailAddress(address);
+			userCollection.add(user.getUsername());
+
+			if (fromUser == null) fromUser = user;
 		}
+
+		if (fromUser != null && (subject.startsWith("Re: Openfire Meetings: ") || subject.startsWith("RE: Openfire Meetings:")))
+		{
+			Bookmark bookmark = GetBookmarkByName(subject.substring(23));
+
+			if (bookmark != null)	// user replies email listener, if user is online, send URL direct to ofmeet web client
+			{
+        		Log.info("Found existing bookmark for " + bookmark.getProperty("url"));
+
+				Collection<ClientSession> sessions = SessionManager.getInstance().getSessions(fromUser.getUsername());
+
+				for (ClientSession session : sessions)
+				{
+        			Log.info("Found existing session, redirecting to " + bookmark.getProperty("url"));
+					sendMessage(session.getAddress(), session.getAddress(), bookmark.getProperty("url"));
+				}
+				return;
+			}
+		}
+
 
   		for (Address address: message.getAllRecipients())
   		{
-			addParticipant(address, userCollection);
+			User user = getUserFromEmailAddress(address);
+			userCollection.add(user.getUsername());
 		}
 
-		if (userCollection.size() > 0 )
+		if (fromUser != null && userCollection.size() > 0 )
 		{
 			String meetingTitle = "Openfire Meetings: " + subject;
-			Bookmark bookmark = GetBookmarkByName(meetingTitle);
+			Bookmark bookmark = GetBookmarkByName(subject);
+
+			JID fromJid = XMPPServer.getInstance().createJID(fromUser.getUsername(), null);
 
 			if (bookmark == null)
 			{
 				String roomName = "ofmeet-" + System.currentTimeMillis();
 				String roomJid = roomName + "@conference." + XMPPServer.getInstance().getServerInfo().getXMPPDomain();
-				bookmark = new Bookmark(Bookmark.Type.group_chat, meetingTitle, roomJid);
+				bookmark = new Bookmark(Bookmark.Type.group_chat, subject, roomJid);
 
 				String id = "" + bookmark.getBookmarkID() + System.currentTimeMillis();
 				String url = "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?b=" + id;
@@ -227,7 +261,7 @@ public class EmailListener {
 				bookmark.setProperty("autojoin", "true");
 				bookmark.setGlobalBookmark(false);
 
-				createRoom(roomName, subject, "admin");
+				createRoom(roomName, subject, fromUser.getUsername(), userCollection);
 			}
 
 			if (message.isMimeType("multipart/*"))
@@ -252,13 +286,34 @@ public class EmailListener {
 				meeting.put("room", bookmark.getValue());
 
 				OfMeetPlugin.self.processMeeting(meeting, username, bookmark.getProperty("url"));
+
+				Collection<ClientSession> sessions = SessionManager.getInstance().getSessions(username);
+
+				for (ClientSession session : sessions)
+				{
+					sendMessage(fromJid, session.getAddress(), bookmark.getProperty("url"));
+				}
 			}
 		}
     }
 
-    private void addParticipant(Address address, List<String> userCollection)
+    private void sendMessage(JID from, JID to, String body)
+    {
+		Log.info("sendMessage: " + from + " " + to + " " + body);
+
+        org.xmpp.packet.Message message = new org.xmpp.packet.Message();
+        message.setTo(to);
+        message.setFrom(from);
+		message.setType(org.xmpp.packet.Message.Type.chat);
+        message.setBody(body);
+
+        XMPPServer.getInstance().getMessageRouter().route(message);
+    }
+
+    private User getUserFromEmailAddress(Address address)
     {
 		String from = address.toString();
+		User theUser = null;
 
 		int ltIndex = from.indexOf('<');
 		int atIndex = from.indexOf('@');
@@ -268,17 +323,18 @@ public class EmailListener {
 		{
 			from = from.substring(ltIndex+1, gtIndex);
 
-			Log.info("sendMessage: found email address " + from);
+			Log.info("getUserFromEmailAddress: found email address " + from);
 
 			Collection<User> users = userManager.findUsers(new HashSet<String>(Arrays.asList("Email")), from);
 
 			for (User user : users)
 			{
-				Log.info("sendMessage: matched email address " + from + " " + user.getUsername());
+				Log.info("getUserFromEmailAddress: matched email address " + from + " " + user.getUsername());
 
-				userCollection.add(user.getUsername());
+				theUser = user;
 			}
 		}
+		return theUser;
 	}
 
 	private Bookmark GetBookmarkByName(String name)
@@ -370,14 +426,14 @@ public class EmailListener {
 				{
 					String roomJid = "ofmeet-" + System.currentTimeMillis() + "@conference." + XMPPServer.getInstance().getServerInfo().getXMPPDomain();
 					bookmark = new Bookmark(Bookmark.Type.url, pdfTitle, pdfUrl);
-
-					String id = "" + bookmark.getBookmarkID() + System.currentTimeMillis();
-					String url = "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?b=" + id;
-
-					bookmark.setProperty("url", pdfUrl);
-					bookmark.setGlobalBookmark(false);
-					bookmark.setUsers(userCollection);
 				}
+
+				String id = "" + bookmark.getBookmarkID() + System.currentTimeMillis();
+				String url = "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?b=" + id;
+
+				bookmark.setProperty("url", pdfUrl);
+				bookmark.setGlobalBookmark(false);
+				bookmark.setUsers(userCollection);
             }
             else {
 
@@ -386,34 +442,20 @@ public class EmailListener {
         }
     }
 
-	private void createRoom(String roomName, String title, String owner) throws NotAllowedException
+	private void createRoom(String roomName, String title, String owner, List<String> userCollection) throws NotAllowedException
 	{
 		MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService("conference").getChatRoom(roomName, XMPPServer.getInstance().createJID(owner, null));
 
-		room.setNaturalLanguageName(title);
-		//room.setSubject(roomJSON.getString("subject"));
-		room.setDescription(title);
-		//room.setPassword(roomJSON.getString("password"));
-		room.setPersistent(true);
-		room.setPublicRoom(false);
-		room.setRegistrationEnabled(false);
-		room.setCanAnyoneDiscoverJID(false);
-		room.setCanOccupantsChangeSubject(true);
-		room.setCanOccupantsInvite(true);
-		room.setChangeNickname(false);
-		room.setCreationDate(new java.util.Date());
-		room.setModificationDate(new java.util.Date());
-		room.setLogEnabled(true);
-		room.setLoginRestrictedToNickname(false);
-		room.setMaxUsers(16);
-		room.setMembersOnly(false);
-		room.setModerated(false);
+		configureRoom(room, title, owner);
 
-		List<String> roles = new ArrayList<String>();
-		roles.add("Moderator");
-		roles.add("Participant");
-		roles.add("Visitor");
-		room.setRolesToBroadcastPresence(roles);
+		for (String username: userCollection)
+		{
+			try {
+				room.addAdmin(XMPPServer.getInstance().createJID(username, null), room.getRole());
+			} catch (Exception e) {
+				Log.error("createRoom set admin role failed for " + username, e);
+			}
+		}
 	}
 
     private static Folder openFolder(String host, Integer port, Boolean isSSLEnabled, String user, String password,
@@ -621,4 +663,106 @@ public class EmailListener {
     public void setUsers(Collection<String> users) {
         JiveGlobals.setProperty("plugin.email.listener.users", StringUtils.collectionToString(users));
     }
+
+	private void configureRoom(MUCRoom room, String title, String owner)
+	{
+		Log.info( "configureRoom " + room.getID());
+
+		FormField field;
+		XDataFormImpl dataForm = new XDataFormImpl(DataForm.TYPE_SUBMIT);
+
+        field = new XFormFieldImpl("muc#roomconfig_roomdesc");
+        field.setType(FormField.TYPE_TEXT_SINGLE);
+        field.addValue(title);
+        dataForm.addField(field);
+
+        field = new XFormFieldImpl("muc#roomconfig_roomname");
+        field.setType(FormField.TYPE_TEXT_SINGLE);
+        field.addValue(room.getName());
+        dataForm.addField(field);
+
+		field = new XFormFieldImpl("FORM_TYPE");
+		field.setType(FormField.TYPE_HIDDEN);
+		field.addValue("http://jabber.org/protocol/muc#roomconfig");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("muc#roomconfig_changesubject");
+		field.addValue("1");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("muc#roomconfig_maxusers");
+		field.addValue("30");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("muc#roomconfig_presencebroadcast");
+		field.addValue("moderator");
+		field.addValue("participant");
+		field.addValue("visitor");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("muc#roomconfig_publicroom");
+		field.addValue("1");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("muc#roomconfig_persistentroom");
+		field.addValue("1");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("muc#roomconfig_moderatedroom");
+		field.addValue("0");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("muc#roomconfig_membersonly");
+		field.addValue("0");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("muc#roomconfig_allowinvites");
+		field.addValue("1");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("muc#roomconfig_passwordprotectedroom");
+		field.addValue("0");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("muc#roomconfig_whois");
+		field.addValue("moderator");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("muc#roomconfig_enablelogging");
+		field.addValue("1");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("x-muc#roomconfig_canchangenick");
+		field.addValue("1");
+		dataForm.addField(field);
+
+		field = new XFormFieldImpl("x-muc#roomconfig_registration");
+		field.addValue("1");
+		dataForm.addField(field);
+
+		// Keep the existing list of admins
+		field = new XFormFieldImpl("muc#roomconfig_roomadmins");
+		for (JID jid : room.getAdmins()) {
+			field.addValue(jid.toString());
+		}
+		dataForm.addField(field);
+
+		String domainName = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+		field = new XFormFieldImpl("muc#roomconfig_roomowners");
+		field.addValue(owner + "@" + domainName);
+		dataForm.addField(field);
+
+		// Create an IQ packet and set the dataform as the main fragment
+		IQ iq = new IQ(IQ.Type.set);
+		Element element = iq.setChildElement("query", "http://jabber.org/protocol/muc#owner");
+		element.add(dataForm.asXMLElement());
+
+		try
+		{
+			room.getIQOwnerHandler().handleIQ(iq, room.getRole());
+
+		} catch (Exception e) {
+			Log.error("configureRoom exception " + e);
+		}
+	}
 }

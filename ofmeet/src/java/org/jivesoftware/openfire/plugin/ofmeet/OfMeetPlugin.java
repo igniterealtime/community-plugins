@@ -508,6 +508,10 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 
 			}
 
+			List<String> lines = Arrays.asList("Move on, nothing here....");
+			Path file = Paths.get(ofmeetHome + File.separator + "index.html");
+			Files.write(file, lines, Charset.forName("UTF-8"));
+
 			File downloadHome = new File(ofmeetHome + File.separator + "download");
 
             if(!downloadHome.exists())
@@ -516,8 +520,8 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 
 			}
 
-			List<String> lines = Arrays.asList("Move on, nothing here....");
-			Path file = Paths.get(downloadHome + File.separator + "index.html");
+			lines = Arrays.asList("Move on, nothing here....");
+			file = Paths.get(downloadHome + File.separator + "index.html");
 			Files.write(file, lines, Charset.forName("UTF-8"));
         }
         catch (Exception e)

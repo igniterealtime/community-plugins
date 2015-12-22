@@ -205,15 +205,11 @@ Strophe.addConnectionPlugin('emuc', {
                 $(document).trigger('passwordrequired.main');
             } else {
                 console.warn('onPresError ', pres);
-                messageHandler.openReportDialog(null,
-                    'Oops! Something went wrong and we couldn`t connect to the conference.',
-                pres);
+                //messageHandler.openReportDialog(null, 'Oops! Something went wrong and we couldn`t connect to the conference.',pres);
             }
         } else {
             console.warn('onPresError ', pres);
-            messageHandler.openReportDialog(null,
-                'Oops! Something went wrong and we couldn`t connect to the conference.',
-                pres);
+            //messageHandler.openReportDialog(null, 'Oops! Something went wrong and we couldn`t connect to the conference.', pres);
         }
         return true;
     },

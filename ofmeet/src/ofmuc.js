@@ -193,10 +193,29 @@ Strophe.addConnectionPlugin('ofmuc', {
     	//console.log('onMessage', $(msg))
     	var that = this;
     	var from = msg.getAttribute('from');
+    	var type = msg.getAttribute('type');    	
 	var farparty = SettingsMenu.getDisplayName();
+		
+	if (type == "chat" && type != "error")
+	{
+		$(msg).find('body').each(function ()  	
+		{
+			var body = $('<div/>').text($(this).text()).html();
+			
+    			console.log('onMessage chat', body, from)			
+			
+			if (body.indexOf('https://') == 0 && body.indexOf('/ofmeet/?b=') > 0)
+			{
+				$(document).trigger("ofmuc.meeting.invite", [body, Strophe.getBareJidFromJid(from)]);
+			}
+					
+		});
+		
+		return true;
+	}
 	
 	if (!farparty) farparty = Strophe.getResourceFromJid(from); 	
-	if (!that.roomJid) that.roomJid = Strophe.getBareJidFromJid(from);        
+	if (!that.roomJid) that.roomJid = Strophe.getBareJidFromJid(from);  	
 	
 	$(msg).find('appshare').each(function() 
 	{
