@@ -291,7 +291,8 @@ public class EmailListener {
 				bookmark = new Bookmark(Bookmark.Type.group_chat, subject, roomJid);
 
 				String id = "" + bookmark.getBookmarkID() + System.currentTimeMillis();
-				String url = "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?b=" + id;
+				String rootUrlSecure = JiveGlobals.getProperty("ofmeet.root.url.secure", "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443"));
+				String url = rootUrlSecure + "/ofmeet/?b=" + id;
 
 				bookmark.setProperty("url", url);
 				bookmark.setProperty("autojoin", "true");
@@ -433,7 +434,7 @@ public class EmailListener {
         if (part.isMimeType("text/plain"))
         {
 			meeting.body = (String) part.getContent();
-			meeting.body = meeting.body.replace("\n", " ").replace("\r", "").replace("\t", "");
+			meeting.body = meeting.body.replace("\n", " ").replace("\r", "").replace("\t", "").replace("\"", "'");
 
 			Log.info("Found body \n" + meeting.body);
         }
@@ -470,7 +471,8 @@ public class EmailListener {
 				}
 
 				String pdfTitle = subject + " - " + fileName;
-				String pdfUrl = "http://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.plain", "7070") + "/ofmeet-cdn/download/" + fileName;
+				String rootUrlPlain = JiveGlobals.getProperty("ofmeet.root.url.plain", "http://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.plain", "7070"));
+				String pdfUrl =  rootUrlPlain + "/ofmeet-cdn/download/" + fileName;
 				Bookmark bookmark = GetBookmarkByName(pdfTitle);
 
 				if (bookmark == null)
@@ -480,7 +482,8 @@ public class EmailListener {
 				}
 
 				String id = "" + bookmark.getBookmarkID() + System.currentTimeMillis();
-				String url = "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?b=" + id;
+				String rootUrlSecure = JiveGlobals.getProperty("ofmeet.root.url.secure", "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443"));
+				String url = rootUrlSecure + "/ofmeet/?b=" + id;
 
 				bookmark.setProperty("url", pdfUrl);
 				bookmark.setGlobalBookmark(false);
@@ -903,9 +906,9 @@ public class EmailListener {
 	END:DAYLIGHT
 	END:VTIMEZONE
 	BEGIN:VEVENT
-	ORGANIZER;CN=Dele Olajide:MAILTO:dele@traderlynk.com
+	ORGANIZER;CN=Dele Olajide:MAILTO:yyyyyy@domain.com
 	ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Dele:MAILT
-	 O:dele@4ng.net
+	 O:xxxxx@domain.net
 	DESCRIPTION;LANGUAGE=en-US:Are you coming?\n
 	UID:2DB9FAF4-899F-440D-BC41-AFFDAAF2A3B4
 	SUMMARY;LANGUAGE=en-US:Movie tonight

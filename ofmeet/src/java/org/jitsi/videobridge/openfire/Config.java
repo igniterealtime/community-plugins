@@ -91,7 +91,8 @@ public class Config extends HttpServlet
 								if (url == null)
 								{
 									String id = bookmark.getBookmarkID() + "" + System.currentTimeMillis();
-									url = "https://" + hostname + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?b=" + id;
+									String rootUrl = JiveGlobals.getProperty("ofmeet.root.url.secure", "https://" + hostname + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443"));
+									url = rootUrl + "/ofmeet/?b=" + id;
 									bookmark.setProperty("url", url);
 								}
 								conferences = conferences + (conferences.equals("[") ? "" : ",");
