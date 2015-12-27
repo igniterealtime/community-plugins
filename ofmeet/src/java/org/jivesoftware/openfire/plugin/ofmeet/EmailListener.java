@@ -21,6 +21,8 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.util.BASE64DecoderStream;
+
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.Log;
@@ -50,6 +52,7 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,7 +181,9 @@ public class EmailListener {
             while (messageListener != null) {
                 if (supportsIdle && folder instanceof IMAPFolder) {
                     IMAPFolder f = (IMAPFolder) folder;
-                    f.idle();
+                    try {
+                    	f.idle();
+					} catch (Exception e) {}
                 }
                 else {
                     Thread.sleep(freq); // sleep for freq milliseconds
@@ -199,20 +204,37 @@ public class EmailListener {
 
     private void sendMessage(Message message) throws Exception {
 		String subject = message.getSubject();
+		List<String> userCollection = new ArrayList<String>();
 
         Log.info("New email has been received " + subject);
 
 		if (subject.startsWith("Openfire Meetings: ")) return;		// email listener is a participant, ignore email
 
-		List<String> userCollection = new ArrayList<String>();
+		Meeting meeting = new Meeting();
+
+		if (message.isMimeType("multipart/*"))
+		{
+			Multipart mp = (Multipart) message.getContent();
+			int count = mp.getCount();
+
+			for (int i = 0; i < count; i++)
+			{
+				createBookmarksForPDFs(mp.getBodyPart(i), subject, userCollection, meeting);
+			}
+		}
+
 		User fromUser = null;
 
   		for (Address address: message.getFrom())
   		{
 			User user = getUserFromEmailAddress(address);
-			userCollection.add(user.getUsername());
 
-			if (fromUser == null) fromUser = user;
+			if (user != null)
+			{
+				userCollection.add(user.getUsername());
+
+				if (fromUser == null) fromUser = user;
+			}
 		}
 
 		if (fromUser != null && (subject.startsWith("Re: Openfire Meetings: ") || subject.startsWith("RE: Openfire Meetings:")))
@@ -235,10 +257,24 @@ public class EmailListener {
 		}
 
 
+		if (fromUser != null && subject.startsWith("Canceled: "))
+		{
+			Bookmark bookmark = GetBookmarkByName(subject.substring(10));
+
+			if (bookmark != null && meeting.cancel)
+			{
+				bookmark.setProperty("calendar", "[]");
+				Log.info("Removing event for meeting planner \n" + meeting.body);
+			}
+			return;
+		}
+
+
   		for (Address address: message.getAllRecipients())
   		{
 			User user = getUserFromEmailAddress(address);
-			userCollection.add(user.getUsername());
+
+			if (user != null) userCollection.add(user.getUsername());
 		}
 
 		if (fromUser != null && userCollection.size() > 0 )
@@ -264,28 +300,46 @@ public class EmailListener {
 				createRoom(roomName, subject, fromUser.getUsername(), userCollection);
 			}
 
-			if (message.isMimeType("multipart/*"))
-			{
-				Multipart mp = (Multipart) message.getContent();
-				int count = mp.getCount();
 
-				for (int i = 0; i < count; i++) {
-					createBookmarksForPDFs(mp.getBodyPart(i), subject, userCollection);
+			if (meeting.startDate != null && meeting.endDate != null)
+			{
+				try {
+					String roomId = (new JID(bookmark.getValue())).getNode();
+					if (meeting.body == null) meeting.body = subject;
+					SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
+					String startDate = dateFormat.format(meeting.startDate);
+					String endDate = dateFormat.format(meeting.endDate);
+
+					if (meeting.request)
+					{
+						String json = "[{\"processed\": false, \"id\": \"" + System.currentTimeMillis() + "\", \"start\": " + meeting.startDate.getTime() + ", \"end\": " + meeting.endDate.getTime() + ", \"startTime\": \"" + endDate + "\", \"endTime\": \"" + endDate + "\", \"title\": \"" + subject + "\", \"description\": \"" + meeting.body + "\", \"room\": \"" + roomId + "\"}]";
+						bookmark.setProperty("calendar", json);
+						Log.info("Adding event for meeting planner \n" + meeting.body);
+					}
+
+				} catch (Exception e) {
+					Log.error("Error create/cancel meeting planner event", e);
 				}
+
+			} else {
+				meeting.startDate = new java.util.Date(System.currentTimeMillis());
+				meeting.endDate = new java.util.Date(System.currentTimeMillis() + 3600000);
+
+				Log.info("Immediate meeting, no event meeting planner\n" + meeting.body);
 			}
 
 			bookmark.setUsers(userCollection);
 
 			for (String username: userCollection)
 			{
-				JSONObject meeting = new JSONObject();
-				meeting.put("startTime", System.currentTimeMillis());
-				meeting.put("endTime", System.currentTimeMillis() + 3600000);
-				meeting.put("description", bookmark.getName());
-				meeting.put("title", meetingTitle);
-				meeting.put("room", bookmark.getValue());
+				JSONObject meetingJSON = new JSONObject();
+				meetingJSON.put("startTime", meeting.startDate.getTime());
+				meetingJSON.put("endTime", meeting.endDate.getTime());
+				meetingJSON.put("description", meeting.body == null ? bookmark.getName() : meeting.body);
+				meetingJSON.put("title", meetingTitle);
+				meetingJSON.put("room", bookmark.getValue());
 
-				OfMeetPlugin.self.processMeeting(meeting, username, bookmark.getProperty("url"));
+				OfMeetPlugin.self.processMeeting(meetingJSON, username, bookmark.getProperty("url"));
 
 				Collection<ClientSession> sessions = SessionManager.getInstance().getSessions(username);
 
@@ -370,37 +424,34 @@ public class EmailListener {
         return bookmark;
 	}
 
-    private void createBookmarksForPDFs(Part part, String subject, List<String> userCollection) throws Exception {
+    private void createBookmarksForPDFs(Part part, String subject, List<String> userCollection, Meeting meeting) throws Exception {
         /*
          * Using isMimeType to determine the content type avoids
          * fetching the actual content data until we need it.
          */
 
-		String fileName = part.getFileName();
+        if (part.isMimeType("text/plain"))
+        {
+			meeting.body = (String) part.getContent();
+			meeting.body = meeting.body.replace("\n", " ").replace("\r", "").replace("\t", "");
 
-		if (fileName == null) 					return;
-		if (fileName.endsWith(".pdf") == false) return;
-
-        Log.info("Found PDF " + fileName);
-
-        if (part.isMimeType("text/plain")) {
-
+			Log.info("Found body \n" + meeting.body);
         }
         else if (part.isMimeType("multipart/*")) {
-
+			Log.info("Found embedded multipart");
         }
         else if (part.isMimeType("message/rfc822")) {
-
+			Log.info("Found nested email");
         }
         else {
 
+			String fileName = part.getFileName();
+
             Object o = part.getContent();
 
-            if (o instanceof String) {
-
-                //System.out.println((String) o);
-            }
-            else if (o instanceof InputStream) {
+            if (fileName != null && fileName.endsWith(".pdf") && o instanceof InputStream)
+            {
+				Log.info("Found PDF " + fileName);
 
 				OutputStream output = new FileOutputStream(downloadHome + File.separator + fileName);
 
@@ -437,10 +488,65 @@ public class EmailListener {
             }
             else {
 
-                //System.out.println(o.toString());
+				if (o instanceof BASE64DecoderStream)
+				{
+					String contentType = part.getContentType();
+
+					if (contentType.indexOf("TEXT/CALENDAR") > -1)
+					{
+						meeting.request = contentType.indexOf("method=REQUEST") > -1;
+						meeting.cancel = contentType.indexOf("method=CANCEL") > -1;
+
+						Log.info("Found Calendar data request=" + meeting.request + ", cancel=" + meeting.cancel);
+
+						try {
+							BASE64DecoderStream is = (BASE64DecoderStream) o;
+							byte[] buffer = new byte[8 * 1024];
+							int bytesRead;
+							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'hhmmss");
+
+							while ((bytesRead = is.read(buffer)) != -1)
+							{
+								String iCalLine = new String(buffer, 0, bytesRead);
+								String lines[] = iCalLine.split("\\r?\\n");
+
+								meeting.startDate = getDate(dateFormat, lines, "DTSTART;TZID=");
+								meeting.endDate = getDate(dateFormat, lines, "DTEND;TZID=");
+							}
+
+							Log.info("Found Calendar start=" + meeting.startDate.getTime() + ", end=" + meeting.endDate.getTime());
+
+						} catch (Exception e) {
+							Log.error("Error decoding start or end date", e);
+						}
+					}
+
+				} else {
+					Log.info("Found PDF " + fileName);
+					Log.info("Found unknown attachment " + part.getFileName() + " " + part.getContentType());
+					Log.info(part.getContent().toString());
+				}
             }
         }
     }
+
+	private java.util.Date getDate(SimpleDateFormat dateFormat, String lines[], String prefix)
+	{
+		java.util.Date date = null;
+
+		for (int i=0; i<lines.length; i++)
+		{
+			if (lines[i].indexOf(prefix) > -1)
+			{
+				try {
+					date = dateFormat.parse(lines[i].substring(lines[i].indexOf(":") + 1));
+				} catch (Exception e) {
+					Log.error("Error parsing date in line " + lines[i]);
+				}
+			}
+		}
+		return date;
+	}
 
 	private void createRoom(String roomName, String title, String owner, List<String> userCollection) throws NotAllowedException
 	{
@@ -453,7 +559,7 @@ public class EmailListener {
 			try {
 				room.addAdmin(XMPPServer.getInstance().createJID(username, null), room.getRole());
 			} catch (Exception e) {
-				Log.error("createRoom set admin role failed for " + username, e);
+				Log.error("createRoom set admin role failed for " + username);
 			}
 		}
 	}
@@ -470,7 +576,7 @@ public class EmailListener {
             props.setProperty("mail.imap.port", String.valueOf(port));
             props.setProperty("mail.imap.connectiontimeout", String.valueOf(10 * 1000));
             // Allow messages with a mix of valid and invalid recipients to still be sent.
-            props.setProperty("mail.debug", JiveGlobals.getProperty("plugin.email.listener.debug", "false"));
+            props.setProperty("mail.debug", JiveGlobals.getProperty("plugin.email.listener.debug", "true"));
 
             // Get a Session object
             Session session = Session.getInstance(props, null);
@@ -765,4 +871,68 @@ public class EmailListener {
 			Log.error("configureRoom exception " + e);
 		}
 	}
+
+	private class Meeting
+	{
+		public java.util.Date startDate = null;
+		public java.util.Date endDate= null;
+		public String body = null;
+		public boolean request = false;
+		public boolean cancel = false;
+	}
+
+/*
+
+	BEGIN:VCALENDAR
+	METHOD:REQUEST
+	PRODID:Microsoft Exchange Server 2010
+	VERSION:2.0
+	BEGIN:VTIMEZONE
+	TZID:GMT Standard Time
+	BEGIN:STANDARD
+	DTSTART:16010101T020000
+	TZOFFSETFROM:+0100
+	TZOFFSETTO:+0000
+	RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=-1SU;BYMONTH=10
+	END:STANDARD
+	BEGIN:DAYLIGHT
+	DTSTART:16010101T010000
+	TZOFFSETFROM:+0000
+	TZOFFSETTO:+0100
+	RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=-1SU;BYMONTH=3
+	END:DAYLIGHT
+	END:VTIMEZONE
+	BEGIN:VEVENT
+	ORGANIZER;CN=Dele Olajide:MAILTO:dele@traderlynk.com
+	ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=Dele:MAILT
+	 O:dele@4ng.net
+	DESCRIPTION;LANGUAGE=en-US:Are you coming?\n
+	UID:2DB9FAF4-899F-440D-BC41-AFFDAAF2A3B4
+	SUMMARY;LANGUAGE=en-US:Movie tonight
+	DTSTART;TZID=GMT Standard Time:20151226T133000
+	DTEND;TZID=GMT Standard Time:20151226T140000
+	CLASS:PUBLIC
+	PRIORITY:5
+	DTSTAMP:20151226T131959Z
+	TRANSP:OPAQUE
+	STATUS:CONFIRMED
+	SEQUENCE:0
+	LOCATION;LANGUAGE=en-US:Hoo\, Rochester
+	X-MICROSOFT-CDO-APPT-SEQUENCE:0
+	X-MICROSOFT-CDO-OWNERAPPTID:2113720871
+	X-MICROSOFT-CDO-BUSYSTATUS:TENTATIVE
+	X-MICROSOFT-CDO-INTENDEDSTATUS:BUSY
+	X-MICROSOFT-CDO-ALLDAYEVENT:FALSE
+	X-MICROSOFT-CDO-IMPORTANCE:1
+	X-MICROSOFT-CDO-INSTTYPE:0
+	X-MICROSOFT-DISALLOW-COUNTER:FALSE
+	BEGIN:VALARM
+	DESCRIPTION:REMINDER
+	TRIGGER;RELATED=START:-PT15M
+	ACTION:DISPLAY
+	END:VALARM
+	END:VEVENT
+	END:VCALENDAR
+
+*/
 }
