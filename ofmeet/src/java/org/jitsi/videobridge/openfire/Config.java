@@ -114,7 +114,6 @@ public class Config extends HttpServlet
 
 			ServletOutputStream out = response.getOutputStream();
 
-			String iceServers 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.iceservers", "");
 			String resolution 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.resolution", "360");
 			String audioMixer			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.audio.mixer", "false");
 			String audioBandwidth 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.audio.bandwidth", "128");
@@ -140,6 +139,22 @@ public class Config extends HttpServlet
 			String enableFirefoxSupport = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.firefox.support", "false");
 			String logStats 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.stats.logging", "false");
 			String focusUserJid 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@"+domain);
+			String iceServers 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.iceservers", "");
+
+			String xirsysUrl = JiveGlobals.getProperty("ofmeet.xirsys.url", null);
+
+			if (xirsysUrl != null)
+			{
+				Log.info("Config. found xirsys Url " + xirsysUrl);
+
+				String xirsysJson = getHTML(xirsysUrl);
+				Log.info("Config. got xirsys json " + xirsysJson);
+
+				JSONObject jsonObject = new JSONObject(xirsysJson);
+				iceServers = jsonObject.getString("d");
+
+				Log.info("Config. got xirsys iceSevers " + iceServers);
+			}
 
 
 			String callControl = "'ofmeet-call-control." + domain + "'";
@@ -296,4 +311,30 @@ public class Config extends HttpServlet
         }
         return false;
     }
+
+   private String getHTML(String urlToRead)
+   {
+      URL url;
+      HttpURLConnection conn;
+      BufferedReader rd;
+      String line;
+      StringBuilder result = new StringBuilder();
+
+      try {
+         url = new URL(urlToRead);
+         conn = (HttpURLConnection) url.openConnection();
+         conn.setRequestMethod("GET");
+         rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+         while ((line = rd.readLine()) != null) {
+            result.append(line);
+         }
+         rd.close();
+      } catch (IOException e) {
+         Log.error("getHTML", e);
+      } catch (Exception e) {
+         Log.error("getHTML", e);
+      }
+
+	  return result.toString();
+	}
 }
