@@ -20443,7 +20443,7 @@ var ofmeet = (function(of)
 	    connection: null,
 	    sessions: {},
 	    jid2session: {},
-	    ice_config: {'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }]},
+    	    ice_config: config.iceServers ? config.iceServers : {'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }]},
 	    pc_constraints: {},
 	    media_constraints: {
 		mandatory: {
@@ -29752,7 +29752,7 @@ var ofmeet = (function(of)
 
 			//console.log("createWebrtcDevice offerSDP.raw", offerSDP.raw);         
 
-			that.audioChannels[confId].peerconnection = new webkitRTCPeerConnection(null, {'optional': [{'DtlsSrtpKeyAgreement': 'true'}]}); 
+			that.audioChannels[confId].peerconnection = new webkitRTCPeerConnection(config.iceServers, {'optional': [{'DtlsSrtpKeyAgreement': 'true'}]}); 
 
 			that.audioChannels[confId].peerconnection.onicecandidate = function(event)
 			{
