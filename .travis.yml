@@ -6,4 +6,5 @@ jdk:
 script: 
   - ant -f ofmeet/build.xml jar
   - ant -f ofsocial/build.xml jar  
+  - ant -f ofswitch/build.xml jar    
 
