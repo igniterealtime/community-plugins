@@ -1,0 +1,1312 @@
+2015-07-01 17:29:01.002302 [NOTICE] switch_loadable_module.c:227 Adding Dialplan 'enum'
+2015-07-01 17:29:01.002302 [NOTICE] switch_loadable_module.c:269 Adding Application 'enum'
+2015-07-01 17:29:01.002302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'enum'
+2015-07-01 17:29:01.002302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'enum_auto'
+2015-07-01 17:29:01.003302 [DEBUG] mod_cdr_csv.c:364 Adding default template.
+2015-07-01 17:29:01.003302 [DEBUG] mod_cdr_csv.c:411 Adding template sql.
+2015-07-01 17:29:01.003302 [DEBUG] mod_cdr_csv.c:411 Adding template example.
+2015-07-01 17:29:01.003302 [DEBUG] mod_cdr_csv.c:411 Adding template snom.
+2015-07-01 17:29:01.003302 [DEBUG] mod_cdr_csv.c:411 Adding template linksys.
+2015-07-01 17:29:01.003302 [DEBUG] mod_cdr_csv.c:411 Adding template asterisk.
+2015-07-01 17:29:01.004302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'cdr_csv'
+2015-07-01 17:29:01.005302 [NOTICE] switch_loadable_module.c:269 Adding Application 'socket'
+2015-07-01 17:29:01.005302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'event_sink'
+2015-07-01 17:29:01.012302 [INFO] mod_sofia.c:5663 Starting initial message thread.
+2015-07-01 17:29:01.012302 [DEBUG] sofia.c:4146 debug [0]
+2015-07-01 17:29:01.012302 [DEBUG] sofia.c:4146 sip-trace [no]
+2015-07-01 17:29:01.012302 [DEBUG] sofia.c:4146 rfc2833-pt [101]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 sip-port [5080]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 dialplan [XML]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 context [public]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 dtmf-duration [2000]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 inbound-codec-prefs [PCMU,G722,PCMA,GSM]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 outbound-codec-prefs [PCMU,G722,PCMA,GSM]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 hold-music [local_stream://moh]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 rtp-timer-name [soft]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 local-network-acl [localnet.auto]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 manage-presence [false]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 inbound-codec-negotiation [generous]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 nonce-ttl [60]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 auth-calls [false]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 rtp-ip [10.55.134.253]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 sip-ip [10.55.134.253]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 ext-rtp-ip [auto-nat]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 ext-sip-ip [auto-nat]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 rtp-timeout-sec [300]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 rtp-hold-timeout-sec [1800]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 tls [false]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 tls-bind-params [transport=tls]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 tls-sip-port [5081]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 tls-cert-dir [C:/tl-server/plugins/freeswitch/native/win-32/conf/ssl]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 tls-version [tlsv1]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 ws-binding [:5066]
+2015-07-01 17:29:01.013302 [NOTICE] sofia.c:5557 Started Profile external [sofia_reg_external]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 debug [0]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 sip-trace [no]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 context [public]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 rfc2833-pt [101]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 sip-port [5091]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 dialplan [XML]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 dtmf-duration [2000]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 inbound-codec-prefs [PCMU,G722,PCMA,GSM]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 outbound-codec-prefs [PCMU,G722,PCMA,GSM]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 use-rtp-timer [true]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 rtp-timer-name [soft]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 rtp-ip [::1]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 sip-ip [::1]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 hold-music [local_stream://moh]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 apply-inbound-acl [domains]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 record-template [C:/tl-server/plugins/freeswitch/native/win-32/recordings/${caller_id_number}.${strftime(%Y-%m-%d-%H-%M-%S)}.wav]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 manage-presence [true]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 inbound-codec-negotiation [generous]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 tls [false]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 tls-bind-params [transport=tls]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 tls-sip-port [5092]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 tls-cert-dir [C:/tl-server/plugins/freeswitch/native/win-32/conf/ssl]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 tls-version [tlsv1]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 nonce-ttl [60]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 auth-calls [true]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 auth-all-packets [false]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 rtp-timeout-sec [300]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 rtp-hold-timeout-sec [1800]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 force-register-domain [10.55.134.253]
+2015-07-01 17:29:01.013302 [DEBUG] sofia.c:4146 force-register-db-domain [10.55.134.253]
+2015-07-01 17:29:01.014302 [DEBUG] sofia.c:2755 Creating agent for external
+2015-07-01 17:29:01.015302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_registrations]
+[delete from sip_registrations where sub_host is null and hostname='WTLKD004' and network_ip like '%' and network_port like '%' and sip_username like '%' and mwi_user  like '%' and mwi_host like '%' and orig_server_host like '%' and orig_hostname like '%']
+Auto Generating Table!
+2015-07-01 17:29:01.015302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_registrations]
+[drop table sip_registrations]
+2015-07-01 17:29:01.015302 [NOTICE] sofia.c:5557 Started Profile internal-ipv6 [sofia_reg_internal-ipv6]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 debug [0]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 sip-trace [no]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 log-auth-failures [true]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 context [public]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 rfc2833-pt [101]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 sip-port [5091]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 dialplan [XML]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 dtmf-duration [2000]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 inbound-codec-prefs [PCMU,G722,PCMA,GSM]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 outbound-codec-prefs [PCMU,G722,PCMA,GSM]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 rtp-timer-name [soft]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 rtp-ip [10.55.134.253]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 sip-ip [10.55.134.253]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 hold-music [local_stream://moh]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 apply-nat-acl [nat.auto]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 apply-inbound-acl [domains]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 local-network-acl [localnet.auto]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 record-path [C:/tl-server/plugins/freeswitch/native/win-32/recordings]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 record-template [${caller_id_number}.${target_domain}.${strftime(%Y-%m-%d-%H-%M-%S)}.wav]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 manage-presence [true]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 inbound-codec-negotiation [generous]
+2015-07-01 17:29:01.015302 [DEBUG] sofia.c:4146 tls [false]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 tls-bind-params [transport=tls]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 tls-sip-port [5092]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 tls-cert-dir [C:/tl-server/plugins/freeswitch/native/win-32/conf/ssl]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 tls-version [tlsv1]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 nonce-ttl [60]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 auth-calls [true]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 inbound-reg-force-matching-username [true]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 auth-all-packets [false]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 ext-rtp-ip [auto-nat]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 ext-sip-ip [auto-nat]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 rtp-timeout-sec [300]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 rtp-hold-timeout-sec [1800]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 force-register-domain [10.55.134.253]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 force-subscription-domain [10.55.134.253]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 force-register-db-domain [10.55.134.253]
+2015-07-01 17:29:01.016302 [DEBUG] sofia.c:4146 challenge-realm [auto_from]
+2015-07-01 17:29:01.018302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_subscriptions]
+[delete from sip_subscriptions where hostname='WTLKD004' and full_to='XXX']
+Auto Generating Table!
+2015-07-01 17:29:01.018302 [DEBUG] sofia.c:2755 Creating agent for internal-ipv6
+2015-07-01 17:29:01.018302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_subscriptions]
+[DROP TABLE sip_subscriptions]
+2015-07-01 17:29:01.019302 [WARNING] sofia.c:1939 MSG Thread 0 Started
+2015-07-01 17:29:01.020302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_registrations]
+[delete from sip_registrations where sub_host is null and hostname='WTLKD004' and network_ip like '%' and network_port like '%' and sip_username like '%' and mwi_user  like '%' and mwi_host like '%' and orig_server_host like '%' and orig_hostname like '%']
+Auto Generating Table!
+2015-07-01 17:29:01.020302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_registrations]
+[drop table sip_registrations]
+2015-07-01 17:29:01.021302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_dialogs]
+[delete from sip_dialogs where hostname='WTLKD004' and (expires <> -9999 or rpid='' or sip_from_tag='' or rcd > 0)]
+Auto Generating Table!
+2015-07-01 17:29:01.021302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_dialogs]
+[DROP TABLE sip_dialogs]
+2015-07-01 17:29:01.023302 [NOTICE] sofia.c:5557 Started Profile internal [sofia_reg_internal]
+2015-07-01 17:29:01.023302 [DEBUG] mod_sofia.c:5676 Waiting for profiles to start
+2015-07-01 17:29:01.023302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_subscriptions]
+[delete from sip_subscriptions where hostname='WTLKD004' and full_to='XXX']
+Auto Generating Table!
+2015-07-01 17:29:01.023302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_presence]
+[delete from sip_presence where hostname='WTLKD004' or open_closed='']
+Auto Generating Table!
+2015-07-01 17:29:01.023302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_subscriptions]
+[DROP TABLE sip_subscriptions]
+2015-07-01 17:29:01.023302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_presence]
+[DROP TABLE sip_presence]
+2015-07-01 17:29:01.025302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_dialogs]
+[delete from sip_dialogs where hostname='WTLKD004' and (expires <> -9999 or rpid='' or sip_from_tag='' or rcd > 0)]
+Auto Generating Table!
+2015-07-01 17:29:01.025302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_authentication]
+[delete from sip_authentication where hostname='WTLKD004' or last_nc >= 0]
+Auto Generating Table!
+2015-07-01 17:29:01.025302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_dialogs]
+[DROP TABLE sip_dialogs]
+2015-07-01 17:29:01.026302 [DEBUG] sofia.c:2755 Creating agent for internal
+2015-07-01 17:29:01.026302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_authentication]
+[DROP TABLE sip_authentication]
+2015-07-01 17:29:01.028302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_shared_appearance_subscriptions]
+[delete from sip_shared_appearance_subscriptions where contact_str='' or hostname='WTLKD004' and network_ip like '%']
+Auto Generating Table!
+2015-07-01 17:29:01.028302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_shared_appearance_subscriptions]
+[DROP TABLE sip_shared_appearance_subscriptions]
+2015-07-01 17:29:01.029302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_registrations]
+[delete from sip_registrations where sub_host is null and hostname='WTLKD004' and network_ip like '%' and network_port like '%' and sip_username like '%' and mwi_user  like '%' and mwi_host like '%' and orig_server_host like '%' and orig_hostname like '%']
+Auto Generating Table!
+2015-07-01 17:29:01.029302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_registrations]
+[drop table sip_registrations]
+2015-07-01 17:29:01.032302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_subscriptions]
+[delete from sip_subscriptions where hostname='WTLKD004' and full_to='XXX']
+Auto Generating Table!
+2015-07-01 17:29:01.032302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_subscriptions]
+[DROP TABLE sip_subscriptions]
+2015-07-01 17:29:01.034302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_shared_appearance_dialogs]
+[delete from sip_shared_appearance_dialogs where contact_str='' or hostname='WTLKD004' and network_ip like '%']
+Auto Generating Table!
+2015-07-01 17:29:01.036302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_shared_appearance_dialogs]
+[DROP TABLE sip_shared_appearance_dialogs]
+2015-07-01 17:29:01.036302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_dialogs]
+[delete from sip_dialogs where hostname='WTLKD004' and (expires <> -9999 or rpid='' or sip_from_tag='' or rcd > 0)]
+Auto Generating Table!
+2015-07-01 17:29:01.037302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_dialogs]
+[DROP TABLE sip_dialogs]
+2015-07-01 17:29:01.040302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_presence]
+[delete from sip_presence where hostname='WTLKD004' or open_closed='']
+Auto Generating Table!
+2015-07-01 17:29:01.041302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_presence]
+[DROP TABLE sip_presence]
+2015-07-01 17:29:01.046302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_authentication]
+[delete from sip_authentication where hostname='WTLKD004' or last_nc >= 0]
+Auto Generating Table!
+2015-07-01 17:29:01.046302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_authentication]
+[DROP TABLE sip_authentication]
+2015-07-01 17:29:01.048302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_shared_appearance_subscriptions]
+[delete from sip_shared_appearance_subscriptions where contact_str='' or hostname='WTLKD004' and network_ip like '%']
+Auto Generating Table!
+2015-07-01 17:29:01.048302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_shared_appearance_subscriptions]
+[DROP TABLE sip_shared_appearance_subscriptions]
+2015-07-01 17:29:01.051302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_presence]
+[delete from sip_presence where hostname='WTLKD004' or open_closed='']
+Auto Generating Table!
+2015-07-01 17:29:01.051302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_presence]
+[DROP TABLE sip_presence]
+2015-07-01 17:29:01.052302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_shared_appearance_dialogs]
+[delete from sip_shared_appearance_dialogs where contact_str='' or hostname='WTLKD004' and network_ip like '%']
+Auto Generating Table!
+2015-07-01 17:29:01.052302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_shared_appearance_dialogs]
+[DROP TABLE sip_shared_appearance_dialogs]
+2015-07-01 17:29:01.055302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_authentication]
+[delete from sip_authentication where hostname='WTLKD004' or last_nc >= 0]
+Auto Generating Table!
+2015-07-01 17:29:01.055302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_authentication]
+[DROP TABLE sip_authentication]
+2015-07-01 17:29:01.060302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_shared_appearance_subscriptions]
+[delete from sip_shared_appearance_subscriptions where contact_str='' or hostname='WTLKD004' and network_ip like '%']
+Auto Generating Table!
+2015-07-01 17:29:01.060302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_shared_appearance_subscriptions]
+[DROP TABLE sip_shared_appearance_subscriptions]
+2015-07-01 17:29:01.065302 [DEBUG] switch_core_sqldb.c:1333 SQL ERR [no such table: sip_shared_appearance_dialogs]
+[delete from sip_shared_appearance_dialogs where contact_str='' or hostname='WTLKD004' and network_ip like '%']
+Auto Generating Table!
+2015-07-01 17:29:01.065302 [DEBUG] switch_core_sqldb.c:1340 Ignoring SQL ERR [no such table: sip_shared_appearance_dialogs]
+[DROP TABLE sip_shared_appearance_dialogs]
+2015-07-01 17:29:01.312302 [DEBUG] sofia.c:2873 Created agent for internal
+2015-07-01 17:29:01.313302 [DEBUG] sofia.c:2918 Set params for internal
+2015-07-01 17:29:01.313302 [DEBUG] sofia.c:2962 Activated db for internal
+2015-07-01 17:29:01.314302 [DEBUG] sofia.c:2873 Created agent for external
+2015-07-01 17:29:01.314302 [DEBUG] sofia.c:2918 Set params for external
+2015-07-01 17:29:01.314302 [DEBUG] sofia.c:2962 Activated db for external
+2015-07-01 17:29:01.314302 [INFO] switch_core_sqldb.c:1679 sofia:internal Starting SQL thread.
+2015-07-01 17:29:01.315302 [DEBUG] sofia.c:3000 Starting thread for internal
+2015-07-01 17:29:01.315302 [DEBUG] sofia.c:2655 Launching worker thread for internal
+2015-07-01 17:29:01.315302 [NOTICE] sofia.c:3734 Adding Alias [10.55.134.253] for profile [internal]
+2015-07-01 17:29:01.316302 [INFO] switch_core_sqldb.c:1679 sofia:external Starting SQL thread.
+2015-07-01 17:29:01.316302 [DEBUG] sofia.c:3000 Starting thread for external
+2015-07-01 17:29:01.317302 [DEBUG] sofia.c:2655 Launching worker thread for external
+2015-07-01 17:29:01.320302 [DEBUG] sofia.c:2873 Created agent for internal-ipv6
+2015-07-01 17:29:01.320302 [DEBUG] sofia.c:2918 Set params for internal-ipv6
+2015-07-01 17:29:01.320302 [DEBUG] sofia.c:2962 Activated db for internal-ipv6
+2015-07-01 17:29:01.322302 [INFO] switch_core_sqldb.c:1679 sofia:internal-ipv6 Starting SQL thread.
+2015-07-01 17:29:01.322302 [DEBUG] sofia.c:3000 Starting thread for internal-ipv6
+2015-07-01 17:29:01.322302 [DEBUG] sofia.c:2655 Launching worker thread for internal-ipv6
+2015-07-01 17:29:02.523302 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'sofia'
+2015-07-01 17:29:02.523302 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'rtp'
+2015-07-01 17:29:02.523302 [NOTICE] switch_loadable_module.c:269 Adding Application 'sofia_sla'
+2015-07-01 17:29:02.523302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia'
+2015-07-01 17:29:02.523302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia_gateway_data'
+2015-07-01 17:29:02.524302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia_username_of'
+2015-07-01 17:29:02.524302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia_contact'
+2015-07-01 17:29:02.524302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia_count_reg'
+2015-07-01 17:29:02.524302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia_dig'
+2015-07-01 17:29:02.524302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia_presence_data'
+2015-07-01 17:29:02.524302 [NOTICE] switch_loadable_module.c:450 Adding Chat interface 'sip'
+2015-07-01 17:29:02.524302 [NOTICE] switch_loadable_module.c:496 Adding Management interface 'mod_sofia' OID[.1.3.6.1.4.1.27880.1001]
+2015-07-01 17:29:02.525302 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'loopback'
+2015-07-01 17:29:02.525302 [NOTICE] switch_loadable_module.c:269 Adding Application 'unloop'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'bg_system'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'system'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'acl'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'alias'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'coalesce'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'banner'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'bgapi'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'break'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'complete'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'cond'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'console_complete'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'console_complete_xml'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'create_uuid'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'db_cache'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'domain_exists'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'echo'
+2015-07-01 17:29:02.529302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'escape'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'eval'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'expand'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'find_user_xml'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'fsctl'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function '...'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'shutdown'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'version'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'global_getvar'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'global_setvar'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'group_call'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'help'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'host_lookup'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'hostname'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'interface_ip'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'switchname'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'gethost'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'hupall'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'in_group'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'is_lan_addr'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'limit_usage'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'limit_hash_usage'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'limit_status'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'limit_reset'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'limit_interval_reset'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'list_users'
+2015-07-01 17:29:02.530302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'load'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'log'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'md5'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'module_exists'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'msleep'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'nat_map'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'originate'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'pause'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'quote_shell_arg'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'regex'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'reloadacl'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'reload'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'reloadxml'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'replace'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'say_string'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sched_api'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sched_broadcast'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sched_del'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sched_hangup'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sched_transfer'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'show'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sql_escape'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'status'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'strftime_tz'
+2015-07-01 17:29:02.531302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'stun'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'time_test'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'timer_test'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'tone_detect'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'unload'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'unsched_api'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uptime'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'reg_url'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'url_decode'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'url_encode'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'user_data'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_early_ok'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'user_exists'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_answer'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_audio'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_break'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_bridge'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_broadcast'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_buglist'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_chat'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_debug_media'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_deflect'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_displace'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_display'
+2015-07-01 17:29:02.532302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_drop_dtmf'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_dump'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_exists'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_fileman'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_flush_dtmf'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_getvar'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_hold'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_kill'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_send_message'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_send_info'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_set_media_stats'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_video_refresh'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_outgoing_answer'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_limit'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_limit_release'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_limit_release'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_loglevel'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_media'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_media_reneg'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_park'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_pause'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_phone_event'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_ring_ready'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_pre_answer'
+2015-07-01 17:29:02.533302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_preprocess'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_record'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_recovery_refresh'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_recv_dtmf'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_send_dtmf'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_session_heartbeat'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_setvar_multi'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_setvar'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_transfer'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_dual_transfer'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_simplify'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_jitterbuffer'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_zombie_exec'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'xml_flush_cache'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'xml_locate'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'xml_wrap'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'file_exists'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'json'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:338 Adding JSON API Function 'mediaStats'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:338 Adding JSON API Function 'status'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:338 Adding JSON API Function 'fsapi'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:338 Adding JSON API Function 'execute'
+2015-07-01 17:29:02.534302 [NOTICE] switch_loadable_module.c:338 Adding JSON API Function 'channelData'
+2015-07-01 17:29:02.537302 [NOTICE] switch_loadable_module.c:269 Adding Application 'conference'
+2015-07-01 17:29:02.537302 [NOTICE] switch_loadable_module.c:269 Adding Application 'conference_set_auto_outcall'
+2015-07-01 17:29:02.537302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'conference'
+2015-07-01 17:29:02.537302 [NOTICE] switch_loadable_module.c:450 Adding Chat interface 'conf'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'error'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'group'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'user'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'pickup'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:227 Adding Dialplan 'inline'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:269 Adding Application 'blind_transfer_ack'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:269 Adding Application 'bind_digit_action'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:269 Adding Application 'capture'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:269 Adding Application 'clear_digit_action'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:269 Adding Application 'digit_action_set_realm'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:269 Adding Application 'privacy'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_audio_level'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_mute'
+2015-07-01 17:29:02.539302 [NOTICE] switch_loadable_module.c:269 Adding Application 'flush_dtmf'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'hold'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'unhold'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'mutex'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'page'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'transfer'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'check_acl'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'verbose_events'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'novideo'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'cng_plc'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'early_hangup'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'sleep'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'delay_echo'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'strftime'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'phrase'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'eval'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_media_stats'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'stop'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_zombie_exec'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'pre_answer'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'answer'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'wait_for_answer'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'hangup'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_name'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'presence'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'log'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'info'
+2015-07-01 17:29:02.540302 [NOTICE] switch_loadable_module.c:269 Adding Application 'event'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'sound_test'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'export'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'bridge_export'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'set'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'multiset'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'push'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'unshift'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_global'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_profile_var'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'unset'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'multiunset'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'ring_ready'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'remove_bugs'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'break'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'detect_speech'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'play_and_detect_speech'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'ivr'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'redirect'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'video_refresh'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'send_info'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'jitterbuffer'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'send_display'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'respond'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'deflect'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'recovery_refresh'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'queue_dtmf'
+2015-07-01 17:29:02.541302 [NOTICE] switch_loadable_module.c:269 Adding Application 'send_dtmf'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'sched_cancel'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'sched_hangup'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'sched_broadcast'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'sched_transfer'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'execute_extension'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'sched_heartbeat'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'enable_heartbeat'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'enable_keepalive'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'media_reset'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'mkdir'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'rename'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'soft_hold'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'bind_meta_app'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'unbind_meta_app'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'block_dtmf'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'unblock_dtmf'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'intercept'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'eavesdrop'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'three_way'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_user'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'stop_dtmf'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'start_dtmf'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'stop_dtmf_generate'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'start_dtmf_generate'
+2015-07-01 17:29:02.542302 [NOTICE] switch_loadable_module.c:269 Adding Application 'stop_tone_detect'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'fax_detect'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'tone_detect'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'echo'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'park'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'park_state'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'gentones'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'playback'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'endless_playback'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'loop_playback'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'att_xfer'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'read'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'play_and_get_digits'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'stop_record_session'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'record_session'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'record_session_mask'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'record_session_unmask'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'record'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'preprocess'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'stop_displace_session'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'displace_session'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'speak'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'clear_speech_cache'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'bridge'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'system'
+2015-07-01 17:29:02.543302 [NOTICE] switch_loadable_module.c:269 Adding Application 'bgsystem'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:269 Adding Application 'say'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:269 Adding Application 'wait_for_silence'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:269 Adding Application 'session_loglevel'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:269 Adding Application 'limit'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:269 Adding Application 'limit_hash'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:269 Adding Application 'limit_execute'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:269 Adding Application 'limit_hash_execute'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:269 Adding Application 'pickup'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'strepoch'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'page'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'strmicroepoch'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'chat'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'strftime'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'presence'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'file_string'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'file'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:450 Adding Chat interface 'event'
+2015-07-01 17:29:02.544302 [NOTICE] switch_loadable_module.c:450 Adding Chat interface 'api'
+2015-07-01 17:29:02.545302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'expr'
+2015-07-01 17:29:02.547302 [NOTICE] switch_loadable_module.c:227 Adding Dialplan 'XML'
+2015-07-01 17:29:02.548302 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'SIP'
+2015-07-01 17:29:02.548302 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'IAX2'
+2015-07-01 17:29:02.548302 [NOTICE] switch_loadable_module.c:227 Adding Dialplan 'asterisk'
+2015-07-01 17:29:02.548302 [NOTICE] switch_loadable_module.c:269 Adding Application 'Dial'
+2015-07-01 17:29:02.548302 [NOTICE] switch_loadable_module.c:269 Adding Application 'Goto'
+2015-07-01 17:29:02.548302 [NOTICE] switch_loadable_module.c:269 Adding Application 'AvoidingDeadlock'
+2015-07-01 17:29:02.549302 [NOTICE] switch_loadable_module.c:192 Adding Codec G723 4 G.723.1 6.3k 8000hz 120ms 6300bps
+2015-07-01 17:29:02.549302 [NOTICE] switch_loadable_module.c:192 Adding Codec G723 4 G.723.1 6.3k 8000hz 90ms 6300bps
+2015-07-01 17:29:02.549302 [NOTICE] switch_loadable_module.c:192 Adding Codec G723 4 G.723.1 6.3k 8000hz 60ms 6300bps
+2015-07-01 17:29:02.549302 [NOTICE] switch_loadable_module.c:192 Adding Codec G723 4 G.723.1 6.3k 8000hz 30ms 6300bps
+2015-07-01 17:29:02.550302 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 10ms 8000bps
+2015-07-01 17:29:02.550302 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 20ms 8000bps
+2015-07-01 17:29:02.550302 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 30ms 8000bps
+2015-07-01 17:29:02.550302 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 40ms 8000bps
+2015-07-01 17:29:02.550302 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 50ms 8000bps
+2015-07-01 17:29:02.550302 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 60ms 8000bps
+2015-07-01 17:29:02.550302 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 70ms 8000bps
+2015-07-01 17:29:02.550302 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 80ms 8000bps
+2015-07-01 17:29:02.550302 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 90ms 8000bps
+2015-07-01 17:29:02.550302 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 100ms 8000bps
+2015-07-01 17:29:02.550302 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 110ms 8000bps
+2015-07-01 17:29:02.550302 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 120ms 8000bps
+2015-07-01 17:29:02.551302 [NOTICE] switch_loadable_module.c:192 Adding Codec AMR 96 AMR 8000hz 20ms 12200bps
+2015-07-01 17:29:02.553302 [NOTICE] switch_loadable_module.c:192 Adding Codec iLBC 97 iLBC 8000hz 30ms 13330bps
+2015-07-01 17:29:02.553302 [NOTICE] switch_loadable_module.c:192 Adding Codec iLBC 98 iLBC 8000hz 20ms 15200bps
+2015-07-01 17:29:02.553302 [CRIT] switch_loadable_module.c:1447 Error Loading module C:/tl-server/plugins/freeswitch/native/win-32/mod/mod_speex.dll
+**dll open error [126l]
+**
+2015-07-01 17:29:02.554302 [NOTICE] switch_loadable_module.c:198 Adding Codec H264 97 H.264 Video (passthru) 90000hz 0ms (VBR)
+2015-07-01 17:29:02.554302 [NOTICE] switch_loadable_module.c:198 Adding Codec H263 34 H.263 Video (passthru) 90000hz 0ms (VBR)
+2015-07-01 17:29:02.554302 [NOTICE] switch_loadable_module.c:198 Adding Codec H263-1998 115 H.263+ Video (passthru) 90000hz 0ms (VBR)
+2015-07-01 17:29:02.554302 [NOTICE] switch_loadable_module.c:198 Adding Codec H263-2000 121 H.263++ Video (passthru) 90000hz 0ms (VBR)
+2015-07-01 17:29:02.554302 [NOTICE] switch_loadable_module.c:198 Adding Codec H261 31 H.261 Video (passthru) 90000hz 0ms (VBR)
+2015-07-01 17:29:02.555302 [INFO] mod_siren.c:155 Audio coding: ITU-T Rec. G.722.1, licensed from Polycom(R)
+2015-07-01 17:29:02.555302 [INFO] mod_siren.c:156 Audio coding: ITU-T Rec. G.722.1 Annex C, licensed from Polycom(R)
+2015-07-01 17:29:02.555302 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 115 Polycom(R) G722.1/G722.1C 32000hz 20ms 48000bps
+2015-07-01 17:29:02.555302 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 115 Polycom(R) G722.1/G722.1C 32000hz 40ms 48000bps
+2015-07-01 17:29:02.555302 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 115 Polycom(R) G722.1/G722.1C 32000hz 60ms 48000bps
+2015-07-01 17:29:02.555302 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 107 Polycom(R) G722.1/G722.1C 16000hz 20ms 32000bps
+2015-07-01 17:29:02.555302 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 107 Polycom(R) G722.1/G722.1C 16000hz 40ms 32000bps
+2015-07-01 17:29:02.555302 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 107 Polycom(R) G722.1/G722.1C 16000hz 60ms 32000bps
+2015-07-01 17:29:02.555302 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 107 Polycom(R) G722.1/G722.1C 16000hz 20ms 24000bps
+2015-07-01 17:29:02.555302 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 107 Polycom(R) G722.1/G722.1C 16000hz 40ms 24000bps
+2015-07-01 17:29:02.555302 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 107 Polycom(R) G722.1/G722.1C 16000hz 60ms 24000bps
+2015-07-01 17:29:02.558302 [INFO] mod_sndfile.c:367 
+LibSndFile Version : libsndfile-1.0.26pre5 Supported Formats
+================================================================================
+AIFF (Apple/SGI)  (extension "aiff")
+AU (Sun/NeXT)  (extension "au")
+AVR (Audio Visual Research)  (extension "avr")
+CAF (Apple Core Audio File)  (extension "caf")
+HTK (HMM Tool Kit)  (extension "htk")
+IFF (Amiga IFF/SVX8/SV16)  (extension "iff")
+MAT4 (GNU Octave 2.0 / Matlab 4.2)  (extension "mat")
+MAT5 (GNU Octave 2.1 / Matlab 5.0)  (extension "mat")
+MPC (Akai MPC 2k)  (extension "mpc")
+PAF (Ensoniq PARIS)  (extension "paf")
+PVF (Portable Voice Format)  (extension "pvf")
+RAW (header-less)  (extension "raw")
+RF64 (RIFF 64)  (extension "rf64")
+SD2 (Sound Designer II)  (extension "sd2")
+SDS (Midi Sample Dump Standard)  (extension "sds")
+SF (Berkeley/IRCAM/CARL)  (extension "sf")
+VOC (Creative Labs)  (extension "voc")
+W64 (SoundFoundry WAVE 64)  (extension "w64")
+WAV (Microsoft)  (extension "wav")
+WAV (NIST Sphere)  (extension "wav")
+WAVEX (Microsoft)  (extension "wav")
+WVE (Psion Series 3)  (extension "wve")
+XI (FastTracker 2)  (extension "xi")
+================================================================================
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'aiff'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'au'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'avr'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'caf'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'htk'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'iff'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'mat'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'mpc'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'paf'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'pvf'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'raw'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'rf64'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'sd2'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'sds'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'sf'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'voc'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'w64'
+2015-07-01 17:29:02.558302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'wav'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'wve'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'xi'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'r8'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'r16'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'r24'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'r32'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'gsm'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'ul'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'ulaw'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'al'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'alaw'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'adpcm'
+2015-07-01 17:29:02.559302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'vox'
+2015-07-01 17:29:02.562302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'PCMU'
+2015-07-01 17:29:02.562302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'iLBC'
+2015-07-01 17:29:02.562302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'G7221'
+2015-07-01 17:29:02.562302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'SPEEX'
+2015-07-01 17:29:02.562302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'L16'
+2015-07-01 17:29:02.562302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'PCMA'
+2015-07-01 17:29:02.562302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'PROXY'
+2015-07-01 17:29:02.562302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'G729'
+2015-07-01 17:29:02.562302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'AMR'
+2015-07-01 17:29:02.562302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'H263-2000'
+2015-07-01 17:29:02.562302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'PROXY-VID'
+2015-07-01 17:29:02.562302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'G723'
+2015-07-01 17:29:02.563302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'H263-1998'
+2015-07-01 17:29:02.563302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'H261'
+2015-07-01 17:29:02.563302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'H263'
+2015-07-01 17:29:02.563302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'H264'
+2015-07-01 17:29:03.040302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'hup_local_stream'
+2015-07-01 17:29:03.040302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'reload_local_stream'
+2015-07-01 17:29:03.040302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'stop_local_stream'
+2015-07-01 17:29:03.040302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'start_local_stream'
+2015-07-01 17:29:03.040302 [NOTICE] switch_loadable_module.c:315 Adding API Function 'show_local_stream'
+2015-07-01 17:29:03.040302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'local_stream'
+2015-07-01 17:29:03.043302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'tone_stream'
+2015-07-01 17:29:03.043302 [NOTICE] switch_loadable_module.c:365 Adding File Format 'silence_stream'
+2015-07-01 17:29:03.043302 [CRIT] switch_loadable_module.c:1447 Error Loading module C:/tl-server/plugins/freeswitch/native/win-32/mod/mod_file_string.dll
+**dll open error [126l]
+**
+2015-07-01 17:29:03.043302 [CRIT] switch_loadable_module.c:1447 Error Loading module C:/tl-server/plugins/freeswitch/native/win-32/mod/mod_spidermonkey.dll
+**dll open error [126l]
+**
+2015-07-01 17:29:03.044302 [NOTICE] switch_loadable_module.c:471 Adding Say interface 'en'
+2015-07-01 17:29:03.045302 [NOTICE] switch_loadable_module.c:471 Adding Say interface 'ru'
+2015-07-01 17:29:03.046302 [DEBUG] mod_event_socket.c:2883 Socket up listening on 127.0.0.1:8021
+2015-07-01 17:29:03.046302 [INFO] switch_time.c:607 Clock synchronized to system time.
+2015-07-01 17:29:03.047302 [NOTICE] switch_core.c:1315 Created ip list rfc6598.auto default (deny)
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 100.64.0.0/10 (allow) [] to list rfc6598.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_core.c:1321 Created ip list rfc1918.auto default (deny)
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 10.0.0.0/8 (allow) [] to list rfc1918.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 172.16.0.0/12 (allow) [] to list rfc1918.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 192.168.0.0/16 (allow) [] to list rfc1918.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_core.c:1329 Created ip list wan.auto default (allow)
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 0.0.0.0/8 (deny) [] to list wan.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 10.0.0.0/8 (deny) [] to list wan.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 172.16.0.0/12 (deny) [] to list wan.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 192.168.0.0/16 (deny) [] to list wan.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 169.254.0.0/16 (deny) [] to list wan.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_core.c:1339 Created ip list nat.auto default (deny)
+2015-07-01 17:29:03.047302 [NOTICE] switch_core.c:1341 Adding 10.55.134.253/255.255.255.0 (deny) to list nat.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 10.0.0.0/8 (allow) [] to list nat.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 172.16.0.0/12 (allow) [] to list nat.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 192.168.0.0/16 (allow) [] to list nat.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 100.64.0.0/10 (allow) [] to list nat.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_core.c:1351 Created ip list loopback.auto default (deny)
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 127.0.0.0/8 (allow) [] to list loopback.auto
+2015-07-01 17:29:03.047302 [NOTICE] switch_core.c:1357 Created ip list localnet.auto default (deny)
+2015-07-01 17:29:03.047302 [NOTICE] switch_core.c:1360 Adding 10.55.134.253/255.255.255.0 (allow) to list localnet.auto
+2015-07-01 17:29:03.047302 [ERR] switch_utils.c:299 Error Adding 127.0.0.1/255 (allow) [] to list localhost
+2015-07-01 17:29:03.047302 [ERR] switch_core.c:1462 Error Adding 127.0.0.1/255 (allow) to list localhost
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 192.168.42.0/24 (deny) [] to list lan
+2015-07-01 17:29:03.047302 [NOTICE] switch_core.c:1460 Adding 192.168.42.0/24 (deny) to list lan
+2015-07-01 17:29:03.047302 [NOTICE] switch_utils.c:325 Adding 192.168.42.42/32 (allow) [] to list lan
+2015-07-01 17:29:03.047302 [NOTICE] switch_core.c:1460 Adding 192.168.42.42/32 (allow) to list lan
+2015-07-01 17:29:03.047302 [INFO] switch_core.c:2240 
+FreeSWITCH Version 1.5.15b~32bit ( 32bit)
+
+FreeSWITCH Started
+Max Sessions [1000]
+Session Rate [30]
+SQL [Enabled]
+2015-07-01 17:29:03.047302 [DEBUG] switch_loadable_module.c:702 Chat Thread Started
+2015-07-01 17:29:03.049302 [DEBUG] switch_loadable_module.c:702 Chat Thread Started
+2015-07-01 17:35:12.389902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'console'
+2015-07-01 17:35:12.391902 [NOTICE] switch_loadable_module.c:227 Adding Dialplan 'enum'
+2015-07-01 17:35:12.391902 [NOTICE] switch_loadable_module.c:269 Adding Application 'enum'
+2015-07-01 17:35:12.391902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'enum'
+2015-07-01 17:35:12.391902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'enum_auto'
+2015-07-01 17:35:12.392902 [DEBUG] mod_cdr_csv.c:364 Adding default template.
+2015-07-01 17:35:12.392902 [DEBUG] mod_cdr_csv.c:411 Adding template sql.
+2015-07-01 17:35:12.392902 [DEBUG] mod_cdr_csv.c:411 Adding template example.
+2015-07-01 17:35:12.392902 [DEBUG] mod_cdr_csv.c:411 Adding template snom.
+2015-07-01 17:35:12.392902 [DEBUG] mod_cdr_csv.c:411 Adding template linksys.
+2015-07-01 17:35:12.392902 [DEBUG] mod_cdr_csv.c:411 Adding template asterisk.
+2015-07-01 17:35:12.392902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'cdr_csv'
+2015-07-01 17:35:12.393902 [NOTICE] switch_loadable_module.c:269 Adding Application 'socket'
+2015-07-01 17:35:12.393902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'event_sink'
+2015-07-01 17:35:12.398902 [INFO] mod_sofia.c:5663 Starting initial message thread.
+2015-07-01 17:35:12.398902 [DEBUG] sofia.c:4146 debug [0]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 sip-trace [no]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 rfc2833-pt [101]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 sip-port [5080]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 dialplan [XML]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 context [public]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 dtmf-duration [2000]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 inbound-codec-prefs [PCMU,G722,PCMA,GSM]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 outbound-codec-prefs [PCMU,G722,PCMA,GSM]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 hold-music [local_stream://moh]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 rtp-timer-name [soft]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 local-network-acl [localnet.auto]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 manage-presence [false]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 inbound-codec-negotiation [generous]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 nonce-ttl [60]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 auth-calls [false]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 rtp-ip [10.55.134.253]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 sip-ip [10.55.134.253]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 ext-rtp-ip [auto-nat]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 ext-sip-ip [auto-nat]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 rtp-timeout-sec [300]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 rtp-hold-timeout-sec [1800]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 tls [false]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 tls-bind-params [transport=tls]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 tls-sip-port [5081]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 tls-cert-dir [C:/tl-server/plugins/freeswitch/native/win-32/conf/ssl]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 tls-version [tlsv1]
+2015-07-01 17:35:12.399902 [DEBUG] sofia.c:4146 ws-binding [:5066]
+2015-07-01 17:35:12.400902 [WARNING] sofia.c:1939 MSG Thread 0 Started
+2015-07-01 17:35:12.400902 [NOTICE] sofia.c:5557 Started Profile external [sofia_reg_external]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 debug [0]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 sip-trace [no]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 context [public]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 rfc2833-pt [101]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 sip-port [5091]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 dialplan [XML]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 dtmf-duration [2000]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 inbound-codec-prefs [PCMU,G722,PCMA,GSM]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 outbound-codec-prefs [PCMU,G722,PCMA,GSM]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 use-rtp-timer [true]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 rtp-timer-name [soft]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 rtp-ip [::1]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 sip-ip [::1]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 hold-music [local_stream://moh]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 apply-inbound-acl [domains]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 record-template [C:/tl-server/plugins/freeswitch/native/win-32/recordings/${caller_id_number}.${strftime(%Y-%m-%d-%H-%M-%S)}.wav]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 manage-presence [true]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 inbound-codec-negotiation [generous]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 tls [false]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 tls-bind-params [transport=tls]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 tls-sip-port [5092]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 tls-cert-dir [C:/tl-server/plugins/freeswitch/native/win-32/conf/ssl]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 tls-version [tlsv1]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 nonce-ttl [60]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 auth-calls [true]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 auth-all-packets [false]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 rtp-timeout-sec [300]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 rtp-hold-timeout-sec [1800]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 force-register-domain [10.55.134.253]
+2015-07-01 17:35:12.400902 [DEBUG] sofia.c:4146 force-register-db-domain [10.55.134.253]
+2015-07-01 17:35:12.401902 [DEBUG] sofia.c:2755 Creating agent for external
+2015-07-01 17:35:12.407902 [NOTICE] sofia.c:5557 Started Profile internal-ipv6 [sofia_reg_internal-ipv6]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 debug [0]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 sip-trace [no]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 log-auth-failures [true]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 context [public]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 rfc2833-pt [101]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 sip-port [5091]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 dialplan [XML]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 dtmf-duration [2000]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 inbound-codec-prefs [PCMU,G722,PCMA,GSM]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 outbound-codec-prefs [PCMU,G722,PCMA,GSM]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 rtp-timer-name [soft]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 rtp-ip [10.55.134.253]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 sip-ip [10.55.134.253]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 hold-music [local_stream://moh]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 apply-nat-acl [nat.auto]
+2015-07-01 17:35:12.407902 [DEBUG] sofia.c:4146 apply-inbound-acl [domains]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 local-network-acl [localnet.auto]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 record-path [C:/tl-server/plugins/freeswitch/native/win-32/recordings]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 record-template [${caller_id_number}.${target_domain}.${strftime(%Y-%m-%d-%H-%M-%S)}.wav]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 manage-presence [true]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 inbound-codec-negotiation [generous]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 tls [false]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 tls-bind-params [transport=tls]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 tls-sip-port [5092]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 tls-cert-dir [C:/tl-server/plugins/freeswitch/native/win-32/conf/ssl]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 tls-version [tlsv1]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 nonce-ttl [60]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 auth-calls [true]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 inbound-reg-force-matching-username [true]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 auth-all-packets [false]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 ext-rtp-ip [auto-nat]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 ext-sip-ip [auto-nat]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 rtp-timeout-sec [300]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 rtp-hold-timeout-sec [1800]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 force-register-domain [10.55.134.253]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 force-subscription-domain [10.55.134.253]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 force-register-db-domain [10.55.134.253]
+2015-07-01 17:35:12.408902 [DEBUG] sofia.c:4146 challenge-realm [auto_from]
+2015-07-01 17:35:12.410902 [DEBUG] sofia.c:2755 Creating agent for internal-ipv6
+2015-07-01 17:35:12.415902 [NOTICE] sofia.c:5557 Started Profile internal [sofia_reg_internal]
+2015-07-01 17:35:12.415902 [DEBUG] mod_sofia.c:5676 Waiting for profiles to start
+2015-07-01 17:35:12.416902 [DEBUG] sofia.c:2755 Creating agent for internal
+2015-07-01 17:35:12.428902 [DEBUG] sofia.c:2873 Created agent for external
+2015-07-01 17:35:12.428902 [DEBUG] sofia.c:2918 Set params for external
+2015-07-01 17:35:12.428902 [DEBUG] sofia.c:2962 Activated db for external
+2015-07-01 17:35:12.429902 [INFO] switch_core_sqldb.c:1679 sofia:external Starting SQL thread.
+2015-07-01 17:35:12.429902 [DEBUG] sofia.c:3000 Starting thread for external
+2015-07-01 17:35:12.429902 [DEBUG] sofia.c:2655 Launching worker thread for external
+2015-07-01 17:35:12.434902 [DEBUG] sofia.c:2873 Created agent for internal-ipv6
+2015-07-01 17:35:12.434902 [DEBUG] sofia.c:2918 Set params for internal-ipv6
+2015-07-01 17:35:12.434902 [DEBUG] sofia.c:2962 Activated db for internal-ipv6
+2015-07-01 17:35:12.435902 [INFO] switch_core_sqldb.c:1679 sofia:internal-ipv6 Starting SQL thread.
+2015-07-01 17:35:12.436902 [DEBUG] sofia.c:3000 Starting thread for internal-ipv6
+2015-07-01 17:35:12.436902 [DEBUG] sofia.c:2655 Launching worker thread for internal-ipv6
+2015-07-01 17:35:12.437902 [DEBUG] sofia.c:2873 Created agent for internal
+2015-07-01 17:35:12.437902 [DEBUG] sofia.c:2918 Set params for internal
+2015-07-01 17:35:12.437902 [DEBUG] sofia.c:2962 Activated db for internal
+2015-07-01 17:35:12.438902 [INFO] switch_core_sqldb.c:1679 sofia:internal Starting SQL thread.
+2015-07-01 17:35:12.438902 [DEBUG] sofia.c:3000 Starting thread for internal
+2015-07-01 17:35:12.438902 [DEBUG] sofia.c:2655 Launching worker thread for internal
+2015-07-01 17:35:12.439902 [NOTICE] sofia.c:3734 Adding Alias [10.55.134.253] for profile [internal]
+2015-07-01 17:35:13.915902 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'sofia'
+2015-07-01 17:35:13.915902 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'rtp'
+2015-07-01 17:35:13.915902 [NOTICE] switch_loadable_module.c:269 Adding Application 'sofia_sla'
+2015-07-01 17:35:13.915902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia'
+2015-07-01 17:35:13.915902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia_gateway_data'
+2015-07-01 17:35:13.916902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia_username_of'
+2015-07-01 17:35:13.916902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia_contact'
+2015-07-01 17:35:13.916902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia_count_reg'
+2015-07-01 17:35:13.916902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia_dig'
+2015-07-01 17:35:13.916902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sofia_presence_data'
+2015-07-01 17:35:13.916902 [NOTICE] switch_loadable_module.c:450 Adding Chat interface 'sip'
+2015-07-01 17:35:13.916902 [NOTICE] switch_loadable_module.c:496 Adding Management interface 'mod_sofia' OID[.1.3.6.1.4.1.27880.1001]
+2015-07-01 17:35:13.916902 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'loopback'
+2015-07-01 17:35:13.916902 [NOTICE] switch_loadable_module.c:269 Adding Application 'unloop'
+2015-07-01 17:35:13.919902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'bg_system'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'system'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'acl'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'alias'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'coalesce'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'banner'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'bgapi'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'break'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'complete'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'cond'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'console_complete'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'console_complete_xml'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'create_uuid'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'db_cache'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'domain_exists'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'echo'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'escape'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'eval'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'expand'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'find_user_xml'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'fsctl'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function '...'
+2015-07-01 17:35:13.920902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'shutdown'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'version'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'global_getvar'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'global_setvar'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'group_call'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'help'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'host_lookup'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'hostname'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'interface_ip'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'switchname'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'gethost'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'hupall'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'in_group'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'is_lan_addr'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'limit_usage'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'limit_hash_usage'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'limit_status'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'limit_reset'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'limit_interval_reset'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'list_users'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'load'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'log'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'md5'
+2015-07-01 17:35:13.921902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'module_exists'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'msleep'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'nat_map'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'originate'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'pause'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'quote_shell_arg'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'regex'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'reloadacl'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'reload'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'reloadxml'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'replace'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'say_string'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sched_api'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sched_broadcast'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sched_del'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sched_hangup'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sched_transfer'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'show'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'sql_escape'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'status'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'strftime_tz'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'stun'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'time_test'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'timer_test'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'tone_detect'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'unload'
+2015-07-01 17:35:13.922902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'unsched_api'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uptime'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'reg_url'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'url_decode'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'url_encode'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'user_data'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_early_ok'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'user_exists'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_answer'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_audio'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_break'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_bridge'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_broadcast'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_buglist'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_chat'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_debug_media'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_deflect'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_displace'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_display'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_drop_dtmf'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_dump'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_exists'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_fileman'
+2015-07-01 17:35:13.923902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_flush_dtmf'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_getvar'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_hold'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_kill'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_send_message'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_send_info'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_set_media_stats'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_video_refresh'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_outgoing_answer'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_limit'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_limit_release'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_limit_release'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_loglevel'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_media'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_media_reneg'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_park'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_pause'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_phone_event'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_ring_ready'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_pre_answer'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_preprocess'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_record'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_recovery_refresh'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_recv_dtmf'
+2015-07-01 17:35:13.924902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_send_dtmf'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_session_heartbeat'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_setvar_multi'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_setvar'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_transfer'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_dual_transfer'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_simplify'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_jitterbuffer'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'uuid_zombie_exec'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'xml_flush_cache'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'xml_locate'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'xml_wrap'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'file_exists'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'json'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:338 Adding JSON API Function 'mediaStats'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:338 Adding JSON API Function 'status'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:338 Adding JSON API Function 'fsapi'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:338 Adding JSON API Function 'execute'
+2015-07-01 17:35:13.925902 [NOTICE] switch_loadable_module.c:338 Adding JSON API Function 'channelData'
+2015-07-01 17:35:13.927902 [NOTICE] switch_loadable_module.c:269 Adding Application 'conference'
+2015-07-01 17:35:13.927902 [NOTICE] switch_loadable_module.c:269 Adding Application 'conference_set_auto_outcall'
+2015-07-01 17:35:13.927902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'conference'
+2015-07-01 17:35:13.927902 [NOTICE] switch_loadable_module.c:450 Adding Chat interface 'conf'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'error'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'group'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'user'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'pickup'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:227 Adding Dialplan 'inline'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'blind_transfer_ack'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'bind_digit_action'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'capture'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'clear_digit_action'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'digit_action_set_realm'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'privacy'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_audio_level'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_mute'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'flush_dtmf'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'hold'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'unhold'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'mutex'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'page'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'transfer'
+2015-07-01 17:35:13.929902 [NOTICE] switch_loadable_module.c:269 Adding Application 'check_acl'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'verbose_events'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'novideo'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'cng_plc'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'early_hangup'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'sleep'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'delay_echo'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'strftime'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'phrase'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'eval'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_media_stats'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'stop'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_zombie_exec'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'pre_answer'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'answer'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'wait_for_answer'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'hangup'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_name'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'presence'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'log'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'info'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'event'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'sound_test'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'export'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'bridge_export'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'set'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'multiset'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'push'
+2015-07-01 17:35:13.930902 [NOTICE] switch_loadable_module.c:269 Adding Application 'unshift'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_global'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_profile_var'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'unset'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'multiunset'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'ring_ready'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'remove_bugs'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'break'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'detect_speech'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'play_and_detect_speech'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'ivr'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'redirect'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'video_refresh'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'send_info'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'jitterbuffer'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'send_display'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'respond'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'deflect'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'recovery_refresh'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'queue_dtmf'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'send_dtmf'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'sched_cancel'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'sched_hangup'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'sched_broadcast'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'sched_transfer'
+2015-07-01 17:35:13.931902 [NOTICE] switch_loadable_module.c:269 Adding Application 'execute_extension'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'sched_heartbeat'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'enable_heartbeat'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'enable_keepalive'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'media_reset'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'mkdir'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'rename'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'soft_hold'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'bind_meta_app'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'unbind_meta_app'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'block_dtmf'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'unblock_dtmf'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'intercept'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'eavesdrop'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'three_way'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'set_user'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'stop_dtmf'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'start_dtmf'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'stop_dtmf_generate'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'start_dtmf_generate'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'stop_tone_detect'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'fax_detect'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'tone_detect'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'echo'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'park'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'park_state'
+2015-07-01 17:35:13.932902 [NOTICE] switch_loadable_module.c:269 Adding Application 'gentones'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'playback'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'endless_playback'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'loop_playback'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'att_xfer'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'read'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'play_and_get_digits'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'stop_record_session'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'record_session'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'record_session_mask'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'record_session_unmask'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'record'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'preprocess'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'stop_displace_session'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'displace_session'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'speak'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'clear_speech_cache'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'bridge'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'system'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'bgsystem'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'say'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'wait_for_silence'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'session_loglevel'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'limit'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'limit_hash'
+2015-07-01 17:35:13.933902 [NOTICE] switch_loadable_module.c:269 Adding Application 'limit_execute'
+2015-07-01 17:35:13.934902 [NOTICE] switch_loadable_module.c:269 Adding Application 'limit_hash_execute'
+2015-07-01 17:35:13.934902 [NOTICE] switch_loadable_module.c:269 Adding Application 'pickup'
+2015-07-01 17:35:13.934902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'strepoch'
+2015-07-01 17:35:13.934902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'page'
+2015-07-01 17:35:13.934902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'strmicroepoch'
+2015-07-01 17:35:13.934902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'chat'
+2015-07-01 17:35:13.934902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'strftime'
+2015-07-01 17:35:13.934902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'presence'
+2015-07-01 17:35:13.934902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'file_string'
+2015-07-01 17:35:13.934902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'file'
+2015-07-01 17:35:13.934902 [NOTICE] switch_loadable_module.c:450 Adding Chat interface 'event'
+2015-07-01 17:35:13.934902 [NOTICE] switch_loadable_module.c:450 Adding Chat interface 'api'
+2015-07-01 17:35:13.935902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'expr'
+2015-07-01 17:35:13.935902 [NOTICE] switch_loadable_module.c:227 Adding Dialplan 'XML'
+2015-07-01 17:35:13.936902 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'SIP'
+2015-07-01 17:35:13.936902 [NOTICE] switch_loadable_module.c:149 Adding Endpoint 'IAX2'
+2015-07-01 17:35:13.936902 [NOTICE] switch_loadable_module.c:227 Adding Dialplan 'asterisk'
+2015-07-01 17:35:13.936902 [NOTICE] switch_loadable_module.c:269 Adding Application 'Dial'
+2015-07-01 17:35:13.936902 [NOTICE] switch_loadable_module.c:269 Adding Application 'Goto'
+2015-07-01 17:35:13.936902 [NOTICE] switch_loadable_module.c:269 Adding Application 'AvoidingDeadlock'
+2015-07-01 17:35:13.937902 [NOTICE] switch_loadable_module.c:192 Adding Codec G723 4 G.723.1 6.3k 8000hz 120ms 6300bps
+2015-07-01 17:35:13.937902 [NOTICE] switch_loadable_module.c:192 Adding Codec G723 4 G.723.1 6.3k 8000hz 90ms 6300bps
+2015-07-01 17:35:13.937902 [NOTICE] switch_loadable_module.c:192 Adding Codec G723 4 G.723.1 6.3k 8000hz 60ms 6300bps
+2015-07-01 17:35:13.937902 [NOTICE] switch_loadable_module.c:192 Adding Codec G723 4 G.723.1 6.3k 8000hz 30ms 6300bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 10ms 8000bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 20ms 8000bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 30ms 8000bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 40ms 8000bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 50ms 8000bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 60ms 8000bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 70ms 8000bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 80ms 8000bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 90ms 8000bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 100ms 8000bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 110ms 8000bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec G729 18 G.729 8000hz 120ms 8000bps
+2015-07-01 17:35:13.938902 [NOTICE] switch_loadable_module.c:192 Adding Codec AMR 96 AMR 8000hz 20ms 12200bps
+2015-07-01 17:35:13.939902 [NOTICE] switch_loadable_module.c:192 Adding Codec iLBC 97 iLBC 8000hz 30ms 13330bps
+2015-07-01 17:35:13.939902 [NOTICE] switch_loadable_module.c:192 Adding Codec iLBC 98 iLBC 8000hz 20ms 15200bps
+2015-07-01 17:35:13.939902 [CRIT] switch_loadable_module.c:1447 Error Loading module C:/tl-server/plugins/freeswitch/native/win-32/mod/mod_speex.dll
+**dll open error [126l]
+**
+2015-07-01 17:35:13.940902 [NOTICE] switch_loadable_module.c:198 Adding Codec H264 97 H.264 Video (passthru) 90000hz 0ms (VBR)
+2015-07-01 17:35:13.940902 [NOTICE] switch_loadable_module.c:198 Adding Codec H263 34 H.263 Video (passthru) 90000hz 0ms (VBR)
+2015-07-01 17:35:13.940902 [NOTICE] switch_loadable_module.c:198 Adding Codec H263-1998 115 H.263+ Video (passthru) 90000hz 0ms (VBR)
+2015-07-01 17:35:13.940902 [NOTICE] switch_loadable_module.c:198 Adding Codec H263-2000 121 H.263++ Video (passthru) 90000hz 0ms (VBR)
+2015-07-01 17:35:13.940902 [NOTICE] switch_loadable_module.c:198 Adding Codec H261 31 H.261 Video (passthru) 90000hz 0ms (VBR)
+2015-07-01 17:35:13.941902 [INFO] mod_siren.c:155 Audio coding: ITU-T Rec. G.722.1, licensed from Polycom(R)
+2015-07-01 17:35:13.941902 [INFO] mod_siren.c:156 Audio coding: ITU-T Rec. G.722.1 Annex C, licensed from Polycom(R)
+2015-07-01 17:35:13.941902 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 115 Polycom(R) G722.1/G722.1C 32000hz 20ms 48000bps
+2015-07-01 17:35:13.941902 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 115 Polycom(R) G722.1/G722.1C 32000hz 40ms 48000bps
+2015-07-01 17:35:13.941902 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 115 Polycom(R) G722.1/G722.1C 32000hz 60ms 48000bps
+2015-07-01 17:35:13.941902 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 107 Polycom(R) G722.1/G722.1C 16000hz 20ms 32000bps
+2015-07-01 17:35:13.941902 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 107 Polycom(R) G722.1/G722.1C 16000hz 40ms 32000bps
+2015-07-01 17:35:13.941902 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 107 Polycom(R) G722.1/G722.1C 16000hz 60ms 32000bps
+2015-07-01 17:35:13.941902 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 107 Polycom(R) G722.1/G722.1C 16000hz 20ms 24000bps
+2015-07-01 17:35:13.941902 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 107 Polycom(R) G722.1/G722.1C 16000hz 40ms 24000bps
+2015-07-01 17:35:13.941902 [NOTICE] switch_loadable_module.c:192 Adding Codec G7221 107 Polycom(R) G722.1/G722.1C 16000hz 60ms 24000bps
+2015-07-01 17:35:13.942902 [INFO] mod_sndfile.c:367 
+LibSndFile Version : libsndfile-1.0.26pre5 Supported Formats
+================================================================================
+AIFF (Apple/SGI)  (extension "aiff")
+AU (Sun/NeXT)  (extension "au")
+AVR (Audio Visual Research)  (extension "avr")
+CAF (Apple Core Audio File)  (extension "caf")
+HTK (HMM Tool Kit)  (extension "htk")
+IFF (Amiga IFF/SVX8/SV16)  (extension "iff")
+MAT4 (GNU Octave 2.0 / Matlab 4.2)  (extension "mat")
+MAT5 (GNU Octave 2.1 / Matlab 5.0)  (extension "mat")
+MPC (Akai MPC 2k)  (extension "mpc")
+PAF (Ensoniq PARIS)  (extension "paf")
+PVF (Portable Voice Format)  (extension "pvf")
+RAW (header-less)  (extension "raw")
+RF64 (RIFF 64)  (extension "rf64")
+SD2 (Sound Designer II)  (extension "sd2")
+SDS (Midi Sample Dump Standard)  (extension "sds")
+SF (Berkeley/IRCAM/CARL)  (extension "sf")
+VOC (Creative Labs)  (extension "voc")
+W64 (SoundFoundry WAVE 64)  (extension "w64")
+WAV (Microsoft)  (extension "wav")
+WAV (NIST Sphere)  (extension "wav")
+WAVEX (Microsoft)  (extension "wav")
+WVE (Psion Series 3)  (extension "wve")
+XI (FastTracker 2)  (extension "xi")
+================================================================================
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'aiff'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'au'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'avr'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'caf'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'htk'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'iff'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'mat'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'mpc'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'paf'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'pvf'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'raw'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'rf64'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'sd2'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'sds'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'sf'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'voc'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'w64'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'wav'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'wve'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'xi'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'r8'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'r16'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'r24'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'r32'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'gsm'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'ul'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'ulaw'
+2015-07-01 17:35:13.943902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'al'
+2015-07-01 17:35:13.944902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'alaw'
+2015-07-01 17:35:13.944902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'adpcm'
+2015-07-01 17:35:13.944902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'vox'
+2015-07-01 17:35:13.944902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'PCMU'
+2015-07-01 17:35:13.944902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'iLBC'
+2015-07-01 17:35:13.944902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'G7221'
+2015-07-01 17:35:13.944902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'SPEEX'
+2015-07-01 17:35:13.944902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'L16'
+2015-07-01 17:35:13.944902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'PCMA'
+2015-07-01 17:35:13.945902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'PROXY'
+2015-07-01 17:35:13.945902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'G729'
+2015-07-01 17:35:13.945902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'AMR'
+2015-07-01 17:35:13.945902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'H263-2000'
+2015-07-01 17:35:13.945902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'PROXY-VID'
+2015-07-01 17:35:13.945902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'G723'
+2015-07-01 17:35:13.945902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'H263-1998'
+2015-07-01 17:35:13.945902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'H261'
+2015-07-01 17:35:13.945902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'H263'
+2015-07-01 17:35:13.945902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'H264'
+2015-07-01 17:35:14.430902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'hup_local_stream'
+2015-07-01 17:35:14.430902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'reload_local_stream'
+2015-07-01 17:35:14.430902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'stop_local_stream'
+2015-07-01 17:35:14.430902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'start_local_stream'
+2015-07-01 17:35:14.430902 [NOTICE] switch_loadable_module.c:315 Adding API Function 'show_local_stream'
+2015-07-01 17:35:14.430902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'local_stream'
+2015-07-01 17:35:14.431902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'tone_stream'
+2015-07-01 17:35:14.431902 [NOTICE] switch_loadable_module.c:365 Adding File Format 'silence_stream'
+2015-07-01 17:35:14.431902 [CRIT] switch_loadable_module.c:1447 Error Loading module C:/tl-server/plugins/freeswitch/native/win-32/mod/mod_file_string.dll
+**dll open error [126l]
+**
+2015-07-01 17:35:14.431902 [CRIT] switch_loadable_module.c:1447 Error Loading module C:/tl-server/plugins/freeswitch/native/win-32/mod/mod_spidermonkey.dll
+**dll open error [126l]
+**
+2015-07-01 17:35:14.432902 [NOTICE] switch_loadable_module.c:471 Adding Say interface 'en'
+2015-07-01 17:35:14.433902 [NOTICE] switch_loadable_module.c:471 Adding Say interface 'ru'
+2015-07-01 17:35:14.434902 [DEBUG] mod_event_socket.c:2883 Socket up listening on 127.0.0.1:8021
+2015-07-01 17:35:14.434902 [INFO] switch_time.c:607 Clock synchronized to system time.
+2015-07-01 17:35:14.434902 [NOTICE] switch_core.c:1315 Created ip list rfc6598.auto default (deny)
+2015-07-01 17:35:14.434902 [NOTICE] switch_utils.c:325 Adding 100.64.0.0/10 (allow) [] to list rfc6598.auto
+2015-07-01 17:35:14.434902 [NOTICE] switch_core.c:1321 Created ip list rfc1918.auto default (deny)
+2015-07-01 17:35:14.434902 [NOTICE] switch_utils.c:325 Adding 10.0.0.0/8 (allow) [] to list rfc1918.auto
+2015-07-01 17:35:14.434902 [NOTICE] switch_utils.c:325 Adding 172.16.0.0/12 (allow) [] to list rfc1918.auto
+2015-07-01 17:35:14.434902 [NOTICE] switch_utils.c:325 Adding 192.168.0.0/16 (allow) [] to list rfc1918.auto
+2015-07-01 17:35:14.434902 [NOTICE] switch_core.c:1329 Created ip list wan.auto default (allow)
+2015-07-01 17:35:14.434902 [NOTICE] switch_utils.c:325 Adding 0.0.0.0/8 (deny) [] to list wan.auto
+2015-07-01 17:35:14.434902 [NOTICE] switch_utils.c:325 Adding 10.0.0.0/8 (deny) [] to list wan.auto
+2015-07-01 17:35:14.434902 [NOTICE] switch_utils.c:325 Adding 172.16.0.0/12 (deny) [] to list wan.auto
+2015-07-01 17:35:14.434902 [NOTICE] switch_utils.c:325 Adding 192.168.0.0/16 (deny) [] to list wan.auto
+2015-07-01 17:35:14.435902 [NOTICE] switch_utils.c:325 Adding 169.254.0.0/16 (deny) [] to list wan.auto
+2015-07-01 17:35:14.435902 [NOTICE] switch_core.c:1339 Created ip list nat.auto default (deny)
+2015-07-01 17:35:14.435902 [NOTICE] switch_core.c:1341 Adding 10.55.134.253/255.255.255.0 (deny) to list nat.auto
+2015-07-01 17:35:14.435902 [NOTICE] switch_utils.c:325 Adding 10.0.0.0/8 (allow) [] to list nat.auto
+2015-07-01 17:35:14.435902 [NOTICE] switch_utils.c:325 Adding 172.16.0.0/12 (allow) [] to list nat.auto
+2015-07-01 17:35:14.435902 [NOTICE] switch_utils.c:325 Adding 192.168.0.0/16 (allow) [] to list nat.auto
+2015-07-01 17:35:14.435902 [NOTICE] switch_utils.c:325 Adding 100.64.0.0/10 (allow) [] to list nat.auto
+2015-07-01 17:35:14.435902 [NOTICE] switch_core.c:1351 Created ip list loopback.auto default (deny)
+2015-07-01 17:35:14.435902 [NOTICE] switch_utils.c:325 Adding 127.0.0.0/8 (allow) [] to list loopback.auto
+2015-07-01 17:35:14.435902 [NOTICE] switch_core.c:1357 Created ip list localnet.auto default (deny)
+2015-07-01 17:35:14.435902 [NOTICE] switch_core.c:1360 Adding 10.55.134.253/255.255.255.0 (allow) to list localnet.auto
+2015-07-01 17:35:14.435902 [ERR] switch_utils.c:299 Error Adding 127.0.0.1/255 (allow) [] to list localhost
+2015-07-01 17:35:14.435902 [ERR] switch_core.c:1462 Error Adding 127.0.0.1/255 (allow) to list localhost
+2015-07-01 17:35:14.435902 [NOTICE] switch_utils.c:325 Adding 192.168.42.0/24 (deny) [] to list lan
+2015-07-01 17:35:14.435902 [NOTICE] switch_core.c:1460 Adding 192.168.42.0/24 (deny) to list lan
+2015-07-01 17:35:14.435902 [NOTICE] switch_utils.c:325 Adding 192.168.42.42/32 (allow) [] to list lan
+2015-07-01 17:35:14.435902 [NOTICE] switch_core.c:1460 Adding 192.168.42.42/32 (allow) to list lan
+2015-07-01 17:35:14.436902 [DEBUG] switch_loadable_module.c:702 Chat Thread Started
+2015-07-01 17:35:14.436902 [INFO] switch_core.c:2240 
+FreeSWITCH Version 1.5.15b~32bit ( 32bit)
+
+FreeSWITCH Started
+Max Sessions [1000]
+Session Rate [30]
+SQL [Enabled]
+2015-07-01 17:35:14.436902 [DEBUG] switch_loadable_module.c:702 Chat Thread Started

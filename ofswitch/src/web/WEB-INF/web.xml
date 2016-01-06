@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+<!--
+Automatically created by Apache Tomcat JspC.
+-->
+<web-app>
+
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dcalls_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dcalls_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dclear_002dcall_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dclear_002dcall_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dconferences_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dconferences_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002doverview_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002doverview_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dregistrations_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dregistrations_jsp</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dcalls_jsp</servlet-name>
+        <url-pattern>/freeswitch-calls.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dclear_002dcall_jsp</servlet-name>
+        <url-pattern>/freeswitch-clear-call.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dconferences_jsp</servlet-name>
+        <url-pattern>/freeswitch-conferences.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002doverview_jsp</servlet-name>
+        <url-pattern>/freeswitch-overview.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dregistrations_jsp</servlet-name>
+        <url-pattern>/freeswitch-registrations.jsp</url-pattern>
+    </servlet-mapping>
+
+</web-app>
+

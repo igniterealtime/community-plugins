@@ -40,7 +40,7 @@ $social_icons = array(
 
 
 function optionsframework_options() {
-     global $social_icons,$sidebars ;
+     global $social_icons,$sidebars;
 	 
 	 $os_fonts        = onetone_options_typography_get_os_fonts();
     $os_fonts        = array_merge(array('' => __( '-- Default --', 'onetone' ) ), $os_fonts);
@@ -2083,7 +2083,6 @@ $options[] =  array(
 		'std' => '<h2>WHOOPS!</h2>
                         <p>THERE IS NOTHING HERE.<br>PERHAPS YOU WERE GIVEN THE WRONG URL?</p>',
 		'type' => 'editor');
-		
 		
 		
 	return $options;

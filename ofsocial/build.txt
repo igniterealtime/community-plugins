@@ -1,0 +1,45 @@
+Buildfile: C:\Projects\ignite\community-plugins\ofsocial\build.xml
+
+clean:
+   [delete] Deleting: C:\Projects\ignite\community-plugins\ofsocial\lib\plugin-ofsocial-jspc.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins\ofsocial\lib\plugin-ofsocial.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins\openfire_4_0_0\target\openfire\plugins\ofsocial.jar
+
+init:
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofsocial\build\classes
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofsocial\build\jar
+
+compile:
+    [javac] C:\Projects\ignite\community-plugins\ofsocial\build.xml:29: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 7 source files to C:\Projects\ignite\community-plugins\ofsocial\build\classes
+    [javac] Note: C:\Projects\ignite\community-plugins\ofsocial\src\java\org\jivesoftware\openfire\plugin\ofsocial\PHP2Java.java uses or overrides a deprecated API.
+    [javac] Note: Recompile with -Xlint:deprecation for details.
+
+lib:
+      [jar] Building jar: C:\Projects\ignite\community-plugins\ofsocial\lib\plugin-ofsocial.jar
+
+compile-jsps:
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofsocial\build\jspc\java
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofsocial\build\jspc\classes
+     [java] SLF4J: Class path contains multiple SLF4J bindings.
+     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins/openfire_4_0_0/target/openfire/lib/slf4j-log4j12.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins/openfire_4_0_0/build/lib/ant/slf4j-simple.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+     [java] SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+     [java] SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+     [java] log4j:WARN No appenders could be found for logger (org.eclipse.jetty.util.log).
+     [java] log4j:WARN Please initialize the log4j system properly.
+    [javac] C:\Projects\ignite\community-plugins\ofsocial\build.xml:60: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 1 source file to C:\Projects\ignite\community-plugins\ofsocial\build\jspc\classes
+      [jar] Building jar: C:\Projects\ignite\community-plugins\ofsocial\lib\plugin-ofsocial-jspc.jar
+     [copy] Copying 1 file to C:\Projects\ignite\community-plugins\ofsocial\src\web\WEB-INF
+
+jar:
+     [copy] Copying 4203 files to C:\Projects\ignite\community-plugins\ofsocial\build\jar
+     [copy] Copied 642 empty directories to 14 empty directories under C:\Projects\ignite\community-plugins\ofsocial\build\jar
+     [copy] Copying 6 files to C:\Projects\ignite\community-plugins\ofsocial\build\jar\lib
+     [copy] Copying 12 files to C:\Projects\ignite\community-plugins\ofsocial\build\jar
+      [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_0\target\openfire\plugins\ofsocial.jar
+   [delete] Deleting directory C:\Projects\ignite\community-plugins\ofsocial\build
+
+BUILD SUCCESSFUL
+Total time: 3 minutes 3 seconds

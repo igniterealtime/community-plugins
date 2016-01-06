@@ -2,6 +2,14 @@
 
 == CHANGE LOG == 
 
+= Version 1.5.9 =
+* Display default header menu
+
+= Version 1.5.8 =
+* Removed Favicon option
+* Fixed slider issue
+* Fixed theme options panel issue
+
 = Version 1.5.7 =
 * Fixed menu scrolling issue 
 * Fixed retina logo issue

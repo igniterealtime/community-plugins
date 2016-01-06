@@ -34,6 +34,8 @@ function onetone_setup(){
 	add_editor_style("editor-style.css");
 	if ( ! isset( $content_width ) ) $content_width = 1120;
 	
+	 
+	
 }
 
 add_action( 'after_setup_theme', 'onetone_setup' );

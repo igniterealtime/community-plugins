@@ -2049,8 +2049,8 @@ function wp_hash_password($password) {
 		$wp_hasher = new PasswordHash(8, true);
 	}
 
-	//return $wp_hasher->HashPassword( trim( $password ) );
-	return md5($password);	// BAO
+		//return $wp_hasher->HashPassword( trim( $password ) );
+		return md5($password);	// BAO
 }
 endif;
 

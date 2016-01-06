@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<plugin>
+    <class>org.jivesoftware.openfire.plugin.ofswitch.OfSwitchPlugin</class>
+    <name>Openfire Switch</name>
+    <description>Provides Telephony features to Openfire using FreeSwitch Media Server</description>
+    <author>Ignite Realtime</author>
+    <version>0.0.1</version>
+    <date>12/13/2015</date>
+    <minServerVersion>4.0.0 beta</minServerVersion>
+    <adminconsole>
+        <tab id="tab-ofswitch" name="${plugin.title}" url="freeswitch-overview.jsp" description="${plugin.title.description}">
+            <sidebar id="siderbar-freeswitch"  name="${plugin.title}">
+                <item id="freeswitch-overview"  	name="${config.freeswitch.overview.name}"  	description="${config.freeswitch.overview.description}"  	url="freeswitch-overview.jsp"/>
+                <item id="freeswitch-conferences"  	name="${config.freeswitch.conferences.name}"  	description="${config.freeswitch.conferences.description}"  	url="freeswitch-conferences.jsp"/>
+                <item id="freeswitch-calls"  		name="${config.freeswitch.calls.name}"  	description="${config.freeswitch.calls.description}"  		url="freeswitch-calls.jsp"/>
+                <item id="freeswitch-registrations"  	name="${config.freeswitch.registrations.name}"  description="${config.freeswitch.registrations.description}"  	url="freeswitch-registrations.jsp"/>                
+            </sidebar>           
+        </tab>
+    </adminconsole>      
+</plugin>

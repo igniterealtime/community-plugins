@@ -95,6 +95,8 @@
 			<fileset dir="${ofmeet.dir}/build/jar">				
 			</fileset>			
 		</jar>
+		
+                <delete dir="${ofmeet.dir}/build"/>	 		
 			              
 	</target>
 </project>

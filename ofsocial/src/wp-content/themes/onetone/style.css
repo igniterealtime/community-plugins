@@ -2,7 +2,7 @@
 Theme Name: Onetone
 Theme URI: http://www.mageewp.com/onetone-theme.html
 Description: Onetone is a one-page business theme based on Bootstrap framework and coded with HTML5/CSS3. All required information are displayed on a single page with clear order according to users' preferences. The basic sections designed for business purpose have already been built for you, such as services, about, gallery, clients, etc. There's also an extensive admin panel where unlimited sections can be easily added. Multiple options are available if you prefer to do some adjustments, such as changing background, parallax scrolling background, video background, Font Awesome Icons, uploading logo and  favicon,adding custom CSS and so on. The theme is also responsive, clean, and SEO optimized. Please note that with our updation, interface of your blog can grow up with futher more diversities.
-Version: 1.5.7
+Version: 1.5.9
 Author: MageeWP
 Author URI: http://www.mageewp.com
 License: GNU General Public License
@@ -2518,4 +2518,87 @@ section.section{
 .format-aside .entry-content p {
 	margin: 0; 
 	text-align:center;
+}
+
+#onetone-owl-slider .owl-item .inner {
+    position: absolute;
+    top: 0;
+}
+
+#onetone-owl-slider .owl-item .item > img {
+    width:100%;
+}
+
+/** slider**/
+
+	section.homepage-slider .inner {
+		padding: 100px 50px 10px;
+		width:100%;
+		position:absolute;
+	    top:0;
+	    text-align:center;
+	    margin:auto;
+		color:#fff;
+	}
+
+	section.homepage-slider h1, section.homepage-slider h2 {
+		font-size: 40px;
+		line-height: 52px;
+		color: #fff;
+	}
+
+	section.homepage-slider .btn {
+		display: inline-block;
+		margin: 25px 0 0;
+		padding: 9px 22px 7px;
+		clear: both;
+
+		color: #fff;
+		font-size: 12px;
+		font-weight: bold;
+		text-transform: uppercase;
+		text-decoration: none;
+
+		border: 2px solid rgba(255,255,255,.4);
+		border-radius: 5px;
+	}
+		section.homepage-slider .btn:hover {
+			background: rgba(255,255,255,.05);
+		}
+		section.homepage-slider .btn:active {
+			-webkit-filter: drop-shadow(0 -1px 2px rgba(0,0,0,.5));
+			-moz-filter: drop-shadow(0 -1px 2px rgba(0,0,0,.5));
+			-ms-filter: drop-shadow(0 -1px 2px rgba(0,0,0,.5));
+			-o-filter: drop-shadow(0 -1px 2px rgba(0,0,0,.5));
+			filter: drop-shadow(0 -1px 2px rgba(0,0,0,.5));
+		}
+
+	section.homepage-slider .btn, section.homepage-slider .dot {
+		-webkit-filter: drop-shadow(0 1px 2px rgba(0,0,0,.3));
+		-moz-filter: drop-shadow(0 1px 2px rgba(0,0,0,.3));
+		-ms-filter: drop-shadow(0 1px 2px rgba(0,0,0,.3));
+		-o-filter: drop-shadow(0 1px 2px rgba(0,0,0,.3));
+		filter: drop-shadow(0 1px 2px rgba(0,0,0,.3));
+	}
+
+		
+@media only screen and (min-device-width: 320px) and (max-device-width: 480px), (max-width: 900px) {
+
+	section.homepage-slider h1, section.homepage-slider h2 {
+		font-size: 24px;
+		line-height: 30px;
+		margin-bottom:20px;
+	}
+	section.homepage-slider .inner {
+		padding-top: 40px;
+		padding-bottom: 20px;
+	}
+	section.homepage-slider p {
+		font-size: 15px;
+		width: 80%;
+		margin: 0 auto;
+	}
+	.owl-controls{
+	display:none !important;
+	}
 }

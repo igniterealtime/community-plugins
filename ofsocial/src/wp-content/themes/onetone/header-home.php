@@ -105,21 +105,41 @@
                         </button>
                         <nav class="site-nav" role="navigation">
                             <?php
-
+							$output = array();
+                        if ( function_exists( 'optionsframework_options' ) ) {
+					       $options = optionsframework_options();
+						   $options = apply_filters( 'of_options', $options );
+								  $config  =  $options;
+								  foreach ( (array) $config as $option ) {
+									  if ( ! isset( $option['id'] ) ) {
+										  continue;
+									  }
+									  if ( ! isset( $option['std'] ) ) {
+										  continue;
+									  }
+									  if ( ! isset( $option['type'] ) ) {
+										  continue;
+									  }
+										  $output[$option['id']] = apply_filters( 'of_sanitize_' . $option['type'], $option['std'], $option );
+										  
+								  }
+				            }
+							$default_options = $output;
+						
 							 $onepage_menu = '';
-							 $section_num = onetone_option( 'section_num' ); 
+							 $section_num = onetone_option( 'section_num',isset($default_options['section_num'])?$default_options['section_num']:9); 
 							 if(isset($section_num) && is_numeric($section_num ) && $section_num >0):
 							 for( $i = 0; $i < $section_num ;$i++){
 							
-							 $section_menu = onetone_option( 'menu_title_'.$i );
-							 $section_slug = onetone_option( 'menu_slug_'.$i );
+							 $section_menu = onetone_option( 'menu_title_'.$i ,isset($default_options['menu_title_'.$i])?$default_options['menu_title_'.$i]:'');
+							 $section_slug = onetone_option( 'menu_slug_'.$i,isset($default_options['menu_slug_'.$i])?$default_options['menu_slug_'.$i]:'' );
 							  if( $section_slug )
 							  $section_slug =  sanitize_title($section_slug );
 							
 							 if(isset($section_menu) && $section_menu !=""){
 							 $sanitize_title = 'section-'.($i+1);
 							 
-							 $section_menu = onetone_option( 'menu_title_'.$i );
+							 $section_menu = onetone_option( 'menu_title_'.$i,isset($default_options['menu_title_'.$i])?$default_options['menu_title_'.$i]:'' );
 							 if(trim($section_slug) !=""){
 								 $sanitize_title = $section_slug; 
 								 }
