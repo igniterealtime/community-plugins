@@ -2,9 +2,10 @@ sudo: false
 language: java
 jdk:
   - oraclejdk8
-
+env:
+  - ENVTARGET=ofmeet
+  - ENVTARGET=ofsocial
+  - ENVTARGET=ofswitch
 script: 
-  - ant -f ofmeet/build.xml jar
-  - ant -f ofsocial/build.xml jar  
-  - ant -f ofswitch/build.xml jar    
+  - ant -f $ENVTARGET/build.xml jar
 
