@@ -46,4 +46,4 @@ jar:
    [delete] Deleting directory C:\Projects\ignite\community-plugins\ofswitch\build
 
 BUILD SUCCESSFUL
-Total time: 1 minute 10 seconds
+Total time: 4 minutes 19 seconds

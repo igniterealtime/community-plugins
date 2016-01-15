@@ -47,7 +47,7 @@ In order to use this feature, you will need:
 
 *   Registered Openfire users with valid email address,
 *   A persistent MUC room to host each planned meeting
-*   The Openfire ClientControl plugin installed to create a room bookmark that links the room to users or user groups. Bookmarks with all users selected are ignored.
+*   The Openfire bookmarks plugin installed to create a room bookmark that links the room to users or user groups. Bookmarks with all users selected are ignored.
     [![Image6.jpg](https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1762-66501/375-210/Image6.jpg)](https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1762-66501/Image6.jpg)
 *   The Openfire Email Service configured to deliver emails
     [![Image4.jpg](https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1762-66500/Image4.jpg)](https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1762-66500/Image4.jpg)

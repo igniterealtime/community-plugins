@@ -340,21 +340,28 @@ Strophe.addConnectionPlugin('emuc', {
 		// Too early to send presence - not initialized
 		return;
 	}
+	
+	// BAO handle jabber.org different from jitsi extensions
+	// OF does not pass on jitsi extensions inside <x>
+
+        if (this.presMap['password']) {
+        	var presx = $pres({to: this.presMap['to'] });
+        	presx.c('x', {xmlns: 'http://jabber.org/protocol/muc'});        
+            	presx.c('password').t(this.presMap['password']).up();
+            	
+		// Send XEP-0115 'c' stanza that contains our capabilities info
+		if (connection.caps) {
+		    connection.caps.node = config.clientNode;
+		    presx.c('c', connection.caps.generateCapsAttrs()).up();
+		}   
+		
+            	connection.send(presx); 
+            	this.presMap['password'] = null;
+            	return;
+        }	
 
         var pres = $pres({to: this.presMap['to'] });
         pres.c('x', {xmlns: this.presMap['xns']});
-
-        if (this.presMap['password']) {
-            pres.c('password').t(this.presMap['password']).up();
-        }
-
-        //pres.up();	// BAO made child elements of <x>
-
-        // Send XEP-0115 'c' stanza that contains our capabilities info
-        if (connection.caps) {
-            connection.caps.node = config.clientNode;
-            pres.c('c', connection.caps.generateCapsAttrs()).up();
-        }
 
         pres.c('user-agent', {xmlns: 'http://jitsi.org/jitmeet/user-agent'})
             .t(navigator.userAgent).up();

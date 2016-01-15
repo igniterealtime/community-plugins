@@ -42,4 +42,4 @@ jar:
    [delete] Deleting directory C:\Projects\ignite\community-plugins\ofsocial\build
 
 BUILD SUCCESSFUL
-Total time: 3 minutes 3 seconds
+Total time: 5 minutes 30 seconds

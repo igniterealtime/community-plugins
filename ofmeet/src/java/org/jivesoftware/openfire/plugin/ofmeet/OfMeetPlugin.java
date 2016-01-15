@@ -370,39 +370,43 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 
 				for(int i = 0; i < calendar.length(); i++)
 				{
-					JSONObject meeting = calendar.getJSONObject(i);
+					try {
+						JSONObject meeting = calendar.getJSONObject(i);
 
-					boolean processed = meeting.getBoolean("processed");
-					long startLong = meeting.getLong("startTime");
+						boolean processed = meeting.getBoolean("processed");
+						long startLong = meeting.getLong("startTime");
 
-					Date rightNow = new Date(System.currentTimeMillis());
-					Date actionDate = new Date(startLong + 300000);
-					Date warnDate = new Date(startLong - 960000);
+						Date rightNow = new Date(System.currentTimeMillis());
+						Date actionDate = new Date(startLong + 300000);
+						Date warnDate = new Date(startLong - 960000);
 
-					Log.debug("OfMeet Plugin - scanning meeting now " + rightNow + " action " + actionDate + " warn " + warnDate + "\n" + meeting );
+						Log.debug("OfMeet Plugin - scanning meeting now " + rightNow + " action " + actionDate + " warn " + warnDate + "\n" + meeting );
 
-					if(rightNow.after(warnDate) && rightNow.before(actionDate))
-					{
-						for (String user : bookmark.getUsers())
+						if(rightNow.after(warnDate) && rightNow.before(actionDate))
 						{
-							processMeeting(meeting, user, bookmark.getProperty("url"));
+							for (String user : bookmark.getUsers())
+							{
+								processMeeting(meeting, user, bookmark.getProperty("url"));
+							}
+
+							for (String groupName : bookmark.getGroups())
+							{
+								try {
+									Group group = GroupManager.getInstance().getGroup(groupName);
+
+									for (JID memberJID : group.getMembers())
+									{
+										processMeeting(meeting, memberJID.getNode(), bookmark.getProperty("url"));
+									}
+
+								} catch (GroupNotFoundException e) { }
+							}
+
+							meeting.put("processed", true);
+							done = true;
 						}
-
-						for (String groupName : bookmark.getGroups())
-						{
-							try {
-								Group group = GroupManager.getInstance().getGroup(groupName);
-
-								for (JID memberJID : group.getMembers())
-								{
-									processMeeting(meeting, memberJID.getNode(), bookmark.getProperty("url"));
-								}
-
-							} catch (GroupNotFoundException e) { }
-						}
-
-						meeting.put("processed", true);
-						done = true;
+					} catch (Exception e) {
+						Log.error("processMeetingPlanner", e);
 					}
 				}
 

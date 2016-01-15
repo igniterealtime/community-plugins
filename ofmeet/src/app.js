@@ -1015,7 +1015,7 @@ $(document).bind('passwordrequired.muc', function (event, jid) {
 
     messageHandler.openTwoButtonDialog(null,
         '<h2>Password required</h2>' +
-        '<input id="lockKey" type="text" placeholder="password" autofocus>',
+        '<input id="lockKey" type="password" placeholder="password" autofocus>',
         true,
         "Ok",
         function (e, v, m, f) {},

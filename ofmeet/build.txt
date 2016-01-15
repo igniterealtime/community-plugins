@@ -43,4 +43,4 @@ jar:
    [delete] Deleting directory C:\Projects\ignite\community-plugins\ofmeet\build
 
 BUILD SUCCESSFUL
-Total time: 1 minute 51 seconds
+Total time: 1 minute 19 seconds
