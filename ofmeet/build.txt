@@ -3,7 +3,7 @@ Buildfile: C:\Projects\ignite\community-plugins\ofmeet\build.xml
 clean:
    [delete] Deleting: C:\Projects\ignite\community-plugins\ofmeet\lib\plugin-ofmeet-jspc.jar
    [delete] Deleting: C:\Projects\ignite\community-plugins\ofmeet\lib\plugin-ofmeet.jar
-   [delete] Deleting: C:\Projects\ignite\community-plugins\openfire_4_0_0\target\openfire\plugins\ofmeet.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins\openfire_4_0_1\target\openfire\plugins\ofmeet.jar
 
 init:
     [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofmeet\build\classes
@@ -24,8 +24,8 @@ compile-jsps:
     [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofmeet\build\jspc\java
     [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofmeet\build\jspc\classes
      [java] SLF4J: Class path contains multiple SLF4J bindings.
-     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins/openfire_4_0_0/target/openfire/lib/slf4j-log4j12.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins/openfire_4_0_0/build/lib/ant/slf4j-simple.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins/openfire_4_0_1/target/openfire/lib/slf4j-log4j12.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins/openfire_4_0_1/build/lib/ant/slf4j-simple.jar!/org/slf4j/impl/StaticLoggerBinder.class]
      [java] SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
      [java] SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
      [java] log4j:WARN No appenders could be found for logger (org.eclipse.jetty.util.log).
@@ -39,8 +39,8 @@ jar:
      [copy] Copying 3049 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
      [copy] Copying 53 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar\lib
      [copy] Copying 59 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
-      [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_0\target\openfire\plugins\ofmeet.jar
+      [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_1\target\openfire\plugins\ofmeet.jar
    [delete] Deleting directory C:\Projects\ignite\community-plugins\ofmeet\build
 
 BUILD SUCCESSFUL
-Total time: 1 minute 19 seconds
+Total time: 1 minute 8 seconds

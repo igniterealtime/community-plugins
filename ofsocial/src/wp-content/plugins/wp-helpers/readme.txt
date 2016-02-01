@@ -1,9 +1,9 @@
 === WordPress Helpers ===
 Contributors: piklist, p51labs, sbruner
 Tags: Piklist, Admin Bar, AIM, Autosave, Comments, Close Comments, Dashboard Widgets, Emojis, Excerpt, Excerpts, Exif, Featured Image, Feeds, Google Talk, Howdy, HTML Editor, Image, Jabber, Maintenance, Maintenance Mode, Media, Private, Protected, RSS Feeds, Settings, Under Construction, Visual Editor, Widgets, xmlrpc, Yahoo IM
-Tested up to: 4.3
+Tested up to: 4.4
 Requires at least: 4.0
-Stable tag: 1.9.3
+Stable tag: 1.9.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,7 +80,7 @@ http://www.youtube.com/watch?v=ZYSUDvodWxI&hd=1
 
 
 > #### Powered by Piklist
-> WordPress Helpers requires the Piklist framework.   
+> WordPress Helpers requires the Piklist framework.
 > <a href="http://wordpress.org/extend/plugins/piklist/">You can download and install Piklist for free.</a>
 
 == Frequently Asked Questions ==
@@ -102,6 +102,11 @@ Awesome! We're always looking for new ideas. Please submit them on our <a href="
 * Install and activate WordPress Helpers like any other plugin.
 
 == Changelog ==
+
+= 1.9.4 =
+Release Date: January 16, 2016
+
+* FIXED: Works with Piklist v0.9.9.x.
 
 = 1.9.3 =
 Release Date: November 13, 2015
@@ -220,7 +225,7 @@ Release Date: June 30, 2015
 * ENHANCED: Upgraded Piklist Checker to 0.6.0
 
 = 1.5.9 =
-* NEW: Customize your login screen logo and background color. 
+* NEW: Customize your login screen logo and background color.
 * ENHANCED: Better UI for Users > Visitors settings.
 
 = 1.5.8 =

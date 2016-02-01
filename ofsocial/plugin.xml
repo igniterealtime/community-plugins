@@ -7,7 +7,7 @@
     <author>Ignite Realtime</author>
     <version>0.0.2</version>
     <date>01/06/2016</date>
-    <minServerVersion>4.0.0 Beta</minServerVersion>  
+    <minServerVersion>4.0.1</minServerVersion>  
     <adminconsole>
         <tab id="tab-ofsocial" name="${plugin.title}" url="ofsocial-summary.jsp" description="${plugin.description}">
             <sidebar id="siderbar-ofsocial" name="${plugin.title}">

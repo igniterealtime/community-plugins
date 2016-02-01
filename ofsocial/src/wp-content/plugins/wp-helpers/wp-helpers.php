@@ -3,7 +3,7 @@
 Plugin Name: WordPress Helpers
 Plugin URI: http://piklist.com
 Description: Enhanced settings for WordPress. Located under <a href="tools.php?page=piklist_wp_helpers">Tools > Helpers</a>
-Version: 1.9.3
+Version: 1.9.4
 Author: Piklist
 Author URI: http://piklist.com/
 Plugin Type: Piklist
@@ -12,8 +12,8 @@ Domain Path: /languages
 License: GPLv2
 */
 
-/*  
-  Copyright (c) 2012-2015 Piklist, LLC.
+/*
+  Copyright (c) 2012-2016 Piklist, LLC.
   All rights reserved.
 
   This software is distributed under the GNU General Public License, Version 2,
@@ -52,7 +52,7 @@ class Piklist_WordPress_Helpers
   private static $dashboard_widgets = null;
 
   private static $list_table_columns = array();
-  
+
   private static $filter_priority = 9999;
 
   public static function admin_init()
@@ -66,22 +66,22 @@ class Piklist_WordPress_Helpers
     if (is_admin())
     {
       include_once('includes/class-piklist-checker.php');
-   
+
       if (!piklist_checker::check(__FILE__))
       {
         return;
       }
 
-      add_filter('piklist_part_process-settings', array('piklist_wordpress_helpers', 'assign_workflows'),1); 
-      
-      add_filter('piklist_admin_pages', array('piklist_wordpress_helpers', 'admin_pages'));   
+      add_filter('piklist_part_process-settings', array('piklist_wordpress_helpers', 'assign_workflows'),1);
+
+      add_filter('piklist_admin_pages', array('piklist_wordpress_helpers', 'admin_pages'));
     }
-    
+
     self::helpers();
   }
 
-  public static function admin_pages($pages) 
-  {    
+  public static function admin_pages($pages)
+  {
     $pages[] = array(
       'page_title' => 'WordPress Helpers'
       ,'menu_title' =>  'Helpers'
@@ -89,12 +89,12 @@ class Piklist_WordPress_Helpers
       ,'capability' => 'manage_options'
       ,'menu_slug' => 'piklist_wp_helpers'
       ,'setting' => 'piklist_wp_helpers'
-      ,'icon_url' => plugins_url('piklist/parts/img/piklist-icon.png') 
+      ,'icon_url' => plugins_url('piklist/parts/img/piklist-icon.png')
       ,'icon' => 'piklist-page'
       ,'single_line' => false
       ,'default_tab' => 'General'
     );
- 
+
     return $pages;
   }
 
@@ -106,7 +106,7 @@ class Piklist_WordPress_Helpers
       ,'sub_menu' => 'tools.php'
       ,'capability' => 'manage_options'
       ,'menu_slug' => 'piklist_wp_helpers_system_information'
-      ,'icon_url' => plugins_url('piklist/parts/img/piklist-icon.png') 
+      ,'icon_url' => plugins_url('piklist/parts/img/piklist-icon.png')
       ,'icon' => 'piklist-page'
     );
 
@@ -140,14 +140,14 @@ class Piklist_WordPress_Helpers
     return $_part;
   }
 
-  public static function helpers() 
+  public static function helpers()
   {
     if (self::$options = get_option('piklist_wp_helpers'))
     {
       foreach (self::$options as $option => $value)
       {
         $value = (is_array($value)) && (count($value) == 1) && (array_key_exists('0', $value)) ? $value[0] : $value;
-        
+
         if ($value == 'true')
         {
           switch ($option)
@@ -155,13 +155,13 @@ class Piklist_WordPress_Helpers
             case 'shortcodes_in_widgets':
               add_filter('widget_text', 'do_shortcode', self::$filter_priority);
             break;
-          
+
             case 'private_title_format':
-              add_filter('private_title_format', array('piklist_wordpress_helpers', 'title_format'), self::$filter_priority);  
+              add_filter('private_title_format', array('piklist_wordpress_helpers', 'title_format'), self::$filter_priority);
             break;
 
             case 'protected_title_format':
-              add_filter('protected_title_format', array('piklist_wordpress_helpers', 'title_format'), self::$filter_priority);                
+              add_filter('protected_title_format', array('piklist_wordpress_helpers', 'title_format'), self::$filter_priority);
             break;
 
             case 'disable_autosave':
@@ -189,16 +189,19 @@ class Piklist_WordPress_Helpers
               add_action('init', array('piklist_wordpress_helpers', 'remove_post_excerpt_box'), self::$filter_priority);
               add_filter('piklist_add_part', array('piklist_wordpress_helpers', 'replace_post_excerpt_box'), self::$filter_priority, 2); // Piklist v0.9.4.x
               add_filter('piklist_part_add', array('piklist_wordpress_helpers', 'replace_post_excerpt_box'), self::$filter_priority, 2); // Piklist v0.9.5.x
+              add_filter('piklist_part_process_callback', array('piklist_wordpress_helpers', 'replace_post_excerpt_box'), self::$filter_priority, 2); // Piklist v0.9.9.x
             break;
 
             case 'show_additional_image_sizes' :
               add_filter('piklist_add_part', array('piklist_wordpress_helpers', 'show_additional_image_sizes'), self::$filter_priority, 2); // Piklist v0.9.4.x
               add_filter('piklist_part_add', array('piklist_wordpress_helpers', 'show_additional_image_sizes'), self::$filter_priority, 2); // Piklist v0.9.5.x
+              add_filter('piklist_part_process_callback', array('piklist_wordpress_helpers', 'show_additional_image_sizes'), self::$filter_priority, 2); // Piklist v0.9.9.x
             break;
 
             case 'show_exif_data' :
               add_filter('piklist_add_part', array('piklist_wordpress_helpers', 'show_exif_data'), self::$filter_priority, 2); // Piklist v0.9.4.x
               add_filter('piklist_part_add', array('piklist_wordpress_helpers', 'show_exif_data'), self::$filter_priority, 2); // Piklist v0.9.5.x
+              add_filter('piklist_part_process_callback', array('piklist_wordpress_helpers', 'show_exif_data'), self::$filter_priority, 2); // Piklist v0.9.9.x
             break;
 
             case 'hide_admin_bar':
@@ -232,9 +235,9 @@ class Piklist_WordPress_Helpers
               remove_action('wp_head', 'print_emoji_detection_script', 7);
               remove_action('admin_print_scripts', 'print_emoji_detection_script');
               remove_action('wp_print_styles', 'print_emoji_styles');
-              remove_action('admin_print_styles', 'print_emoji_styles');  
+              remove_action('admin_print_styles', 'print_emoji_styles');
               remove_filter('the_content_feed', 'wp_staticize_emoji');
-              remove_filter('comment_text_rss', 'wp_staticize_emoji');  
+              remove_filter('comment_text_rss', 'wp_staticize_emoji');
               remove_filter('wp_mail', 'wp_staticize_emoji_for_email');
               add_filter('tiny_mce_plugins', array('piklist_wordpress_helpers', 'disable_emojis_tinymce'), self::$filter_priority);
               add_action('piklist_wordpress_helpers_admin_css', array('piklist_wordpress_helpers', 'hide_option_use_smilies'), self::$filter_priority);
@@ -247,7 +250,7 @@ class Piklist_WordPress_Helpers
             case 'theme_switcher':
               if (is_multisite() && !is_super_admin())
               {
-                add_action('admin_init', array('piklist_wordpress_helpers', 'theme_switcher'), self::$filter_priority); 
+                add_action('admin_init', array('piklist_wordpress_helpers', 'theme_switcher'), self::$filter_priority);
               }
             break;
 
@@ -275,7 +278,7 @@ class Piklist_WordPress_Helpers
             break;
 
             case 'maintenance_mode':
-              add_action('get_header', array('piklist_wordpress_helpers', 'maintenance_mode'));          
+              add_action('get_header', array('piklist_wordpress_helpers', 'maintenance_mode'));
               add_action('admin_notices', array('piklist_wordpress_helpers', 'maintenance_mode_warning'));
               add_action('admin_bar_menu', array('piklist_wordpress_helpers', 'maintenance_mode_warning_toolbar'), 999);
               add_filter('login_message', array('piklist_wordpress_helpers', 'maintenance_mode_message'));
@@ -336,33 +339,33 @@ class Piklist_WordPress_Helpers
             case 'clean_header':
 
               $value = is_array($value) ? $value : array($value);
-              
+
               foreach ($value as $tag)
               {
                 self::remove_filter('wp_head', $tag);
               }
 
             break;
-            
+
             case 'excerpt_length_type':
-          
+
               switch ($value)
               {
                 case 'words':
                   add_filter('excerpt_length', array('piklist_wordpress_helpers', 'excerpt_length'), self::$filter_priority);
                 break;
-          
+
                 case 'characters':
                   add_filter('get_the_excerpt', array('piklist_wordpress_helpers', 'excerpt_length'), self::$filter_priority);
                 break;
               }
-            
+
             break;
-          
+
             case 'profile_fields':
               add_filter('user_contactmethods', array('piklist_wordpress_helpers', 'unset_profile_fields'), self::$filter_priority, 1);
             break;
-          
+
             case 'change_howdy':
               add_filter('admin_bar_menu', array('piklist_wordpress_helpers', 'change_howdy'), self::$filter_priority);
             break;
@@ -385,7 +388,7 @@ class Piklist_WordPress_Helpers
             case 'mail_from_name':
               add_filter('wp_mail_from_name', array('piklist_wordpress_helpers', 'mail_from_name'), self::$filter_priority);
             break;
-          
+
             case 'show_admin_bar_components':
               add_action('wp_before_admin_bar_render', array('piklist_wordpress_helpers', 'remove_admin_bar_components'), self::$filter_priority);
             break;
@@ -410,7 +413,7 @@ class Piklist_WordPress_Helpers
                 add_filter('get_user_option_screen_layout_page', array('piklist_wordpress_helpers', 'get_user_option_screen_layout_post'), self::$filter_priority);
                 add_action('piklist_wordpress_helpers_admin_css', array('piklist_wordpress_helpers', 'screen_layout_prefs'), self::$filter_priority);
               }
-              
+
             break;
 
             case 'disable_uprade_notifications':
@@ -418,7 +421,7 @@ class Piklist_WordPress_Helpers
               if (current_user_can('manage_options')) break;
 
                $value = is_array($value) ? $value : array($value);
-              
+
                 if (in_array('wordpress', $value))
                 {
                   add_filter('pre_site_transient_update_core', '__return_null');
@@ -433,35 +436,35 @@ class Piklist_WordPress_Helpers
                 {
                   add_filter('pre_site_transient_update_themes', '__return_null');
                 }
-            
+
             break;
 
             case 'search_post_types':
 
-              add_filter('pre_get_posts', array('piklist_wordpress_helpers', 'set_search'));          
-            
+              add_filter('pre_get_posts', array('piklist_wordpress_helpers', 'set_search'));
+
             break;
 
             case 'delay_feed':
-                        
+
               if (!empty(self::$options['delay_feed']) && isset(self::$options['delay_feed'][0]['delay_feed_num']))
               {
                 add_filter('posts_where', array('piklist_wordpress_helpers', 'delay_feed'), self::$filter_priority);
               }
-            
+
             break;
 
             case 'require_featured_image':
 
               add_action('save_post', array('piklist_wordpress_helpers', 'require_featured_image'), self::$filter_priority);
               add_action('admin_notices', array('piklist_wordpress_helpers', 'notice_admin_require_featured_image'), self::$filter_priority);
-            
+
             break;
           }
         }
       }
     }
-    
+
     add_action('admin_footer', array('piklist_wordpress_helpers', 'admin_css'), self::$filter_priority);
   }
 
@@ -473,7 +476,7 @@ class Piklist_WordPress_Helpers
     {
       extract($arguments);
     }
-        
+
     if (isset($wp_filter[$filter]) && $filter == $tag)
     {
       foreach ($wp_filter[$filter] as $priority => $data)
@@ -487,10 +490,10 @@ class Piklist_WordPress_Helpers
       {
         remove_action($filter, $tag, $priority, $wp_filter[$filter][$priority][$tag]['accepted_args']);
       }
-      
+
     }
   }
-  
+
   public static function title_format($format)
   {
     return '%s';
@@ -505,9 +508,16 @@ class Piklist_WordPress_Helpers
   {
     if($folder == 'meta-boxes')
     {
+      // Piklist v0.9.4.x and v0.9.5.x
      if(!empty($part_data['type']) && $part_data['type'] == 'piklist_wp_helpers_post')
      {
         $part_data['type'] = 'post';
+     }
+
+     // Piklist v0.9.9.x
+     if(!empty($part_data['data']['post_type']) && in_array('piklist_wp_helpers_post', $part_data['data']['post_type']))
+     {
+        array_push($part_data['data']['post_type'], 'post');
      }
     }
 
@@ -562,9 +572,12 @@ class Piklist_WordPress_Helpers
     {
       if((isset($part_data['part']) && $part_data['part'] == 'image-sizes.php') || (isset($part_data['name']) && $part_data['name'] == 'Image Sizes'))
       {
-        $part_data['capability'] = null;
+        $part_data['capability'] = null; // Piklist v0.9.4.x and v0.9.5.x
+        $part_data['data']['capability'] = null; // Piklist v0.9.9.x
+
         return $part_data;
       }
+
     }
 
     return $part_data;
@@ -576,7 +589,9 @@ class Piklist_WordPress_Helpers
     {
       if((isset($part_data['part']) && $part_data['part'] == 'image-exif.php') || (isset($part_data['name']) && $part_data['name'] == 'Exif Data'))
       {
-        $part_data['capability'] = null;
+        $part_data['capability'] = null; // Piklist v0.9.4.x and v0.9.5.x
+        $part_data['data']['capability'] = null; // Piklist v0.9.9.x
+
         return $part_data;
       }
     }
@@ -605,7 +620,7 @@ class Piklist_WordPress_Helpers
 
   public static function wp_default_editor($default)
   {
-    return self::$options['default_editor']; 
+    return self::$options['default_editor'];
   }
 
   public static function edit_posts_per_page($posts_per_page)
@@ -617,20 +632,20 @@ class Piklist_WordPress_Helpers
   {
     echo '#excerpt { height:' . self::$options['excerpt_box_height'] . 'px; }' . PHP_EOL;
   }
-  
+
   public static function get_dashboard_widgets()
   {
     global $typenow, $wp_meta_boxes;
-  
+
     if (empty(self::$dashboard_widgets))
     {
       remove_action('wp_dashboard_setup', array('piklist_wordpress_helpers', 'remove_dashboard_widgets'), self::$filter_priority);
-      
+
       if (!function_exists('wp_dashboard_setup'))
       {
         include_once(ABSPATH . '/wp-admin/includes/dashboard.php');
       }
-    
+
       wp_dashboard_setup();
 
       $meta_boxes = current($wp_meta_boxes);
@@ -651,7 +666,7 @@ class Piklist_WordPress_Helpers
         }
       }
     }
-    
+
     return self::$dashboard_widgets;
   }
 
@@ -666,7 +681,7 @@ class Piklist_WordPress_Helpers
 
     return $all_dashboards_widgets;
   }
-  
+
   public static function remove_widgets()
   {
     if(!empty(self::$options['remove_widgets_new']['widgets']))
@@ -679,7 +694,7 @@ class Piklist_WordPress_Helpers
 
       foreach ($widgets as $widget)
       {
-        unregister_widget($widget);          
+        unregister_widget($widget);
       }
     }
   }
@@ -687,13 +702,13 @@ class Piklist_WordPress_Helpers
   public static function remove_dashboard_widgets()
   {
     $dashboard_widgets = self::get_dashboard_widgets();
-    
+
     $widgets = self::$options['remove_dashboard_widgets_new']['dashboard_widgets'];
 
     if(!empty($widgets[0]))
     {
       $widgets = is_array($widgets) ? $widgets : array($widgets);
-      
+
       if(empty($widgets[1]))
       {
         $widgets = $widgets[0]; // backwards compatibility before Piklist v.9.9.x
@@ -707,7 +722,7 @@ class Piklist_WordPress_Helpers
         {
           remove_meta_box($dashboard_widget, 'dashboard', $value['context']);
         }
-        
+
       }
     }
   }
@@ -717,7 +732,7 @@ class Piklist_WordPress_Helpers
   {
     $orig_methods = $methods;
 
-    $options = self::$options['xml_rpc_methods']; 
+    $options = self::$options['xml_rpc_methods'];
     $options = is_array($options) ? $options : array($options);
 
     if(!empty($options[0]))
@@ -740,7 +755,7 @@ class Piklist_WordPress_Helpers
     $value = self::$options['profile_fields'];
     $value = is_array($value) ? $value : array($value);
 
-    foreach ($value as $tag) 
+    foreach ($value as $tag)
     {
       if (isset($contactmethods[$tag]))
       {
@@ -754,12 +769,12 @@ class Piklist_WordPress_Helpers
   public static function featured_image($content)
   {
     global $post;
-      
+
     if (has_post_thumbnail($post->ID))
     {
       $content = '<p class="entry-featured-image entry-featured-image-' . $post->ID . '">' . get_the_post_thumbnail($post->ID) . '</p>' . $content;
     }
-      
+
     return $content;
   }
 
@@ -767,7 +782,7 @@ class Piklist_WordPress_Helpers
   public static function change_howdy($wp_admin_bar)
   {
     $my_account = $wp_admin_bar->get_node('my-account');
-    
+
     $wp_admin_bar->add_node(array(
       'id' => 'my-account'
       ,'title' => str_replace('Howdy, ', self::$options['change_howdy'] . ' ', $my_account->title)
@@ -782,7 +797,7 @@ class Piklist_WordPress_Helpers
     shuffle($image_id);
 
     $image = wp_get_attachment_image_src($image_id[0],'full');
-    
+
     piklist('shared/login-css', array(
       'image' => $image
     ));
@@ -803,7 +818,7 @@ class Piklist_WordPress_Helpers
   {
     $color = self::$options['login_background'];
 ?>
-    <!-- WP Helpers -->   
+    <!-- WP Helpers -->
     <style type="text/css">
       html {
         background: none repeat scroll 0 0 <?php echo $color; ?>;
@@ -818,7 +833,7 @@ class Piklist_WordPress_Helpers
   public static function remove_admin_bar_components()
   {
     global $wp_admin_bar;
-    
+
     $value = self::$options['show_admin_bar_components'];
     $value = is_array($value) ? $value : array($value);
 
@@ -848,7 +863,7 @@ class Piklist_WordPress_Helpers
         ,'title' => $title
         ,'content' => $help_content
       ));
-  
+
       return $contextual_help;
     }
   }
@@ -857,7 +872,7 @@ class Piklist_WordPress_Helpers
   public static function add_help_tab_screen_information()
   {
     global $hook_suffix, $current_screen;
- 
+
     $variables = '<ul style="width:50%;float:left;"> <strong>' . __('Screen variables', 'wp-helpers') . '</strong>'
         . sprintf(__('%1$s Screen id %2$s', 'wp-helpers'),'<li><strong>', '</strong>' . $current_screen->id . '</li>')
 
@@ -866,7 +881,7 @@ class Piklist_WordPress_Helpers
         . sprintf(__('%1$s Parent file %2$s', 'wp-helpers'),'<li><strong>', '</strong>' . $current_screen->parent_file . '</li>')
         . sprintf(__('%1$s Hook suffix %2$s', 'wp-helpers'),'<li><strong>', '</strong>' . $hook_suffix . '</li>')
         . '</ul>';
- 
+
     $hooks = array(
         "load-$hook_suffix"
         ,"admin_print_styles-$hook_suffix"
@@ -874,28 +889,28 @@ class Piklist_WordPress_Helpers
         ,"admin_head-$hook_suffix"
         ,"admin_footer-$hook_suffix"
     );
- 
+
     if (did_action('add_meta_boxes_' . $current_screen->id))
     {
       $hooks[] = 'add_meta_boxes_' . $current_screen->id;
     }
-        
+
     if (did_action('add_meta_boxes'))
     {
       $hooks[] = 'add_meta_boxes';
     }
- 
+
     $hooks = '<ul style="width:50%;float:left;"> <strong>' . __('Hooks', 'wp-helpers') .  '</strong> <li>' . implode('</li><li>', $hooks) . '</li></ul>';
 
     $help_content = $variables . $hooks;
- 
+
     return $help_content;
   }
 
   public static function delete_orphaned_meta()
   {
     global $wpdb;
-    
+
     $tables = array(
       array(
         'type' => 'post'
@@ -932,7 +947,7 @@ class Piklist_WordPress_Helpers
   }
 
   public static function screen_layout_prefs()
-  { 
+  {
     echo '.screen-layout, .columns-prefs { display: none; }' . PHP_EOL;
   }
 
@@ -942,7 +957,7 @@ class Piklist_WordPress_Helpers
     {
       return false;
     }
-    
+
     return $open;
   }
 
@@ -960,7 +975,7 @@ class Piklist_WordPress_Helpers
       add_filter('manage_' . $post_type . '_columns', array('piklist_wordpress_helpers', 'edit_column_header'), self::$filter_priority, 2);
       add_filter('manage_edit-' .  $value . '_sortable_columns', array('piklist_wordpress_helpers', 'register_sortable_column'), self::$filter_priority);
     }
-    
+
     if ($custom_post_types = get_post_types(array('_builtin' => false)))
     {
       foreach ($custom_post_types  as $custom_post_type)
@@ -1009,7 +1024,7 @@ class Piklist_WordPress_Helpers
       add_filter('manage_edit-' . $taxonomy_builtin . '_columns', array('piklist_wordpress_helpers', 'edit_column_header'), self::$filter_priority, 2);
       add_filter('manage_edit-' . $taxonomy_builtin . '_sortable_columns', array('piklist_wordpress_helpers', 'register_sortable_column'), self::$filter_priority);
     }
-    
+
     if ($custom_taxonomies = get_taxonomies(array('_builtin' => false)))
     {
       foreach ($custom_taxonomies  as $custom_taxonomy)
@@ -1040,7 +1055,7 @@ class Piklist_WordPress_Helpers
   public static function register_sortable_column($columns)
   {
     $columns['piklist_id'] =  __('ID', 'wp-helpers');
-   
+
     return $columns;
   }
 
@@ -1096,9 +1111,9 @@ class Piklist_WordPress_Helpers
     switch ($column)
     {
       case 'piklist_id':
-        
+
         $value = (int) $id;
-      
+
       break;
 
       default:
@@ -1107,7 +1122,7 @@ class Piklist_WordPress_Helpers
 
       break;
     }
-    
+
     return $value;
   }
 
@@ -1125,7 +1140,7 @@ class Piklist_WordPress_Helpers
   public static function theme_switcher()
   {
     global $submenu;
-    
+
     unset($submenu['themes.php'][5]);
     unset($submenu['themes.php'][15]);
   }
@@ -1147,7 +1162,7 @@ class Piklist_WordPress_Helpers
     if (current_user_can('manage_options'))
     {
       global $submenu;
-      
+
       $all_options_menu = array('All','manage_options','options.php');
       array_unshift($submenu['options-general.php'], $all_options_menu);
     }
@@ -1188,7 +1203,7 @@ class Piklist_WordPress_Helpers
       else
       {
         wp_die(self::$options['maintenance_mode_message'], self::$options['maintenance_mode_message'], array('response' => '503'));
-      }           
+      }
     }
   }
 
@@ -1230,7 +1245,7 @@ class Piklist_WordPress_Helpers
 
   public static function notice_admin()
   {
-    self::admin_notice(self::$options['admin_message'], false); 
+    self::admin_notice(self::$options['admin_message'], false);
   }
 
   public static function check_notice_front()
@@ -1245,7 +1260,7 @@ class Piklist_WordPress_Helpers
       if (!is_user_logged_in())
       {
         return;
-      } 
+      }
     }
 
     if ($browser_type != 'all')
@@ -1256,7 +1271,7 @@ class Piklist_WordPress_Helpers
         {
           return;
         }
-      } 
+      }
     }
     self::front_notice($message, $type);
   }
@@ -1267,7 +1282,7 @@ class Piklist_WordPress_Helpers
     global $post, $wp_roles, $blog_id;
 
     $extended_classes = array();
-    
+
     $extended_classes[] = 'no-js';
 
 
@@ -1286,7 +1301,7 @@ class Piklist_WordPress_Helpers
         $extended_classes = array_merge($extended_classes, self::author_class($classes));
       }
     }
-    
+
     if (is_archive())
     {
       if (is_year())
@@ -1314,7 +1329,7 @@ class Piklist_WordPress_Helpers
     }
 
     if (is_multisite())
-    {       
+    {
        $sitename = str_replace(' ', '-', strtolower(get_bloginfo('name')));
        $extended_classes[] = 'multisite';
        $extended_classes[] = 'site-' . $blog_id;
@@ -1433,7 +1448,7 @@ class Piklist_WordPress_Helpers
     {
       $classes[] = 'iphone';
     }
-    
+
     return $classes;
   }
 
@@ -1465,7 +1480,7 @@ class Piklist_WordPress_Helpers
     global $post, $post_id;
 
     $classes = array();
-        
+
     $post = get_post($post->ID);
     $post_type = $post->post_type;
 
@@ -1491,7 +1506,7 @@ class Piklist_WordPress_Helpers
               $counter++;
             }
           }
-        }              
+        }
       }
     }
 
@@ -1589,7 +1604,7 @@ class Piklist_WordPress_Helpers
   public static function go_home($redirect_to, $request, $user)
   {
     return home_url();
-  } 
+  }
 
   public static function helpers_css()
   {
@@ -1603,10 +1618,10 @@ class Piklist_WordPress_Helpers
   }
 
   public static function admin_css()
-  { 
+  {
 ?>
-    <!-- Piklist WP-Helpers -->   
-    <style type="text/css">  
+    <!-- Piklist WP-Helpers -->
+    <style type="text/css">
       <?php do_action('piklist_wordpress_helpers_admin_css'); ?>
     </style>
 <?php
@@ -1616,15 +1631,15 @@ class Piklist_WordPress_Helpers
   {
     update_option('avatar_default', 'mystery');
   }
-  
+
   public static function clean_phpinfo()
   {
     ob_start();
-    
+
       phpinfo();
-    
+
       $phpinfo = ob_get_contents();
-    
+
     ob_end_clean();
 
     $phpinfo = preg_replace( '%^.*<body>(.*)</body>.*$%ms','$1',$phpinfo);
@@ -1641,10 +1656,10 @@ class Piklist_WordPress_Helpers
     $theme_data = wp_get_theme();
     $theme = $theme_data->Name . ' ' . $theme_data->Version  . '( ' . strip_tags($theme_data->author) . ' )';
 
-    $page_on_front_id = get_option('page_on_front'); 
+    $page_on_front_id = get_option('page_on_front');
     $page_on_front = get_the_title($page_on_front_id) . ' (#' . $page_on_front_id . ')';
 
-    $page_for_posts_id = get_option('page_for_posts'); 
+    $page_for_posts_id = get_option('page_for_posts');
     $page_for_posts = get_the_title($page_for_posts_id) . ' (#' . $page_for_posts_id . ')';
 
     $table_prefix_length = strlen($wpdb->prefix);
@@ -1660,7 +1675,7 @@ class Piklist_WordPress_Helpers
     $wp_debug = defined('WP_DEBUG') ? WP_DEBUG ? __('Enabled', 'wp-helpers') . "\n" : __('Disabled', 'wp-helpers') . "\n" : __('Not set', 'wp-helpers');
 
     $php_safe_mode = ini_get('safe_mode') ? __('Yes', 'wp-helpers') : __('No', 'wp-helpers');
-    $allow_url_fopen = ini_get('allow_url_fopen') ? __('Yes', 'wp-helpers') : __('No', 'wp-helpers'); 
+    $allow_url_fopen = ini_get('allow_url_fopen') ? __('Yes', 'wp-helpers') : __('No', 'wp-helpers');
 
     $plugins_active = array();
     $plugins = get_plugins();
@@ -1679,7 +1694,7 @@ class Piklist_WordPress_Helpers
     $sidebar_widgets = '';
     $current_sidebar = '';
     $active_widgets = get_option('sidebars_widgets');
-    
+
     if (is_array($active_widgets) && count($active_widgets))
     {
       foreach ($active_widgets as $sidebar => $widgets)
@@ -1691,7 +1706,7 @@ class Piklist_WordPress_Helpers
             $sidebar_widgets .= $sidebar . ': ';
             $current_sidebar = $sidebar;
           }
-          
+
           if (count($widgets))
           {
             $sidebar_widgets .= implode(', ', $widgets);
@@ -1702,7 +1717,7 @@ class Piklist_WordPress_Helpers
             $sidebar_widgets .= __('(none)', 'piklist');
             $all_widgets[] = $sidebar_widgets;
           }
-        
+
           $sidebar_widgets = '';
         }
       }

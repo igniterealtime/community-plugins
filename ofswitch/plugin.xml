@@ -6,7 +6,7 @@
     <author>Ignite Realtime</author>
     <version>0.0.1</version>
     <date>12/13/2015</date>
-    <minServerVersion>4.0.0 beta</minServerVersion>
+    <minServerVersion>4.0.1</minServerVersion>
     <adminconsole>
         <tab id="tab-ofswitch" name="${plugin.title}" url="freeswitch-overview.jsp" description="${plugin.title.description}">
             <sidebar id="siderbar-freeswitch"  name="${plugin.title}">

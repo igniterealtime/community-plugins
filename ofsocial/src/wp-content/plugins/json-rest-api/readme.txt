@@ -3,13 +3,16 @@ Contributors: rmccue, rachelbaker
 Tags: json, rest, api, rest-api
 Requires at least: 3.9
 Tested up to: 4.4
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Access your site's data through an easy-to-use HTTP REST API.
+Access your site's data through an easy-to-use HTTP REST API (Version 1, deprecated).
 
 == Description ==
+
+**Notice:** This is the deprecated Version 1 of the WP REST API. It's no longer supported beyond security fixes. Please consider [WP REST API v2](https://wordpress.org/plugins/rest-api/) for your website, although there are [considerations to be aware of](https://make.wordpress.org/core/2015/12/11/wp-rest-api-version-2-0-beta-9/).
+
 WordPress is moving towards becoming a fully-fledged application framework, and
 we need new APIs. This project was born to create an easy-to-use,
 easy-to-understand and well-tested framework for creating these APIs, plus
@@ -49,6 +52,12 @@ Drop this directory in and activate it. You need to be using pretty permalinks
 to use the plugin, as it uses custom rewrite rules to power the API.
 
 == Changelog ==
+
+= 1.2.5 =
+
+* Ensure media of private posts are private too.
+
+  Reported by @danielbachhuber on 2016-01-08.
 
 = 1.2.4 =
 
