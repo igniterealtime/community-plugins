@@ -5,8 +5,8 @@
     <name>Openfire Social</name>
     <description>Provides social network with member profiles, activity streams, user groups, messaging, blogs and more using WordPress and BuddyPress</description>
     <author>Ignite Realtime</author>
-    <version>0.0.2</version>
-    <date>01/06/2016</date>
+    <version>0.0.4</version>
+    <date>02/04/2016</date>
     <minServerVersion>4.0.1</minServerVersion>  
     <adminconsole>
         <tab id="tab-ofsocial" name="${plugin.title}" url="ofsocial-summary.jsp" description="${plugin.description}">
