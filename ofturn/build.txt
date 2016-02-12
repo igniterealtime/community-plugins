@@ -1,0 +1,25 @@
+Buildfile: C:\projects\community-plugins\ofturn\build.xml
+
+clean:
+
+init:
+    [mkdir] Created dir: C:\projects\community-plugins\ofturn\build\classes
+    [mkdir] Created dir: C:\projects\community-plugins\ofturn\build\jar
+
+compile:
+    [javac] C:\projects\community-plugins\ofturn\build.xml:27: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 42 source files to C:\projects\community-plugins\ofturn\build\classes
+
+lib:
+      [jar] Building jar: C:\projects\community-plugins\ofturn\lib\plugin-ofturn.jar
+
+jar:
+     [copy] Copying 10 files to C:\projects\community-plugins\ofturn\build\jar
+     [copy] Copied 17 empty directories to 13 empty directories under C:\projects\community-plugins\ofturn\build\jar
+     [copy] Copying 5 files to C:\projects\community-plugins\ofturn\build\jar\lib
+     [copy] Copying 11 files to C:\projects\community-plugins\ofturn\build\jar
+      [jar] Building jar: C:\projects\community-plugins\openfire_4_0_1\target\openfire\plugins\ofturn.jar
+   [delete] Deleting directory C:\projects\community-plugins\ofturn\build
+
+BUILD SUCCESSFUL
+Total time: 2 seconds
