@@ -1,0 +1,10 @@
+{
+  "name": "ofmeet.remote.control",
+  "description": "Openfire Meetings Remote Control Host",
+  "path": "HOST_PATH",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://fohfnhgabmicpkjcpjpjongpijcffaba/",
+    "chrome-extension://efhlikchjcajmajchmpkjkfhlgnbhioe/"
+  ]
+}

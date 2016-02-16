@@ -36,11 +36,11 @@ compile-jsps:
      [copy] Copying 1 file to C:\Projects\ignite\community-plugins\ofmeet\src\web\WEB-INF
 
 jar:
-     [copy] Copying 3049 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
+     [copy] Copying 3044 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
      [copy] Copying 53 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar\lib
      [copy] Copying 59 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
       [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_1\target\openfire\plugins\ofmeet.jar
    [delete] Deleting directory C:\Projects\ignite\community-plugins\ofmeet\build
 
 BUILD SUCCESSFUL
-Total time: 1 minute 8 seconds
+Total time: 1 minute 7 seconds

@@ -13,7 +13,9 @@ var ssrc2jid = {};
 var mediaStreams = {};
 var bridgeIsDown = false;
 var myFriends = {};
-
+var selectedUser = null;
+var remoteControlled = false;
+var remoteController = null;
 
 //TODO: this array must be removed when firefox implement multistream support
 var notReceivedSSRCs = [];
@@ -1746,6 +1748,8 @@ $(document).bind('fatalError.jingle',
 function onSelectedEndpointChanged(userJid)
 {
     console.log('selected endpoint changed: ', userJid);
+    selectedUser = userJid;
+    
     if (_dataChannels && _dataChannels.length != 0)
     {
         _dataChannels.some(function (dataChannel) {
@@ -1770,6 +1774,7 @@ $(document).bind("selectedendpointchanged", function(event, userJid) {
 function onPinnedEndpointChanged(userJid)
 {
     console.log('pinned endpoint changed: ', userJid);
+    
     if (_dataChannels && _dataChannels.length != 0)
     {
         _dataChannels.some(function (dataChannel) {

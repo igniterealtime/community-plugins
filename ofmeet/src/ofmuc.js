@@ -28,6 +28,7 @@ Strophe.addConnectionPlugin('ofmuc', {
     bookmarks: [],
     appRunning: false,
     enableCursor: true,
+    video: null,
     
     init: function (conn) {
         this.connection = conn;
@@ -49,6 +50,48 @@ Strophe.addConnectionPlugin('ofmuc', {
 		if (!event.data) return;  
 		if (event.data.type == 'ofmeetLoaded')  that.appReady();
 		if (event.data.type == 'ofmeetSendMessage')  that.appMessage(event.data.msg);                           
+	});
+	
+	var getMouseData = function (e) 
+	{
+		var data = {}
+		
+		if (!that.video) that.video = document.querySelector('#largeVideo')
+
+		if (that.video) 
+		{
+			var videoSize = that.video.getBoundingClientRect();
+			data.x = scale(e.clientX, 0, videoSize.width, 0, screen.width);
+			data.y = scale(e.clientY, 0, videoSize.height, 0, screen.height);			
+		}
+		return data
+	}
+	
+	var scale = function (x, fromLow, fromHigh, toLow, toHigh) 
+	{
+		return (x - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow
+	}	
+	
+	window.addEventListener('mouseup', function (e) 
+	{ 
+		var data = getMouseData(e)
+		data.click = true		
+		console.log('send mouseup', data)	
+	});	
+	
+	window.addEventListener('keydown', function (e) 
+	{ 
+		e.preventDefault()
+
+		var data = {
+			keyCode: e.keyCode,
+			shift: e.shiftKey,
+			meta: e.metaKey,
+			control: e.ctrlKey,
+			alt: e.altKey
+		}
+
+		console.log('send key', data)	
 	});	
 	
     },
@@ -197,7 +240,67 @@ Strophe.addConnectionPlugin('ofmuc', {
 	var farparty = SettingsMenu.getDisplayName();
 		
 	if (type == "chat" && type != "error")
-	{
+	{	
+		$(msg).find('remotecontrol').each(function() 
+		{
+			var action = $(this).attr('action');
+			var requestor = Strophe.getResourceFromJid(from);
+
+			console.log("remote control message", action, requestor);
+
+			if (action == "request")	// requested
+			{
+				var msg = $msg({to: from, type: 'chat'});			
+				
+				if (!isUsingScreenStream || remoteControlled)
+				{
+					msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'rejected'}).up();
+					
+				} else {
+					msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'accepted'}).up();
+					remoteControlled = true;
+					remoteController = requestor;
+				}
+				
+				that.connection.send(msg);				
+			}
+			else
+			
+			if (action == "terminate")	// requested
+			{			
+				remoteControlled = false;
+				remoteController = null;
+			}
+			
+			else
+
+			if (action == "rejected")		// requestor
+			{			
+				$.prompt("Your request was rejected",
+				    {
+					title: "Desktop Remote Control",
+					persistent: false
+				    }
+				); 		
+			}
+			else
+			
+			if (action == "accepted")		// requestor
+			{			
+				isRemoteControl = true;
+				Toolbar.changeRemoteControlButtonState(true);
+			}
+			else
+			
+			if (action == "terminated")		// requestor
+			{			
+				isRemoteControl = false;
+				Toolbar.changeRemoteControlButtonState(false);
+			}			
+			
+			return;
+		});
+	
 		$(msg).find('body').each(function ()  	
 		{
 			var body = $('<div/>').text($(this).text()).html();
@@ -209,7 +312,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 				$(document).trigger("ofmuc.meeting.invite", [body, Strophe.getBareJidFromJid(from)]);
 			}
 					
-		});
+		});		
 		
 		return true;
 	}
@@ -243,7 +346,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 	{
 		that.members[from].avatar = $(this).text();	
 		Avatar.setUserAvatar(from);
-	});
+	});	
 	
         return true;
     },

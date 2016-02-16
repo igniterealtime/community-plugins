@@ -5,6 +5,11 @@
  */
 var isUsingScreenStream = false;
 /**
+ * Indicates that desktop stream is currently remotely controlled
+ * @type {boolean}
+ */
+var isRemoteControl = false;
+/**
  * Indicates that switch stream operation is in progress and prevent from triggering new events.
  * @type {boolean}
  */
@@ -86,8 +91,7 @@ function isUpdateRequired(minVersion, extVersion)
     catch (e)
     {
         console.error("Failed to parse extension version", e);
-        messageHandler.showError('Error',
-            'Error when trying to detect desktopsharing extension.');
+        messageHandler.showError('Error', 'Error when trying to detect desktopsharing extension.');
         return true;
     }
 }
@@ -106,7 +110,7 @@ function doGetStreamFromExtension(streamCallback, failCallback)
 		failCallback("Extension failed to get the stream");
 	}, 1000);
 								
-    window.postMessage({ type: 'ofmeetGetScreen', id: pending }, '*');
+    window.postMessage({ type: 'ofmeetGetScreen', id: pending, server: config.bosh, resource: Strophe.getResourceFromJid(connection.jid) }, '*');
     
     window.addEventListener('message', function (event) 
     {
@@ -180,8 +184,10 @@ function isDesktopSharingEnabled() {
 function showDesktopSharingButton() {
     if (isDesktopSharingEnabled()) {
         $('#desktopsharing').css({display: "inline"});
+        $('#remotecontrol').css({display: "inline"});        
     } else {
         $('#desktopsharing').css({display: "none"});
+        $('#remotecontrol').css({display: "none"});         
     }
 }
 
@@ -254,6 +260,65 @@ function newStreamCreated(stream) {
     }
 }
 
+
+function remoteControl()
+{
+   if (remoteControlled || isUsingScreenStream)
+   {
+	$.prompt("Your desktop is either being controlled or shared",
+	    {
+		title: "Desktop Remote Control",
+		persistent: false
+	    }
+	);   
+   	return;
+   }
+   
+   if (isRemoteControl)
+   {
+	isRemoteControl = false;
+	Toolbar.changeRemoteControlButtonState(false);
+
+	var msg = $msg({to: roomName + "/" + selectedUser, type: 'chat'});
+	msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'terminate'}).up();
+	connection.send(msg);   	
+
+   
+   } else {
+	   if (selectedUser && selectedUser != Strophe.getResourceFromJid(connection.jid))
+	   {
+		$.prompt("You are about to request desktop remote control of " + selectedUser,
+			{
+			title: "Desktop Remote Control",
+			buttons: { "Continue": true, "Cancel": false},
+			defaultButton: 1,
+			submit: function(e,v,m,f)
+			{
+				if(v)
+				{				
+					setTimeout(function()
+					{
+						var msg = $msg({to: roomName + "/" + selectedUser, type: 'chat'});
+						msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'request'}).up();
+						connection.send(msg);
+
+					}, 3000);
+				}
+			}
+		});
+
+	   } else {
+		$.prompt("Select a participant and try again",
+		    {
+			title: "Desktop Remote Control",
+			persistent: false
+		    }
+		);   
+	   }
+    }
+}
+
+
 /*
  * Toggles screen sharing.
  */
@@ -293,6 +358,13 @@ function toggleScreenSharing() {
             },
             getSwitchStreamFailed, config.resolution || '360'
         );
+        
+	if (remoteControlled)
+	{
+		var msg = $msg({to: roomName + "/" + remoteController, type: 'chat'});
+		msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'terminated'}).up();
+		connection.send(msg);   	
+	}        
     }
 }
 

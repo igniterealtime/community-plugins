@@ -271,6 +271,23 @@ var Toolbar = (function (my) {
             button.removeClass("glow");
         }
     };
+    
+    /**
+     * Sets the state of the button. The button has blue glow if desktop
+     * streaming is active.
+     * @param active the state of the desktop streaming.
+     */
+    my.changeRemoteControlButtonState = function (active) {
+        var button = $("#remotecontrol > a");
+        if (active)
+        {
+            button.addClass("glow");
+        }
+        else
+        {
+            button.removeClass("glow");
+        }
+    };    
 
     return my;
 }(Toolbar || {}));
