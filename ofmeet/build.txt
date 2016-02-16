@@ -12,10 +12,12 @@ init:
 compile:
     [javac] C:\Projects\ignite\community-plugins\ofmeet\build.xml:29: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
     [javac] Compiling 136 source files to C:\Projects\ignite\community-plugins\ofmeet\build\classes
+    [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
     [javac] Note: Some input files use or override a deprecated API.
     [javac] Note: Recompile with -Xlint:deprecation for details.
     [javac] Note: Some input files use unchecked or unsafe operations.
     [javac] Note: Recompile with -Xlint:unchecked for details.
+    [javac] 1 warning
 
 lib:
       [jar] Building jar: C:\Projects\ignite\community-plugins\ofmeet\lib\plugin-ofmeet.jar
@@ -32,15 +34,17 @@ compile-jsps:
      [java] log4j:WARN Please initialize the log4j system properly.
     [javac] C:\Projects\ignite\community-plugins\ofmeet\build.xml:60: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
     [javac] Compiling 6 source files to C:\Projects\ignite\community-plugins\ofmeet\build\jspc\classes
+    [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
+    [javac] 1 warning
       [jar] Building jar: C:\Projects\ignite\community-plugins\ofmeet\lib\plugin-ofmeet-jspc.jar
      [copy] Copying 1 file to C:\Projects\ignite\community-plugins\ofmeet\src\web\WEB-INF
 
 jar:
-     [copy] Copying 3044 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
+     [copy] Copying 1082 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
      [copy] Copying 53 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar\lib
      [copy] Copying 59 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
       [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_1\target\openfire\plugins\ofmeet.jar
    [delete] Deleting directory C:\Projects\ignite\community-plugins\ofmeet\build
 
 BUILD SUCCESSFUL
-Total time: 1 minute 7 seconds
+Total time: 30 seconds

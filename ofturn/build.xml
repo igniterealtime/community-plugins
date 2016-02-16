@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ofturn" default="jar" basedir = "..">
+	<description>Openfire Turn Server Build</description>
+
+	<property name="openfire.home" 	value="./openfire_4_0_1/target/openfire" />
+	<property name="lib.ant.dir" 	value="./openfire_4_0_1/build/lib/ant" />	
+	<property name="ofturn.dir" 	value="ofturn" />
+	
+
+	<path id="build.classpath">
+		<fileset dir="${ofturn.dir}/lib" includes="*.jar"/>
+		<fileset dir="${openfire.home}/lib" includes="*.jar"/>
+	</path>
+
+	<target name="init">
+		<!-- create our directories -->
+		<mkdir dir="${ofturn.dir}/build/classes"/>
+		<mkdir dir="${ofturn.dir}/build/jar"/>					
+	</target>
+	
+	<target name="clean">
+        <delete dir="${ofturn.dir}/build/classes/*"/>
+        <delete file="${openfire.home}/plugins/ofturn.jar"/>
+	</target>
+	
+	<target name="compile" depends="init">
+		<javac debug="true" deprecation="false" srcdir="${ofturn.dir}/src" destdir="${ofturn.dir}/build/classes">
+			<classpath refid="build.classpath"/>
+		</javac>
+	</target>
+
+	<target name="lib" depends="clean, compile">
+		<jar destfile="${ofturn.dir}/lib/plugin-ofturn.jar">
+			<fileset dir="${ofturn.dir}/build/classes">
+				<include name="**" />
+			</fileset>
+		</jar>
+	</target>	
+	
+	<target name="jar" depends="lib">
+		<copy todir="${ofturn.dir}/build/jar" overwrite="true">
+			<fileset dir="${ofturn.dir}/src">
+                        	<exclude name="java/**/*.java"/>				
+			</fileset>
+		</copy>			
+		<copy todir="${ofturn.dir}/build/jar/lib" overwrite="true">			
+			<fileset dir="${ofturn.dir}/lib">				
+			</fileset>
+		</copy>			
+		<copy todir="${ofturn.dir}/build/jar" overwrite="true">						
+			<fileset dir="${ofturn.dir}">
+                        	<exclude name="build.*"/>		
+                        	<exclude name="build/**"/>	
+                        	<exclude name="src/**"/>                        	
+			</fileset>			
+		</copy>
+				
+		<jar destfile="${openfire.home}/plugins/ofturn.jar">
+			<fileset dir="${ofturn.dir}/build/jar">				
+			</fileset>			
+		</jar>
+		
+                <delete dir="${ofturn.dir}/build"/>	              
+	</target>
+</project>
+

@@ -5,7 +5,7 @@ jdk:
 env:
   - ENVTARGET=ofmeet
   - ENVTARGET=ofsocial
-  - ENVTARGET=ofswitch
+  - ENVTARGET=ofturn  
 script: 
   - ant -f $ENVTARGET/build.xml jar
 
