@@ -76,6 +76,7 @@
 		<copy todir="${ofmeet.dir}/build/jar" overwrite="true">
 			<fileset dir="${ofmeet.dir}/src">
                         	<exclude name="java/**/*.java"/>
+                        	<exclude name="remotecontrol/**"/>                        	
                         	<exclude name="java/**"/>                        	
 			</fileset>
 		</copy>			
@@ -90,6 +91,11 @@
                         	<exclude name="src/**"/>                        	
 			</fileset>			
 		</copy>		
+
+		<jar destfile="${ofmeet.dir}/build/jar/remotecontrol.zip">
+			<fileset dir="${ofmeet.dir}/src/remotecontrol">				
+			</fileset>			
+		</jar>
 		
 		<jar destfile="${openfire.home}/plugins/ofmeet.jar">
 			<fileset dir="${ofmeet.dir}/build/jar">				

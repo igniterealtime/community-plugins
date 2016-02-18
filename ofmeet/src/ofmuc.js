@@ -714,7 +714,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 		}
 	}
 	else {
-	    	var appsList = '<select id="appName"><option value="/ofmeet/apps/woot">Collaborative Editing</option><option value="/ofmeet/apps/drawing">Collaborative Drawing</option><option value="/ofmeet/apps/scrumblr">Post-It Scrum Board</option>'
+	    	var appsList = '<select id="appName"><option value="/ofmeet/apps/woot">Collaborative Editing</option><option value="/ofmeet/apps/drawing">Collaborative Drawing</option>'
 	    	
 	    	for (var i=0; i<that.urls.length; i++)
 	    	{
