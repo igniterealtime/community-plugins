@@ -232,6 +232,10 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 			checkDownloadFolder(pluginDirectory);
         	EmailListener.getInstance().start();
 
+      // Woot node.js server app
+      JiveGlobals.setProperty("js.woot", "woot.js");
+			JiveGlobals.setProperty("js.woot.path", pluginDirectory.getAbsolutePath() + File.separator + "apps" + File.separator + "woot" + File.separator + "server");
+
 		} catch (Exception e) {
 			Log.error("Could NOT start open fire meetings", e);
 		}
