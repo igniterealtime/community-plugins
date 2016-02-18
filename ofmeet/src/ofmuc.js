@@ -117,7 +117,7 @@ Strophe.addConnectionPlugin('ofmuc', {
         var availableWidth = Util.getAvailableVideoWidth();
         var availableHeight = this.getPresentationHeight();
 
-        var aspectRatio = 16.0 / 9.0;
+        var aspectRatio = 16.5 / 9.0;
         if (availableHeight < availableWidth / aspectRatio) {
             availableWidth = Math.floor(availableHeight * aspectRatio);
         }

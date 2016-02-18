@@ -229,9 +229,9 @@ var PanelToggler = (function(my) {
         var availableWidth = window.innerWidth;
 
         var panelWidth = 200;
-        if (availableWidth * 0.2 < 200) {
-            panelWidth = availableWidth * 0.2;
-        }
+//        if (availableWidth * 0.2 < 200) {
+//            panelWidth = availableWidth * 0.2;
+//        }
 
         return [panelWidth, availableHeight];
     };

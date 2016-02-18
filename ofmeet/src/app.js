@@ -246,7 +246,7 @@ function obtainAudioAndVideoPermissions(callback) {
                     });
                     messageHandler.showError("Error",
                         "Failed to obtain permissions to use the local microphone" +
-                            "and/or camera.");
+                            " and/or camera.");
                 }
             );
         },
