@@ -3,4 +3,4 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-node ofmeet.remote.control.js
+./osx/node ofmeet.remote.control.osx.js
