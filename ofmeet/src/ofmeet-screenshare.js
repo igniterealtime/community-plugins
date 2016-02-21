@@ -363,7 +363,11 @@ function toggleScreenSharing() {
 	{
 		var msg = $msg({to: roomName + "/" + remoteController, type: 'chat'});
 		msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'terminated'}).up();
-		connection.send(msg);   	
+		connection.send(msg);  
+
+		remoteControlled = false;
+		remoteController = null;		
+    		window.postMessage({ type: 'ofmeetSetRequestorOff'}, '*');		
 	}        
     }
 }

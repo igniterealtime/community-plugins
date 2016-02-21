@@ -1,41 +1,26 @@
+var webserver = null, robot = null, ws = null, server = null, interval = null, screenSize, requestor = null;
+var http = require('http');
+var WebSocket = require('ws');
+var vkey = require('vkey')
+
+
 module.exports = 
 {  
   start: function (os) 
   {
-	var ws = null, server = null, interval = null;
-
-	var http = require('http');
-	var WebSocket = require('ws');
-	var robot = require("./" + os + "/robotjs.node");
-	var vkey = require('vkey')
-
 	console.log("ofmeet.remote.control starts");
 
-	var server = http.createServer(handleRequest);
-	server.listen("6060", handleConnection);
-
-	console.log("ofmeet.remote.control found robot");
+	robot = require("./" + os + "/robotjs.node");
+	webserver = http.createServer(handleRequest);
+	webserver.listen("6060", handleConnection);
+	screenSize = robot.getScreenSize();
+	
+	console.log("ofmeet.remote.control found robot", screenSize.height, screenSize.width);
 
 	//Speed up the mouse.
-	robot.setMouseDelay(2);
-
-	var twoPI = Math.PI * 2.0;
-	var screenSize = robot.getScreenSize();
-	var height = (screenSize.height / 2) - 10;
-	var width = screenSize.width;
-
-	setInterval(function()
-	{
-		console.log("ofmeet.remote.control start sine wave");
-
-		for (var x = 0; x < width; x++)
-		{
-		    y = height * Math.sin((twoPI * x) / width) + height;
-		    //robot.moveMouse(x, y);
-		}
-
-	}, 5000);
+	//robot.setMouseDelay(2);
   },
+  
   stop: function () {
 
   }
@@ -64,21 +49,39 @@ function handleRequest(request, response)
     if (pos > -1)
     {
     	try {
-    		if (ws) closeWebSocket();
-
 		var params = request.url.substring(pos + 1).split("&");
-		var resource = params[0].split("=")[1];
-		var url = params[1].split("=")[1];
+		var action = params[0].split("=")[1];	
+		
+		if (action == "ofmeetGetScreen")
+		{
+    			if (ws) closeWebSocket();
+		
+			var resource = params[1].split("=")[1];
+			var url = params[2].split("=")[1];
 
-		var host = url.indexOf("/") < 0 ? url : url.split("/")[2];   
-		var protocol = url.indexOf("/") < 0 ? "wss:" : (url.split("/")[0] == "http:") ? "ws:" : "wss:";  
+			var host = url.indexOf("/") < 0 ? url : url.split("/")[2];   
+			var protocol = url.indexOf("/") < 0 ? "wss:" : (url.split("/")[0] == "http:") ? "ws:" : "wss:";  
 
-		server = protocol + "//" + host + "/ofmeetws/server?username=null&password=null&resource=" + "remotecontrol-" + resource;	
-		console.log("ofmeet.remote.control got server ", server);
+			var wsUrl = protocol + "//" + host + "/ofmeetws/server?username=null&password=null&resource=" + "remotecontrol-" + resource;	
+			console.log("ofmeet.remote.control got server ", wsUrl);
 
-		ws = new WebSocket(server, "xmpp");		
-		ws.on('open', openWebSocket);
-		ws.on('message', messageWebSocket);
+			ws = new WebSocket(wsUrl, "xmpp");		
+			ws.on('open', openWebSocket);
+			ws.on('message', messageWebSocket);
+		}
+		else 
+		
+		if (action == "ofmeetSetRequestorOn")
+		{
+			requestor = params[1].split("=")[1];
+			console.log("ofmeet.remote.control got requestor ", requestor);			
+		}		
+		else 
+		
+		if (action == "ofmeetSetRequestorOff")
+		{
+			requestor = null;
+		}		
 	
 	} catch (e) {
 		console.error("ofmeet.remote.control error", e);
@@ -107,26 +110,50 @@ function closeWebSocket()
 
 function messageWebSocket(data, flags) 
 {
+	//console.log("ofmeet.remote.control websocket data", data, flags);
+	
   	// flags.binary will be set if a binary data is received.
   	// flags.masked will be set if the data was masked.
+  	// <message xmlns="jabber:client" to="remotecontrol-ofmeet3966@btg199251" from="deleolajide@btg199251/ofmeet1253"><m>{'click': 'true', 'x': '362.6666666666667', 'y': '308.3022086286504'}</m></message>
+  	// <message xmlns="jabber:client" to="remotecontrol-ofmeet3966@btg199251" from="deleolajide@btg199251/ofmeet1253"><k>{'key': '71', 'shift': 'false', 'crtl': 'false', 'alt': 'false', 'meta': 'false'}</k></message>
 	
-	console.log("ofmeet.remote.control websocket data", data);
+	if (requestor && data.indexOf("/" + requestor) > -1)
+	{
+		var json = null;
+		var pos1 = data.indexOf("<m>");
+		var pos2 = data.indexOf("<k>");	
+
+		if (pos1 > -1) json = data.substring(pos1 + 3, data.indexOf('</m>'));
+		if (pos2 > -1) json = data.substring(pos2 + 3, data.indexOf('</k>'));
+
+		handleEvents(JSON.parse(json));
+	} else {
+		console.error("unexpected web socket data", data)
+	}
+	
 }
 
 function handleEvents (data) 
 {
+	//console.log("handleEvents", data);
+	
 	if (data.click) 
 	{
-		var pos = robot.getMousePos() // hosts current x/y
+		var pos = robot.getMousePos()	
+		console.log("ofmeet.remote.control mouse click", data.x, data.y, screenSize.height, screenSize.width, pos.x, pos.y);
+	
 		robot.moveMouse(data.x, data.y) // move to remotes pos
 		robot.mouseToggle("up", "left") // set mouse position to up
 		robot.mouseClick() // click on remote click spot
-		robot.moveMouse(pos.x, pos.y) // go back to hosts position
+		//robot.moveMouse(pos.x, pos.y) // go back to hosts position
 	}
 
-	if (data.keyCode) 
+	if (data.key) 
 	{
-		var k = vkey[data.keyCode].toLowerCase()
+		var k = vkey[data.key].toLowerCase()
+	
+		console.log("ofmeet.remote.control key", k, data);
+	
 		if (k === '<space>') k = ' '
 		var modifiers = []
 		if (data.shift) modifiers.push('shift')
@@ -157,9 +184,4 @@ function handleEvents (data)
 			else console.log('did not type ' + k)
 		}
 	}
-}
-
-function scale (x, fromLow, fromHigh, toLow, toHigh) 
-{
-	return (x - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow
 }

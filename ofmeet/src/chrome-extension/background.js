@@ -16,26 +16,22 @@ window.addEventListener("load", function()
 chrome.runtime.onConnect.addListener(function (channel) 
 {
     channel.onMessage.addListener(function (message) 
-    {       	
-        switch(message.type) {
+    {   
+	console.log("ofmeet.chrome extension: message got", message);
+			
+        switch(message.type) 
+        {
+        case 'ofmeetSetRequestorOn': 
+            	sendRemoteControl('action=' + message.type + '&requester=' + message.id)        
+        	break;
+
+        case 'ofmeetSetRequestorOff': 
+            	sendRemoteControl('action=' + message.type)                
+        	break;
+        	
         case 'ofmeetGetScreen':
             	server = message.server;
-
-		var xhr = new XMLHttpRequest();
-		xhr.onreadystatechange = function() 
-		{
-			if (xhr.readyState == 4 && xhr.status == 200)
-			{
-				console.log("ofmeet.remote.control: connected", server);
-			}
-			
-			if (xhr.status > 400)
-			{
-				console.error("ofmeet.remote.control: error", xhr);			
-			}
-		};
-		xhr.open("GET", 'http://localhost:6060/?resource=' + message.resource + '&server=' + message.server, true);
-		xhr.send()
+            	sendRemoteControl('action=' + message.type + '&resource=' + message.resource + '&server=' + message.server)
 
             	var pending = chrome.desktopCapture.chooseDesktopMedia(message.options || ['screen', 'window'], channel.sender.tab, function (streamid) 
                 {
@@ -58,3 +54,23 @@ chrome.runtime.onConnect.addListener(function (channel)
         }
     });
 });
+
+function sendRemoteControl(message)
+{
+	var xhr = new XMLHttpRequest();
+	
+	xhr.onreadystatechange = function() 
+	{
+		if (xhr.readyState == 4 && xhr.status == 200)
+		{
+			console.log("ofmeet.chrome extension: message sent to remote control", message);
+		}
+
+		if (xhr.status > 400)
+		{
+			console.error("ofmeet.chrome extension: error", xhr);			
+		}
+	};
+	xhr.open("GET", 'http://localhost:6060/?' + message, true);
+	xhr.send();
+}

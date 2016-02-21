@@ -61,8 +61,8 @@ Strophe.addConnectionPlugin('ofmuc', {
 		if (that.video) 
 		{
 			var videoSize = that.video.getBoundingClientRect();
-			data.x = scale(e.clientX, 0, videoSize.width, 0, screen.width);
-			data.y = scale(e.clientY, 0, videoSize.height, 0, screen.height);			
+			data.x = scale(e.clientX - videoSize.left, 0, videoSize.width, 0, screen.width);
+			data.y = scale(e.clientY - videoSize.top, 0, videoSize.height, 0, screen.height);			
 		}
 		return data
 	}
@@ -73,25 +73,28 @@ Strophe.addConnectionPlugin('ofmuc', {
 	}	
 	
 	window.addEventListener('mouseup', function (e) 
-	{ 
-		var data = getMouseData(e)
-		data.click = true		
-		console.log('send mouseup', data)	
+	{ 		
+		if (isRemoteControl)
+		{
+			var data = getMouseData(e)
+			data.click = true		
+			console.log('send mouseup x', data)
+
+			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"click": ' + data.click + ', "x": ' + data.x + ', "y": ' + data.y + '}');				
+			that.connection.send(msg);			
+		}
 	});	
 	
 	window.addEventListener('keydown', function (e) 
-	{ 
-		e.preventDefault()
-
-		var data = {
-			keyCode: e.keyCode,
-			shift: e.shiftKey,
-			meta: e.metaKey,
-			control: e.ctrlKey,
-			alt: e.altKey
+	{ 			
+		if (isRemoteControl)
+		{	
+			e.preventDefault()
+			console.log('send key x', e)
+			
+			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("k").t('{"key": ' + e.keyCode + ', "shift": ' + e.shiftKey + ', "crtl": ' + e.ctrlKey + ', "alt": ' + e.altKey + ', "meta": ' + e.metaKey + '}');				
+			that.connection.send(msg);			
 		}
-
-		console.log('send key', data)	
 	});	
 	
     },
@@ -260,6 +263,8 @@ Strophe.addConnectionPlugin('ofmuc', {
 					msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'accepted'}).up();
 					remoteControlled = true;
 					remoteController = requestor;
+    					
+    					window.postMessage({ type: 'ofmeetSetRequestorOn', id: requestor}, '*');					
 				}
 				
 				that.connection.send(msg);				
@@ -270,6 +275,8 @@ Strophe.addConnectionPlugin('ofmuc', {
 			{			
 				remoteControlled = false;
 				remoteController = null;
+    				
+    				window.postMessage({ type: 'ofmeetSetRequestorOff'}, '*');				
 			}
 			
 			else
