@@ -137,6 +137,12 @@ function handleEvents (data)
 {
 	//console.log("handleEvents", data);
 	
+	if (data.move) 
+	{
+		//console.log("ofmeet.remote.control mouse move", data.x, data.y, screenSize.height, screenSize.width, pos.x, pos.y);	
+		robot.moveMouse(data.x, data.y) // move to remotes pos
+	}
+	
 	if (data.click) 
 	{
 		var pos = robot.getMousePos()	
@@ -145,8 +151,8 @@ function handleEvents (data)
 		robot.moveMouse(data.x, data.y) // move to remotes pos
 		robot.mouseToggle("up", "left") // set mouse position to up
 		robot.mouseClick() // click on remote click spot
-		//robot.moveMouse(pos.x, pos.y) // go back to hosts position
-	}
+		robot.moveMouse(pos.x, pos.y) // go back to hosts position
+	}	
 
 	if (data.key) 
 	{

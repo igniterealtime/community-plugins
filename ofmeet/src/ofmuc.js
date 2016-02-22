@@ -71,16 +71,25 @@ Strophe.addConnectionPlugin('ofmuc', {
 	{
 		return (x - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow
 	}	
+
+	window.addEventListener('mousemove', function (e) 
+	{ 		
+		if (isRemoteControl)
+		{
+			var data = getMouseData(e)		
+			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"move": ' + true + ', "x": ' + data.x + ', "y": ' + data.y + '}');				
+			that.connection.send(msg);			
+		}
+	});
 	
 	window.addEventListener('mouseup', function (e) 
 	{ 		
 		if (isRemoteControl)
 		{
-			var data = getMouseData(e)
-			data.click = true		
-			console.log('send mouseup x', data)
+			var data = getMouseData(e)		
+			console.log('send mouseup', data)
 
-			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"click": ' + data.click + ', "x": ' + data.x + ', "y": ' + data.y + '}');				
+			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"click": ' + true + ', "x": ' + data.x + ', "y": ' + data.y + '}');				
 			that.connection.send(msg);			
 		}
 	});	
@@ -90,7 +99,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 		if (isRemoteControl)
 		{	
 			e.preventDefault()
-			console.log('send key x', e)
+			console.log('send key', e)
 			
 			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("k").t('{"key": ' + e.keyCode + ', "shift": ' + e.shiftKey + ', "crtl": ' + e.ctrlKey + ', "alt": ' + e.altKey + ', "meta": ' + e.metaKey + '}');				
 			that.connection.send(msg);			
