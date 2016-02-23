@@ -263,14 +263,48 @@ function newStreamCreated(stream) {
 
 function remoteControl()
 {
-   if (remoteControlled || isUsingScreenStream)
+   if (isUsingScreenStream)
    {
-	$.prompt("Your desktop is either being controlled or shared",
-	    {
-		title: "Desktop Remote Control",
-		persistent: false
-	    }
-	);   
+	if (selectedUser && selectedUser != Strophe.getResourceFromJid(connection.jid))
+	{
+		$.prompt("You are about to give desktop remote control to " + selectedUser,
+			{
+			title: "Desktop Remote Control",
+			buttons: { "Continue": true, "Cancel": false},
+			defaultButton: 1,
+			submit: function(e,v,m,f)
+			{
+				if(v)
+				{				
+					setTimeout(function()
+					{
+						var msg = $msg({to: roomName + "/" + selectedUser, type: 'chat'});
+						msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'accepted'}).up();
+						connection.send(msg);
+
+					}, 3000);
+
+					if (remoteControlled)			// terminate current controller session
+					{
+						termnateRemoteControl();			
+					}
+					
+					remoteControlled = true;
+					remoteController = selectedUser;
+    					
+    					window.postMessage({ type: 'ofmeetSetRequestorOn', id: selectedUser}, '*');					
+				}
+			}
+		});
+
+	} else {
+		$.prompt("Select a participant and try again",
+		    {
+			title: "Desktop Remote Control",
+			persistent: false
+		    }
+		);   
+	}   
    	return;
    }
    
@@ -279,9 +313,12 @@ function remoteControl()
 	isRemoteControl = false;
 	Toolbar.changeRemoteControlButtonState(false);
 
-	var msg = $msg({to: roomName + "/" + selectedUser, type: 'chat'});
-	msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'terminate'}).up();
-	connection.send(msg);   	
+	if (selectedUser)
+	{
+		var msg = $msg({to: roomName + "/" + selectedUser, type: 'chat'});
+		msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'terminate'}).up();
+		connection.send(msg);  
+	}
 
    
    } else {
@@ -361,14 +398,21 @@ function toggleScreenSharing() {
         
 	if (remoteControlled)
 	{
-		var msg = $msg({to: roomName + "/" + remoteController, type: 'chat'});
-		msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'terminated'}).up();
-		connection.send(msg);  
-
-		remoteControlled = false;
-		remoteController = null;		
-    		window.postMessage({ type: 'ofmeetSetRequestorOff'}, '*');		
+		termnateRemoteControl();			
 	}        
     }
+}
+/*
+ * Termnate Remote Control
+ */
+function termnateRemoteControl() 
+{
+	var msg = $msg({to: roomName + "/" + remoteController, type: 'chat'});
+	msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'terminated'}).up();
+	connection.send(msg);  
+
+	remoteControlled = false;
+	remoteController = null;		
+	window.postMessage({ type: 'ofmeetSetRequestorOff'}, '*');
 }
 
