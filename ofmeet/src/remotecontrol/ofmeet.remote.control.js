@@ -139,9 +139,19 @@ function handleEvents (data)
 	
 	if (data.move) 
 	{
-		//console.log("ofmeet.remote.control mouse move", data.x, data.y, screenSize.height, screenSize.width, pos.x, pos.y);	
+		//console.log("ofmeet.remote.control mouse move", data.x, data.y, screenSize.height, screenSize.width);	
 		robot.moveMouse(data.x, data.y) // move to remotes pos
 	}
+	
+	if (data.wheel) 
+	{
+		console.log("ofmeet.remote.control mouse wheel", data.delta);	
+		
+		if (data.delta > 0)
+			robot.scrollMouse(data.delta, "up");
+		else
+			robot.scrollMouse(-data.delta, "down");		
+	}	
 	
 	if (data.up) 
 	{

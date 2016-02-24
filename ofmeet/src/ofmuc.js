@@ -105,9 +105,20 @@ Strophe.addConnectionPlugin('ofmuc', {
 		if (isRemoteControl)
 		{
 			var data = getMouseData(e)		
-			console.log('send mouseup', data)
+			console.log('send mousedown', data)
 
 			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"down": ' + true + ', "button": ' + e.button + ', "x": ' + data.x + ', "y": ' + data.y + '}');				
+			that.connection.send(msg);			
+		}
+	});	
+	
+	window.addEventListener('mousewheel', function (e) 
+	{ 		
+		if (isRemoteControl)
+		{
+			console.log('send mousewheel', e.wheelDelta)
+
+			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"wheel": ' + true + ', "delta": ' + e.wheelDelta + '}');				
 			that.connection.send(msg);			
 		}
 	});	
