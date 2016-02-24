@@ -335,7 +335,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 				isRemoteControl = true;
 				Toolbar.changeRemoteControlButtonState(true);
 				
-				$.prompt("Your now have remote desktop control of " + requestor,
+				$.prompt("You now have remote desktop control of " + requestor,
 				    {
 					title: "Desktop Remote Control",
 					persistent: false
