@@ -188,18 +188,18 @@ var Toolbar = (function (my) {
      */
     my.toggleFullScreen = function () 
     {
-        var fsElement = null;
-        
-        if (isRemoteControl)
-        	fsElement = document.querySelector('#largeVideo');
-        	
-        else if (connection.ofmuc.shareApp || connection.ofmuc.sharePDF || connection.ofmuc.appRunning || connection.ofmuc.appFrame)
-        	fsElement = document.querySelector('#presentation');
-        else
-        	fsElement = document.documentElement;
-        	
+        if (!document.mozFullScreen && !document.webkitIsFullScreen) 
+        {        
+		var fsElement = null;
 
-        if (!document.mozFullScreen && !document.webkitIsFullScreen) {
+		if (isRemoteControl)
+			fsElement = document.querySelector('#largeVideo');
+
+		else if (connection.ofmuc.shareApp || connection.ofmuc.sharePDF || connection.ofmuc.appRunning || connection.ofmuc.appFrame)
+			fsElement = document.querySelector('#presentation');
+		else
+			fsElement = document.documentElement;
+        
             //Enter Full Screen
             if (fsElement.mozRequestFullScreen) {
                 fsElement.mozRequestFullScreen();

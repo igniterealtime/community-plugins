@@ -136,13 +136,7 @@ function messageWebSocket(data, flags)
 function handleEvents (data) 
 {
 	//console.log("handleEvents", data);
-	
-	if (data.move) 
-	{
-		//console.log("ofmeet.remote.control mouse move", data.x, data.y, screenSize.height, screenSize.width);	
-		robot.moveMouse(data.x, data.y) // move to remotes pos
-	}
-	
+
 	if (data.wheel) 
 	{
 		console.log("ofmeet.remote.control mouse wheel", data.delta);	
@@ -153,19 +147,35 @@ function handleEvents (data)
 			robot.scrollMouse(-data.delta, "down");		
 	}	
 	
+	if (data.move) 
+	{
+		//console.log("ofmeet.remote.control mouse move", data);
+		
+    		var x = scale(data.x, 0, data.width, 0, screenSize.width);
+    		var y = scale(data.y, 0, data.height, 0, screenSize.height);
+    		
+		robot.moveMouse(x, y);
+	}
+		
 	if (data.up) 
 	{
-		console.log("ofmeet.remote.control mouse up", data.x, data.y, screenSize.height, screenSize.width);
+		console.log("ofmeet.remote.control mouse up", data);
+		
+    		var x = scale(data.x, 0, data.width, 0, screenSize.width);
+    		var y = scale(data.y, 0, data.height, 0, screenSize.height);
 	
-		robot.moveMouse(data.x, data.y);
+		robot.moveMouse(x, y);
 		robot.mouseToggle("up", data.button == 0 ? "left" : (data.button == 1 ? "middle" : "right"));
 	}
 	
 	if (data.down) 
 	{
-		console.log("ofmeet.remote.control mouse down", data.x, data.y, screenSize.height, screenSize.width);
+		console.log("ofmeet.remote.control mouse down", data);
+		
+    		var x = scale(data.x, 0, data.width, 0, screenSize.width);
+    		var y = scale(data.y, 0, data.height, 0, screenSize.height);
 	
-		robot.moveMouse(data.x, data.y);
+		robot.moveMouse(x, y);
 		robot.mouseToggle("down", data.button == 0 ? "left" : (data.button == 1 ? "middle" : "right"));
 	}	
 
@@ -206,4 +216,8 @@ function handleEvents (data)
 			else console.log('did not type ' + k)
 		}
 	}
+}
+
+function scale (x, fromLow, fromHigh, toLow, toHigh) {
+  return (x - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow
 }

@@ -61,17 +61,15 @@ Strophe.addConnectionPlugin('ofmuc', {
 		if (that.video) 
 		{
 			var videoSize = that.video.getBoundingClientRect();
-			data.x = scale(e.clientX - videoSize.left, 0, videoSize.width, 0, screen.width);
-			data.y = scale(e.clientY - videoSize.top, 0, videoSize.height, 0, screen.height);			
+			
+			data.x = e.clientX - videoSize.left;
+			data.y = e.clientY - videoSize.top;			
+			data.height = videoSize.height;
+			data.width = videoSize.width;						
 		}
 		return data
 	}
 	
-	var scale = function (x, fromLow, fromHigh, toLow, toHigh) 
-	{
-		return (x - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow
-	}	
-
 	window.addEventListener("contextmenu", function(e) 	// Block context menu so right-click gets sent properly
 	{
 		cancelEvent(e);
@@ -83,7 +81,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 		if (isRemoteControl)
 		{
 			var data = getMouseData(e)		
-			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"move": ' + true + ', "x": ' + data.x + ', "y": ' + data.y + '}');				
+			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"move": ' + true + ', "x": ' + data.x + ', "y": ' + data.y + ', "width": ' + data.width + ', "height": ' + data.height + '}');				
 			that.connection.send(msg);			
 		}
 	});
@@ -93,9 +91,9 @@ Strophe.addConnectionPlugin('ofmuc', {
 		if (isRemoteControl)
 		{
 			var data = getMouseData(e)		
-			console.log('send mouseup', data)
+			//console.log('send mouseup', data)
 
-			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"up": ' + true + ', "button": ' + e.button + ', "x": ' + data.x + ', "y": ' + data.y + '}');				
+			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"up": ' + true + ', "button": ' + e.button + ', "x": ' + data.x + ', "y": ' + data.y + ', "width": ' + data.width + ', "height": ' + data.height + '}');				
 			that.connection.send(msg);			
 		}
 	});
@@ -105,9 +103,9 @@ Strophe.addConnectionPlugin('ofmuc', {
 		if (isRemoteControl)
 		{
 			var data = getMouseData(e)		
-			console.log('send mousedown', data)
+			//console.log('send mousedown', data)
 
-			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"down": ' + true + ', "button": ' + e.button + ', "x": ' + data.x + ', "y": ' + data.y + '}');				
+			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"down": ' + true + ', "button": ' + e.button + ', "x": ' + data.x + ', "y": ' + data.y + ', "width": ' + data.width + ', "height": ' + data.height + '}');				
 			that.connection.send(msg);			
 		}
 	});	
@@ -116,7 +114,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 	{ 		
 		if (isRemoteControl)
 		{
-			console.log('send mousewheel', e.wheelDelta)
+			//console.log('send mousewheel', e.wheelDelta)
 
 			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"wheel": ' + true + ', "delta": ' + e.wheelDelta + '}');				
 			that.connection.send(msg);			
@@ -291,21 +289,42 @@ Strophe.addConnectionPlugin('ofmuc', {
 
 			if (action == "request")	// requested
 			{
-				var msg = $msg({to: from, type: 'chat'});			
+				var msg2 = $msg({to: from, type: 'chat'});			
 				
 				if (!isUsingScreenStream || remoteControlled)
 				{
-					msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'rejected'}).up();
+					msg2.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'rejected'}).up();
+					that.connection.send(msg2);					
 					
 				} else {
-					msg.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'accepted'}).up();
-					remoteControlled = true;
-					remoteController = requestor;
-    					
-    					window.postMessage({ type: 'ofmeetSetRequestorOn', id: requestor}, '*');					
-				}
-				
-				that.connection.send(msg);				
+
+					$.prompt(requestor + ' would like to control your desktop?',
+					{
+						title: "Desktop Remote Control",
+						persistent: false,
+						buttons: { "Permit": true , "Deny": false},
+						defaultButton: 1,     
+						loaded: function(event) {
+						},			
+						submit: function(e,v,m,f) 
+						{
+							if(v)
+							{
+								msg2.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'accepted'}).up();								
+								
+								remoteControlled = true;
+								remoteController = requestor;
+
+								window.postMessage({ type: 'ofmeetSetRequestorOn', id: requestor}, '*');
+								
+							} else {
+								msg2.c('remotecontrol', {xmlns: 'http://igniterealtime.org/protocol/remotecontrol', action: 'rejected'}).up();							
+							}
+							
+							that.connection.send(msg2);							
+						}
+					});									
+				}				
 			}
 			else
 			
