@@ -186,8 +186,18 @@ var Toolbar = (function (my) {
      * Toggles the application in and out of full screen mode
      * (a.k.a. presentation mode in Chrome).
      */
-    my.toggleFullScreen = function () {
-        var fsElement = document.documentElement;
+    my.toggleFullScreen = function () 
+    {
+        var fsElement = null;
+        
+        if (isRemoteControl)
+        	fsElement = document.querySelector('#largeVideo');
+        	
+        else if (connection.ofmuc.shareApp || connection.ofmuc.sharePDF || connection.ofmuc.appRunning || connection.ofmuc.appFrame)
+        	fsElement = document.querySelector('#presentation');
+        else
+        	fsElement = document.documentElement;
+        	
 
         if (!document.mozFullScreen && !document.webkitIsFullScreen) {
             //Enter Full Screen

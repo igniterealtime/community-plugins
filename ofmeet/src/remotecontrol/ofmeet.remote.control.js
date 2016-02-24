@@ -143,24 +143,30 @@ function handleEvents (data)
 		robot.moveMouse(data.x, data.y) // move to remotes pos
 	}
 	
-	if (data.click) 
+	if (data.up) 
 	{
-		var pos = robot.getMousePos()	
-		console.log("ofmeet.remote.control mouse click", data.x, data.y, screenSize.height, screenSize.width, pos.x, pos.y);
+		console.log("ofmeet.remote.control mouse up", data.x, data.y, screenSize.height, screenSize.width);
 	
-		robot.moveMouse(data.x, data.y) // move to remotes pos
-		robot.mouseToggle("up", "left") // set mouse position to up
-		robot.mouseClick() // click on remote click spot
-		robot.moveMouse(pos.x, pos.y) // go back to hosts position
+		robot.moveMouse(data.x, data.y);
+		robot.mouseToggle("up", data.button == 0 ? "left" : (data.button == 1 ? "middle" : "right"));
+	}
+	
+	if (data.down) 
+	{
+		console.log("ofmeet.remote.control mouse down", data.x, data.y, screenSize.height, screenSize.width);
+	
+		robot.moveMouse(data.x, data.y);
+		robot.mouseToggle("down", data.button == 0 ? "left" : (data.button == 1 ? "middle" : "right"));
 	}	
 
 	if (data.key) 
 	{
-		var k = vkey[data.key].toLowerCase()
+		var k = vkey[data.key].toLowerCase();
 	
 		console.log("ofmeet.remote.control key", k, data);
 	
-		if (k === '<space>') k = ' '
+		if (k === '<space>') k = ' ';
+		
 		var modifiers = []
 		if (data.shift) modifiers.push('shift')
 		if (data.control) modifiers.push('control')

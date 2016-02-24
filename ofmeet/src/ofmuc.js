@@ -72,6 +72,12 @@ Strophe.addConnectionPlugin('ofmuc', {
 		return (x - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow
 	}	
 
+	window.addEventListener("contextmenu", function(e) 	// Block context menu so right-click gets sent properly
+	{
+		cancelEvent(e);
+		
+	}, false);
+    
 	window.addEventListener('mousemove', function (e) 
 	{ 		
 		if (isRemoteControl)
@@ -81,7 +87,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 			that.connection.send(msg);			
 		}
 	});
-	
+
 	window.addEventListener('mouseup', function (e) 
 	{ 		
 		if (isRemoteControl)
@@ -89,7 +95,19 @@ Strophe.addConnectionPlugin('ofmuc', {
 			var data = getMouseData(e)		
 			console.log('send mouseup', data)
 
-			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"click": ' + true + ', "x": ' + data.x + ', "y": ' + data.y + '}');				
+			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"up": ' + true + ', "button": ' + e.button + ', "x": ' + data.x + ', "y": ' + data.y + '}');				
+			that.connection.send(msg);			
+		}
+	});
+	
+	window.addEventListener('mousedown', function (e) 
+	{ 		
+		if (isRemoteControl)
+		{
+			var data = getMouseData(e)		
+			console.log('send mouseup', data)
+
+			var msg = $msg({to: "remotecontrol-" + selectedUser + "@" + config.hosts.domain}).c("m").t('{"down": ' + true + ', "button": ' + e.button + ', "x": ' + data.x + ', "y": ' + data.y + '}');				
 			that.connection.send(msg);			
 		}
 	});	
