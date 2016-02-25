@@ -1220,7 +1220,8 @@ function isAudioMuted()
 
 // Starts or stops the recording for the conference.
 function toggleRecording() {
-    Recording.toggleRecording();
+    //Recording.toggleRecording();
+    connection.ofmuc.toggleRecording();	//using call control component to access vb conference object
 }
 
 /**

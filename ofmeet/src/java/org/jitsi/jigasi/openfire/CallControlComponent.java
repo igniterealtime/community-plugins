@@ -156,22 +156,14 @@ public class CallControlComponent extends AbstractComponent
 		if (sipService != null) sipService.stop();
 	}
 
-	public void recordCall(Conference conference, String token, String state)
+	public boolean recordCall(Conference conference, String token, String state)
 	{
-		String focusJid = conference.getFocus();
-		String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
-
-		Log.info("CallControlComponent - recordCall " + token + " " + state + " " + focusJid);
-
-		IQ iq = new IQ(IQ.Type.set);
-		iq.setTo("ofmeet-jitsi-videobridge."+domain);
-		iq.setFrom(focusJid);
-
-		Element colibri = iq.setChildElement("conference", "http://jitsi.org/protocol/colibri");
-		colibri.addAttribute("id", conference.getID());
-		colibri.addElement("recording").addAttribute("state", state).addAttribute("token", token);
-
-		sendPacket(iq);
+		if (token.equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.secret", "secret")))
+		{
+			conference.setRecording(state.equals("true"));
+			return true;
+		}
+		return false;
 	}
 
 	private void makeCall(Conference conference, String confJid, String to, String callId, String username, long startTimestamp)
@@ -661,7 +653,11 @@ public class CallControlComponent extends AbstractComponent
 
 						if (conference != null)
 						{
-							recordCall(conference, token, state);
+							if (recordCall(conference, token, state) == false)
+							{
+								Log.error("CallControlComponent - can't set recording with " + token + " " + state);
+								reply.setError(PacketError.Condition.item_not_found);
+							}
 
 						} else {
 							Log.error("CallControlComponent - can't find conference " + confId);
