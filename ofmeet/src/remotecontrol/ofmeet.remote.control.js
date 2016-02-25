@@ -42,7 +42,7 @@ function handleRequest(request, response)
 {
     response.end('ok');
     
-    console.log('ofmeet.remote.control recieved request: ' + request.url);
+    console.log('ofmeet.remote.control received request: ' + request.url);
     
     var pos = request.url.indexOf("?");
     
