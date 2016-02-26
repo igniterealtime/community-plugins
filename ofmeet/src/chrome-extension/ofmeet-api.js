@@ -30638,8 +30638,9 @@ var ofmeet = (function(of)
 		},
 	 });
 
+
 	Strophe.addConnectionPlugin('intercom', 
-	 {
+	{
 		connection: null,
 		audioChannels: {},
 		audioStreams: {}, 
@@ -30652,182 +30653,150 @@ var ofmeet = (function(of)
 			console.log("strophe plugin intercom enabled");  
 		},   
 
+		createIntercom: function(audioElement) 
+		{                
+			console.log('createIntercom', audioElement); 
+
+			this.modifySsrc = false;			
+			var that = this;
+			this.audioChannels = {};					
+
+			navigator.webkitGetUserMedia({audio: true, video: false}, function(stream)
+			{
+				that._sendOffer(stream, "handset", "handset", audioElement);	
+				that.myAudioStream = stream;
+
+			}, function(error) {
+
+				console.error("No audio device found");
+			});
+		},
+		
+		expireIntercom: function()
+		{
+			console.log("expireIntercom");
+
+			var device = "handset";
+
+			if (this.audioChannels[device] && this.audioChannels[device].peerconnection)
+			{
+					this.audioChannels[device].peerconnection.close();
+			}
+
+			if (this.audioChannels[device].localStream)
+			{
+				this.audioChannels[device].localStream.getAudioTracks().forEach(function (track) {
+				    track.stop();
+				});					
+			}
+
+			var iq = $iq({to: "ofmeet-jitsi-videobridge." + this.connection.domain, type: 'get'});
+
+			iq.c('conference', {xmlns: 'http://jitsi.org/protocol/colibri', id: this.audioChannels[device].confId});                  
+			iq.c('content', {name: 'audio'}).c('channel', {id: this.audioChannels[device].audioId, expire: '0'});
+
+			var that = this;
+
+			this.connection.sendIQ(iq, 
+
+				function (res) {
+				    console.log('expireIntercom ok', res);
+				    $(document).trigger('intercom.expired', that.audioChannels[device]);                                                                                  
+				},
+
+				function (err) {
+				    console.error('expireIntercom error', err);                                                 
+				}
+			); 
+
+			this.audioChannels[device].peerconnection = null;
+			this.audioChannels[device].localStream = null;
+		},                             
+		
 		setDirection: function(direction) 
 		{
 			console.log('setDirection', this.audioChannels["handset"].audioId, direction);   
 
-			var iq = $iq({to: "ofmeet-jitsi-videobridge." + this.connection.domain, type: 'get'});
-
-			iq.c('conference', {xmlns: 'http://jitsi.org/protocol/colibri', id: config.globalConferenceId});                       
-			iq.c('content', {name: 'audio'}).c('channel', {id: this.audioChannels["handset"].audioId, direction: direction});
-
-			this.connection.sendIQ(iq, function (resp) 
+			if (this.audioChannels["handset"].audioId)
 			{
-				console.info('setDirection ok');  
+				var iq = $iq({to: "ofmeet-jitsi-videobridge." + this.connection.domain, type: 'get'});
 
-			}, function (err) {
+				iq.c('conference', {xmlns: 'http://jitsi.org/protocol/colibri', id: config.globalConferenceId});                       
+				iq.c('content', {name: 'audio'}).c('channel', {id: this.audioChannels["handset"].audioId, direction: direction});
 
-				console.error('setDirection', err);                                                
-			});                           
-		},                
-
-		enableStream: function(stream, flag)
-		{                	
-			if (stream)
-			{
-				var localTracks = stream.getAudioTracks();
-
-				for (var idx = 0; idx < localTracks.length; idx++) 
+				this.connection.sendIQ(iq, function (resp) 
 				{
-				    localTracks[idx].enabled = flag;					    
-				}
+					console.info('setDirection ok');  
+
+				}, function (err) {
+
+					console.error('setDirection', err);                                                
+				});   
+			} else {
+				console.error("Intercom not initialised");
 			}
 		},
-
-		enableRemoteTracks: function(name, flag)
+		
+		enableLocalStream: function(flag)
 		{
-			console.log("enableRemoteTracks", name, flag);
-			this.enableStream(this.audioStreams[name], flag);
+			this._enableStream(this.myAudioStream, flag);				               
 		},
-
+		
+		enableRemoteStream: function(username, flag)
+		{
+			this._enableStream(this.audioStreams[username], flag);				               
+		},		
+		
 		enableRemoteStreams: function(participants, flag)
 		{
 			for (var i=0; i<participants.length; i++)
 			{
-				this.enableRemoteTracks(participants[i], flag);	
+				this._enableStream(this.audioStreams[participants[i]], flag);				
 			}                
 		},
-
-		streamReady: function(stream)
+		
+		handleSSRC: function(action, ssrc, label)
 		{
-			var me = Strophe.getNodeFromJid(this.connection.jid);
-
-			this.enableStream(stream, false);	
-
 			var that = this;
-
-			if (stream.id == me)
+			
+			if (that.audioChannels["handset"])
 			{
-				setTimeout(function() 
+				var sdp = new SDP(that.audioChannels["handset"].peerconnection.remoteDescription.sdp);
+
+				if (action == "add")
 				{
-					that.enableStream(that.myAudioStream, false);
-					that.setDirection("inactive");	
-
-				}, 1000);
-			}
-
-		},
-
-		handleStreamEvent: function (event) 
-		{			
-			var that = this;		
-
-			console.log("handleStreamEvent", event);				
-
-			if (event.event == "callstate")
-			{															
-				if (event.state == "connected" || event.state == "conferenced")
-				{
-					console.log("connected/conferenced streams",that.myAudioStream, event.wire.participants);
-
-					that.enableRemoteStreams(event.wire.participants, true);
-					that.enableStream(that.myAudioStream, true);
-					that.setDirection("sendrecv");	
-				}	
-
-				if (event.state == "idle")
-				{
-					console.log("idle streams",that.myAudioStream, event.wire);
-
-					that.enableStream(that.myAudioStream, false);					
-					that.enableRemoteStreams(event.wire.participants, false);
-					that.setDirection("inactive");	
+					sdp.media[0] += 'a=ssrc:' + ssrc + ' ' + 'cname:' + label + '\r\n';
+					sdp.media[0] += 'a=ssrc:' + ssrc + ' ' + 'label:' + label + '\r\n';
+					sdp.media[0] += 'a=ssrc:' + ssrc + ' ' + 'msid:' + label + ' ' +  label + '\r\n';
+					sdp.media[0] += 'a=ssrc:' + ssrc + ' ' + 'mslabel:' + label + '\r\n';  						
+				}
+				
+				else {
+					sdp.removeMediaLines(0, 'a=ssrc:' + ssrc);
 				}
 
-				if (event.state == "busy")
-				{
-					console.log("busy streams",that.myAudioStream, event.wire);					
+				sdp.raw = sdp.session + sdp.media.join('');
 
-					that.enableRemoteStreams(event.wire.participants, event.wire.action == "attach_wire");
+				that.audioChannels["handset"].peerconnection.setRemoteDescription(new RTCSessionDescription({type: 'offer', sdp: sdp.raw}		
 
-					var me = Strophe.getNodeFromJid(that.connection.jid);						
+					), function() {
+					    console.log('handleSSRC ' + action + ' modify ok', that.audioChannels["handset"].peerconnection.signalingState);			    
 
-					if (event.wire.username == me)
-					{
-						that.enableStream(that.myAudioStream, event.wire.action == "attach_wire");					
-						that.setDirection("inactive");						
-					}
-				}					
-			}
-
-			if (event.action == "add_ssrc" || event.action == "remove_ssrc")
-			{
-				that.modifySsrc = true;
-
-				if (that.audioChannels[event.device])
-				{
-					var sdp = new SDP(that.audioChannels[event.device].peerconnection.remoteDescription.sdp);
-					var label = Strophe.getNodeFromJid(event.endpoint);
-					var ssrc = event.ssrc;
-
-					if (event.action == "add_ssrc")
-					{
-						sdp.media[0] += 'a=ssrc:' + ssrc + ' ' + 'cname:' + label + '\r\n';
-						sdp.media[0] += 'a=ssrc:' + ssrc + ' ' + 'label:' + label + '\r\n';
-						sdp.media[0] += 'a=ssrc:' + ssrc + ' ' + 'msid:' + label + ' ' +  label + '\r\n';
-						sdp.media[0] += 'a=ssrc:' + ssrc + ' ' + 'mslabel:' + label + '\r\n';  						
-					}
-					else
-
-					if (event.action == "remove_ssrc")
-					{
-						sdp.removeMediaLines(0, 'a=ssrc:' + ssrc);
-					}
-
-
-					sdp.raw = sdp.session + sdp.media.join('');
-
-					that.audioChannels[event.device].peerconnection.setRemoteDescription(new RTCSessionDescription({type: 'offer', sdp: sdp.raw}		
-
-						), function() {
-						    console.log('onMessage ' + event.action + 'modify ok', that.audioChannels[event.device].peerconnection.signalingState);			    
-
-						}, function(error) {
-						    console.log('onMessage ' + event.action + 'modify failed');
-					});						
-				}
-			}
-
-			return true;
-
-		},		
-
-		createWebrtcDevice: function(audioElement, device, deviceId) 
-		{                
-			console.log('createWebrtcDevice', device, deviceId); 
-
-			this.modifySsrc = false;
-
-			if (device == "handset" && deviceId)
-			{			
-				var that = this;
-				this.audioChannels = {};					
-
-				navigator.webkitGetUserMedia({audio: true, video: false}, function(stream)
-				{
-					that.sendOffer(stream, device, deviceId, audioElement);	
-					that.myAudioStream = stream;
-
-				}, function(error) {
-
-					//console.error("No audio device found");
+					}, function(error) {
+					    console.log('onMessage ' + action + ' modify failed');
 				});
-			}
+				
+			} else {
+				console.error("Intercom not initialised");
+			}		
 		},
-
-		sendOffer: function(stream, device, deviceId, audioElement) 
+		
+		
+		
+		
+		_sendOffer: function(stream, device, deviceId, audioElement) 
 		{
-			//console.log('sendOffer', stream, device, deviceId);   
+			//console.log('_sendOffer', stream, device, deviceId);   
 
 			var that = this;           
 
@@ -30838,7 +30807,7 @@ var ofmeet = (function(of)
 
 			that.connection.sendIQ(iq, function (offer) 
 			{
-					that.handleOffer(offer, device, deviceId, stream, audioElement);
+					that._handleOffer(offer, device, deviceId, stream, audioElement);
 
 			}, function (err) {
 
@@ -30846,7 +30815,7 @@ var ofmeet = (function(of)
 			});                           
 		},
 
-		handleOffer: function(offer, device, deviceId, stream, audioElement) 
+		_handleOffer: function(offer, device, deviceId, stream, audioElement) 
 		{
 			var audioDirection = "sendrecv";
 			var audioBandwidth = "256";
@@ -30857,7 +30826,7 @@ var ofmeet = (function(of)
 
 			var offerSDP = new SDP(SDPHeader + SDPAudio);
 
-			//console.log("handleOffer SDP object", offerSDP);
+			//console.log("_handleOffer SDP object", offerSDP);
 
 			var that = this;
 			var confId = null;
@@ -30884,7 +30853,7 @@ var ofmeet = (function(of)
 				{                              
 					var name = $(this).attr('name'); 
 
-					//console.log("handleOffer media ", name);						
+					//console.log("_handleOffer media ", name);						
 
 					if (name == "data")
 					{
@@ -30903,7 +30872,7 @@ var ofmeet = (function(of)
 							dataId = $(this).attr('id');
 							that.audioChannels[device].dataId = dataId;
 
-							//console.log("handleOffer data track " + that.audioChannels[device].dataId);  
+							//console.log("_handleOffer data track " + that.audioChannels[device].dataId);  
 							var zindex = 0;
 
 							$(this).find('transport').each(function() 
@@ -30945,7 +30914,7 @@ var ofmeet = (function(of)
 
 							dataSDP += "a=mid:data\r\n";
 
-							//console.log("handleOffer data SDP\n", dataSDP);
+							//console.log("_handleOffer data SDP\n", dataSDP);
 
 							offerSDP.media[1] = dataSDP;
 						}						
@@ -30959,7 +30928,7 @@ var ofmeet = (function(of)
 							audioId = $(this).attr('id');
 							that.audioChannels[device].audioId = audioId;
 
-							//console.log("handleOffer audio track " + that.audioChannels[device].audioId);  
+							//console.log("_handleOffer audio track " + that.audioChannels[device].audioId);  
 							var zindex = 0;
 
 							$(this).find('source').each(function() 
@@ -30967,7 +30936,7 @@ var ofmeet = (function(of)
 								var ssrc = $(this).attr('ssrc');
 								var label = Strophe.getNodeFromJid(that.connection.jid);
 
-								console.log("handleOffer source", ssrc, label);
+								console.log("_handleOffer source", ssrc, label);
 
 								offerSDP.media[0] += 'a=ssrc:' + ssrc + ' ' + 'cname:' + label + '\r\n';
 								offerSDP.media[0] += 'a=ssrc:' + ssrc + ' ' + 'label:' + label + '\r\n';
@@ -31007,7 +30976,7 @@ var ofmeet = (function(of)
 			offerSDP.raw = offerSDP.session + offerSDP.media.join('');
 			that.audioChannels[device].sdp = offerSDP.raw;
 
-			//console.log("handleOffer offerSDP.raw", offerSDP.raw);         
+			//console.log("_handleOffer offerSDP.raw", offerSDP.raw);         
 
 			that.audioChannels[device].peerconnection = new webkitRTCPeerConnection(config.iceServers, {'optional': [{'DtlsSrtpKeyAgreement': 'true'}]}); 			
 
@@ -31017,7 +30986,7 @@ var ofmeet = (function(of)
 
 					if (!event.candidate) 
 					{
-						that.sendAnswer(confId, device);
+						that._sendAnswer(confId, device);
 					}
 
 			}
@@ -31066,7 +31035,7 @@ var ofmeet = (function(of)
 
 					console.info("Data channel new dominant speaker event: ",   dominantSpeakerEndpoint);
 
-					$(document).trigger('dominantspeakerchanged', [dominantSpeakerEndpoint]);
+					$(document).trigger('intercom.dominantspeakerchanged', [dominantSpeakerEndpoint]);
 				    }
 				    else if ("InLastNChangeEvent" === colibriClass)
 				    {
@@ -31089,7 +31058,7 @@ var ofmeet = (function(of)
 						newValue = new Boolean(newValue).valueOf();
 					    }
 					}
-					$(document).trigger('inlastnchanged', [oldValue, newValue]);
+					$(document).trigger('intercom.inlastnchanged', [oldValue, newValue]);
 				    }
 				    else if ("LastNEndpointsChangeEvent" === colibriClass)
 				    {
@@ -31103,24 +31072,24 @@ var ofmeet = (function(of)
 
 					console.log("Data channel new last-n event: ",  lastNEndpoints, endpointsEnteringLastN, obj);
 
-					$(document).trigger('lastnchanged', [lastNEndpoints, endpointsEnteringLastN, stream]);
+					$(document).trigger('intercom.lastnchanged', [lastNEndpoints, endpointsEnteringLastN, stream]);
 				    }
 
 				    else if ("SimulcastLayersChangedEvent" === colibriClass)
 				    {
-					$(document).trigger('simulcastlayerschanged', [obj.endpointSimulcastLayers]);
+					$(document).trigger('intercom.simulcastlayerschanged', [obj.endpointSimulcastLayers]);
 				    }
 				    else if ("SimulcastLayersChangingEvent" === colibriClass)
 				    {
-					$(document).trigger('simulcastlayerschanging', [obj.endpointSimulcastLayers]);
+					$(document).trigger('intercom.simulcastlayerschanging', [obj.endpointSimulcastLayers]);
 				    }
 				    else if ("StartSimulcastLayerEvent" === colibriClass)
 				    {
-					$(document).trigger('startsimulcastlayer', obj.simulcastLayer);
+					$(document).trigger('intercom.startsimulcastlayer', obj.simulcastLayer);
 				    }
 				    else if ("StopSimulcastLayerEvent" === colibriClass)
 				    {
-					$(document).trigger('stopsimulcastlayer', obj.simulcastLayer);
+					$(document).trigger('intercom.stopsimulcastlayer', obj.simulcastLayer);
 				    }
 				    else
 				    {
@@ -31149,13 +31118,12 @@ var ofmeet = (function(of)
 
 				if (that.audioChannels[device].peerconnection.signalingState == "have-remote-offer")
 				{
-					$(document).trigger('TL.Event.WireLynk.StreamAdded', {mixer: confId, channel: audioId, data: data, deviceId: deviceId, audioChannels: that.audioChannels[device]});                                                                           
-					TL.trigger(new TL.Event.WireLynk.PrivateWire('{"event": "device", "extension": "' + config[device] + '", "sipUri": "' + deviceId + '", "isConnected": true}'));	                                                                         							
+					$(document).trigger('intercom.stream.added', that.audioChannels[device]);                                                                           
 				}
 
 
 				that.audioStreams[data.stream.id] = data.stream;
-				that.streamReady(data.stream, false);				
+				that._streamReady(data.stream, false);				
 
 				if (!that.modifySsrc)
 				{
@@ -31171,11 +31139,7 @@ var ofmeet = (function(of)
 							that.audioChannels[device].audioElement.volume = 1;
 						}
 
-						that.audioChannels[device].audioElement.src = URL.createObjectURL(data.stream);
-
-						that.audioChannels['speaker1'] = that.audioChannels["handset"];	
-						that.audioChannels['speaker1'].audioElement.src = URL.createObjectURL(data.stream); 				
-
+						that.audioChannels[device].audioElement.src = URL.createObjectURL(data.stream);				
 
 					}, function (error) {
 
@@ -31188,14 +31152,14 @@ var ofmeet = (function(of)
 			that.audioChannels[device].peerconnection.addStream(stream);
 			that.audioChannels[device].peerconnection.setRemoteDescription(new RTCSessionDescription({type: "offer", sdp : offerSDP.raw}));
 
-			$(document).trigger('TL.Event.WireLynk.Offered', {mixer: confId, channel: audioId, device: device, deviceId: deviceId, audioChannels: that.audioChannels[device]});
+			$(document).trigger('intercom.offered', that.audioChannels[device]);
 		},
 
-		sendAnswer: function (confId, device) 
+		_sendAnswer: function (confId, device) 
 		{
 			var audioId = this.audioChannels[device].audioId;			
 
-			//console.log("sendAnswer", confId, audioId, this.audioChannels[device].peerconnection.localDescription.sdp);
+			//console.log("_sendAnswer", confId, audioId, this.audioChannels[device].peerconnection.localDescription.sdp);
 
 			var that = this;
 
@@ -31263,83 +31227,69 @@ var ofmeet = (function(of)
 			var candidates = SDPUtil.find_lines(remoteSDP.media[0], 'a=candidate:', remoteSDP.session);
 
 			candidates.forEach(function (line) {
-					var tmp = SDPUtil.candidateToJingle(line);
-					iq.c('candidate', tmp).up();
+				var tmp = SDPUtil.candidateToJingle(line);
+				iq.c('candidate', tmp).up();
 			});
 
 			tmp = SDPUtil.iceparams(remoteSDP.media[0], remoteSDP.session);
 
 			if (tmp) {
-					iq.attrs(tmp);
-
+				iq.attrs(tmp);
 			}
 
 			this.connection.sendIQ(iq,
 
-					function (res) {
-						//console.log('sendAnswer ok', res);  
-
-						$(res).find('ssrc').each(function() 
-						{	
-							var ssrc = $(this).text();
-							that.audioChannels[device].ssrc = ssrc;
-
-							//of.sendJsonRequest({action: 'add_ssrc', ssrc: ssrc, device: device});
-						});
-
-						$(document).trigger('TL.Event.WireLynk.Answered', {mixer: confId, channel: audioId, device: that.audioChannels[device].device, deviceId: that.audioChannels[device].deviceId, audioChannels: that.audioChannels[device]});                                                              
-					},
-
-					function (err) {
-					    //console.error('sendAnswer error', err);                                 
-					}
-			);                                                                                                                                                                                                                             
-
-		},
-
-		expireWebrtcDevice: function(device)
-		{
-			console.log("expireWebrtcDevice", device);
-
-			if (!device || !this.audioChannels[device]) return;
-
-			if (this.audioChannels[device] && this.audioChannels[device].peerconnection)
-			{
-					this.audioChannels[device].peerconnection.close();
-			}
-
-			if (this.audioChannels[device].localStream)
-			{
-				this.audioChannels[device].localStream.getAudioTracks().forEach(function (track) {
-				    track.stop();
-				});					
-			}
-
-			var iq = $iq({to: "ofmeet-jitsi-videobridge." + this.connection.domain, type: 'get'});
-
-			iq.c('conference', {xmlns: 'http://jitsi.org/protocol/colibri', id: this.audioChannels[device].confId});                  
-			iq.c('content', {name: 'audio'}).c('channel', {id: this.audioChannels[device].audioId, expire: '0'});
-
-			var that = this;
-
-			this.connection.sendIQ(iq, 
-
 				function (res) {
-				    //console.log('expireWebrtcDevice ok', res);
-				    //of.sendJsonRequest({action: 'remove_ssrc', ssrc: that.audioChannels[device].ssrc, device: device});
-				    $(document).trigger('TL.Event.WireLynk.Expired', {mixer: that.audioChannels[device].confId, channel: that.audioChannels[device].audioId, deviceId: that.audioChannels[device].deviceId});                                                                                  
+					//console.log('_sendAnswer ok', res);  
+
+					$(res).find('ssrc').each(function() 
+					{	
+						var ssrc = $(this).text();
+						that.audioChannels[device].ssrc = ssrc;
+						$(document).trigger('intercom.answered', that.audioChannels[device]);                                   							
+					});
 				},
 
 				function (err) {
-				    //console.error('expireWebrtcDevice error', err);                                                 
+				    console.error('_sendAnswer error', err);                                 
 				}
-			); 
+			);                                                                                                                                                                                                                             
+		},  
+		
 
-			this.audioChannels[device].peerconnection = null;
-			this.audioChannels[device].localStream = null;
-		}                              
+		_streamReady: function(stream)
+		{
+			var me = Strophe.getNodeFromJid(this.connection.jid);
+			this._enableStream(stream, false);	
+			var that = this;
+
+			if (stream.id == me)
+			{
+				setTimeout(function() 
+				{
+					that._enableStream(that.myAudioStream, false);
+					that.setDirection("inactive");	
+
+				}, 1000);
+			}
+
+		},		
+
+		_enableStream: function(stream, flag)
+		{                	
+			if (stream)
+			{
+				var tracks = stream.getAudioTracks();
+
+				for (var idx = 0; idx < tracks.length; idx++) 
+				{
+				    tracks[idx].enabled = flag;					    
+				}
+			} else {
+				console.error('Intercom not initialised');
+			}
+		}
 	});             
-
 
 	Strophe.addConnectionPlugin('workgroup',
 	{
@@ -33319,7 +33269,7 @@ var ofmeet = (function(of)
 	    // BAO
 	    connection = new Openfire.Connection(config.bosh);
 	    
-	    connection.resource = of.util.BrowserDetect.browser.toLowerCase() + ":" + of.util.BrowserDetect.version + ":" + of.util.BrowserDetect.OS.toLowerCase();		
+	    connection.resource = of.util.BrowserDetect.browser.toLowerCase() + ":" + of.util.BrowserDetect.version + ":" + of.util.BrowserDetect.OS.toLowerCase() + ":" + Math.round(Math.random() * 10000);		
 	    of.connection = connection;
 
 	    var email = SettingsMenu.getEmail();

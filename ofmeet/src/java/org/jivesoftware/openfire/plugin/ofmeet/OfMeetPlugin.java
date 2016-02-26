@@ -46,9 +46,12 @@ import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
 import org.jivesoftware.openfire.muc.*;
 import org.jivesoftware.openfire.group.*;
+import org.jivesoftware.openfire.session.*;
+import org.jivesoftware.openfire.event.*;
 import org.jivesoftware.openfire.security.SecurityAuditManager;
 import org.jivesoftware.openfire.handler.IQHandler;
 import org.jivesoftware.openfire.IQHandlerInfo;
+import org.jivesoftware.openfire.roster.RosterManager;
 
 import org.xmpp.component.ComponentManager;
 import org.xmpp.component.ComponentManagerFactory;
@@ -75,7 +78,7 @@ import org.jitsi.jicofo.openfire.JicofoPlugin;
 import net.sf.json.*;
 import org.dom4j.*;
 
-public class OfMeetPlugin implements Plugin, ClusterEventListener  {
+public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener  {
 
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
     private final ConcurrentHashMap<String, XMPPServlet.XMPPWebSocket> sockets = new ConcurrentHashMap<String, XMPPServlet.XMPPWebSocket>();
@@ -128,13 +131,13 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 			}
 
 			try {
-				Log.info("OfMeet Plugin - Initialize SIP gateway ");
+				Log.info("OfMeet Plugin - Initialize call control component ");
 
 				jigasiPlugin = new JigasiPlugin();
 				jigasiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
 			}
 			catch (Exception e1) {
-				Log.error("Could NOT Initialize jitsi videobridge", e1);
+				Log.error("Could NOT Initialize jigasi component", e1);
 			}
 
 			String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
@@ -180,9 +183,9 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 
 			try {
 
-				boolean clientControl = XMPPServer.getInstance().getPluginManager().getPlugin("clientControl") != null || XMPPServer.getInstance().getPluginManager().getPlugin("clientcontrol") != null;
+				boolean bookmarks = XMPPServer.getInstance().getPluginManager().getPlugin("bookmarks") != null;
 
-				if (clientControl)
+				if (bookmarks)
 				{
 					new Timer().scheduleAtFixedRate(new TimerTask()
 					{
@@ -205,7 +208,9 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 
 			ServletContextHandler context = new ServletContextHandler(contexts, "/ofmeetws", ServletContextHandler.SESSIONS);
 			context.addServlet(new ServletHolder(new XMPPServlet()),"/server");
+
 			// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
+
 			final List<ContainerInitializer> initializers = new ArrayList<>();
 			initializers.add(new ContainerInitializer(new JettyJasperInitializer(), null));
 			context.setAttribute("org.eclipse.jetty.containerInitializers", initializers);
@@ -217,6 +222,7 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 			context2.setClassLoader(this.getClass().getClassLoader());
 
 			// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
+
 			final List<ContainerInitializer> initializers2 = new ArrayList<>();
 			initializers2.add(new ContainerInitializer(new JettyJasperInitializer(), null));
 			context2.setAttribute("org.eclipse.jetty.containerInitializers", initializers2);
@@ -242,9 +248,14 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 			ofmeetIQHandler = new OfMeetIQHandler();
 			XMPPServer.getInstance().getIQRouter().addHandler(ofmeetIQHandler);
 
-      // Woot node.js server app
-      JiveGlobals.setProperty("js.woot", "woot.js");
+      		// Woot node.js server app
+
+			Log.info("OfMeet Plugin - Setup woot nodejs service");
+
+      		JiveGlobals.setProperty("js.woot", "woot.js");
 			JiveGlobals.setProperty("js.woot.path", pluginDirectory.getAbsolutePath() + File.separator + "apps" + File.separator + "woot" + File.separator + "server");
+
+        	SessionEventDispatcher.addListener(this);
 
 		} catch (Exception e) {
 			Log.error("Could NOT start open fire meetings", e);
@@ -253,6 +264,8 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 
     public void destroyPlugin() {
         try {
+
+        	SessionEventDispatcher.removeListener(this);
 
 			XMPPServer.getInstance().getIQRouter().removeHandler(ofmeetIQHandler);
 			ofmeetIQHandler = null;
@@ -311,6 +324,48 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 		return sockets;
 	}
 
+    private void checkDownloadFolder(File pluginDirectory)
+    {
+		String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
+
+        try
+        {
+			File ofmeetFolderPath = new File(ofmeetHome);
+
+            if(!ofmeetFolderPath.exists())
+            {
+                ofmeetFolderPath.mkdirs();
+
+			}
+
+			List<String> lines = Arrays.asList("Move on, nothing here....");
+			Path file = Paths.get(ofmeetHome + File.separator + "index.html");
+			Files.write(file, lines, Charset.forName("UTF-8"));
+
+			File downloadHome = new File(ofmeetHome + File.separator + "download");
+
+            if(!downloadHome.exists())
+            {
+                downloadHome.mkdirs();
+
+			}
+
+			lines = Arrays.asList("Move on, nothing here....");
+			file = Paths.get(downloadHome + File.separator + "index.html");
+			Files.write(file, lines, Charset.forName("UTF-8"));
+        }
+        catch (Exception e)
+        {
+            Log.error("checkDownloadFolder", e);
+        }
+	}
+
+	//-------------------------------------------------------
+	//
+	//		clustering
+	//
+	//-------------------------------------------------------
+
 	@Override
 	public void joinedCluster()
 	{
@@ -352,6 +407,12 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 		jigasiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
 		jicofoPlugin.initializePlugin(componentManager, manager, pluginDirectory);
 	}
+
+	//-------------------------------------------------------
+	//
+	//		meeting planner
+	//
+	//-------------------------------------------------------
 
 	public void processMeetingPlanner()
 	{
@@ -516,45 +577,40 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 		return buffer.toString();
 	}
 
-    private void checkDownloadFolder(File pluginDirectory)
-    {
-		String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
+	//-------------------------------------------------------
+	//
+	//		session management
+	//
+	//-------------------------------------------------------
 
-        try
-        {
-			File ofmeetFolderPath = new File(ofmeetHome);
+	public void anonymousSessionCreated(Session session)
+	{
+		Log.debug("OfMeet Plugin -  anonymousSessionCreated "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
+	}
 
-            if(!ofmeetFolderPath.exists())
-            {
-                ofmeetFolderPath.mkdirs();
+	public void anonymousSessionDestroyed(Session session)
+	{
+		Log.debug("OfMeet Plugin -  anonymousSessionDestroyed "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
+	}
 
-			}
+	public void resourceBound(Session session)
+	{
+		Log.debug("OfMeet Plugin -  resourceBound "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
+	}
 
-			List<String> lines = Arrays.asList("Move on, nothing here....");
-			Path file = Paths.get(ofmeetHome + File.separator + "index.html");
-			Files.write(file, lines, Charset.forName("UTF-8"));
+	public void sessionCreated(Session session)
+	{
+		Log.debug("OfMeet Plugin -  sessionCreated "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
+	}
 
-			File downloadHome = new File(ofmeetHome + File.separator + "download");
-
-            if(!downloadHome.exists())
-            {
-                downloadHome.mkdirs();
-
-			}
-
-			lines = Arrays.asList("Move on, nothing here....");
-			file = Paths.get(downloadHome + File.separator + "index.html");
-			Files.write(file, lines, Charset.forName("UTF-8"));
-        }
-        catch (Exception e)
-        {
-            Log.error("checkDownloadFolder", e);
-        }
+	public void sessionDestroyed(Session session)
+	{
+		Log.debug("OfMeet Plugin -  sessionDestroyed "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
 	}
 
 	//-------------------------------------------------------
 	//
-	//
+	//		custom IQ handler for user and group properties JSON request/response
 	//
 	//-------------------------------------------------------
 
@@ -579,6 +635,7 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 
 				if ("get_user_properties".equals(action)) getUserProperties(iq.getFrom().getNode(), reply, requestJSON);
 				if ("set_user_properties".equals(action)) setUserProperties(iq.getFrom().getNode(), reply, requestJSON);
+				if ("get_user_groups".equals(action)) getUserGroups(iq.getFrom().getNode(), reply, requestJSON);
 
 				return reply;
 
@@ -656,6 +713,95 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 			}
 		}
 
+		private void getUserGroups(String defaultUsername, IQ reply, JSONObject requestJSON)
+		{
+			Element childElement = reply.setChildElement("response", "http://igniterealtime.org/protocol/ofmeet");
+
+			try {
+				String username = requestJSON.getString("username");
+
+				if (username == null) username = defaultUsername;
+
+				UserManager userManager = XMPPServer.getInstance().getUserManager();
+				User user = userManager.getUser(username);
+
+				Collection<Group> groups = GroupManager.getInstance().getGroups(user);
+				JSONArray groupsJSON = new JSONArray();
+				int index = 0;
+
+				for (Group group : groups)
+				{
+					groupsJSON.put(index++, getJsonFromGroupXml(group.getName()));
+				}
+
+				childElement.setText(groupsJSON.toString());
+
+			} catch (UserNotFoundException e) {
+				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, "User not found"));
+				return;
+
+			} catch (Exception e1) {
+				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, requestJSON.toString() + " " + e1));
+				return;
+			}
+		}
+
+		private JSONObject getJsonFromGroupXml(String groupname)
+		{
+			JSONObject groupJSON = new JSONObject();
+
+			try {
+				Group group = GroupManager.getInstance().getGroup(groupname);
+
+            	boolean isSharedGroup = RosterManager.isSharedGroup(group);
+				Map<String, String> properties = group.getProperties();
+            	String showInRoster = (isSharedGroup ? properties.get("sharedRoster.showInRoster") : "");
+
+            	groupJSON.put("name", group.getName());
+            	groupJSON.put("desc", group.getDescription());
+            	groupJSON.put("count", group.getMembers().size() + group.getAdmins().size());
+            	groupJSON.put("shared", String.valueOf(isSharedGroup));
+            	groupJSON.put("display", (isSharedGroup ? properties.get("sharedRoster.displayName") : ""));
+                groupJSON.put("specified_groups", String.valueOf("onlyGroup".equals(showInRoster) && properties.get("sharedRoster.groupList").trim().length() > 0));
+				groupJSON.put("visibility", showInRoster);
+				groupJSON.put("groups", (isSharedGroup ? properties.get("sharedRoster.groupList") : ""));
+
+				for(Map.Entry<String, String> props : properties.entrySet())
+				{
+					groupJSON.put(props.getKey(), props.getValue());
+				}
+
+				JSONArray membersJSON = new JSONArray();
+				JSONArray adminsJSON = new JSONArray();
+				int i = 0;
+
+				for (JID memberJID : group.getMembers())
+				{
+					JSONObject memberJSON = new JSONObject();
+					memberJSON.put("jid", memberJID.toString());
+					memberJSON.put("name", memberJID.getNode());
+					membersJSON.put(i++, memberJSON);
+				}
+
+				groupJSON.put("members", membersJSON);
+				i = 0;
+
+				for (JID memberJID : group.getAdmins())
+				{
+					JSONObject adminJSON = new JSONObject();
+					adminJSON.put("jid", memberJID.toString());
+					adminJSON.put("name", memberJID.getNode());
+					adminsJSON.put(i++, adminJSON);
+				}
+				groupJSON.put("admins", adminsJSON);
+
+			} catch (Exception e) {
+				Log.error("getJsonFromGroupXml", e);
+			}
+
+			return groupJSON;
+		}
+
 		private String removeNull(String s)
 		{
 			if (s == null)
@@ -666,4 +812,11 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 			return s.trim();
 		}
 	}
+
+	//-------------------------------------------------------
+	//
+	//
+	//
+	//-------------------------------------------------------
+
 }
