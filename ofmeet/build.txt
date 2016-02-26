@@ -48,4 +48,4 @@ jar:
    [delete] Deleting directory C:\projects\community-plugins\ofmeet\build
 
 BUILD SUCCESSFUL
-Total time: 42 seconds
+Total time: 25 seconds

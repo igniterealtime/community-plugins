@@ -30,6 +30,9 @@ import java.util.*;
 import java.text.*;
 import java.security.Principal;
 
+import org.jitsi.videobridge.openfire.PluginImpl;
+import org.jitsi.videobridge.*;
+
 import org.dom4j.*;
 
 import net.sf.json.*;
@@ -39,6 +42,7 @@ public class Config extends HttpServlet
 {
     private static final Logger Log = LoggerFactory.getLogger(Config.class);
 	public static final long serialVersionUID = 24362462L;
+	public static String globalConferenceId = null;
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -158,6 +162,15 @@ public class Config extends HttpServlet
 				Log.info("Config. got xirsys iceSevers " + iceServers);
 			}
 
+			Videobridge videobridge = PluginImpl.component.getVideobridge();
+
+			if (globalConferenceId == null || videobridge.getConference(globalConferenceId, null) == null)
+			{
+				Conference conference = videobridge.createConference(null);
+                conference.setRecording(true);
+                conference.setLastKnownFocus(domain);
+				globalConferenceId = conference.getID();
+			}
 
 			String callControl = "'ofmeet-call-control." + domain + "'";
 
@@ -223,6 +236,7 @@ public class Config extends HttpServlet
 			out.println("    logStats: " + logStats + ",");
 			out.println("    disablePrezi: true,");
 			out.println("    conferences: " + conferences + ",");
+			out.println("    globalConferenceId: '" + globalConferenceId + "',");
 			out.println("    bosh: window.location.protocol + '//' + window.location.host + '/http-bind/'");
 			out.println("};	");
 

@@ -47,6 +47,9 @@ import org.jivesoftware.openfire.user.UserNotFoundException;
 import org.jivesoftware.openfire.muc.*;
 import org.jivesoftware.openfire.group.*;
 import org.jivesoftware.openfire.security.SecurityAuditManager;
+import org.jivesoftware.openfire.handler.IQHandler;
+import org.jivesoftware.openfire.IQHandlerInfo;
+
 import org.xmpp.component.ComponentManager;
 import org.xmpp.component.ComponentManagerFactory;
 
@@ -70,7 +73,7 @@ import org.jitsi.jigasi.openfire.JigasiPlugin;
 import org.jitsi.jicofo.openfire.JicofoPlugin;
 
 import net.sf.json.*;
-
+import org.dom4j.*;
 
 public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 
@@ -84,6 +87,7 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
     private TaskEngine taskEngine = TaskEngine.getInstance();
     private UserManager userManager = XMPPServer.getInstance().getUserManager();
     private ComponentManager componentManager;
+    private OfMeetIQHandler ofmeetIQHandler = null;
 
     public static OfMeetPlugin self;
 
@@ -112,6 +116,7 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 		self = this;
 
 		try {
+
 			try {
 				Log.info("OfMeet Plugin - Initialize jitsi videobridge ");
 
@@ -232,6 +237,11 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 			checkDownloadFolder(pluginDirectory);
         	EmailListener.getInstance().start();
 
+			Log.info("OfMeet Plugin - Initialize IQ handler ");
+
+			ofmeetIQHandler = new OfMeetIQHandler();
+			XMPPServer.getInstance().getIQRouter().addHandler(ofmeetIQHandler);
+
       // Woot node.js server app
       JiveGlobals.setProperty("js.woot", "woot.js");
 			JiveGlobals.setProperty("js.woot.path", pluginDirectory.getAbsolutePath() + File.separator + "apps" + File.separator + "woot" + File.separator + "server");
@@ -243,6 +253,9 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
 
     public void destroyPlugin() {
         try {
+
+			XMPPServer.getInstance().getIQRouter().removeHandler(ofmeetIQHandler);
+			ofmeetIQHandler = null;
 
 			for (XMPPServlet.XMPPWebSocket socket : sockets.values())
 			{
@@ -537,5 +550,120 @@ public class OfMeetPlugin implements Plugin, ClusterEventListener  {
         {
             Log.error("checkDownloadFolder", e);
         }
+	}
+
+	//-------------------------------------------------------
+	//
+	//
+	//
+	//-------------------------------------------------------
+
+    public class OfMeetIQHandler extends IQHandler
+    {
+        public OfMeetIQHandler()
+        {
+			super("Openfire Meetings IQ Handler");
+		}
+
+        @Override public IQ handleIQ(IQ iq)
+        {
+			IQ reply = IQ.createResultIQ(iq);
+
+			try {
+				Log.info("Openfire Meetings handleIQ \n" + iq.toString());
+				final Element element = iq.getChildElement();
+				JID from = iq.getFrom();
+
+				JSONObject requestJSON = new JSONObject(element.getText());
+				String action = requestJSON.getString("action");
+
+				if ("get_user_properties".equals(action)) getUserProperties(iq.getFrom().getNode(), reply, requestJSON);
+				if ("set_user_properties".equals(action)) setUserProperties(iq.getFrom().getNode(), reply, requestJSON);
+
+				return reply;
+
+			} catch(Exception e) {
+				Log.error("Openfire Meetings handleIQ", e);
+				reply.setError(new PacketError(PacketError.Condition.internal_server_error, PacketError.Type.modify, e.toString()));
+				return reply;
+			}
+		}
+
+        @Override public IQHandlerInfo getInfo()
+        {
+			return new IQHandlerInfo("request", "http://igniterealtime.org/protocol/ofmeet");
+		}
+
+		private void setUserProperties(String username, IQ reply, JSONObject requestJSON)
+		{
+			Element childElement = reply.setChildElement("response", "http://igniterealtime.org/protocol/ofmeet");
+
+			try {
+				UserManager userManager = XMPPServer.getInstance().getUserManager();
+				User user = userManager.getUser(username);
+
+				if (requestJSON != null)
+				{
+					Iterator<?> keys = requestJSON.keys();
+
+					while( keys.hasNext() )
+					{
+						String key = (String)keys.next();
+						String value = requestJSON.getString(key);
+
+						user.getProperties().put(key, value);
+					}
+				}
+
+			} catch (Exception e) {
+				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, "User " + username + " " + requestJSON.toString() + " " + e));
+				return;
+			}
+		}
+
+		private void getUserProperties(String defaultUsername, IQ reply, JSONObject requestJSON)
+		{
+			Element childElement = reply.setChildElement("response", "http://igniterealtime.org/protocol/ofmeet");
+
+			try {
+				String username = requestJSON.getString("username");
+
+				if (username == null) username = defaultUsername;
+
+				UserManager userManager = XMPPServer.getInstance().getUserManager();
+				User user = userManager.getUser(username);
+
+				JSONObject userJSON = new JSONObject();
+
+				userJSON.put("username", JID.unescapeNode(user.getUsername()));
+				userJSON.put("name", user.isNameVisible() ? removeNull(user.getName()) : "");
+				userJSON.put("email", user.isEmailVisible() ? removeNull(user.getEmail()) : "");
+
+				for(Map.Entry<String, String> props : user.getProperties().entrySet())
+				{
+					userJSON.put(props.getKey(), props.getValue());
+				}
+
+				childElement.setText(userJSON.toString());
+
+			} catch (UserNotFoundException e) {
+				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, "User not found"));
+				return;
+
+			} catch (Exception e1) {
+				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, requestJSON.toString() + " " + e1));
+				return;
+			}
+		}
+
+		private String removeNull(String s)
+		{
+			if (s == null)
+			{
+				return "";
+			}
+
+			return s.trim();
+		}
 	}
 }

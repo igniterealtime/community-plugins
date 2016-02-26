@@ -108,7 +108,7 @@
 		<%= conference.getID() %>
         </td>
         <td width="15%" align="center">
-            <% if (!"".equals(conference.getFocus())) { %>
+            <% if (conference.getFocus() != null && !"".equals(conference.getFocus())) { %>
                 <%= (new JID(conference.getFocus())).getNode() %>
             <% }
                else { %>
@@ -163,9 +163,9 @@
             <% } %>		
         </td>        
         <td width="1%" align="center" style="border-right:1px #ccc solid;">
-            <a href="ofmeet-expire.jsp?confid=<%= URLEncoder.encode(conference.getID(), "UTF-8") %>&focus=<%= URLEncoder.encode(conference.getFocus(), "UTF-8") %>"
-             title="<fmt:message key="ofmeet.summary.expire" />"
-             ><img src="images/delete-16x16.gif" width="16" height="16" border="0" alt=""></a>
+            <a href="ofmeet-expire.jsp?confid=<%= URLEncoder.encode(conference.getID(), "UTF-8") %>&focus=<%= conference.getFocus() != null ? URLEncoder.encode(conference.getFocus(), "UTF-8") : "&nbsp;" %>" title="<fmt:message key="ofmeet.summary.expire" />">
+            	<img src="images/delete-16x16.gif" width="16" height="16" border="0" alt="">
+            </a>
         </td>
     </tr>
 

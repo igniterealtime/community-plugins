@@ -170,6 +170,8 @@ public class PluginImpl
 		System.setProperty("org.jitsi.videobridge.NAT_HARVESTER_LOCAL_ADDRESS", localAddress);
 		System.setProperty("org.jitsi.videobridge.NAT_HARVESTER_PUBLIC_ADDRESS", publicAddress);
 
+		System.setProperty("org.jitsi.videobridge.defaultOptions", "2");	// allow videobridge access without focus
+
         PropertyEventDispatcher.addListener(this);
 
         // Let's check for custom configuration
