@@ -1078,7 +1078,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 		return;
 	}
 
-	var req = $iq({type: 'set', to: config.hosts.call_control});
+	var req = $iq({type: 'set', to: "ofmeet-call-control." + config.hosts.domain});
 	
 	req.c('record',	{xmlns: 'urn:xmpp:rayo:record:1'});
 	req.c('hint', 	{name: 'JvbToken', value: this.recordingToken}).up();

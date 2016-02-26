@@ -66,9 +66,10 @@ function sendRemoteControl(message)
 			console.log("ofmeet.chrome extension: message sent to remote control", message);
 		}
 
-		if (xhr.status > 400)
+		if (xhr.status >= 400)
 		{
-			console.error("ofmeet.chrome extension: error", xhr);			
+			console.error("ofmeet.chrome extension: error", xhr);	
+			port = chrome.runtime.connectNative('ofmeet.remote.control');				
 		}
 	};
 	xhr.open("GET", 'http://localhost:6060/?' + message, true);
