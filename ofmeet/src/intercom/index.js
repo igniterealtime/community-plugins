@@ -1,9 +1,11 @@
-
+var bgWindow = null;
+var fgWindow = null;
 var intercom = null;
 var conn = null;
-var domain = urlParam("domain");
+var server = urlParam("server");
 var username = urlParam("username");
 var password = urlParam("password");
+
 
 window.addEventListener("unload", function () 
 {
@@ -13,47 +15,32 @@ window.addEventListener("unload", function ()
                 
 window.addEventListener("load", function()
 {
+	chrome.windows.getCurrent(function(win)
+	{
+		fgWindow = win;
+	});
+	
+	chrome.runtime.getBackgroundPage(function (win)
+	{
+		bgWindow = win;
+		bgWindow.ChromeUi.appReady();		
+	});
+	
+	chrome.runtime.onMessage.addListener(function(event, sender, sendResponse) 
+	{
+		bgWindow.ChromeUi.log("onMessage", event, sender);		
+
+		if (event.id == "Intercom.App.Ready") appReady();
+	});
+	
+	
+	
 	intercom = document.querySelector("ui-intercom");
 
 	intercom.addEventListener('Intercom.Action', function (event)
 	{
-		console.log("intercom.action", event);		
+		bgWindow.ChromeUi.log("intercom.action", event);		
 	});
-	
-	$(document).bind('ofmeet.connected', function (event, connection)
-	{
-		console.log("ofmeet connected", connection);
-		
-		ofmeet.visible(false);		
-		connection.intercom.createIntercom();
-		conn = connection;
-	});
-	
-	$(document).bind('intercom.offered', function (event, audio)
-	{
-		console.log("intercom.offered", audio);
-		
-		$("ui-intercom").css("display", "block");
-		$('#pleasewait').css("display", "none");
-	});
-
-	$(document).bind('intercom.stream.added', function (event, audio)
-	{
-		console.log("intercom.stream.added", audio);
-	});
-
-	$(document).bind('intercom.delivered', function (event, audio)
-	{
-		console.log("intercom.delivered", audio);
-	});	
-
-	$(document).bind('ofmeet.ready', function ()
-	{
-		console.log("ofmeet.ready");
-		ofmeet.connect();
-	});	
-		
-	ofmeet.ready(username, password);	
 })
 
 
@@ -63,3 +50,9 @@ function urlParam(name)
 	if (!results) { return undefined; }
 	return unescape(results[1] || undefined);
 };
+
+function appReady()
+{
+	$("ui-intercom").css("display", "block");
+	$('#pleasewait').css("display", "none");
+}

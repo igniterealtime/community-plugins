@@ -248,13 +248,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			ofmeetIQHandler = new OfMeetIQHandler();
 			XMPPServer.getInstance().getIQRouter().addHandler(ofmeetIQHandler);
 
-      		// Woot node.js server app
-
-			Log.info("OfMeet Plugin - Setup woot nodejs service");
-
-      		JiveGlobals.setProperty("js.woot", "woot.js");
-			JiveGlobals.setProperty("js.woot.path", pluginDirectory.getAbsolutePath() + File.separator + "apps" + File.separator + "woot" + File.separator + "server");
-
         	SessionEventDispatcher.addListener(this);
 
 		} catch (Exception e) {

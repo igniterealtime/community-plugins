@@ -13,6 +13,60 @@
 
   <script type="text/javascript">
 
+	var callback = null;
+	var quill = null;
+
+	var socket =
+	{
+		emit: function(op, json)
+		{
+			window.parent.connection.ofmuc.appMessage(json);
+		},
+
+		on: function(op, cb)
+		{
+			callback = cb;
+		}
+	};
+
+	var OpenfireMeetings =
+	{
+		handleAppMessage: function  (json, from)
+		{
+			//try {
+				var obj = JSON.parse(json);
+				window.parent.console.log("remote handleAppMessage", obj, json, from);
+
+				if (callback) callback(obj);
+
+			//} catch (e) { window.parent.console.error("remote handleAppMessage", e)}
+		},
+
+		getContent: function()
+		{
+			window.parent.console.log("remote getContent");
+			return window.q ? window.q.contents() : "";
+		},
+
+		getPrintContent: function()
+		{
+			window.parent.console.log("remote getPrintContent");
+			return this.getContent();
+		},
+
+		setContent: function(contents)
+		{
+			window.parent.console.log("remote setContent", contents);
+
+			var op = {
+				type: 'contents-init',
+				contents: contents
+			}
+
+			if (callback) callback(op);
+		}
+	};
+
 	function urlParam(name)
 	{
 		var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
@@ -26,16 +80,9 @@
 		var user = urlParam("user");
 		var room = urlParam("room");
 
-    var base_url = location.protocol+'//'+location.hostname+':8843';
-
 		window.parent.console.log('remote document ready', user, room);
 
-    $.getScript(base_url + '/socket.io/socket.io.js', function() {
-      var socket = io.connect( base_url, { "force new connection": true } );
-      socket.on('connect', function(){
-        window.q = new Woot.QuillAdapter(socket, room, '#editor', '#toolbar');
-      });
-    });
+     	window.q = new Woot.QuillAdapter(socket, room, '#editor', '#toolbar');
 
 		$('#editor').css({height: window.innerHeight - 60, width: window.innerWidth - 40});
 
@@ -45,9 +92,9 @@
 		});
 
 		window.parent.connection.ofmuc.appEnableCursor(false);
-    window.parent.connection.ofmuc.appReady();
+    	window.parent.connection.ofmuc.appReady();
 
-		window.parent.console.log('remote document ready XX', user, room);
+		window.parent.console.log('remote document ready', user, room);
   });
   </script>
 </head>

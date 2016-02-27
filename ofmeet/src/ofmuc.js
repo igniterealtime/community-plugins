@@ -694,6 +694,11 @@ Strophe.addConnectionPlugin('ofmuc', {
 		} catch (e) { }		
 	}
     },
+    
+    appGetMembers: function ()
+    {
+    	return this.connection.emuc.list_members;
+    },
 
     openAppsDialog: function() {
 	//console.log("ofmuc.openAppsDialog"); 

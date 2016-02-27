@@ -1,0 +1,36 @@
+ {
+   "background": {
+      "persistent": true,
+      "scripts": [ 
+       "background.js", "ofmeet-api.js"
+      ]
+   },
+   "browser_action": {
+      "default_icon": {
+         "19": "icon48.png",
+         "38": "icon48.png"
+      }     
+   },   
+   "content_scripts": [ {
+      "js": [ "content.js"],
+      "matches": [ "https://*/*", "http://*/*" ],      
+      "all_frames": true
+   } ],   
+   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' 'unsafe-inline' data: http: https:",
+   "description": "Always on voice for Openfire Meetings",
+   "externally_connectable": {
+      "matches": [ "*://localhost/*" ,"*://btg199251/*"]
+   },
+   "icons": {
+      "128": "icon128.png",
+      "16": "icon16.png",
+      "48": "icon48.png"
+   },  
+   "manifest_version": 2,
+   "minimum_chrome_version": "34",
+   "name": "Openfire Meetings Voice",
+   "permissions": ["background", "idle", "notifications", "http://*/*", "https://*/*" ],
+   "web_accessible_resources": [ "*" ],
+   "options_page": "options/index.html",     
+   "version": "0.0.1"
+}
