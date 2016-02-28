@@ -4,7 +4,9 @@ Provides high quality, scalable video conferences using Jitsi Meet and Jitsi Vid
 ## Overview
 Ignite Realtime is pleased to announce "Openfire Meetings", a new plugin for Openfire that continues the development of the ofmeet web application which was part of the now deprecated [Jitsi-videobridge plugin](https://community.igniterealtime.org/community/support/jitsi_videobridge_plugin).
 
-**PLEASE NOTE** - You will need at least Openfire 3.10.0 to use this plugin. You will also need the [Openfire Meetings Chrome extension](https://chrome.google.com/webstore/detail/openfire-meetings-chrome/fohfnhgabmicpkjcpjpjongpijcffaba?hl=en-GB) for screen sharing, co-browsing and application sharing.
+**PLEASE NOTE** - You will need at least Openfire 4.0.1 to use this plugin. You will also need the [Openfire Meetings Chrome extension](https://chrome.google.com/webstore/detail/openfire-meetings-chrome/fohfnhgabmicpkjcpjpjongpijcffaba?hl=en-GB) for screen sharing, remote desktop control, co-browsing and application sharing.
+
+For remote desktop control, you will need to download and install the remote desktop control native application for your O/S. Windows, Linux and OSX are all supported.
 
 [![ofmeet1.png](https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1730-22181/432-272/ofmeet1.png)](https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1730-22181/ofmeet1.png)
 
@@ -38,6 +40,11 @@ Replace port 7443 by 7070 for http instead of https
 
 [![ofmeet5.png](https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1730-22278/ofmeet5.png)](https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1730-22278/ofmeet5.png)
 
+To install remote desktop control, first download and extract the native application from https://your-server.com:7443/ofmeet/remotecontrol.zip into any suitable folder. Run install_host.bat (Windows) or install_host.sh (Linux / OS X) to install and register the native application with the chrome extension. Run uninstall_host.bat or uninstall_host.sh to unregister the native application when you are done with it.
+
+To grant another user remote control of your desktop, share your desktop, select a participant and click on the remote control button. Alternatively, any viewer of your screen share can request for remote control access by clicking on the remote control button while viewing your screen. 
+
+**PLEASE NOTE** - Remote desktop control only works currently on Windows and and with full screen share of your primary screen. To enable remote control of a desktop application, move the selected application to top right corner of the primary screen for proper screen alignement. 
 
 It also has a meeting planner feature that enables you to schedule meetings in advance using a calendar. When you add a meeting to the calendar, a request to join the meeting is automatically generated and sent to each participant using Openfire's email service 15 mins before the meeting starts. Included in the email is a link to join the meeting from a Chrome web browser.
 
