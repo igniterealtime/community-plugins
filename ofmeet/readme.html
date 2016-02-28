@@ -48,16 +48,11 @@
     Openfire Meetings Plugin Readme
 </h1>
 
-<h2>Overview</h2>
-
-<p>
-	Openfire Meetings
-</p>
-
-
 <div>
+	<h2>Overview</h2>
 	<p>Ignite Realtime is pleased to announce "Openfire Meetings", a new plugin for Openfire that continues the development of the ofmeet web application which was part of the now deprecated <a href="https://community.igniterealtime.org/community/support/jitsi_videobridge_plugin">Jitsi-videobridge plugin</a>.</p>
-	<p style="min-height: 8pt; padding: 0px;">&nbsp;</p><p><strong>PLEASE NOTE</strong> - You will need at least Openfire 3.10.0 to use this plugin. You will also need the <a href="https://chrome.google.com/webstore/detail/openfire-meetings-chrome/fohfnhgabmicpkjcpjpjongpijcffaba?hl=en-GB">Openfire Meetings Chrome extension</a> for screen sharing, co-browsing and application sharing.</p>
+	<p style="min-height: 8pt; padding: 0px;">&nbsp;<strong>PLEASE NOTE</strong> - You will need at least Openfire 3.10.0 to use this plugin. You will also need the <a href="https://chrome.google.com/webstore/detail/openfire-meetings-chrome/fohfnhgabmicpkjcpjpjongpijcffaba?hl=en-GB">Openfire Meetings Chrome extension</a> for screen sharing, remote desktop control, co-browsing and application sharing.</p>
+	<p>For remote desktop control, you will need to download and install the remote desktop control native application for your O/S. Windows, Linux and OSX are all supported.</p>
 	<p><a href="https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1730-22181/ofmeet1.png"><img alt="ofmeet1.png" height="272" src="https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1730-22181/432-272/ofmeet1.png" style="width:432px; height: 272.438709677419px;" width="432"/></a></p>
 	<p style="min-height: 8pt; padding: 0px;">&nbsp;</p><p>Openfire Meetings is a complete standalone plugin powered by Jitsi Videobridge. It does not depend on any other plugins. It can be enhanced by adding the optional client control and fastpath plugins. The client control plugin will enable the management and user provisioning of PDF presentation urls and conference bookmarks. Users can select presentations and conferences from a pull down list.</p><p style="min-height: 8pt; padding: 0px;">&nbsp;</p>
 	<p><a href="https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1730-22275/ofmeet3.png"><img alt="ofmeet3.png" height="160" src="https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1730-22275/428-160/ofmeet3.png" style="width:428px; height: 160.325732899023px;" width="428"/></a></p>
@@ -70,15 +65,18 @@
 		<li>Configuration directly from Openfire admin web pages.</li>
 	</ul>
 	<p style="min-height: 8pt; padding: 0px;">&nbsp;</p><p><a href="https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1730-22276/ofmeet2.png"><img alt="ofmeet2.png" height="224" src="https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1730-22276/397-224/ofmeet2.png" style="width:397px; height: 223.661971830986px;" width="397"/></a></p>
-	<p><strong>How to use</strong></p>
+	<h2>How to use</h2>
 	<p><span>Jitsi Meet - </span>select room - https://your-server.com:7443/ofmeet<br/>specify room - https://your-server.com:7443/ofmeet/?r=xxxxx<br/>audio only (no video) - https://your-server.com:7443/ofmeet/?r=xxxxx&novideo=true</p>
 	<p><span>Spark Plugin - </span>download https://your-server.com:7443/ofmeet/spark/ofmeet-plugin.jar</p>
 	<p>Candy - https://your-server.com:7443/ofmeet/candy.html</p>
 	<p>JavaScript example - https://your-server.com:7443/ofmeet/api</p>
 	<p>Replace port 7443 by 7070 for http instead of https</p>
-	<p style="min-height: 8pt; padding: 0px;">&nbsp;</p><p><a href="https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1730-22278/ofmeet5.png"><img alt="ofmeet5.png" height="93" src="https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1730-22278/ofmeet5.png" style="height: auto;" width="300"/></a></p>
-</div>
-<div>
+	<p style="min-height: 8pt; padding: 0px;">&nbsp;<a href="https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1730-22278/ofmeet5.png"><img alt="ofmeet5.png" height="93" src="https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1730-22278/ofmeet5.png" style="height: auto;" width="300"/></a></p>
+	<h2>Remote Desktop Control</h2>
+	<p>To install remote desktop control, first download and extract the native application from https://your-server.com:7443/ofmeet/remotecontrol.zip into any suitable folder. Run install_host.bat (Windows) or install_host.sh (Linux / OS X) to install and register the native application with the chrome extension. Run uninstall_host.bat or uninstall_host.sh to unregister the native application when you are done with it.</p>
+	<p>To grant another user remote control of your desktop, share your desktop, select a participant and click on the remote control button. Alternatively, any viewer of your screen share can request for remote control access by clicking on the remote control button while viewing your screen.</p>
+	<p>PLEASE NOTE - Remote desktop control only works currently on Windows and and with full screen share of your primary screen. To enable remote control of a desktop application, move the selected application to top right corner of the primary screen for proper screen alignement.</p>
+	<h2>Meeting Planner</h2>
 	<p>It also has a meeting planner feature that enables you to schedule meetings in advance using a calendar. When you add a meeting to the calendar, a request to join the meeting is automatically generated and sent to each participant using Openfire's email service 15 mins before the meeting starts. Included in the email is a link to join the meeting from a Chrome web browser.</p><p><a href="https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1762-66498/Image2.jpg"><img alt="Image2.jpg" height="215" src="https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1762-66498/379-215/Image2.jpg" style="width:379px; height: 215.108108108108px;" width="379"></a><a href="https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1762-66502/Image5.jpg"><img alt="Image5.jpg" height="175" src="https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1762-66502/212-175/Image5.jpg" style="width:212px; height: 174.9px;" width="212"></a></p><p>In order to use this feature, you will need:<br><br></p><ul><li>Registered Openfire users with valid email address,</li><li>A persistent MUC room to host each planned meeting</li><li>The Openfire bookmarks plugin installed to create a room bookmark that links the room to users or user groups. Bookmarks with all users selected are ignored.<br><a href="https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1762-66501/Image6.jpg"><img alt="Image6.jpg"  height="210" src="https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1762-66501/375-210/Image6.jpg" style="width:375px; height: 209.879032258065px;" width="375"></a></li><li>The Openfire Email Service configured to deliver emails<br><a href="https://community.igniterealtime.org/servlet/JiveServlet/showImage/38-1762-66500/Image4.jpg"><img alt="Image4.jpg" height="408" src="https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1762-66500/Image4.jpg" style="width: 620px; height: 209px;" width="1210"></a></li></ul><p>The calendar is implemented using the excellent open source <a href="http://fullcalendar.io/" rel="nofollow" target="_blank">FullCalendar</a> jQuery plugin by Adam Shaw.</p>
 </div>
 	<p>Discussion place is in the <a href="https://community.igniterealtime.org/community/plugins/commplugins/openfire-meetings/activity">community plugins, here</a></p>
