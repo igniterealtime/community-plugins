@@ -92,7 +92,7 @@
 			</fileset>			
 		</copy>		
 
-		<jar destfile="${ofmeet.dir}/build/jar/remotecontrol.zip">
+		<jar destfile="${openfire.home}/plugins/remotecontrol.zip">
 			<fileset dir="${ofmeet.dir}/src/remotecontrol">				
 			</fileset>			
 		</jar>

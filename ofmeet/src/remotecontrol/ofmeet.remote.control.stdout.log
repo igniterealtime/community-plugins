@@ -1,0 +1,95 @@
+22:12
+ofmeet.remote.control starts
+ofmeet.remote.control found robot 900 1440
+ofmeet.remote.control listening on: http://localhost:6060
+ofmeet.remote.control received request: /?action=ofmeetGetScreen&resource=ofmeet9770&server=https://btg199251:7443/http-bind/
+ofmeet.remote.control got server  wss://btg199251:7443/ofmeetws/server?username=null&password=null&resource=remotecontrol-ofmeet9770
+ofmeet.remote.control received request: /?action=ofmeetSetRequestorOn&requester=ofmeet2223
+ofmeet.remote.control got requestor  ofmeet2223
+ofmeet.remote.control mouse down { down: true,
+  button: 0,
+  x: 640,
+  y: 212,
+  width: 928.984375,
+  height: 581 }
+ofmeet.remote.control mouse up { up: true,
+  button: 0,
+  x: 640,
+  y: 212,
+  width: 928.984375,
+  height: 581 }
+ofmeet.remote.control mouse down { down: true,
+  button: 0,
+  x: 692,
+  y: 57,
+  width: 928.984375,
+  height: 581 }
+ofmeet.remote.control mouse up { up: true,
+  button: 0,
+  x: 720,
+  y: 128,
+  width: 928.984375,
+  height: 581 }
+ofmeet.remote.control mouse down { down: true,
+  button: 0,
+  x: 656,
+  y: 31,
+  width: 928.984375,
+  height: 581 }
+ofmeet.remote.control mouse up { up: true,
+  button: 0,
+  x: 656,
+  y: 31,
+  width: 928.984375,
+  height: 581 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 914, y: 200, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 997, y: 161, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 1317, y: 161, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 1317, y: 161, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 715, y: 75, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 1113, y: 80, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 890, y: 377, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 890, y: 377, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 883, y: 396, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 883, y: 396, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 406, y: 142, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 406, y: 142, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 406, y: 142, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 406, y: 142, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 406, y: 142, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 406, y: 142, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 692, y: 81, width: 1440, height: 900 }
+ofmeet.remote.control mouse wheel -3
+ofmeet.remote.control mouse wheel 3
+ofmeet.remote.control mouse wheel 6
+ofmeet.remote.control mouse wheel 0
+ofmeet.remote.control mouse wheel 0
+ofmeet.remote.control mouse wheel 9
+ofmeet.remote.control mouse wheel 9
+ofmeet.remote.control mouse wheel 9
+ofmeet.remote.control mouse wheel 9
+ofmeet.remote.control mouse wheel -3
+ofmeet.remote.control mouse wheel -3
+ofmeet.remote.control mouse wheel -3
+ofmeet.remote.control mouse wheel -3
+ofmeet.remote.control mouse wheel -3
+ofmeet.remote.control mouse wheel -3
+ofmeet.remote.control mouse wheel 0
+ofmeet.remote.control mouse up { up: true, button: 0, x: 649, y: 147, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 644, y: 146, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 704, y: 98, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 840, y: 447, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 840, y: 447, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true,
+  button: 0,
+  x: 604,
+  y: 27,
+  width: 928.984375,
+  height: 581 }
+ofmeet.remote.control mouse up { up: true,
+  button: 0,
+  x: 604,
+  y: 27,
+  width: 928.984375,
+  height: 581 }
+ofmeet.remote.control received request: /?action=ofmeetSetRequestorOff
