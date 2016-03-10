@@ -40,7 +40,7 @@ compile-jsps:
      [copy] Copying 1 file to C:\Projects\ignite\community-plugins\ofmeet\src\web\WEB-INF
 
 jar:
-     [copy] Copying 515 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
+     [copy] Copying 502 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
      [copy] Copying 53 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar\lib
      [copy] Copying 59 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
       [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_1\target\openfire\plugins\remotecontrol.zip
@@ -48,4 +48,4 @@ jar:
    [delete] Deleting directory C:\Projects\ignite\community-plugins\ofmeet\build
 
 BUILD SUCCESSFUL
-Total time: 49 seconds
+Total time: 1 minute 1 second

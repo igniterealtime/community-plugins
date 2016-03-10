@@ -7,8 +7,8 @@
 	<link rel="stylesheet" type="text/css" href="candy/res/default.css" />
     <script src="/ofmeet/config"></script><!-- BAO -->
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-	<script type="text/javascript" src="candy/libs/libs.bundle.js"></script>
-	<script type="text/javascript" src="candy/libs/strophe.openfire.js"></script>
+	<script type="text/javascript" src="candy/libs.bundle.js"></script>
+	<script type="text/javascript" src="candy/strophe.openfire.js"></script>
 	<script type="text/javascript" src="candy/candy.bundle.js"></script>
 
 	<script type="text/javascript" src="candy/candyshop/colors/candy.js"></script>
@@ -28,8 +28,6 @@
 	<script type="text/javascript">
 
 		$(document).ready(function() {
-
-			$("<div>").attr("id","candy").attr("style","width: 100%; height: 100%;").appendTo("body");
 
 			Candy.init(config.bosh, {
 				core: {
@@ -69,5 +67,6 @@
 	</script>
 </head>
 <body>
+	<div id="candy"></div>
 </body>
 </html>

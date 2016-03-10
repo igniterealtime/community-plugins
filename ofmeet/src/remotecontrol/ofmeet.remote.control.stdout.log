@@ -1,95 +1,149 @@
-22:12
+20:41
 ofmeet.remote.control starts
 ofmeet.remote.control found robot 900 1440
 ofmeet.remote.control listening on: http://localhost:6060
-ofmeet.remote.control received request: /?action=ofmeetGetScreen&resource=ofmeet9770&server=https://btg199251:7443/http-bind/
-ofmeet.remote.control got server  wss://btg199251:7443/ofmeetws/server?username=null&password=null&resource=remotecontrol-ofmeet9770
-ofmeet.remote.control received request: /?action=ofmeetSetRequestorOn&requester=ofmeet2223
-ofmeet.remote.control got requestor  ofmeet2223
+ofmeet.remote.control received request: /?action=ofmeetGetScreen&resource=ofmeet9905&server=https://traderlynk.net/http-bind/
+ofmeet.remote.control got server  wss://traderlynk.net/ofmeetws/server?username=null&password=null&resource=remotecontrol-ofmeet9905
+ofmeet.remote.control received request: /?action=ofmeetSetRequestorOn&requester=ofmeet5380
+ofmeet.remote.control got requestor  ofmeet5380
 ofmeet.remote.control mouse down { down: true,
   button: 0,
-  x: 640,
-  y: 212,
-  width: 928.984375,
-  height: 581 }
+  x: 660.09375,
+  y: 223,
+  width: 972.15625,
+  height: 608 }
 ofmeet.remote.control mouse up { up: true,
   button: 0,
-  x: 640,
-  y: 212,
-  width: 928.984375,
-  height: 581 }
+  x: 660.09375,
+  y: 223,
+  width: 972.15625,
+  height: 608 }
 ofmeet.remote.control mouse down { down: true,
   button: 0,
-  x: 692,
-  y: 57,
-  width: 928.984375,
-  height: 581 }
+  x: 927.09375,
+  y: 363,
+  width: 972.15625,
+  height: 608 }
 ofmeet.remote.control mouse up { up: true,
   button: 0,
-  x: 720,
-  y: 128,
-  width: 928.984375,
-  height: 581 }
+  x: 927.09375,
+  y: 363,
+  width: 972.15625,
+  height: 608 }
 ofmeet.remote.control mouse down { down: true,
   button: 0,
-  x: 656,
-  y: 31,
-  width: 928.984375,
-  height: 581 }
+  x: 658.09375,
+  y: 32,
+  width: 972.15625,
+  height: 608 }
 ofmeet.remote.control mouse up { up: true,
   button: 0,
-  x: 656,
-  y: 31,
-  width: 928.984375,
-  height: 581 }
-ofmeet.remote.control mouse down { down: true, button: 0, x: 914, y: 200, width: 1440, height: 900 }
-ofmeet.remote.control mouse up { up: true, button: 0, x: 997, y: 161, width: 1440, height: 900 }
-ofmeet.remote.control mouse down { down: true, button: 0, x: 1317, y: 161, width: 1440, height: 900 }
-ofmeet.remote.control mouse up { up: true, button: 0, x: 1317, y: 161, width: 1440, height: 900 }
-ofmeet.remote.control mouse down { down: true, button: 0, x: 715, y: 75, width: 1440, height: 900 }
-ofmeet.remote.control mouse up { up: true, button: 0, x: 1113, y: 80, width: 1440, height: 900 }
-ofmeet.remote.control mouse down { down: true, button: 0, x: 890, y: 377, width: 1440, height: 900 }
-ofmeet.remote.control mouse up { up: true, button: 0, x: 890, y: 377, width: 1440, height: 900 }
-ofmeet.remote.control mouse down { down: true, button: 0, x: 883, y: 396, width: 1440, height: 900 }
-ofmeet.remote.control mouse up { up: true, button: 0, x: 883, y: 396, width: 1440, height: 900 }
-ofmeet.remote.control mouse down { down: true, button: 0, x: 406, y: 142, width: 1440, height: 900 }
-ofmeet.remote.control mouse up { up: true, button: 0, x: 406, y: 142, width: 1440, height: 900 }
-ofmeet.remote.control mouse down { down: true, button: 0, x: 406, y: 142, width: 1440, height: 900 }
-ofmeet.remote.control mouse up { up: true, button: 0, x: 406, y: 142, width: 1440, height: 900 }
-ofmeet.remote.control mouse down { down: true, button: 0, x: 406, y: 142, width: 1440, height: 900 }
-ofmeet.remote.control mouse up { up: true, button: 0, x: 406, y: 142, width: 1440, height: 900 }
-ofmeet.remote.control mouse down { down: true, button: 0, x: 692, y: 81, width: 1440, height: 900 }
-ofmeet.remote.control mouse wheel -3
-ofmeet.remote.control mouse wheel 3
-ofmeet.remote.control mouse wheel 6
-ofmeet.remote.control mouse wheel 0
-ofmeet.remote.control mouse wheel 0
-ofmeet.remote.control mouse wheel 9
-ofmeet.remote.control mouse wheel 9
-ofmeet.remote.control mouse wheel 9
-ofmeet.remote.control mouse wheel 9
-ofmeet.remote.control mouse wheel -3
-ofmeet.remote.control mouse wheel -3
-ofmeet.remote.control mouse wheel -3
-ofmeet.remote.control mouse wheel -3
-ofmeet.remote.control mouse wheel -3
-ofmeet.remote.control mouse wheel -3
-ofmeet.remote.control mouse wheel 0
-ofmeet.remote.control mouse up { up: true, button: 0, x: 649, y: 147, width: 1440, height: 900 }
-ofmeet.remote.control mouse down { down: true, button: 0, x: 644, y: 146, width: 1440, height: 900 }
-ofmeet.remote.control mouse up { up: true, button: 0, x: 704, y: 98, width: 1440, height: 900 }
-ofmeet.remote.control mouse down { down: true, button: 0, x: 840, y: 447, width: 1440, height: 900 }
-ofmeet.remote.control mouse up { up: true, button: 0, x: 840, y: 447, width: 1440, height: 900 }
+  x: 658.09375,
+  y: 32,
+  width: 972.15625,
+  height: 608 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 1312, y: 889, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 1312, y: 889, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 1298, y: 532, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 1298, y: 532, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 1369, y: 534, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 1369, y: 534, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 22, y: 53, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 22, y: 53, width: 1440, height: 900 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 345, y: 125, width: 1440, height: 900 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 345, y: 125, width: 1440, height: 900 }
+ofmeet.remote.control key <shift> { key: 16, shift: true, crtl: false, alt: false, meta: false }
+did not type <shift>
+ofmeet.remote.control key h { key: 72, shift: true, crtl: false, alt: false, meta: false }
+typed h ["shift"]
+ofmeet.remote.control key e { key: 69, shift: false, crtl: false, alt: false, meta: false }
+typed e []
+ofmeet.remote.control key l { key: 76, shift: false, crtl: false, alt: false, meta: false }
+typed l []
+ofmeet.remote.control key l { key: 76, shift: false, crtl: false, alt: false, meta: false }
+typed l []
+ofmeet.remote.control key o { key: 79, shift: false, crtl: false, alt: false, meta: false }
+typed o []
+ofmeet.remote.control key <space> { key: 32, shift: false, crtl: false, alt: false, meta: false }
+typed   []
+ofmeet.remote.control key <backspace> { key: 8, shift: false, crtl: false, alt: false, meta: false }
+ofmeet.remote.control key , { key: 188, shift: false, crtl: false, alt: false, meta: false }
+typed , []
+ofmeet.remote.control key <space> { key: 32, shift: false, crtl: false, alt: false, meta: false }
+typed   []
+ofmeet.remote.control key h { key: 72, shift: false, crtl: false, alt: false, meta: false }
+typed h []
+ofmeet.remote.control key o { key: 79, shift: false, crtl: false, alt: false, meta: false }
+typed o []
+ofmeet.remote.control key w { key: 87, shift: false, crtl: false, alt: false, meta: false }
+typed w []
+ofmeet.remote.control key <space> { key: 32, shift: false, crtl: false, alt: false, meta: false }
+typed   []
+ofmeet.remote.control key a { key: 65, shift: false, crtl: false, alt: false, meta: false }
+typed a []
+ofmeet.remote.control key r { key: 82, shift: false, crtl: false, alt: false, meta: false }
+typed r []
+ofmeet.remote.control key e { key: 69, shift: false, crtl: false, alt: false, meta: false }
+typed e []
+ofmeet.remote.control key <space> { key: 32, shift: false, crtl: false, alt: false, meta: false }
+typed   []
+ofmeet.remote.control key y { key: 89, shift: false, crtl: false, alt: false, meta: false }
+typed y []
+ofmeet.remote.control key o { key: 79, shift: false, crtl: false, alt: false, meta: false }
+typed o []
+ofmeet.remote.control key u { key: 85, shift: false, crtl: false, alt: false, meta: false }
+typed u []
+ofmeet.remote.control key <space> { key: 32, shift: false, crtl: false, alt: false, meta: false }
+typed   []
+ofmeet.remote.control key t { key: 84, shift: false, crtl: false, alt: false, meta: false }
+typed t []
+ofmeet.remote.control key o { key: 79, shift: false, crtl: false, alt: false, meta: false }
+typed o []
+ofmeet.remote.control key d { key: 68, shift: false, crtl: false, alt: false, meta: false }
+typed d []
+ofmeet.remote.control key a { key: 65, shift: false, crtl: false, alt: false, meta: false }
+typed a []
+ofmeet.remote.control key y { key: 89, shift: false, crtl: false, alt: false, meta: false }
+typed y []
+ofmeet.remote.control key . { key: 190, shift: false, crtl: false, alt: false, meta: false }
+typed . []
 ofmeet.remote.control mouse down { down: true,
   button: 0,
-  x: 604,
-  y: 27,
-  width: 928.984375,
-  height: 581 }
+  x: 602.09375,
+  y: 29,
+  width: 972.15625,
+  height: 608 }
 ofmeet.remote.control mouse up { up: true,
   button: 0,
-  x: 604,
-  y: 27,
-  width: 928.984375,
-  height: 581 }
+  x: 602.09375,
+  y: 29,
+  width: 972.15625,
+  height: 608 }
+ofmeet.remote.control received request: /?action=ofmeetSetRequestorOff
+ofmeet.remote.control received request: /?action=ofmeetSetRequestorOn&requester=ofmeet5380
+ofmeet.remote.control got requestor  ofmeet5380
+ofmeet.remote.control mouse down { down: true,
+  button: 0,
+  x: 658.09375,
+  y: 219,
+  width: 972.15625,
+  height: 608 }
+ofmeet.remote.control mouse up { up: true,
+  button: 0,
+  x: 658.09375,
+  y: 219,
+  width: 972.15625,
+  height: 608 }
+ofmeet.remote.control mouse down { down: true,
+  button: 0,
+  x: 230.09375,
+  y: 28,
+  width: 972.15625,
+  height: 608 }
+ofmeet.remote.control mouse up { up: true,
+  button: 0,
+  x: 230.09375,
+  y: 28,
+  width: 972.15625,
+  height: 608 }
 ofmeet.remote.control received request: /?action=ofmeetSetRequestorOff
