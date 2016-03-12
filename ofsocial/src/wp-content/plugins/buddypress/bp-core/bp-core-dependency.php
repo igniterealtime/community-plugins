@@ -17,10 +17,13 @@
  *
  * @package BuddyPress
  * @subpackage Core
+ * @since 1.7.0
  */
 
 /**
  * Fire the 'bp_include' action, where plugins should include files.
+ *
+ * @since 1.2.5
  */
 function bp_include() {
 
@@ -34,6 +37,8 @@ function bp_include() {
 
 /**
  * Fire the 'bp_setup_components' action, where plugins should initialize components.
+ *
+ * @since 1.6.0
  */
 function bp_setup_components() {
 
@@ -47,6 +52,8 @@ function bp_setup_components() {
 
 /**
  * Fire the 'bp_setup_canonical_stack' action, where plugins should set up their canonical URL.
+ *
+ * @since 2.1.0
  */
 function bp_setup_canonical_stack() {
 
@@ -74,7 +81,24 @@ function bp_register_taxonomies() {
 }
 
 /**
+ * Fire the 'bp_register_post_types' action, where plugins should register post types.
+ *
+ * @since 2.5.0
+ */
+function bp_register_post_types() {
+
+	/**
+	 * Fires inside the 'bp_register_post_types' function, where plugins should register post types.
+	 *
+	 * @since 2.5.0
+	 */
+	do_action( 'bp_register_post_types' );
+}
+
+/**
  * Fire the 'bp_setup_globals' action, where plugins should initialize global settings.
+ *
+ * @since 1.2.0
  */
 function bp_setup_globals() {
 
@@ -88,6 +112,8 @@ function bp_setup_globals() {
 
 /**
  * Fire the 'bp_setup_nav' action, where plugins should register their navigation items.
+ *
+ * @since 1.2.0
  */
 function bp_setup_nav() {
 
@@ -101,6 +127,8 @@ function bp_setup_nav() {
 
 /**
  * Fire the 'bp_setup_admin_bar' action, where plugins should add items to the WP admin bar.
+ *
+ * @since 1.5.0
  */
 function bp_setup_admin_bar() {
 	if ( bp_use_wp_admin_bar() ) {
@@ -118,6 +146,8 @@ function bp_setup_admin_bar() {
 
 /**
  * Fire the 'bp_setup_title' action, where plugins should modify the page title.
+ *
+ * @since 1.5.0
  */
 function bp_setup_title() {
 
@@ -131,6 +161,8 @@ function bp_setup_title() {
 
 /**
  * Fire the 'bp_register_widgets' action, where plugins should register widgets.
+ *
+ * @since 1.2.0
  */
 function bp_setup_widgets() {
 
@@ -177,6 +209,8 @@ function bp_setup_cache_groups() {
  *
  * We white-list the WordPress customizer which purposely loads the user early.
  *
+ * @since 1.7.0
+ *
  * @link https://buddypress.trac.wordpress.org/ticket/6046
  * @link https://core.trac.wordpress.org/ticket/24169
  *
@@ -201,6 +235,8 @@ function bp_setup_current_user() {
 
 /**
  * Fire the 'bp_init' action, BuddyPress's main initialization hook.
+ *
+ * @since 1.2.5
  */
 function bp_init() {
 
@@ -213,9 +249,31 @@ function bp_init() {
 }
 
 /**
+ * Fire the 'bp_customize_register' action when the Customizer has loaded,
+ * allowing scripts and styles to be initialized.
+ *
+ * @since 2.5.0
+ *
+ * @param WP_Customize_Manager $customizer Customizer instance.
+ */
+function bp_customize_register( WP_Customize_Manager $customizer ) {
+
+	/**
+	 * Fires once the Customizer has loaded, allow scripts and styles to be initialized.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param WP_Customize_Manager $customizer Customizer instance.
+	 */
+	do_action( 'bp_customize_register', $customizer );
+}
+
+/**
  * Fire the 'bp_loaded' action, which fires after BP's core plugin files have been loaded.
  *
  * Attached to 'plugins_loaded'.
+ *
+ * @since 1.2.0
  */
 function bp_loaded() {
 
@@ -231,6 +289,8 @@ function bp_loaded() {
  * Fire the 'bp_ready' action, which runs after BP is set up and the page is about to render.
  *
  * Attached to 'wp'.
+ *
+ * @since 1.6.0
  */
 function bp_ready() {
 
@@ -247,6 +307,8 @@ function bp_ready() {
  *
  * Attach potential template actions, such as catching form requests or routing
  * custom URLs.
+ *
+ * @since 1.5.0
  */
 function bp_actions() {
 
@@ -263,6 +325,8 @@ function bp_actions() {
  *
  * Runs just after 'bp_actions'. Use this hook to attach your template
  * loaders.
+ *
+ * @since 1.5.0
  */
 function bp_screens() {
 
@@ -280,6 +344,8 @@ function bp_screens() {
  * Fire 'bp_widgets_init', which runs after widgets have been set up.
  *
  * Hooked to 'widgets_init'.
+ *
+ * @since 1.6.0
  */
 function bp_widgets_init() {
 
@@ -297,8 +363,16 @@ function bp_widgets_init() {
  * Fire 'bp_head', which is used to hook scripts and styles in the <head>.
  *
  * Hooked to 'wp_head'.
+ *
+ * @since 1.6.0
  */
 function bp_head() {
+
+	/**
+	 * Fires inside the 'bp_head' function, which runs on 'wp_head'.
+	 *
+	 * @since 1.6.0
+	 */
 	do_action ( 'bp_head' );
 }
 
@@ -489,7 +563,6 @@ function bp_after_setup_theme() {
  * @see WP::parse_request() for a description of parameters.
  *
  * @param array $query_vars See {@link WP::parse_request()}.
- *
  * @return array $query_vars See {@link WP::parse_request()}.
  */
 function bp_request( $query_vars = array() ) {
@@ -511,9 +584,7 @@ function bp_request( $query_vars = array() ) {
  *
  * @param string $redirect_to     See 'login_redirect'.
  * @param string $redirect_to_raw See 'login_redirect'.
- *
- * @param bool   $user See 'login_redirect'.
- *
+ * @param bool   $user            See 'login_redirect'.
  * @return string
  */
 function bp_login_redirect( $redirect_to = '', $redirect_to_raw = '', $user = false ) {
@@ -540,7 +611,6 @@ function bp_login_redirect( $redirect_to = '', $redirect_to_raw = '', $user = fa
  * @uses apply_filters()
  *
  * @param string $template See 'template_include'.
- *
  * @return string Template file to use.
  */
 function bp_template_include( $template = '' ) {
@@ -585,8 +655,7 @@ function bp_generate_rewrite_rules( $wp_rewrite ) {
  *
  * @uses apply_filters() Calls 'bp_allowed_themes' with the allowed themes list.
  *
- * @param array $themes
- *
+ * @param array $themes The path of the template to include.
  * @return array
  */
 function bp_allowed_themes( $themes ) {
@@ -607,21 +676,22 @@ function bp_allowed_themes( $themes ) {
  * The main action used for handling theme-side POST requests.
  *
  * @since 1.9.0
+ *
  * @uses do_action()
  */
 function bp_post_request() {
 
-	// Bail if not a POST action
+	// Bail if not a POST action.
 	if ( ! bp_is_post_request() ) {
 		return;
 	}
 
-	// Bail if no action
+	// Bail if no action.
 	if ( empty( $_POST['action'] ) ) {
 		return;
 	}
 
-	// Sanitize the POST action
+	// Sanitize the POST action.
 	$action = sanitize_key( $_POST['action'] );
 
 	/**
@@ -650,21 +720,22 @@ function bp_post_request() {
  * The main action used for handling theme-side GET requests.
  *
  * @since 1.9.0
+ *
  * @uses do_action()
  */
 function bp_get_request() {
 
-	// Bail if not a POST action
+	// Bail if not a POST action.
 	if ( ! bp_is_get_request() ) {
 		return;
 	}
 
-	// Bail if no action
+	// Bail if no action.
 	if ( empty( $_GET['action'] ) ) {
 		return;
 	}
 
-	// Sanitize the GET action
+	// Sanitize the GET action.
 	$action = sanitize_key( $_GET['action'] );
 
 	/**

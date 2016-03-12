@@ -4,6 +4,7 @@
  *
  * @package BuddyPress
  * @subpackage XProfileClasses
+ * @since 2.2.0
  */
 
 // Exit if accessed directly.
@@ -22,7 +23,7 @@ class BP_XProfile_Query {
 	 * See {@see WP_XProfile_Query::__construct()} for information on parameters.
 	 *
 	 * @since 2.2.0
-	 * @var    array
+	 * @var array
 	 */
 	public $queries = array();
 
@@ -30,7 +31,7 @@ class BP_XProfile_Query {
 	 * Database table that where the metadata's objects are stored (eg $wpdb->users).
 	 *
 	 * @since 2.2.0
-	 * @var    string
+	 * @var string
 	 */
 	public $primary_table;
 
@@ -38,7 +39,7 @@ class BP_XProfile_Query {
 	 * Column in primary_table that represents the ID of the object.
 	 *
 	 * @since 2.2.0
-	 * @var    string
+	 * @var string
 	 */
 	public $primary_id_column;
 
@@ -46,7 +47,7 @@ class BP_XProfile_Query {
 	 * A flat list of table aliases used in JOIN clauses.
 	 *
 	 * @since 2.2.0
-	 * @var    array
+	 * @var array
 	 */
 	protected $table_aliases = array();
 
@@ -91,7 +92,6 @@ class BP_XProfile_Query {
 	 * @since 2.2.0
 	 *
 	 * @param array $queries Array of query clauses.
-	 *
 	 * @return array Sanitized array of query clauses.
 	 */
 	public function sanitize_query( $queries ) {
@@ -158,7 +158,6 @@ class BP_XProfile_Query {
 	 * @since 2.2.0
 	 *
 	 * @param  array $query XProfile query arguments.
-	 *
 	 * @return bool  Whether the query clause is a first-order clause.
 	 */
 	protected function is_first_order_clause( $query ) {
@@ -171,7 +170,6 @@ class BP_XProfile_Query {
 	 * @since 2.2.0
 	 *
 	 * @param string $type MySQL type to cast `value`.
-	 *
 	 * @return string MySQL type.
 	 */
 	public function get_cast_for_type( $type = '' ) {
@@ -229,9 +227,8 @@ class BP_XProfile_Query {
 	 *
 	 * @since 2.2.0
 	 *
-	 * @param  array $query Query to parse.
+	 * @param  array $query Query to parse. Passed by reference.
 	 * @param  int   $depth Optional. Number of tree levels deep we currently are. Used to calculate indentation.
-	 *
 	 * @return array {
 	 *     Array containing JOIN and WHERE SQL clauses to append to a single query array.
 	 *
@@ -312,7 +309,6 @@ class BP_XProfile_Query {
 	 *
 	 * @param string $primary_table     Database table where the object being filtered is stored (eg wp_users).
 	 * @param string $primary_id_column ID column for the filtered object in $primary_table.
-	 *
 	 * @return array {
 	 *     Array containing JOIN and WHERE SQL clauses to append to the main query.
 	 *
@@ -347,7 +343,6 @@ class BP_XProfile_Query {
 	 *
 	 * @param array $clause       Query clause.
 	 * @param array $parent_query Parent query array.
-	 *
 	 * @return array {
 	 *     Array containing JOIN and WHERE SQL clauses to append to a first-order query.
 	 *
@@ -497,7 +492,6 @@ class BP_XProfile_Query {
 	 *
 	 * @param array $clause       Query clause.
 	 * @param array $parent_query Parent query of $clause.
-	 *
 	 * @return string|bool Table alias if found, otherwise false.
 	 */
 	protected function find_compatible_table_alias( $clause, $parent_query ) {

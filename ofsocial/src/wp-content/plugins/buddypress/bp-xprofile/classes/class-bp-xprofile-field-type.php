@@ -4,6 +4,7 @@
  *
  * @package BuddyPress
  * @subpackage XProfileClasses
+ * @since 2.0.0
  */
 
 // Exit if accessed directly.
@@ -18,6 +19,7 @@ abstract class BP_XProfile_Field_Type {
 
 	/**
 	 * Validation regex rules for field type.
+	 *
 	 * @since 2.0.0
 	 * @var array Field type validation regexes.
 	 */
@@ -117,7 +119,6 @@ abstract class BP_XProfile_Field_Type {
 	 * @param string $format         Regex string.
 	 * @param string $replace_format Optional; if 'replace', replaces the format instead of adding to it.
 	 *                               Defaults to 'add'.
-	 *
 	 * @return BP_XProfile_Field_Type
 	 */
 	public function set_format( $format, $replace_format = 'add' ) {
@@ -152,7 +153,6 @@ abstract class BP_XProfile_Field_Type {
 	 * @since 2.0.0
 	 *
 	 * @param string|array $values Whitelisted values.
-	 *
 	 * @return BP_XProfile_Field_Type
 	 */
 	public function set_whitelist_values( $values ) {
@@ -181,7 +181,6 @@ abstract class BP_XProfile_Field_Type {
 	 * @since 2.0.0
 	 *
 	 * @param string|array $values Value to check against the registered formats.
-	 *
 	 * @return bool True if the value validates
 	 */
 	public function is_valid( $values ) {
@@ -207,10 +206,13 @@ abstract class BP_XProfile_Field_Type {
 			$validated = true;
 		}
 
-		// If there's a whitelist set, also check the $value.
+		// If there's a whitelist set, make sure that each value is a whitelisted value.
 		if ( ( true === $validated ) && ! empty( $values ) && ! empty( $this->validation_whitelist ) ) {
 			foreach ( (array) $values as $value ) {
-				$validated = in_array( $value, $this->validation_whitelist, true );
+				if ( ! in_array( $value, $this->validation_whitelist, true ) ) {
+					$validated = false;
+					break;
+				}
 			}
 		}
 
@@ -234,6 +236,7 @@ abstract class BP_XProfile_Field_Type {
 	 * @since 2.0.0
 	 *
 	 * @param array $raw_properties Optional key/value array of permitted attributes that you want to add.
+	 * @return void
 	 */
 	abstract public function edit_field_html( array $raw_properties = array() );
 
@@ -242,8 +245,10 @@ abstract class BP_XProfile_Field_Type {
 	 *
 	 * Must be used inside the {@link bp_profile_fields()} template loop.
 	 *
-	 * @param array $raw_properties Optional key/value array of permitted attributes that you want to add.
 	 * @since 2.0.0
+	 *
+	 * @param array $raw_properties Optional key/value array of permitted attributes that you want to add.
+	 * @return void
 	 */
 	abstract public function admin_field_html( array $raw_properties = array() );
 
@@ -417,9 +422,8 @@ abstract class BP_XProfile_Field_Type {
 	 * @since 2.1.0
 	 * @since 2.4.0 Added the `$field_id` parameter.
 	 *
-	 * @param mixed $field_value Submitted field value.
-	 * @param int   $field_id    Optional. ID of the field.
-	 *
+	 * @param mixed      $field_value Submitted field value.
+	 * @param string|int $field_id    Optional. ID of the field.
 	 * @return mixed
 	 */
 	public static function pre_validate_filter( $field_value, $field_id = '' ) {
@@ -436,9 +440,8 @@ abstract class BP_XProfile_Field_Type {
 	 * @since 2.1.0
 	 * @since 2.4.0 Added `$field_id` parameter.
 	 *
-	 * @param mixed $field_value Field value.
-	 * @param int   $field_id    ID of the field.
-	 *
+	 * @param mixed      $field_value Field value.
+	 * @param string|int $field_id    ID of the field.
 	 * @return mixed
 	 */
 	public static function display_filter( $field_value, $field_id = '' ) {
@@ -456,7 +459,6 @@ abstract class BP_XProfile_Field_Type {
 	 * @since 2.0.0
 	 *
 	 * @param array $properties Optional key/value array of attributes for this edit field.
-	 *
 	 * @return string
 	 */
 	protected function get_edit_field_html_elements( array $properties = array() ) {

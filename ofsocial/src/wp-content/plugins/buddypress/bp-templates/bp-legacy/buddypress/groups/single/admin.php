@@ -141,7 +141,7 @@ do_action( 'bp_before_group_admin_content' ); ?>
 
 		<label for="group-invite-status-admins"><input type="radio" name="group-invite-status" id="group-invite-status-admins" value="admins"<?php bp_group_show_invite_status_setting( 'admins' ); ?> /> <?php _e( 'Group admins only', 'buddypress' ); ?></label>
 
- 	</div>
+	</div>
 
 	<hr />
 
@@ -313,7 +313,7 @@ do_action( 'bp_before_group_admin_content' ); ?>
 
 
 	<div class="bp-widget">
-		<h4><?php _e("Members", "buddypress"); ?></h4>
+		<h4><?php _e( "Members", 'buddypress' ); ?></h4>
 
 		<?php if ( bp_group_has_members( 'per_page=15&exclude_banned=0' ) ) : ?>
 

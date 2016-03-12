@@ -2647,7 +2647,7 @@ Candy.Core.Event = function(self, Strophe, $) {
             // Autojoin bookmarks
             $("conference", msg).each(function() {
                 var item = $(this);
-                if (item.attr("autojoin")) {
+                if (item.attr("autojoin") && item.attr("autojoin") == "true") {		// BAO Openfire has value true/false
                     Candy.Core.Action.Jabber.Room.Join(item.attr("jid"));
                 }
             });
@@ -3626,10 +3626,13 @@ Candy.View.Pane = function(self, $) {
                 event.preventDefault();
                 return;
             }
+            var roomname = roomName || Strophe.getNodeFromJid(roomJid);				// BAO
+            if (roomname.indexOf("workgroup-") == 0) roomname = roomname.substring(10);
+            
             var html = Mustache.to_html(Candy.View.Template.Chat.tab, {
                 roomJid: roomJid,
                 roomId: roomId,
-                name: roomName || Strophe.getNodeFromJid(roomJid),
+                name: roomname,
                 privateUserChat: function() {
                     return roomType === "chat";
                 },
@@ -5763,12 +5766,15 @@ Candy.View.Template = function(self) {
 		 */
         unreadmessages: "({{count}}) {{title}}"
     };
+    
+    // BAO added title on tabs
+    
     self.Chat = {
         pane: '<div id="chat-pane">{{> tabs}}{{> mobile}}{{> toolbar}}{{> rooms}}</div>{{> modal}}',
         rooms: '<div id="chat-rooms" class="rooms"></div>',
         tabs: '<ul id="chat-tabs"></ul>',
         mobileIcon: '<div id="mobile-roster-icon"><a class="box-shadow-icon"></a></div>',
-        tab: '<li class="roomtype-{{roomType}}" data-roomjid="{{roomJid}}" data-roomtype="{{roomType}}">' + '<a href="#" class="label">{{#privateUserChat}}@{{/privateUserChat}}{{name}}</a>' + '<a href="#" class="transition"></a><a href="#" class="close">×</a>' + '<small class="unread"></small></li>',
+        tab: '<li class="roomtype-{{roomType}}" data-roomjid="{{roomJid}}" data-roomtype="{{roomType}}">' + '<a title="{{name}}" href="#" class="label">{{#privateUserChat}}@{{/privateUserChat}}{{name}}</a>' + '<a href="#" class="transition"></a><a href="#" class="close">×</a>' + '<small class="unread"></small></li>',
         modal: '<div id="chat-modal"><a id="admin-message-cancel" class="close" href="#">×</a>' + '<span id="chat-modal-body"></span>' + '<img src="{{assetsPath}}img/modal-spinner.gif" id="chat-modal-spinner" />' + '</div><div id="chat-modal-overlay"></div>',
         adminMessage: '<li><small data-timestamp="{{timestamp}}">{{time}}</small><div class="adminmessage">' + '<span class="label">{{sender}}</span>' + '<span class="spacer">▸</span>{{subject}} {{{message}}}</div></li>',
         infoMessage: '<li><small data-timestamp="{{timestamp}}">{{time}}</small><div class="infomessage">' + '<span class="spacer">•</span>{{subject}} {{{message}}}</div></li>',

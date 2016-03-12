@@ -4,6 +4,7 @@
  *
  * @package BuddyPress
  * @subpackage Core
+ * @since 2.3.0
  */
 
 // Exit if accessed directly.
@@ -62,7 +63,6 @@ class BP_Media_Extractor {
 	 * @param string|WP_Post $richtext        Content to parse.
 	 * @param int            $what_to_extract Media type to extract (optional).
 	 * @param array          $extra_args      Bespoke data for a particular extractor (optional).
-	 *
 	 * @return array {
 	 *     @type array $has Extracted media counts. {
 	 *         @type int $audio
@@ -196,7 +196,6 @@ class BP_Media_Extractor {
 	 * @param string $richtext   Content to parse.
 	 * @param string $plaintext  Sanitized version of the content.
 	 * @param array  $extra_args Bespoke data for a particular extractor (optional).
-	 *
 	 * @return array {
 	 *     @type array $has Extracted media counts. {
 	 *         @type int $links
@@ -211,7 +210,7 @@ class BP_Media_Extractor {
 	protected function extract_links( $richtext, $plaintext, $extra_args = array() ) {
 		$data = array( 'has' => array( 'links' => 0 ), 'links' => array() );
 
-		// Matches: href="text" and href='text'
+		// Matches: href="text" and href='text'.
 		if ( stripos( $richtext, 'href=' ) !== false ) {
 			preg_match_all( '#href=(["\'])([^"\']+)\1#i', $richtext, $matches );
 
@@ -256,7 +255,6 @@ class BP_Media_Extractor {
 	 * @param string $richtext   Content to parse.
 	 * @param string $plaintext  Sanitized version of the content.
 	 * @param array  $extra_args Bespoke data for a particular extractor.
-	 *
 	 * @return array {
 	 *     @type array $has Extracted media counts. {
 	 *         @type int $mentions
@@ -291,7 +289,7 @@ class BP_Media_Extractor {
 			}
 		}
 
-		// Build results
+		// Build results.
 		foreach ( $mentions as $user_id => $mention_name ) {
 			$mention = array( 'name' => strtolower( $mention_name ) );
 
@@ -328,7 +326,6 @@ class BP_Media_Extractor {
 	 * @param string $richtext   Content to parse.
 	 * @param string $plaintext  Sanitized version of the content.
 	 * @param array  $extra_args Bespoke data for a particular extractor (optional).
-	 *
 	 * @return array {
 	 *     @type array $has Extracted media counts. {
 	 *         @type int $images
@@ -353,7 +350,7 @@ class BP_Media_Extractor {
 
 		// `<img src>` tags.
 		if ( stripos( $richtext, 'src=' ) !== false ) {
-			preg_match_all( '#src=(["\'])([^"\']+)\1#i', $richtext, $img_srcs );  // matches src="text" and src='text'
+			preg_match_all( '#src=(["\'])([^"\']+)\1#i', $richtext, $img_srcs );  // Matches src="text" and src='text'.
 
 			// <img>.
 			if ( ! empty( $img_srcs[2] ) ) {
@@ -448,7 +445,6 @@ class BP_Media_Extractor {
 	 * @param string $richtext   Content to parse.
 	 * @param string $plaintext  Sanitized version of the content.
 	 * @param array  $extra_args Bespoke data for a particular extractor (optional).
-	 *
 	 * @return array {
 	 *     @type array $has Extracted media counts. {
 	 *         @type int $shortcodes
@@ -476,10 +472,10 @@ class BP_Media_Extractor {
 					$attrs = ( ! $attrs ) ? array() : $attrs;
 
 					$shortcode               = array();
-					$shortcode['attributes'] = $attrs;             // Attributes
-					$shortcode['content']    = $matches[5][ $i ];  // Content
-					$shortcode['type']       = $shortcode_name;    // Shortcode
-					$shortcode['original']   = $matches[0][ $i ];  // Entire shortcode
+					$shortcode['attributes'] = $attrs;             // Attributes.
+					$shortcode['content']    = $matches[5][ $i ];  // Content.
+					$shortcode['type']       = $shortcode_name;    // Shortcode.
+					$shortcode['original']   = $matches[0][ $i ];  // Entire shortcode.
 
 					$data['shortcodes'][] = $shortcode;
 				}
@@ -510,7 +506,6 @@ class BP_Media_Extractor {
 	 * @param string $richtext   Content to parse.
 	 * @param string $plaintext  Sanitized version of the content.
 	 * @param array  $extra_args Bespoke data for a particular extractor (optional).
-	 *
 	 * @return array {
 	 *     @type array $has Extracted media counts. {
 	 *         @type int $embeds
@@ -590,7 +585,6 @@ class BP_Media_Extractor {
 	 * @param string $richtext   Content to parse.
 	 * @param string $plaintext  Sanitized version of the content.
 	 * @param array  $extra_args Bespoke data for a particular extractor (optional).
-	 *
 	 * @return array {
 	 *     @type array $has Extracted media counts. {
 	 *         @type int $audio
@@ -643,7 +637,7 @@ class BP_Media_Extractor {
 			}
 		}
 
-		// <a href="*.mp3"> tags
+		// <a href="*.mp3"> tags.
 		foreach ( $audio_types as $extension ) {
 			$extension = '.' . $extension;
 
@@ -688,7 +682,6 @@ class BP_Media_Extractor {
 	 * @param string $richtext   Content to parse.
 	 * @param string $plaintext  Sanitized version of the content.
 	 * @param array  $extra_args Bespoke data for a particular extractor (optional).
-	 *
 	 * @return array {
 	 *     @type array $has Extracted media counts. {
 	 *         @type int $video
@@ -767,7 +760,6 @@ class BP_Media_Extractor {
 	 * @param string $richtext   Content to parse.
 	 * @param string $plaintext  Sanitized version of the content.
 	 * @param array  $extra_args Bespoke data for a particular extractor (optional).
-	 *
 	 * @return array
 	 */
 	protected function extract_images_from_galleries( $richtext, $plaintext, $extra_args = array() ) {
@@ -793,7 +785,7 @@ class BP_Media_Extractor {
 				if ( ctype_digit( $extra_args['width'] ) ) {
 					$image_size = array( $extra_args['width'], $extra_args['height'] );
 				} else {
-					$image_size = $extra_args['width'];  // e.g. "thumb", "medium".
+					$image_size = $extra_args['width'];  // E.g. "thumb", "medium".
 				}
 
 			} else {
@@ -867,7 +859,6 @@ class BP_Media_Extractor {
 	 * @param string $richtext   Content to parse.
 	 * @param string $plaintext  Sanitized version of the content.
 	 * @param array  $extra_args Contains data that an implementation might need beyond the defaults.
-	 *
 	 * @return array
 	 */
 	protected function extract_images_from_featured_images( $richtext, $plaintext, $extra_args ) {
@@ -889,7 +880,7 @@ class BP_Media_Extractor {
 				if ( ctype_digit( $extra_args['width'] ) ) {
 					$image_size = array( $extra_args['width'], $extra_args['height'] );
 				} else {
-					$image_size = $extra_args['width'];  // e.g. "thumb", "medium".
+					$image_size = $extra_args['width'];  // E.g. "thumb", "medium".
 				}
 			} else {
 				$image_size = 'full';
@@ -918,8 +909,7 @@ class BP_Media_Extractor {
 	 *
 	 * @since 2.3.0
 	 *
-	 * @param string $richtext
-	 *
+	 * @param string $richtext Content to sanitize.
 	 * @return string
 	 */
 	protected function strip_markup( $richtext ) {

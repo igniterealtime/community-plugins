@@ -15,7 +15,7 @@
       "js": [ "content.js", "jquery.min.js", "util.js", "ofmeet.js", "tinycolor.js" ],
       "matches": [ "https://*/*", "http://*/*" ]
    } ],
-   "description": "Openfire Meetings Chrome Extension required for screen sharing, remote control and co-browsing",
+   "description": "Openfire Meetings Chrome Extension for persistent group chat, screen sharing, remote control and co-browsing",
    "icons": {
       "128": "ignite_dl_openfire.png",
       "16": "ofmeet.png",
@@ -26,5 +26,5 @@
    "name": "Openfire Meetings Chrome Extension",
    "permissions": [ "desktopCapture", "background", "nativeMessaging", "http://localhost/"],
    "short_name": "ofmeet chrome extension",
-   "version": "0.0.7"
+   "version": "0.0.8"
 }

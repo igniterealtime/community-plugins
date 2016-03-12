@@ -19,6 +19,7 @@
 
 package org.jivesoftware.openfire.plugin.ofsocial;
 
+import org.jivesoftware.openfire.plugin.spark.*;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.roster.Roster;
 import org.jivesoftware.database.DbConnectionManager;
@@ -45,6 +46,11 @@ import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
 import org.jivesoftware.openfire.SessionPacketRouter;
 import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.fastpath.util.WorkgroupUtils;
+import org.jivesoftware.openfire.fastpath.dataforms.FormManager;
+import org.jivesoftware.openfire.fastpath.settings.chat.ChatSettingsCreator;
+
+import org.jivesoftware.xmpp.workgroup.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,15 +82,7 @@ public class PHP2Java extends AbstractQuercusModule
 
 	public PHP2Java()
 	{
-/*
-		try {
-			String code = "<?php $foo = strlen('abc'); print $foo; return 'yikes'; ?>";
-			Object o = engine.eval(code);
-			System.out.println(o);
-		} catch (Exception e) {
-			Log.error("PHP2Java script error", e);
-		}
-*/
+
 	}
 
 	public String registerUser(String username)
@@ -242,20 +240,31 @@ public class PHP2Java extends AbstractQuercusModule
 	public synchronized void createGroupChat(String groupId)
 	{
 		String roomName = getSQLField("SELECT name FROM wp_bp_groups WHERE id='" + groupId + "'", "name");
+		String roomStatus = getSQLField("SELECT status FROM wp_bp_groups WHERE id='" + groupId + "'", "status");
+		String roomDesc = getSQLField("SELECT description FROM wp_bp_groups WHERE id='" + groupId + "'", "description");
+
 		String domainName = JiveGlobals.getProperty("xmpp.domain", XMPPServer.getInstance().getServerInfo().getHostname());
 
 		Log.info( "createGroupChat " + groupId + " " + roomName);
 
 		try
 		{
-			if (roomName != null)
+			if (roomName != null && roomStatus != null)
 			{
-				createRoom(removeSpaces(roomName).toLowerCase());
+				roomName = removeSpaces(roomName);
+
+				if (roomStatus.equals("hidden"))
+				{
+					createWorkgroup(roomName, roomDesc);
+
+				} else {
+					createRoom(roomName, roomStatus, roomDesc);
+				}
 			}
 
 		} catch(Exception e) {
 
-			Log.error("createGroupChat exception " + e);
+			Log.error("createGroupChat exception ", e);
 		}
 	}
 
@@ -315,7 +324,7 @@ public class PHP2Java extends AbstractQuercusModule
 			}
 			catch(Exception e)
 			{
-				Log.error("joinGroup exception " + e);
+				Log.error("joinGroup exception ", e);
 				e.printStackTrace();
 			}
 		}
@@ -366,7 +375,7 @@ public class PHP2Java extends AbstractQuercusModule
 			}
 			catch(Exception e)
 			{
-				Log.error("removeFriendship exception " + e);
+				Log.error("removeFriendship exception ", e);
 				e.printStackTrace();
 			}
 
@@ -445,7 +454,7 @@ public class PHP2Java extends AbstractQuercusModule
 			}
 			catch(Exception e)
 			{
-				Log.error("createFriendship exception " + e);
+				Log.error("createFriendship exception ", e);
 				e.printStackTrace();
 			}
 
@@ -484,7 +493,7 @@ public class PHP2Java extends AbstractQuercusModule
 			}
 
 		} catch (SQLException e) {
-			Log.error("getSQLField exception " + e);
+			Log.error("getSQLField exception ", e);
 
 		} finally {
 			DbConnectionManager.closeConnection(rs, psmt, con);
@@ -510,7 +519,13 @@ public class PHP2Java extends AbstractQuercusModule
 			while (rs.next()) {
 
 				String fieldValue = removeSpaces(rs.getString(field)).toLowerCase();
-				createRoom(fieldValue);
+
+				MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService("conference").getChatRoom(fieldValue);
+
+				if (room == null)
+				{
+					createRoom(fieldValue, "public", fieldValue);
+				}
 
 				if (first)
 				{
@@ -521,7 +536,7 @@ public class PHP2Java extends AbstractQuercusModule
 			}
 
 		} catch (Exception e) {
-			Log.error("getSQLList exception " + e);
+			Log.error("getSQLList exception ", e);
 
 		} finally {
 			DbConnectionManager.closeConnection(rs, psmt, con);
@@ -559,7 +574,7 @@ public class PHP2Java extends AbstractQuercusModule
 			}
 
 		} catch (Exception e) {
-			Log.error("getSQLList exception " + e);
+			Log.error("getSQLList exception ", e);
 
 		} finally {
 			DbConnectionManager.closeConnection(rs, psmt, con);
@@ -596,14 +611,16 @@ public class PHP2Java extends AbstractQuercusModule
 			}
 
 		} catch (Exception e) {
-			Log.error("messageOtherRoomMembers exception " + e);
+			Log.error("messageOtherRoomMembers exception", e);
 		}
 	}
 
 
-	private void createRoom(String roomName)
+	private void createRoom(String roomname, String roomStatus, String description)
 	{
-		//Log.info( "createRoom " + roomName);
+		String roomName = roomname.toLowerCase();
+
+		Log.info( "createRoom " + roomName + " " + roomStatus);
 
 		try
 		{
@@ -619,19 +636,87 @@ public class PHP2Java extends AbstractQuercusModule
 
 					if (room != null)
 					{
-						configureRoom(room);
+						configureRoom(room, description);
+						createBookMark(roomname, roomStatus, description);
 					}
 				}
 			}
 
 		} catch (Exception e) {
-
-			e.printStackTrace();
+			Log.error("createRoom", e);
 		}
 	}
 
+	private void createWorkgroup(String roomName, String description)
+	{
+		String room = removeSpaces(roomName).toLowerCase();
+		String defaultQueueName = "Default Queue";
 
-	private void configureRoom(MUCRoom room )
+		try
+		{
+			WorkgroupManager workgroupManager = WorkgroupManager.getInstance();
+			Workgroup workgroup = workgroupManager.getWorkgroup(room);
+
+			if (workgroup == null)
+			{
+				Group group = GroupManager.getInstance().getGroup(roomName, true);
+
+				if (group != null)
+				{
+					workgroup = workgroupManager.createWorkgroup(roomName);
+					workgroup.setDescription(description);
+                	workgroup.setStatus(Workgroup.Status.READY);
+
+					RequestQueue queue = workgroup.createRequestQueue(defaultQueueName);
+                	ChatSettingsCreator.getInstance().createDefaultSettings(workgroup.getJID());
+
+					FormManager formManager = FormManager.getInstance();
+					formManager.createGenericForm(workgroup);
+
+					queue.addGroup(group);
+				}
+			}
+
+		} catch (Exception e) {
+			Log.error("createWorkgroup", e);
+		}
+	}
+
+	private void createBookMark(String roomName, String roomStatus, String description)
+	{
+		Bookmark bookmark = GetBookmarkByName(roomName);
+		List<String> groupCollection = new ArrayList<String>();
+
+		try
+		{
+			if (bookmark == null)
+			{
+				String roomJid = roomName.toLowerCase() + "@conference." + XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+				bookmark = new Bookmark(Bookmark.Type.group_chat, roomName, roomJid);
+				String id = "" + bookmark.getBookmarkID() + System.currentTimeMillis();
+				String rootUrlSecure = JiveGlobals.getProperty("ofmeet.root.url.secure", "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443"));
+				String url = rootUrlSecure + "/ofmeet/?b=" + id;
+
+				bookmark.setProperty("url", url);
+				bookmark.setProperty("description", description);
+				bookmark.setProperty("autojoin", "true");
+
+				if (roomStatus.equals("public"))
+				{
+					bookmark.setGlobalBookmark(true);
+
+				} else {
+					groupCollection.add(roomName);
+					bookmark.setGroups(groupCollection);
+				}
+			}
+
+		} catch (Exception e) {
+			Log.error("createBookMark", e);
+		}
+	}
+
+	private void configureRoom(MUCRoom room, String description)
 	{
 		Log.info( "configureRoom " + room.getID());
 
@@ -640,19 +725,7 @@ public class PHP2Java extends AbstractQuercusModule
 
         field = new XFormFieldImpl("muc#roomconfig_roomdesc");
         field.setType(FormField.TYPE_TEXT_SINGLE);
-
-		String desc = room.getDescription();
-		desc = desc == null ? "" : desc;
-
-		//int pos = desc.indexOf(":");
-
-		//if (pos > 0)
-		//	desc = desc.substring(pos + 1);
-
-
-        //field.addValue(String.valueOf(room.getID() + 1000) + ":" + desc);
-
-        field.addValue(desc);
+        field.addValue(description);
         dataForm.addField(field);
 
         field = new XFormFieldImpl("muc#roomconfig_roomname");
@@ -742,9 +815,43 @@ public class PHP2Java extends AbstractQuercusModule
 			room.getIQOwnerHandler().handleIQ(iq, room.getRole());
 
 		} catch (Exception e) {
-			Log.error("configureRoom exception " + e);
+			Log.error("configureRoom exception ", e);
 		}
 	}
+
+	private Bookmark GetBookmarkByName(String name)
+	{
+ 		Bookmark bookmark = null;
+
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            con = DbConnectionManager.getConnection();
+            pstmt = con.prepareStatement("SELECT bookmarkID from ofBookmark where bookmarkName=?");
+            pstmt.setString(1, name);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                long bookmarkID = rs.getLong(1);
+                try {
+                    bookmark = new Bookmark(bookmarkID);
+                }
+                catch (Exception e) {
+                }
+            }
+        }
+        catch (SQLException e) {
+            Log.error(e.getMessage(), e);
+        }
+        finally {
+            DbConnectionManager.closeConnection(rs, pstmt, con);
+        }
+
+        return bookmark;
+	}
+
 
 	public class DummyConnection extends VirtualConnection
 	{

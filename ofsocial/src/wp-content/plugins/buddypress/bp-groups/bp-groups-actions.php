@@ -8,6 +8,7 @@
  *
  * @package BuddyPress
  * @subpackage GroupsActions
+ * @since 1.5.0
  */
 
 // Exit if accessed directly.
@@ -28,11 +29,11 @@ function bp_groups_group_access_protection() {
 	$no_access_args  = array();
 
 	if ( ! $user_has_access && 'hidden' !== $current_group->status ) {
-		// Always allow access to home and request-membership
+		// Always allow access to home and request-membership.
 		if ( bp_is_current_action( 'home' ) || bp_is_current_action( 'request-membership' ) ) {
 			$user_has_access = true;
 
-		// User doesn't have access, so set up redirect args
+		// User doesn't have access, so set up redirect args.
 		} elseif ( is_user_logged_in() ) {
 			$no_access_args = array(
 				'message'  => __( 'You do not have access to this group.', 'buddypress' ),
@@ -42,7 +43,7 @@ function bp_groups_group_access_protection() {
 		}
 	}
 
-	// Protect the admin tab from non-admins
+	// Protect the admin tab from non-admins.
 	if ( bp_is_current_action( 'admin' ) && ! bp_is_item_admin() ) {
 		$user_has_access = false;
 		$no_access_args  = array(
@@ -91,27 +92,31 @@ add_action( 'bp_actions', 'bp_groups_group_access_protection' );
 
 /**
  * Catch and process group creation form submissions.
+ *
+ * @since 1.2.0
+ *
+ * @return bool
  */
 function groups_action_create_group() {
 
-	// If we're not at domain.org/groups/create/ then return false
+	// If we're not at domain.org/groups/create/ then return false.
 	if ( !bp_is_groups_component() || !bp_is_current_action( 'create' ) )
 		return false;
 
 	if ( !is_user_logged_in() )
 		return false;
 
- 	if ( !bp_user_can_create_groups() ) {
+	if ( !bp_user_can_create_groups() ) {
 		bp_core_add_message( __( 'Sorry, you are not allowed to create groups.', 'buddypress' ), 'error' );
 		bp_core_redirect( bp_get_groups_directory_permalink() );
 	}
 
 	$bp = buddypress();
 
-	// Make sure creation steps are in the right order
+	// Make sure creation steps are in the right order.
 	groups_action_sort_creation_steps();
 
-	// If no current step is set, reset everything so we can start a fresh group creation
+	// If no current step is set, reset everything so we can start a fresh group creation.
 	$bp->groups->current_create_step = bp_action_variable( 1 );
 	if ( !bp_get_groups_current_create_step() ) {
 		unset( $bp->groups->current_create_step );
@@ -125,32 +130,32 @@ function groups_action_create_group() {
 		bp_core_redirect( trailingslashit( bp_get_groups_directory_permalink() . 'create/step/' . array_shift( $keys ) ) );
 	}
 
-	// If this is a creation step that is not recognized, just redirect them back to the first screen
+	// If this is a creation step that is not recognized, just redirect them back to the first screen.
 	if ( bp_get_groups_current_create_step() && empty( $bp->groups->group_creation_steps[bp_get_groups_current_create_step()] ) ) {
 		bp_core_add_message( __('There was an error saving group details. Please try again.', 'buddypress'), 'error' );
 		bp_core_redirect( trailingslashit( bp_get_groups_directory_permalink() . 'create' ) );
 	}
 
-	// Fetch the currently completed steps variable
+	// Fetch the currently completed steps variable.
 	if ( isset( $_COOKIE['bp_completed_create_steps'] ) && !isset( $reset_steps ) )
 		$bp->groups->completed_create_steps = json_decode( base64_decode( stripslashes( $_COOKIE['bp_completed_create_steps'] ) ) );
 
-	// Set the ID of the new group, if it has already been created in a previous step
+	// Set the ID of the new group, if it has already been created in a previous step.
 	if ( isset( $_COOKIE['bp_new_group_id'] ) ) {
 		$bp->groups->new_group_id = (int) $_COOKIE['bp_new_group_id'];
 		$bp->groups->current_group = groups_get_group( array( 'group_id' => $bp->groups->new_group_id ) );
 
-		// Only allow the group creator to continue to edit the new group
+		// Only allow the group creator to continue to edit the new group.
 		if ( ! bp_is_group_creator( $bp->groups->current_group, bp_loggedin_user_id() ) ) {
 			bp_core_add_message( __( 'Only the group creator may continue editing this group.', 'buddypress' ), 'error' );
 			bp_core_redirect( trailingslashit( bp_get_groups_directory_permalink() . 'create' ) );
 		}
 	}
 
-	// If the save, upload or skip button is hit, lets calculate what we need to save
+	// If the save, upload or skip button is hit, lets calculate what we need to save.
 	if ( isset( $_POST['save'] ) ) {
 
-		// Check the nonce
+		// Check the nonce.
 		check_admin_referer( 'groups_create_save_' . bp_get_groups_current_create_step() );
 
 		if ( 'group-details' == bp_get_groups_current_create_step() ) {
@@ -174,7 +179,7 @@ function groups_action_create_group() {
 			if ( !isset($_POST['group-show-forum']) ) {
 				$group_enable_forum = 0;
 			} else {
-				// Create the forum if enable_forum = 1
+				// Create the forum if enable_forum = 1.
 				if ( bp_is_active( 'forums' ) && !groups_get_groupmeta( $bp->groups->new_group_id, 'forum_id' ) ) {
 					groups_new_group_forum();
 				}
@@ -246,12 +251,12 @@ function groups_action_create_group() {
 		if ( !in_array( bp_get_groups_current_create_step(), $completed_create_steps ) )
 			$bp->groups->completed_create_steps[] = bp_get_groups_current_create_step();
 
-		// Reset cookie info
+		// Reset cookie info.
 		setcookie( 'bp_new_group_id', $bp->groups->new_group_id, time()+60*60*24, COOKIEPATH );
 		setcookie( 'bp_completed_create_steps', base64_encode( json_encode( $bp->groups->completed_create_steps ) ), time()+60*60*24, COOKIEPATH );
 
 		// If we have completed all steps and hit done on the final step we
-		// can redirect to the completed group
+		// can redirect to the completed group.
 		$keys = array_keys( $bp->groups->group_creation_steps );
 		if ( count( $bp->groups->completed_create_steps ) == count( $keys ) && bp_get_groups_current_create_step() == array_pop( $keys ) ) {
 			unset( $bp->groups->current_create_step );
@@ -297,7 +302,7 @@ function groups_action_create_group() {
 		}
 	}
 
-	// Remove invitations
+	// Remove invitations.
 	if ( 'group-invites' === bp_get_groups_current_create_step() && ! empty( $_REQUEST['user_id'] ) && is_numeric( $_REQUEST['user_id'] ) ) {
 		if ( ! check_admin_referer( 'groups_invite_uninvite_user' ) ) {
 			return false;
@@ -315,28 +320,26 @@ function groups_action_create_group() {
 		bp_core_redirect( trailingslashit( bp_get_groups_directory_permalink() . 'create/step/group-invites' ) );
 	}
 
-	// Group avatar is handled separately
+	// Group avatar is handled separately.
 	if ( 'group-avatar' == bp_get_groups_current_create_step() && isset( $_POST['upload'] ) ) {
 		if ( ! isset( $bp->avatar_admin ) ) {
 			$bp->avatar_admin = new stdClass();
 		}
 
 		if ( !empty( $_FILES ) && isset( $_POST['upload'] ) ) {
-			// Normally we would check a nonce here, but the group save nonce is used instead
-
-			// Pass the file to the avatar upload handler
+			// Normally we would check a nonce here, but the group save nonce is used instead.
+			// Pass the file to the avatar upload handler.
 			if ( bp_core_avatar_handle_upload( $_FILES, 'groups_avatar_upload_dir' ) ) {
 				$bp->avatar_admin->step = 'crop-image';
 
-				// Make sure we include the jQuery jCrop file for image cropping
+				// Make sure we include the jQuery jCrop file for image cropping.
 				add_action( 'wp_print_scripts', 'bp_core_add_jquery_cropper' );
 			}
 		}
 
-		// If the image cropping is done, crop the image and save a full/thumb version
+		// If the image cropping is done, crop the image and save a full/thumb version.
 		if ( isset( $_POST['avatar-crop-submit'] ) && isset( $_POST['upload'] ) ) {
-			// Normally we would check a nonce here, but the group save nonce is used instead
-
+			// Normally we would check a nonce here, but the group save nonce is used instead.
 			if ( !bp_core_avatar_handle_crop( array( 'object' => 'group', 'avatar_dir' => 'group-avatars', 'item_id' => $bp->groups->current_group->id, 'original_file' => $_POST['image_src'], 'crop_x' => $_POST['x'], 'crop_y' => $_POST['y'], 'crop_w' => $_POST['w'], 'crop_h' => $_POST['h'] ) ) )
 				bp_core_add_message( __( 'There was an error saving the group profile photo, please try uploading again.', 'buddypress' ), 'error' );
 			else
@@ -357,22 +360,26 @@ add_action( 'bp_actions', 'groups_action_create_group' );
 
 /**
  * Catch and process "Join Group" button clicks.
+ *
+ * @since 1.0.0
+ *
+ * @return bool
  */
 function groups_action_join_group() {
 
 	if ( !bp_is_single_item() || !bp_is_groups_component() || !bp_is_current_action( 'join' ) )
 		return false;
 
-	// Nonce check
+	// Nonce check.
 	if ( !check_admin_referer( 'groups_join_group' ) )
 		return false;
 
 	$bp = buddypress();
 
-	// Skip if banned or already a member
+	// Skip if banned or already a member.
 	if ( !groups_is_user_member( bp_loggedin_user_id(), $bp->groups->current_group->id ) && !groups_is_user_banned( bp_loggedin_user_id(), $bp->groups->current_group->id ) ) {
 
-		// User wants to join a group that is not public
+		// User wants to join a group that is not public.
 		if ( $bp->groups->current_group->status != 'public' ) {
 			if ( !groups_check_user_has_invite( bp_loggedin_user_id(), $bp->groups->current_group->id ) ) {
 				bp_core_add_message( __( 'There was an error joining the group.', 'buddypress' ), 'error' );
@@ -380,7 +387,7 @@ function groups_action_join_group() {
 			}
 		}
 
-		// User wants to join any group
+		// User wants to join any group.
 		if ( !groups_join_group( $bp->groups->current_group->id ) )
 			bp_core_add_message( __( 'There was an error joining the group.', 'buddypress' ), 'error' );
 		else
@@ -410,22 +417,24 @@ add_action( 'bp_actions', 'groups_action_join_group' );
  * another function handles this. See {@link bp_legacy_theme_ajax_joinleave_group()}.
  *
  * @since 1.2.4
+ *
+ * @return bool
  */
 function groups_action_leave_group() {
 	if ( ! bp_is_single_item() || ! bp_is_groups_component() || ! bp_is_current_action( 'leave-group' ) ) {
 		return false;
 	}
 
-	// Nonce check
+	// Nonce check.
 	if ( ! check_admin_referer( 'groups_leave_group' ) ) {
 		return false;
 	}
 
-	// User wants to leave any group
+	// User wants to leave any group.
 	if ( groups_is_user_member( bp_loggedin_user_id(), bp_get_current_group_id() ) ) {
 		$bp = buddypress();
 
-		// Stop sole admins from abandoning their group
+		// Stop sole admins from abandoning their group.
 		$group_admins = groups_get_group_admins( bp_get_current_group_id() );
 
 		if ( 1 == count( $group_admins ) && $group_admins[0]->user_id == bp_loggedin_user_id() ) {
@@ -453,6 +462,8 @@ add_action( 'bp_actions', 'groups_action_leave_group' );
 /**
  * Sort the group creation steps.
  *
+ * @since 1.1.0
+ *
  * @return false|null False on failure.
  */
 function groups_action_sort_creation_steps() {
@@ -472,7 +483,7 @@ function groups_action_sort_creation_steps() {
 		$temp[$step['position']] = array( 'name' => $step['name'], 'slug' => $slug );
 	}
 
-	// Sort the steps by their position key
+	// Sort the steps by their position key.
 	ksort($temp);
 	unset($bp->groups->group_creation_steps);
 
@@ -489,6 +500,8 @@ function groups_action_sort_creation_steps() {
 
 /**
  * Catch requests for a random group page (example.com/groups/?random-group) and redirect.
+ *
+ * @since 1.2.0
  */
 function groups_action_redirect_to_random_group() {
 
@@ -509,19 +522,19 @@ add_action( 'bp_actions', 'groups_action_redirect_to_random_group' );
  */
 function groups_action_group_feed() {
 
-	// get current group
+	// Get current group.
 	$group = groups_get_current_group();
 
 	if ( ! bp_is_active( 'activity' ) || ! bp_is_groups_component() || ! $group || ! bp_is_current_action( 'feed' ) )
 		return false;
 
-	// if group isn't public or if logged-in user is not a member of the group, do
-	// not output the group activity feed
+	// If group isn't public or if logged-in user is not a member of the group, do
+	// not output the group activity feed.
 	if ( ! bp_group_is_visible( $group ) ) {
 		return false;
 	}
 
-	// setup the feed
+	// Set up the feed.
 	buddypress()->activity->feed = new BP_Activity_Feed( array(
 		'id'            => 'group',
 

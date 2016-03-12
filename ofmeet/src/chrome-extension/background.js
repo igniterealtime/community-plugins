@@ -150,32 +150,40 @@ function createRootWindow()
 	
 	if (!host)
 	{
-		host = prompt("Please enter your openfire meetings server:port");
-		window.localStorage["store.settings.host"] = host;
-	}
+		host = prompt("Please enter your openfire meetings server:port", "my-host-name:7443");
 		
-	var url = "https://" + host + "/ofmeet";
-
-	xhr.onreadystatechange = function() 
-	{
-		if (xhr.readyState == 4 && xhr.status == 200)
+		if (host && host != "null" && host != "")
 		{
-			console.log("checkAuthentication ok");
-			openRootWindow();				
-		}
+			window.localStorage["store.settings.host"] = host;
+		
+		} else return;
+	}
 
-		if (xhr.readyState == 4 && xhr.status == 401)
+	if (host && host != "null" && host != "")
+	{		
+		var url = "https://" + host + "/ofmeet";
+
+		xhr.onreadystatechange = function() 
 		{
-			console.error("checkAuthentication error", xhr);
-
-			chrome.tabs.create({'url': url}, function(win)
+			if (xhr.readyState == 4 && xhr.status == 200)
 			{
-				waiting = true;
-			});				
-		}
-	};
-	xhr.open("GET", url, true);
-	xhr.send();	
+				console.log("checkAuthentication ok");
+				openRootWindow();				
+			}
+
+			if (xhr.readyState == 4 && xhr.status == 401)
+			{
+				console.error("checkAuthentication error", xhr);
+
+				chrome.tabs.create({'url': url}, function(win)
+				{
+					waiting = true;
+				});				
+			}
+		};
+		xhr.open("GET", url, true);
+		xhr.send();	
+	}
 }
 
 function destroyRootWindow()

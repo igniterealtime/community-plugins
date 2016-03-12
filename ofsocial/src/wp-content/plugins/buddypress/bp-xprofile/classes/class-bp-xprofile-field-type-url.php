@@ -4,6 +4,7 @@
  *
  * @package BuddyPress
  * @subpackage XProfileClasses
+ * @since 2.1.0
  */
 
 // Exit if accessed directly.
@@ -45,11 +46,11 @@ class BP_XProfile_Field_Type_URL extends BP_XProfile_Field_Type {
 	 *
 	 * Must be used inside the {@link bp_profile_fields()} template loop.
 	 *
+	 * @since 2.1.0
+	 *
 	 * @param array $raw_properties Optional key/value array of
 	 *                              {@link http://dev.w3.org/html5/markup/input.number.html permitted attributes}
 	 *                              that you want to add.
-	 *
-	 * @since 2.1.0
 	 */
 	public function edit_field_html( array $raw_properties = array() ) {
 
@@ -85,9 +86,10 @@ class BP_XProfile_Field_Type_URL extends BP_XProfile_Field_Type {
 	 *
 	 * Must be used inside the {@link bp_profile_fields()} template loop.
 	 *
+	 * @since 2.1.0
+	 *
 	 * @param array $raw_properties Optional key/value array of permitted
 	 *                              attributes that you want to add.
-	 * @since 2.1.0
 	 */
 	public function admin_field_html( array $raw_properties = array() ) {
 
@@ -127,9 +129,8 @@ class BP_XProfile_Field_Type_URL extends BP_XProfile_Field_Type {
 	 * @since 2.1.0
 	 * @since 2.4.0 Added the `$field_id` parameter.
 	 *
-	 * @param string $submitted_value Raw value submitted by the user.
-	 * @param int    $field_id        Optional. ID of the field.
-	 *
+	 * @param string     $submitted_value Raw value submitted by the user.
+	 * @param string|int $field_id        Optional. ID of the field.
 	 * @return string
 	 */
 	public static function pre_validate_filter( $submitted_value = '', $field_id = '' ) {
@@ -157,9 +158,8 @@ class BP_XProfile_Field_Type_URL extends BP_XProfile_Field_Type {
 	 * @since 2.1.0
 	 * @since 2.4.0 Added the `$field_id` parameter.
 	 *
-	 * @param string $field_value The URL value, as saved in the database.
-	 * @param int    $field_id    Optional. ID of the field.
-	 *
+	 * @param string     $field_value The URL value, as saved in the database.
+	 * @param string|int $field_id    Optional. ID of the field.
 	 * @return string URL converted to a link.
 	 */
 	public static function display_filter( $field_value, $field_id = '' ) {

@@ -10,10 +10,12 @@ init:
     [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofsocial\build\jar
 
 compile:
-    [javac] C:\Projects\ignite\community-plugins\ofsocial\build.xml:29: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
-    [javac] Compiling 7 source files to C:\Projects\ignite\community-plugins\ofsocial\build\classes
+    [javac] C:\Projects\ignite\community-plugins\ofsocial\build.xml:31: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 9 source files to C:\Projects\ignite\community-plugins\ofsocial\build\classes
+    [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
     [javac] Note: C:\Projects\ignite\community-plugins\ofsocial\src\java\org\jivesoftware\openfire\plugin\ofsocial\PHP2Java.java uses or overrides a deprecated API.
     [javac] Note: Recompile with -Xlint:deprecation for details.
+    [javac] 1 warning
 
 lib:
       [jar] Building jar: C:\Projects\ignite\community-plugins\ofsocial\lib\plugin-ofsocial.jar
@@ -28,18 +30,20 @@ compile-jsps:
      [java] SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
      [java] log4j:WARN No appenders could be found for logger (org.eclipse.jetty.util.log).
      [java] log4j:WARN Please initialize the log4j system properly.
-    [javac] C:\Projects\ignite\community-plugins\ofsocial\build.xml:60: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] C:\Projects\ignite\community-plugins\ofsocial\build.xml:63: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
     [javac] Compiling 1 source file to C:\Projects\ignite\community-plugins\ofsocial\build\jspc\classes
+    [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
+    [javac] 1 warning
       [jar] Building jar: C:\Projects\ignite\community-plugins\ofsocial\lib\plugin-ofsocial-jspc.jar
      [copy] Copying 1 file to C:\Projects\ignite\community-plugins\ofsocial\src\web\WEB-INF
 
 jar:
-     [copy] Copying 4197 files to C:\Projects\ignite\community-plugins\ofsocial\build\jar
-     [copy] Copied 641 empty directories to 14 empty directories under C:\Projects\ignite\community-plugins\ofsocial\build\jar
+     [copy] Copying 4111 files to C:\Projects\ignite\community-plugins\ofsocial\build\jar
+     [copy] Copied 612 empty directories to 10 empty directories under C:\Projects\ignite\community-plugins\ofsocial\build\jar
      [copy] Copying 6 files to C:\Projects\ignite\community-plugins\ofsocial\build\jar\lib
      [copy] Copying 12 files to C:\Projects\ignite\community-plugins\ofsocial\build\jar
       [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_1\target\openfire\plugins\ofsocial.jar
    [delete] Deleting directory C:\Projects\ignite\community-plugins\ofsocial\build
 
 BUILD SUCCESSFUL
-Total time: 1 minute 43 seconds
+Total time: 1 minute 1 second

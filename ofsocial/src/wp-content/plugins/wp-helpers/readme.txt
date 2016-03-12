@@ -1,9 +1,9 @@
 === WordPress Helpers ===
 Contributors: piklist, p51labs, sbruner
 Tags: Piklist, Admin Bar, AIM, Autosave, Comments, Close Comments, Dashboard Widgets, Emojis, Excerpt, Excerpts, Exif, Featured Image, Feeds, Google Talk, Howdy, HTML Editor, Image, Jabber, Maintenance, Maintenance Mode, Media, Private, Protected, RSS Feeds, Settings, Under Construction, Visual Editor, Widgets, xmlrpc, Yahoo IM
-Tested up to: 4.4
+Tested up to: 4.5
 Requires at least: 4.0
-Stable tag: 1.9.4
+Stable tag: 1.9.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -102,6 +102,11 @@ Awesome! We're always looking for new ideas. Please submit them on our <a href="
 * Install and activate WordPress Helpers like any other plugin.
 
 == Changelog ==
+
+= 1.9.5 =
+Release Date: March 10, 2016
+
+* FIXED: errors with remove_filter function. Props @mcmaster
 
 = 1.9.4 =
 Release Date: January 16, 2016

@@ -2,10 +2,12 @@
 /**
  * BuddyPress Core Caching Functions.
  *
- * @package BuddyPress
- *
  * Caching functions handle the clearing of cached objects and pages on specific
  * actions throughout BuddyPress.
+ *
+ * @package BuddyPress
+ * @supackage Cache
+ * @since 1.5.0
  */
 
 // Exit if accessed directly.
@@ -14,10 +16,12 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Prune the WP Super Cache.
  *
- * @see prune_super_cache()
+ * When WP Super Cache is installed, this function will clear cached pages
+ * so that success/error messages or time-sensitive content are not cached.
  *
- * When wp-super-cache is installed this function will clear cached pages
- * so that success/error messages are not cached, or time sensitive content.
+ * @since 1.0.0
+ *
+ * @see prune_super_cache()
  *
  * @return int
  */
@@ -39,6 +43,8 @@ function bp_core_clear_cache() {
 /**
  * Clear all cached objects for a user, or those that a user is part of.
  *
+ * @since 1.0.0
+ *
  * @param string $user_id User ID to delete cache for.
  */
 function bp_core_clear_user_object_cache( $user_id ) {
@@ -47,6 +53,8 @@ function bp_core_clear_user_object_cache( $user_id ) {
 
 /**
  * Clear member count caches and transients.
+ *
+ * @since 1.6.0
  */
 function bp_core_clear_member_count_caches() {
 	wp_cache_delete( 'bp_total_member_count', 'bp' );
@@ -81,7 +89,7 @@ function bp_core_clear_directory_pages_cache_page_edit( $post_id ) {
 		return;
 	}
 
-	wp_cache_delete( 'directory_pages', 'bp' );
+	wp_cache_delete( 'directory_pages', 'bp_pages' );
 }
 add_action( 'save_post', 'bp_core_clear_directory_pages_cache_page_edit' );
 
@@ -94,7 +102,7 @@ add_action( 'save_post', 'bp_core_clear_directory_pages_cache_page_edit' );
  */
 function bp_core_clear_directory_pages_cache_settings_edit( $option ) {
 	if ( 'bp-pages' === $option ) {
-		wp_cache_delete( 'directory_pages', 'bp' );
+		wp_cache_delete( 'directory_pages', 'bp_pages' );
 	}
 }
 add_action( 'update_option', 'bp_core_clear_directory_pages_cache_settings_edit' );
@@ -133,7 +141,6 @@ add_action( 'add_site_option', 'bp_core_clear_root_options_cache' );
  *
  * @param array  $item_ids    ID list.
  * @param string $cache_group The cache group to check against.
- *
  * @return array
  */
 function bp_get_non_cached_ids( $item_ids, $cache_group ) {
@@ -174,19 +181,18 @@ function bp_get_non_cached_ids( $item_ids, $cache_group ) {
  *     @type string       $cache_key_prefix Optional. The prefix to use when creating
  *                                          cache key names. Default: the value of $meta_table.
  * }
- *
  * @return array|bool Metadata cache for the specified objects, or false on failure.
  */
 function bp_update_meta_cache( $args = array() ) {
 	global $wpdb;
 
 	$defaults = array(
-		'object_ids' 	   => array(), // Comma-separated list or array of item ids
-		'object_type' 	   => '',      // Canonical component id: groups, members, etc
-		'cache_group'      => '',      // Cache group
-		'meta_table' 	   => '',      // Name of the table containing the metadata
-		'object_column'    => '',      // DB column for the object ids (group_id, etc)
-		'cache_key_prefix' => ''       // Prefix to use when creating cache key names. Eg 'bp_groups_groupmeta'
+		'object_ids' 	   => array(), // Comma-separated list or array of item ids.
+		'object_type' 	   => '',      // Canonical component id: groups, members, etc.
+		'cache_group'      => '',      // Cache group.
+		'meta_table' 	   => '',      // Name of the table containing the metadata.
+		'object_column'    => '',      // DB column for the object ids (group_id, etc).
+		'cache_key_prefix' => ''       // Prefix to use when creating cache key names. Eg 'bp_groups_groupmeta'.
 	);
 	$r = wp_parse_args( $args, $defaults );
 	extract( $r );
@@ -212,7 +218,7 @@ function bp_update_meta_cache( $args = array() ) {
 
 	$cache = array();
 
-	// Get meta info
+	// Get meta info.
 	if ( ! empty( $uncached_ids ) ) {
 		$id_list   = join( ',', wp_parse_id_list( $uncached_ids ) );
 		$meta_list = $wpdb->get_results( esc_sql( "SELECT {$object_column}, meta_key, meta_value FROM {$meta_table} WHERE {$object_column} IN ({$id_list})" ), ARRAY_A );
@@ -223,19 +229,19 @@ function bp_update_meta_cache( $args = array() ) {
 				$mkey = $metarow['meta_key'];
 				$mval = $metarow['meta_value'];
 
-				// Force subkeys to be array type:
+				// Force subkeys to be array type.
 				if ( !isset( $cache[$mpid] ) || !is_array( $cache[$mpid] ) )
 					$cache[$mpid] = array();
 				if ( !isset( $cache[$mpid][$mkey] ) || !is_array( $cache[$mpid][$mkey] ) )
 					$cache[$mpid][$mkey] = array();
 
-				// Add a value to the current pid/key:
+				// Add a value to the current pid/key.
 				$cache[$mpid][$mkey][] = $mval;
 			}
 		}
 
 		foreach ( $uncached_ids as $uncached_id ) {
-			// Cache empty values as well
+			// Cache empty values as well.
 			if ( ! isset( $cache[ $uncached_id ] ) ) {
 				$cache[ $uncached_id ] = array();
 			}

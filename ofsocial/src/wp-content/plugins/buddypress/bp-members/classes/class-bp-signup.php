@@ -2,10 +2,9 @@
 /**
  * Signups Management class.
  *
- * @since 2.0.0
- *
  * @package BuddyPress
  * @subpackage coreClasses
+ * @since 2.0.0
  */
 
 /**
@@ -587,7 +586,7 @@ class BP_Signup {
 
 				// Send the validation email.
 				} else {
-					bp_core_signup_send_validation_email( false, $signup->user_email, $signup->activation_key );
+					bp_core_signup_send_validation_email( false, $signup->user_email, $signup->activation_key, $signup->user_login );
 				}
 			}
 

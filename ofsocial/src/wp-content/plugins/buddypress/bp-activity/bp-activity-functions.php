@@ -6,6 +6,7 @@
  *
  * @package BuddyPress
  * @subpackage ActivityFunctions
+ * @since 1.5.0
  */
 
 // Exit if accessed directly.
@@ -117,7 +118,14 @@ function bp_activity_find_mentions( $content ) {
 		return false;
 	}
 
-	return $mentioned_users;
+	/**
+	 * Filters the mentioned users.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param array $mentioned_users Associative array with user IDs as keys and usernames as values.
+	 */
+	return apply_filters( 'bp_activity_mentioned_users', $mentioned_users );
 }
 
 /**
@@ -132,6 +140,15 @@ function bp_activity_find_mentions( $content ) {
 function bp_activity_clear_new_mentions( $user_id ) {
 	bp_delete_user_meta( $user_id, 'bp_new_mention_count' );
 	bp_delete_user_meta( $user_id, 'bp_new_mentions'      );
+
+	/**
+	 * Fires once mentions has been reset for a given user.
+	 *
+	 * @since  2.5.0
+	 *
+	 * @param  int $user_id The id of the user whose unread mentions are being reset.
+	 */
+	do_action( 'bp_activity_clear_new_mentions', $user_id );
 }
 
 /**
@@ -375,6 +392,16 @@ function bp_activity_set_action( $component_id, $type, $description, $format_cal
 		'position'        => $position,
 	), $component_id, $type, $description, $format_callback, $label, $context );
 
+	// Sort the actions of the affected component.
+	$action_array = (array) $bp->activity->actions->{$component_id};
+	$action_array = bp_sort_by_key( $action_array, 'position', 'num' );
+
+	// Restore keys.
+	$bp->activity->actions->{$component_id} = new stdClass;
+	foreach ( $action_array as $key_ordered ) {
+		$bp->activity->actions->{$component_id}->{$key_ordered['key']} = $key_ordered;
+	}
+
 	return true;
 }
 
@@ -418,11 +445,24 @@ function bp_activity_set_post_type_tracking_args( $post_type = '', $args = array
 		return false;
 	}
 
+	$activity_labels = array(
+		/* Post labels */
+		'bp_activity_admin_filter',
+		'bp_activity_front_filter',
+		'bp_activity_new_post',
+		'bp_activity_new_post_ms',
+		/* Comment labels */
+		'bp_activity_comments_admin_filter',
+		'bp_activity_comments_front_filter',
+		'bp_activity_new_comment',
+		'bp_activity_new_comment_ms'
+	);
+
 	// Labels are loaded into the post type object.
-	foreach ( array( 'bp_activity_admin_filter', 'bp_activity_front_filter', 'bp_activity_new_post', 'bp_activity_new_post_ms' ) as $label_type ) {
+	foreach ( $activity_labels as $label_type ) {
 		if ( ! empty( $args[ $label_type ] ) ) {
 			$wp_post_types[ $post_type ]->labels->{$label_type} = $args[ $label_type ];
-			unset( $args[ $post_type ] );
+			unset( $args[ $label_type ] );
 		}
 	}
 
@@ -436,6 +476,7 @@ function bp_activity_set_post_type_tracking_args( $post_type = '', $args = array
  * Get tracking arguments for a specific post type.
  *
  * @since 2.2.0
+ * @since 2.5.0 Add post type comments tracking args
  *
  * @param  string $post_type Name of the post type.
  * @return object The tracking arguments of the post type.
@@ -445,17 +486,20 @@ function bp_activity_get_post_type_tracking_args( $post_type ) {
 		return false;
 	}
 
-	$post_type_object = get_post_type_object( $post_type );
+	$post_type_object           = get_post_type_object( $post_type );
+	$post_type_support_comments = post_type_supports( $post_type, 'comments' );
 
 	$post_type_activity = array(
-		'component_id'      => buddypress()->activity->id,
-		'action_id'         => 'new_' . $post_type,
-		'format_callback'   => 'bp_activity_format_activity_action_custom_post_type_post',
-		'front_filter'      => $post_type_object->labels->name,
-		'contexts'          => array( 'activity' ),
-		'position'          => 0,
-		'singular'          => strtolower( $post_type_object->labels->singular_name ),
-		'activity_comment' => ! post_type_supports( $post_type, 'comments' ),
+		'component_id'            => buddypress()->activity->id,
+		'action_id'               => 'new_' . $post_type,
+		'format_callback'         => 'bp_activity_format_activity_action_custom_post_type_post',
+		'front_filter'            => $post_type_object->labels->name,
+		'contexts'                => array( 'activity' ),
+		'position'                => 0,
+		'singular'                => strtolower( $post_type_object->labels->singular_name ),
+		'activity_comment'        => ! $post_type_support_comments,
+		'comment_action_id'       => false,
+		'comment_format_callback' => 'bp_activity_format_activity_action_custom_post_type_comment',
 	);
 
 	if ( ! empty( $post_type_object->bp_activity ) ) {
@@ -488,6 +532,52 @@ function bp_activity_get_post_type_tracking_args( $post_type ) {
 		$post_type_activity->new_post_type_action_ms = $post_type_object->labels->bp_activity_new_post_ms;
 	}
 
+	// If the post type supports comments and has a comment action id, build the comments tracking args
+	if ( $post_type_support_comments && ! empty( $post_type_activity->comment_action_id ) ) {
+		// Init a new container for the activity type for comments
+		$post_type_activity->comments_tracking = new stdClass();
+
+		// Build the activity type for comments
+		$post_type_activity->comments_tracking->component_id = $post_type_activity->component_id;
+		$post_type_activity->comments_tracking->action_id    = $post_type_activity->comment_action_id;
+
+		// Try to get the comments admin filter from the post type labels.
+		if ( ! empty( $post_type_object->labels->bp_activity_comments_admin_filter ) ) {
+			$post_type_activity->comments_tracking->admin_filter = $post_type_object->labels->bp_activity_comments_admin_filter;
+
+		// Fall back to a generic name.
+		} else {
+			$post_type_activity->comments_tracking->admin_filter = _x( 'New item comment posted', 'Post Type generic comments activity admin filter', 'buddypress' );
+		}
+
+		$post_type_activity->comments_tracking->format_callback = $post_type_activity->comment_format_callback;
+
+		// Check for the comments front filter in the post type labels.
+		if ( ! empty( $post_type_object->labels->bp_activity_comments_front_filter ) ) {
+			$post_type_activity->comments_tracking->front_filter = $post_type_object->labels->bp_activity_comments_front_filter;
+
+		// Fall back to a generic name.
+		} else {
+			$post_type_activity->comments_tracking->front_filter = _x( 'Item comments', 'Post Type generic comments activity front filter', 'buddypress' );
+		}
+
+		$post_type_activity->comments_tracking->contexts = $post_type_activity->contexts;
+		$post_type_activity->comments_tracking->position = (int) $post_type_activity->position + 1;
+
+		// Try to get the action for new post type comment action on non-multisite installations.
+		if ( ! empty( $post_type_object->labels->bp_activity_new_comment ) ) {
+			$post_type_activity->comments_tracking->new_post_type_comment_action = $post_type_object->labels->bp_activity_new_comment;
+		}
+
+		// Try to get the action for new post type comment action on multisite installations.
+		if ( ! empty( $post_type_object->labels->bp_activity_new_comment_ms ) ) {
+			$post_type_activity->comments_tracking->new_post_type_comment_action_ms = $post_type_object->labels->bp_activity_new_comment_ms;
+		}
+	}
+
+	// Finally make sure we'll be able to find the post type this activity type is associated to.
+	$post_type_activity->post_type = $post_type;
+
 	/**
 	 * Filters tracking arguments for a specific post type.
 	 *
@@ -503,6 +593,7 @@ function bp_activity_get_post_type_tracking_args( $post_type ) {
  * Get tracking arguments for all post types.
  *
  * @since 2.2.0
+ * @since 2.5.0 Include post type comments tracking args if needed
  *
  * @return array List of post types with their tracking arguments.
  */
@@ -516,6 +607,20 @@ function bp_activity_get_post_types_tracking_args() {
 		$track_post_type = bp_activity_get_post_type_tracking_args( $post_type );
 
 		if ( ! empty( $track_post_type ) ) {
+			// Set the post type comments tracking args
+			if ( ! empty( $track_post_type->comments_tracking->action_id ) ) {
+				// Used to check support for comment tracking by activity type (new_post_type_comment)
+				$track_post_type->comments_tracking->comments_tracking = true;
+
+				// Used to be able to find the post type this activity type is associated to.
+				$track_post_type->comments_tracking->post_type = $post_type;
+
+				$post_types_tracking_args[ $track_post_type->comments_tracking->action_id ] = $track_post_type->comments_tracking;
+
+				// Used to check support for comment tracking by activity type (new_post_type)
+				$track_post_type->comments_tracking = true;
+			}
+
 			$post_types_tracking_args[ $track_post_type->action_id ] = $track_post_type;
 		}
 
@@ -530,6 +635,117 @@ function bp_activity_get_post_types_tracking_args() {
 	 *                                        their tracking arguments.
 	 */
 	return apply_filters( 'bp_activity_get_post_types_tracking_args', $post_types_tracking_args );
+}
+
+/**
+ * Check if the *Post Type* activity supports a specific feature.
+ *
+ * @since 2.5.0
+ *
+ * @param  string $activity_type The activity type to check.
+ * @param  string $feature       The feature to check. Currently supports:
+ *                               'post-type-comment-tracking', 'post-type-comment-reply' & 'comment-reply'.
+ *                               See inline doc for more info.
+ * @return bool
+ */
+function bp_activity_type_supports( $activity_type = '', $feature = '' ) {
+	$retval = false;
+
+	$bp = buddypress();
+
+	switch ( $feature ) {
+		/**
+		 * Does this activity type support comment tracking?
+		 *
+		 * eg. 'new_blog_post' and 'new_blog_comment' will both return true.
+		 */
+		case 'post-type-comment-tracking' :
+			// Set the activity track global if not set yet
+			if ( empty( $bp->activity->track ) ) {
+				$bp->activity->track = bp_activity_get_post_types_tracking_args();
+			}
+
+			if ( ! empty( $bp->activity->track[ $activity_type ]->comments_tracking ) ) {
+				$retval = true;
+			}
+			break;
+
+		/**
+		 * Is this a parent activity type that support post comments?
+		 *
+		 * eg. 'new_blog_post' will return true; 'new_blog_comment' will return false.
+		 */
+		case 'post-type-comment-reply' :
+			// Set the activity track global if not set yet.
+			if ( empty( $bp->activity->track ) ) {
+				$bp->activity->track = bp_activity_get_post_types_tracking_args();
+			}
+
+			if ( ! empty( $bp->activity->track[ $activity_type ]->comments_tracking ) && ! empty( $bp->activity->track[ $activity_type ]->comment_action_id ) ) {
+				$retval = true;
+			}
+			break;
+
+		/**
+		 * Does this activity type support comment & reply?
+		 */
+		case 'comment-reply' :
+			// Set the activity track global if not set yet.
+			if ( empty( $bp->activity->track ) ) {
+				$bp->activity->track = bp_activity_get_post_types_tracking_args();
+			}
+
+			// Post Type activities
+			if ( ! empty( $bp->activity->track[ $activity_type ] ) ) {
+				if ( isset( $bp->activity->track[ $activity_type ]->activity_comment ) ) {
+					$retval = $bp->activity->track[ $activity_type ]->activity_comment;
+				}
+
+				// Eventually override with comment synchronization feature.
+				if ( isset( $bp->activity->track[ $activity_type ]->comments_tracking ) ) {
+					$retval = $bp->activity->track[ $activity_type ]->comments_tracking && ! bp_disable_blogforum_comments();
+				}
+
+			// Retired Forums component
+			} elseif ( 'new_forum_topic' === $activity_type || 'new_forum_post' === $activity_type ) {
+				$retval = ! bp_disable_blogforum_comments();
+
+			// By Default, all other activity types are supporting comments.
+			} else {
+				$retval = true;
+			}
+			break;
+	}
+
+	return $retval;
+}
+
+/**
+ * Get a specific tracking argument for a given activity type
+ *
+ * @since 2.5.0
+ *
+ * @param  string       $activity_type the activity type.
+ * @param  string       $arg           the key of the tracking argument.
+ * @return mixed        the value of the tracking arg, false if not found.
+ */
+function bp_activity_post_type_get_tracking_arg( $activity_type, $arg = '' ) {
+	if ( empty( $activity_type ) || empty( $arg ) ) {
+		return false;
+	}
+
+	$bp = buddypress();
+
+	// Set the activity track global if not set yet
+	if ( empty( $bp->activity->track ) ) {
+		$bp->activity->track = bp_activity_get_post_types_tracking_args();
+	}
+
+	if ( isset( $bp->activity->track[ $activity_type ]->{$arg} ) ) {
+		return $bp->activity->track[ $activity_type ]->{$arg};
+	} else {
+		return false;
+	}
 }
 
 /**
@@ -560,18 +776,6 @@ function bp_activity_get_actions() {
 				$post_type->contexts,
 				$post_type->position
 			);
-		}
-	}
-
-	// Sort the actions by their position within each component.
-	foreach ( $bp->activity->actions as $component => $actions ) {
-		$actions = (array) $actions;
-		$temp = bp_sort_by_key( $actions, 'position', 'num' );
-
-		// Restore keys.
-		$bp->activity->actions->{$component} = new stdClass;
-		foreach ( $temp as $key_ordered ) {
-			$bp->activity->actions->{$component}->{$key_ordered['key']} = $key_ordered;
 		}
 	}
 
@@ -1254,6 +1458,8 @@ add_action( 'bp_register_activity_actions', 'bp_activity_register_activity_actio
 /**
  * Generate an activity action string for an activity item.
  *
+ * @since 2.0.0
+ *
  * @param object $activity Activity data object.
  * @return string|bool Returns false if no callback is found, otherwise returns
  *                     the formatted action string.
@@ -1393,6 +1599,57 @@ function bp_activity_format_activity_action_custom_post_type_post( $action, $act
 	return apply_filters( 'bp_activity_custom_post_type_post_action', $action, $activity );
 }
 
+/**
+ * Format activity action strings for custom post types comments.
+ *
+ * @since 2.5.0
+ *
+ * @param string $action   Static activity action.
+ * @param object $activity Activity data object.
+ *
+ * @return string
+ */
+function bp_activity_format_activity_action_custom_post_type_comment( $action, $activity ) {
+	$bp = buddypress();
+
+	// Fetch all the tracked post types once.
+	if ( empty( $bp->activity->track ) ) {
+		$bp->activity->track = bp_activity_get_post_types_tracking_args();
+	}
+
+	if ( empty( $activity->type ) || empty( $bp->activity->track[ $activity->type ] ) ) {
+		return $action;
+	}
+
+	$user_link = bp_core_get_userlink( $activity->user_id );
+
+	if ( is_multisite() ) {
+		$blog_link = '<a href="' . esc_url( get_home_url( $activity->item_id ) ) . '">' . get_blog_option( $activity->item_id, 'blogname' ) . '</a>';
+
+		if ( ! empty( $bp->activity->track[ $activity->type ]->new_post_type_comment_action_ms ) ) {
+			$action = sprintf( $bp->activity->track[ $activity->type ]->new_post_type_comment_action_ms, $user_link, $activity->primary_link, $blog_link );
+		} else {
+			$action = sprintf( _x( '%1$s commented on the <a href="%2$s">item</a>, on the site %3$s', 'Activity Custom Post Type comment action', 'buddypress' ), $user_link, $activity->primary_link, $blog_link );
+		}
+	} else {
+		if ( ! empty( $bp->activity->track[ $activity->type ]->new_post_type_comment_action ) ) {
+			$action = sprintf( $bp->activity->track[ $activity->type ]->new_post_type_comment_action, $user_link, $activity->primary_link );
+		} else {
+			$action = sprintf( _x( '%1$s commented on the <a href="%2$s">item</a>', 'Activity Custom Post Type post comment action', 'buddypress' ), $user_link, $activity->primary_link );
+		}
+	}
+
+	/**
+	 * Filters the formatted custom post type activity comment action string.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string               $action   Activity action string value.
+	 * @param BP_Activity_Activity $activity Activity item object.
+	 */
+	return apply_filters( 'bp_activity_custom_post_type_comment_action', $action, $activity );
+}
+
 /*
  * Business functions are where all the magic happens in BuddyPress. They will
  * handle the actual saving or manipulation of information. Usually they will
@@ -1426,16 +1683,16 @@ function bp_activity_format_activity_action_custom_post_type_post( $action, $act
 function bp_activity_get( $args = '' ) {
 
 	$r = bp_parse_args( $args, array(
-		'max'               => false,        // Maximum number of results to return
+		'max'               => false,        // Maximum number of results to return.
 		'fields'            => 'all',
-		'page'              => 1,            // page 1 without a per_page will result in no pagination.
+		'page'              => 1,            // Page 1 without a per_page will result in no pagination.
 		'per_page'          => false,        // results per page
 		'sort'              => 'DESC',       // sort ASC or DESC
-		'display_comments'  => false,        // false for no comments. 'stream' for within stream display, 'threaded' for below each activity item
+		'display_comments'  => false,        // False for no comments. 'stream' for within stream display, 'threaded' for below each activity item.
 
 		'search_terms'      => false,        // Pass search terms as a string
 		'meta_query'        => false,        // Filter by activity meta. See WP_Meta_Query for format
-		'date_query'        => false,        // Filter by date. See first parameter of WP_Date_Query for format
+		'date_query'        => false,        // Filter by date. See first parameter of WP_Date_Query for format.
 		'filter_query'      => false,
 		'show_hidden'       => false,        // Show activity items that are hidden site-wide?
 		'exclude'           => false,        // Comma-separated list of activity IDs to exclude.
@@ -1790,9 +2047,9 @@ function bp_activity_post_update( $args = '' ) {
  *
  * @since 2.2.0
  *
- * @param int     $post_id ID of the new post.
- * @param WP_Post $post    Post object.
- * @param int     $user_id ID of the post author.
+ * @param int          $post_id ID of the new post.
+ * @param WP_Post|null $post    Post object.
+ * @param int          $user_id ID of the post author.
  * @return int|bool The ID of the activity on success. False on error.
  */
 function bp_activity_post_type_publish( $post_id = 0, $post = null, $user_id = 0 ) {
@@ -1927,7 +2184,7 @@ function bp_activity_post_type_publish( $post_id = 0, $post = null, $user_id = 0
  *
  * @since 2.2.0
  *
- * @param WP_Post $post Post item.
+ * @param WP_Post|null $post Post item.
  * @return bool True on success, false on failure.
  */
 function bp_activity_post_type_update( $post = null ) {
@@ -1981,11 +2238,13 @@ function bp_activity_post_type_update( $post = null ) {
 	 * Fires after the updating of an activity item for a custom post type entry.
 	 *
 	 * @since 2.2.0
+	 * @since 2.5.0 Add the post type tracking args parameter
 	 *
-	 * @param WP_Post              $post     Post object.
-	 * @param BP_Activity_Activity $activity Activity object.
+	 * @param WP_Post              $post                 Post object.
+	 * @param BP_Activity_Activity $activity             Activity object.
+	 * @param object               $activity_post_object The post type tracking args object.
 	 */
-	do_action( 'bp_activity_post_type_updated', $post, $activity );
+	do_action( 'bp_activity_post_type_updated', $post, $activity, $activity_post_object );
 
 	return $updated;
 }
@@ -1995,8 +2254,8 @@ function bp_activity_post_type_update( $post = null ) {
  *
  * @since 2.2.0
  *
- * @param  int     $post_id ID of the post being unpublished.
- * @param  WP_Post $post    Post object.
+ * @param int          $post_id ID of the post being unpublished.
+ * @param WP_Post|null $post    Post object.
  * @return bool True on success, false on failure.
  */
 function bp_activity_post_type_unpublish( $post_id = 0, $post = null ) {
@@ -2041,9 +2300,270 @@ function bp_activity_post_type_unpublish( $post_id = 0, $post = null ) {
 }
 
 /**
+ * Create an activity item for a newly posted post type comment.
+ *
+ * @since 2.5.0
+ *
+ * @param  int  $comment_id  ID of the comment.
+ * @param  bool $is_approved Whether the comment is approved or not.
+ * @param  object $activity_post_object the post type tracking args object.
+ *
+ * @return int|bool The ID of the activity on success. False on error.
+ */
+function bp_activity_post_type_comment( $comment_id = 0, $is_approved = true, $activity_post_object = null ) {
+	// Get the users comment
+	$post_type_comment = get_comment( $comment_id );
+
+	// Don't record activity if the comment hasn't been approved
+	if ( empty( $is_approved ) ) {
+		return false;
+	}
+
+	// Don't record activity if no email address has been included
+	if ( empty( $post_type_comment->comment_author_email ) ) {
+		return false;
+	}
+
+	// Don't record activity if the comment has already been marked as spam
+	if ( 'spam' === $is_approved ) {
+		return false;
+	}
+
+	// Get the user by the comment author email.
+	$user = get_user_by( 'email', $post_type_comment->comment_author_email );
+
+	// If user isn't registered, don't record activity
+	if ( empty( $user ) ) {
+		return false;
+	}
+
+	// Get the user_id
+	$user_id = (int) $user->ID;
+
+	// Get blog and post data
+	$blog_id = get_current_blog_id();
+
+	// Get the post
+	$post_type_comment->post = get_post( $post_type_comment->comment_post_ID );
+
+	if ( ! is_a( $post_type_comment->post, 'WP_Post' ) ) {
+		return false;
+	}
+
+	/**
+	 * Filters whether to publish activities about the comment regarding the post status
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param bool true to bail, false otherwise.
+	 */
+	$is_post_status_not_allowed = (bool) apply_filters( 'bp_activity_post_type_is_post_status_allowed', 'publish' !== $post_type_comment->post->post_status || ! empty( $post_type_comment->post->post_password ) );
+
+	// If this is a password protected post, or not a public post don't record the comment
+	if ( $is_post_status_not_allowed ) {
+		return false;
+	}
+
+	// Set post type
+	$post_type = $post_type_comment->post->post_type;
+
+	if ( empty( $activity_post_object ) ) {
+		// Get the post type tracking args.
+		$activity_post_object = bp_activity_get_post_type_tracking_args( $post_type );
+
+		// Bail if the activity type does not exist
+		if ( empty( $activity_post_object->comments_tracking->action_id ) ) {
+			return false;
+		}
+	}
+
+	// Set the $activity_comment_object
+	$activity_comment_object = $activity_post_object->comments_tracking;
+
+	/**
+	 * Filters whether or not to post the activity about the comment.
+	 *
+	 * This is a variable filter, dependent on the post type,
+	 * that lets components or plugins bail early if needed.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param bool $value      Whether or not to continue.
+	 * @param int  $blog_id    ID of the current site.
+	 * @param int  $post_id    ID of the current post being commented.
+	 * @param int  $user_id    ID of the current user.
+	 * @param int  $comment_id ID of the current comment being posted.
+	 */
+	if ( false === apply_filters( "bp_activity_{$post_type}_pre_comment", true, $blog_id, $post_type_comment->post->ID, $user_id, $comment_id ) ) {
+		return false;
+	}
+
+	// Is this an update ?
+	$activity_id = bp_activity_get_activity_id( array(
+		'user_id'           => $user_id,
+		'component'         => $activity_comment_object->component_id,
+		'type'              => $activity_comment_object->action_id,
+		'item_id'           => $blog_id,
+		'secondary_item_id' => $comment_id,
+	) );
+
+	// Record this in activity streams.
+	$comment_link = get_comment_link( $post_type_comment->comment_ID );
+
+	// Backward compatibility filters for the 'blogs' component.
+	if ( 'blogs' == $activity_comment_object->component_id )  {
+		$activity_content      = apply_filters_ref_array( 'bp_blogs_activity_new_comment_content',      array( $post_type_comment->comment_content, &$post_type_comment, $comment_link ) );
+		$activity_primary_link = apply_filters_ref_array( 'bp_blogs_activity_new_comment_primary_link', array( $comment_link, &$post_type_comment ) );
+	} else {
+		$activity_content      = $post_type_comment->comment_content;
+		$activity_primary_link = $comment_link;
+	}
+
+	$activity_args = array(
+		'id'            => $activity_id,
+		'user_id'       => $user_id,
+		'content'       => $activity_content,
+		'primary_link'  => $activity_primary_link,
+		'component'     => $activity_comment_object->component_id,
+		'recorded_time' => $post_type_comment->comment_date_gmt,
+	);
+
+	if ( bp_disable_blogforum_comments() ) {
+		$blog_url = get_home_url( $blog_id );
+		$post_url = add_query_arg(
+			'p',
+			$post_type_comment->post->ID,
+			trailingslashit( $blog_url )
+		);
+
+		$activity_args['type']              = $activity_comment_object->action_id;
+		$activity_args['item_id']           = $blog_id;
+		$activity_args['secondary_item_id'] = $post_type_comment->comment_ID;
+
+		if ( ! empty( $activity_args['content'] ) ) {
+			// Create the excerpt.
+			$activity_summary = bp_activity_create_summary( $activity_args['content'], $activity_args );
+
+			// Backward compatibility filter for blog comments.
+			if ( 'blogs' == $activity_post_object->component_id )  {
+				$activity_args['content'] = apply_filters( 'bp_blogs_record_activity_content', $activity_summary, $activity_args['content'], $activity_args, $post_type );
+			} else {
+				$activity_args['content'] = $activity_summary;
+			}
+		}
+
+		// Set up the action by using the format functions.
+		$action_args = array_merge( $activity_args, array(
+			'post_title' => $post_type_comment->post->post_title,
+			'post_url'   => $post_url,
+			'blog_url'   => $blog_url,
+			'blog_name'  => get_blog_option( $blog_id, 'blogname' ),
+		) );
+
+		$activity_args['action'] = call_user_func_array( $activity_comment_object->format_callback, array( '', (object) $action_args ) );
+
+		// Make sure the action is set.
+		if ( empty( $activity_args['action'] ) ) {
+			return;
+		} else {
+			// Backward compatibility filter for the blogs component.
+			if ( 'blogs' === $activity_post_object->component_id )  {
+				$activity_args['action'] = apply_filters( 'bp_blogs_record_activity_action', $activity_args['action'] );
+			}
+		}
+
+		$activity_id = bp_activity_add( $activity_args );
+	}
+
+	/**
+	 * Fires after the publishing of an activity item for a newly published post type post.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param int        $activity_id          ID of the newly published activity item.
+	 * @param WP_Comment $post_type_comment    Comment object.
+	 * @param array      $activity_args        Array of activity arguments.
+	 * @param object     $activity_post_object the post type tracking args object.
+	 */
+	do_action_ref_array( 'bp_activity_post_type_comment', array( &$activity_id, $post_type_comment, $activity_args, $activity_post_object ) );
+
+	return $activity_id;
+}
+add_action( 'comment_post', 'bp_activity_post_type_comment', 10, 2 );
+add_action( 'edit_comment', 'bp_activity_post_type_comment', 10    );
+
+/**
+ * Remove an activity item when a comment about a post type is deleted.
+ *
+ * @since 2.5.0
+ *
+ * @param  int    $comment_id           ID of the comment.
+ * @param  object $activity_post_object The post type tracking args object.
+ *
+ * @return bool True on success. False on error.
+ */
+function bp_activity_post_type_remove_comment( $comment_id = 0, $activity_post_object = null ) {
+	if ( empty( $activity_post_object ) ) {
+		$comment = get_comment( $comment_id );
+		if ( ! $comment ) {
+			return;
+		}
+
+		$post_type = get_post_type( $comment->comment_post_ID );
+		if ( ! $post_type ) {
+			return;
+		}
+
+		// Get the post type tracking args.
+		$activity_post_object = bp_activity_get_post_type_tracking_args( $post_type );
+
+		// Bail if the activity type does not exist
+		if ( empty( $activity_post_object->comments_tracking->action_id ) ) {
+			return false;
+		}
+	}
+
+	// Set the $activity_comment_object
+	$activity_comment_object = $activity_post_object->comments_tracking;
+
+	if ( empty( $activity_comment_object->action_id ) ) {
+		return false;
+	}
+
+	$deleted = false;
+
+	if ( bp_disable_blogforum_comments() ) {
+		$deleted = bp_activity_delete_by_item_id( array(
+			'item_id'           => get_current_blog_id(),
+			'secondary_item_id' => $comment_id,
+			'component'         => $activity_comment_object->component_id,
+			'type'              => $activity_comment_object->action_id,
+			'user_id'           => false,
+		) );
+	}
+
+	/**
+	 * Fires after the custom post type comment activity was removed.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param bool       $deleted              True if the activity was deleted false otherwise
+	 * @param WP_Comment $comment              Comment object.
+	 * @param object     $activity_post_object The post type tracking args object.
+	 * @param string     $value                The post type comment activity type.
+	 */
+	do_action( 'bp_activity_post_type_remove_comment', $deleted, $comment_id, $activity_post_object, $activity_comment_object->action_id );
+
+	return $deleted;
+}
+add_action( 'delete_comment', 'bp_activity_post_type_remove_comment', 10, 1 );
+
+/**
  * Add an activity comment.
  *
  * @since 1.2.0
+ * @since 2.5.0 Add a new possible parameter $skip_notification for the array of arguments.
+ *              Add the $primary_link parameter for the array of arguments.
  *
  * @uses wp_parse_args()
  * @uses bp_activity_add()
@@ -2053,15 +2573,19 @@ function bp_activity_post_type_unpublish( $post_id = 0, $post = null ) {
  * @uses do_action() To call the 'bp_activity_comment_posted' hook.
  *
  * @param array|string $args {
- *     @type int    $id          Optional. Pass an ID to update an existing comment.
- *     @type string $content     The content of the comment.
- *     @type int    $user_id     Optional. The ID of the user making the comment.
- *                               Defaults to the ID of the logged-in user.
- *     @type int    $activity_id The ID of the "root" activity item, ie the oldest
- *                               ancestor of the comment.
- *     @type int    $parent_id   Optional. The ID of the parent activity item, ie the item to
- *                               which the comment is an immediate reply. If not provided,
- *                               this value defaults to the $activity_id.
+ *     @type int    $id                Optional. Pass an ID to update an existing comment.
+ *     @type string $content           The content of the comment.
+ *     @type int    $user_id           Optional. The ID of the user making the comment.
+ *                                     Defaults to the ID of the logged-in user.
+ *     @type int    $activity_id       The ID of the "root" activity item, ie the oldest
+ *                                     ancestor of the comment.
+ *     @type int    $parent_id         Optional. The ID of the parent activity item, ie the item to
+ *                                     which the comment is an immediate reply. If not provided,
+ *                                     this value defaults to the $activity_id.
+ *     @type string $primary_link      Optional. the primary link for the comment.
+ *                                     Defaults to an empty string.
+ *     @type bool   $skip_notification Optional. false to send a comment notification, false otherwise.
+ *                                     Defaults to false.
  * }
  * @return int|bool The ID of the comment on success, otherwise false.
  */
@@ -2075,11 +2599,13 @@ function bp_activity_new_comment( $args = '' ) {
 	}
 
 	$r = wp_parse_args( $args, array(
-		'id'          => false,
-		'content'     => false,
-		'user_id'     => bp_loggedin_user_id(),
-		'activity_id' => false, // ID of the root activity item.
-		'parent_id'   => false  // ID of a parent comment (optional).
+		'id'                => false,
+		'content'           => false,
+		'user_id'           => bp_loggedin_user_id(),
+		'activity_id'       => false, // ID of the root activity item.
+		'parent_id'         => false, // ID of a parent comment (optional).
+		'primary_link'      => '',
+		'skip_notification' => false,
 	) );
 
 	// Bail if missing necessary data.
@@ -2126,6 +2652,7 @@ function bp_activity_new_comment( $args = '' ) {
 		'content'           => $comment_content,
 		'component'         => buddypress()->activity->id,
 		'type'              => 'activity_comment',
+		'primary_link'      => $r['primary_link'],
 		'user_id'           => $r['user_id'],
 		'item_id'           => $activity_id,
 		'secondary_item_id' => $r['parent_id'],
@@ -2144,16 +2671,31 @@ function bp_activity_new_comment( $args = '' ) {
 	}
 	wp_cache_delete( $activity_id, 'bp_activity' );
 
-	/**
-	 * Fires near the end of an activity comment posting, before the returning of the comment ID.
-	 *
-	 * @since 1.2.0
-	 *
-	 * @param int                  $comment_id ID of the newly posted activity comment.
-	 * @param array                $r          Array of parsed comment arguments.
-	 * @param BP_Activity_Activity $activity   Activity item being commented on.
-	 */
-	do_action( 'bp_activity_comment_posted', $comment_id, $r, $activity );
+	if ( empty( $r[ 'skip_notification' ] ) ) {
+		/**
+		 * Fires near the end of an activity comment posting, before the returning of the comment ID.
+		 * Sends a notification to the user @see bp_activity_new_comment_notification_helper().
+		 *
+		 * @since 1.2.0
+		 *
+		 * @param int   $comment_id ID of the newly posted activity comment.
+		 * @param array $r          Array of parsed comment arguments.
+		 * @param int   $activity   ID of the activity item being commented on.
+		 */
+		do_action( 'bp_activity_comment_posted', $comment_id, $r, $activity );
+	} else {
+		/**
+		 * Fires near the end of an activity comment posting, before the returning of the comment ID.
+		 * without sending a notification to the user
+		 *
+		 * @since 2.5.0
+		 *
+		 * @param int   $comment_id ID of the newly posted activity comment.
+		 * @param array $r          Array of parsed comment arguments.
+		 * @param int   $activity   ID of the activity item being commented on.
+		 */
+		do_action( 'bp_activity_comment_posted_notification_skipped', $comment_id, $r, $activity );
+	}
 
 	if ( empty( $comment_id ) ) {
 		$errors->add( 'comment_failed', $feedback );
@@ -2193,8 +2735,11 @@ function bp_activity_get_activity_id( $args = '' ) {
 	 * Filters the activity ID being requested.
 	 *
 	 * @since 1.2.0
+	 * @since 2.5.0 Added the `$r` and `$args` parameters.
 	 *
 	 * @param BP_Activity_Activity $value ID returned by BP_Activity_Activity get_id() method with provided arguments.
+	 * @param array                $r     Parsed function arguments.
+	 * @param array                $args  Arguments passed to the function.
 	 */
 	return apply_filters( 'bp_activity_get_activity_id', BP_Activity_Activity::get_id(
 		$r['user_id'],
@@ -2205,7 +2750,7 @@ function bp_activity_get_activity_id( $args = '' ) {
 		$r['action'],
 		$r['content'],
 		$r['date_recorded']
-	) );
+	), $r, $args );
 }
 
 /**
@@ -2419,6 +2964,7 @@ function bp_activity_delete( $args = '' ) {
  * @return bool True on success, false on failure.
  */
 function bp_activity_delete_comment( $activity_id, $comment_id ) {
+	$deleted = false;
 
 	/**
 	 * Filters whether BuddyPress should delete an activity comment or not.
@@ -2427,13 +2973,15 @@ function bp_activity_delete_comment( $activity_id, $comment_id ) {
 	 * handle the deletion of child comments differently. Make sure you return false.
 	 *
 	 * @since 1.2.0
+	 * @since 2.5.0 Add the deleted parameter (passed by reference)
 	 *
 	 * @param bool $value       Whether BuddyPress should continue or not.
 	 * @param int  $activity_id ID of the root activity item being deleted.
 	 * @param int  $comment_id  ID of the comment being deleted.
+	 * @param bool $deleted     Whether the activity comment has been deleted or not.
 	 */
-	if ( ! apply_filters( 'bp_activity_delete_comment_pre', true, $activity_id, $comment_id ) ) {
-		return false;
+	if ( ! apply_filters_ref_array( 'bp_activity_delete_comment_pre', array( true, $activity_id, $comment_id, &$deleted ) ) ) {
+		return $deleted;
 	}
 
 	// Delete any children of this comment.
@@ -2442,6 +2990,8 @@ function bp_activity_delete_comment( $activity_id, $comment_id ) {
 	// Delete the actual comment.
 	if ( ! bp_activity_delete( array( 'id' => $comment_id, 'type' => 'activity_comment' ) ) ) {
 		return false;
+	} else {
+		$deleted = true;
 	}
 
 	// Purge comment cache for the root activity update.
@@ -2460,7 +3010,7 @@ function bp_activity_delete_comment( $activity_id, $comment_id ) {
 	 */
 	do_action( 'bp_activity_delete_comment', $activity_id, $comment_id );
 
-	return true;
+	return $deleted;
 }
 
 	/**

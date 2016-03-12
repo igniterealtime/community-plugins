@@ -8,6 +8,7 @@
  *
  * @package BuddyPress
  * @subpackage XProfileScreens
+ * @since 1.5.0
  */
 
 // Exit if accessed directly.
@@ -301,7 +302,7 @@ function xprofile_screen_change_avatar() {
  */
 function xprofile_screen_change_cover_image() {
 
-	// Bail if not the correct screen
+	// Bail if not the correct screen.
 	if ( ! bp_is_my_profile() && ! bp_current_user_can( 'bp_moderate' ) ) {
 		return false;
 	}

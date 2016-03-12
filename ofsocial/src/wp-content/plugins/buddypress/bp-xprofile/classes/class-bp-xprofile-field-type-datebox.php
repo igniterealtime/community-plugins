@@ -4,6 +4,7 @@
  *
  * @package BuddyPress
  * @subpackage XProfileClasses
+ * @since 2.0.0
  */
 
 // Exit if accessed directly.
@@ -98,6 +99,7 @@ class BP_XProfile_Field_Type_Datebox extends BP_XProfile_Field_Type {
 			 */
 			do_action( bp_get_the_profile_field_errors_action() ); ?>
 
+			<label for="<?php bp_the_profile_field_input_name(); ?>_day" class="bp-screen-reader-text"><?php esc_html_e( 'Select day', 'buddypress' ); ?></label>
 			<select <?php echo $this->get_edit_field_html_elements( $day_r ); ?>>
 				<?php bp_the_profile_field_options( array(
 					'type'    => 'day',
@@ -105,6 +107,7 @@ class BP_XProfile_Field_Type_Datebox extends BP_XProfile_Field_Type {
 				) ); ?>
 			</select>
 
+			<label for="<?php bp_the_profile_field_input_name(); ?>_month" class="bp-screen-reader-text"><?php esc_html_e( 'Select month', 'buddypress' ); ?></label>
 			<select <?php echo $this->get_edit_field_html_elements( $month_r ); ?>>
 				<?php bp_the_profile_field_options( array(
 					'type'    => 'month',
@@ -112,6 +115,7 @@ class BP_XProfile_Field_Type_Datebox extends BP_XProfile_Field_Type {
 				) ); ?>
 			</select>
 
+			<label for="<?php bp_the_profile_field_input_name(); ?>_year" class="bp-screen-reader-text"><?php esc_html_e( 'Select year', 'buddypress' ); ?></label>
 			<select <?php echo $this->get_edit_field_html_elements( $year_r ); ?>>
 				<?php bp_the_profile_field_options( array(
 					'type'    => 'year',
@@ -306,10 +310,9 @@ class BP_XProfile_Field_Type_Datebox extends BP_XProfile_Field_Type {
 	 * @since 2.1.0
 	 * @since 2.4.0 Added the `$field_id` parameter.
 	 *
-	 * @param string $field_value The date value, as saved in the database. Typically, this is a MySQL-formatted
-	 *                            date string (Y-m-d H:i:s).
-	 * @param int    $field_id    Optional. ID of the field.
-	 *
+	 * @param string     $field_value The date value, as saved in the database. Typically, this is a MySQL-formatted
+	 *                                date string (Y-m-d H:i:s).
+	 * @param string|int $field_id    Optional. ID of the field.
 	 * @return string Date formatted by bp_format_time().
 	 */
 	public static function display_filter( $field_value, $field_id = '' ) {

@@ -2,9 +2,9 @@
 /**
  * Functions related to the BuddyPress Activity component and the WP Cache.
  *
- * @since 1.6.0
- * @package    BuddyPress
+ * @package BuddyPress
  * @subpackage ActivityCache
+ * @since 1.6.0
  */
 
 // Exit if accessed directly.
@@ -16,6 +16,8 @@ defined( 'ABSPATH' ) || exit;
  * It grabs all activitymeta associated with all of the activity items passed
  * in $activity_ids and adds it to the WP cache. This improves efficiency when
  * using querying activitymeta inline.
+ *
+ * @since 1.6.0
  *
  * @param int|string|array|bool $activity_ids Accepts a single activity ID, or a comma-
  *                                            separated list or array of activity ids.

@@ -2,14 +2,16 @@
 <project name="ofsocial" default="jar" basedir = "..">
 	<description>Openfire Social Build</description>
 
-	<property name="openfire.home" 	value="./openfire_4_0_1/target/openfire" />
-	<property name="lib.ant.dir" 	value="./openfire_4_0_1/build/lib/ant" />	
-	<property name="ofsocial.dir" 	value="ofsocial" />
+	<property name="openfire.home" 		value="./openfire_4_0_1/target/openfire" />
+	<property name="lib.ant.dir" 		value="./openfire_4_0_1/build/lib/ant" />	
+	<property name="lib.ant.ofsocial" 	value="./openfire_4_0_1/build/lib/ofsocial" />		
+	<property name="ofsocial.dir" 		value="ofsocial" />
 	
 
 	<path id="build.classpath">
 		<fileset dir="${ofsocial.dir}/lib" includes="*.jar"/>
 		<fileset dir="${openfire.home}/lib" includes="*.jar"/>
+		<fileset dir="${lib.ant.ofsocial}" includes="*.jar" />			
 	</path>
 
 	<target name="init">
@@ -49,6 +51,7 @@
 			<fileset dir="${ofsocial.dir}/lib" includes="*.jar"/>
 			<fileset dir="${openfire.home}/lib" includes="*.jar"/>			
 			<fileset dir="${lib.ant.dir}" includes="*.jar" />
+			<fileset dir="${lib.ant.ofsocial}" includes="*.jar" />			
 			<fileset dir="${ant.home}/lib" includes="ant.jar" />
 		    </classpath>
 		    <arg line="-uriroot '${ofsocial.dir}/src/web'"/>

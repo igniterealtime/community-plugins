@@ -4,6 +4,7 @@
  *
  * @package BuddyPress
  * @subpackage MessagesClasses
+ * @since 1.0.0
  */
 
 // Exit if accessed directly.
@@ -65,7 +66,7 @@ class BP_Messages_Message {
 	/**
 	 * Constructor.
 	 *
-	 * @param int $id Optional. ID of the message.
+	 * @param int|null $id Optional. ID of the message.
 	 */
 	public function __construct( $id = null ) {
 		$this->date_sent = bp_core_current_time();

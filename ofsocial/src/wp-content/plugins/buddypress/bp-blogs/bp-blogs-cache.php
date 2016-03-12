@@ -7,6 +7,7 @@
  *
  * @package BuddyPress
  * @subpackage BlogsCache
+ * @since 1.5.0
  */
 
 // Exit if accessed directly.
@@ -24,11 +25,11 @@ defined( 'ABSPATH' ) || exit;
  */
 function bp_blogs_update_meta_cache( $blog_ids = false ) {
 	$cache_args = array(
-		'object_ids' 	   => $blog_ids,
-		'object_type' 	   => buddypress()->blogs->id,
-		'object_column'    => 'blog_id',
-		'cache_group'      => 'blog_meta',
-		'meta_table' 	   => buddypress()->blogs->table_name_blogmeta,
+		'object_ids'    => $blog_ids,
+		'object_type'   => buddypress()->blogs->id,
+		'object_column' => 'blog_id',
+		'cache_group'   => 'blog_meta',
+		'meta_table'    => buddypress()->blogs->table_name_blogmeta,
 	);
 
 	bp_update_meta_cache( $cache_args );

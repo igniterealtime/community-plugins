@@ -7,6 +7,7 @@
  *
  * @package BuddyPress
  * @subpackage FriendsActivity
+ * @since 1.5.0
  */
 
 // Exit if accessed directly.
@@ -17,6 +18,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * A wrapper for {@link bp_activity_add()} that provides some Friends-specific
  * defaults.
+ *
+ * @since 1.0.0
  *
  * @see bp_activity_add() for more detailed description of parameters and
  *      return values.
@@ -55,6 +58,8 @@ function friends_record_activity( $args = '' ) {
 /**
  * Delete an activity item related to the Friends component.
  *
+ * @since 1.0.0
+ *
  * @param array $args {
  *     An array of arguments for the item to delete.
  *     @type int    $item_id ID of the 'item' associated with the activity item.
@@ -81,6 +86,8 @@ function friends_delete_activity( $args ) {
 
 /**
  * Register the activity actions for bp-friends.
+ *
+ * @since 1.1.0
  */
 function friends_register_activity_actions() {
 
@@ -289,7 +296,6 @@ add_filter( 'bp_activity_set_friends_scope_args', 'bp_friends_filter_activity_sc
  *
  * @param array $retval Empty array by default.
  * @param array $filter Current activity arguments.
- *
  * @return array
  */
 function bp_friends_filter_activity_just_me_scope( $retval = array(), $filter = array() ) {
@@ -383,3 +389,23 @@ function bp_friends_friendship_accepted_activity( $friendship_id, $initiator_use
 	) );
 }
 add_action( 'friends_friendship_accepted', 'bp_friends_friendship_accepted_activity', 10, 4 );
+
+/**
+ * Deletes friendship activity items when a user is deleted.
+ *
+ * @since 2.5.0
+ *
+ * @param int $user_id The ID of the user being deleted.
+ */
+function bp_friends_delete_activity_on_user_delete( $user_id = 0 ) {
+	if ( ! bp_is_active( 'activity' ) ) {
+		return;
+	}
+
+	bp_activity_delete( array(
+		'component'         => buddypress()->friends->id,
+		'type'              => 'friendship_created',
+		'secondary_item_id' => $user_id
+	) );
+}
+add_action( 'friends_remove_data', 'bp_friends_delete_activity_on_user_delete' );

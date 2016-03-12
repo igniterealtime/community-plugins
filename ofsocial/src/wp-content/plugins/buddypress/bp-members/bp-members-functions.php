@@ -6,6 +6,7 @@
  *
  * @package BuddyPress
  * @subpackage MembersFunctions
+ * @since 1.5.0
  */
 
 // Exit if accessed directly.
@@ -1244,6 +1245,8 @@ function bp_get_user_last_activity( $user_id = 0 ) {
  * be called directly from the BuddyPress Tools panel.
  *
  * @since 2.0.0
+ *
+ * @return bool
  */
 function bp_last_activity_migrate() {
 	global $wpdb;
@@ -1735,7 +1738,7 @@ function bp_core_validate_user_signup( $user_name, $user_email ) {
 	 *
 	 * @param array $result Results of user validation including errors, if any.
 	 */
- 	return apply_filters( 'bp_core_validate_user_signup', $result );
+	return apply_filters( 'bp_core_validate_user_signup', $result );
 }
 
 /**
@@ -1836,7 +1839,7 @@ function bp_core_signup_user( $user_login, $user_password, $user_email, $usermet
 		 *                               signup data, xprofile data, etc).
 		 */
 		if ( apply_filters( 'bp_core_signup_send_activation_key', true, $user_id, $user_email, $activation_key, $usermeta ) ) {
-			bp_core_signup_send_validation_email( $user_id, $user_email, $activation_key );
+			bp_core_signup_send_validation_email( $user_id, $user_email, $activation_key, $user_login );
 		}
 	}
 
@@ -2196,62 +2199,30 @@ function bp_core_signup_avatar_upload_dir() {
 /**
  * Send activation email to a newly registered user.
  *
- * @param int    $user_id    ID of the new user.
- * @param string $user_email Email address of the new user.
- * @param string $key        Activation key.
+ * @since  2.5.0 Add the $user_login parameter.
+ *
+ * @param int|bool $user_id    ID of the new user, false if BP_SIGNUPS_SKIP_USER_CREATION is true.
+ * @param string   $user_email Email address of the new user.
+ * @param string   $key        Activation key.
+ * @param string   $user_login Optional. The user login name.
  */
-function bp_core_signup_send_validation_email( $user_id, $user_email, $key ) {
-	$activate_url = trailingslashit( bp_get_activation_page() ) . "{$key}/";
-	$activate_url = esc_url( $activate_url );
+function bp_core_signup_send_validation_email( $user_id, $user_email, $key, $user_login = '' ) {
+	$args = array(
+		'tokens' => array(
+			'activate.url' => esc_url( trailingslashit( bp_get_activation_page() ) . "{$key}/" ),
+			'key'          => $key,
+			'user.email'   => $user_email,
+			'user.id'      => $user_id,
+		),
+	);
 
-	$message = sprintf( __( "Thanks for registering! To complete the activation of your account please click the following link:\n\n%1\$s\n\n", 'buddypress' ), $activate_url );
-	$subject = bp_get_email_subject( array( 'text' => __( 'Activate Your Account', 'buddypress' ) ) );
+	if ( $user_id ) {
+		$to = $user_id;
+	} else {
+		$to = array( array( $user_email => $user_login ) );
+	}
 
-	/**
-	 * Filters the user email that the validation email will be sent to.
-	 *
-	 * @since 1.5.0
-	 *
-	 * @param string $user_email User email the notification is being sent to.
-	 * @param int    $user_id    ID of the new user receiving email.
-	 */
-	$to      = apply_filters( 'bp_core_signup_send_validation_email_to',     $user_email, $user_id                );
-
-	/**
-	 * Filters the validation email subject that will be sent to user.
-	 *
-	 * @since 1.5.0
-	 *
-	 * @param string $subject Email validation subject text.
-	 * @param int    $user_id ID of the new user receiving email.
-	 */
-	$subject = apply_filters( 'bp_core_signup_send_validation_email_subject', $subject,    $user_id                );
-
-	/**
-	 * Filters the validation email message that will be sent to user.
-	 *
-	 * @since 1.5.0
-	 *
-	 * @param string $message      Email validation message text.
-	 * @param int    $user_id      ID of the new user receiving email.
-	 * @param string $activate_url URL to use for activating account.
-	 */
-	$message = apply_filters( 'bp_core_signup_send_validation_email_message', $message,    $user_id, $activate_url );
-
-	wp_mail( $to, $subject, $message );
-
-	/**
-	 * Fires after the sending of activation email to a newly registered user.
-	 *
-	 * @since 1.5.0
-	 *
-	 * @param string $subject    Subject for the sent email.
-	 * @param string $message    Message for the sent email.
-	 * @param int    $user_id    ID of the new user.
-	 * @param string $user_email Email address of the new user.
-	 * @param string $key        Activation key.
-	 */
-	do_action( 'bp_core_sent_user_validation_email', $subject, $message, $user_id, $user_email, $key );
+	bp_send_email( 'core-user-registration', $to, $args );
 }
 
 /**
@@ -2259,9 +2230,9 @@ function bp_core_signup_send_validation_email( $user_id, $user_email, $key ) {
  *
  * @since 1.2.2
  *
- * @param WP_User|WP_Error $user     Either the WP_User or the WP_Error object.
- * @param string           $username The inputted, attempted username.
- * @param string           $password The inputted, attempted password.
+ * @param WP_User|WP_Error|null $user     Either the WP_User or the WP_Error object.
+ * @param string                $username The inputted, attempted username.
+ * @param string                $password The inputted, attempted password.
  * @return WP_User|WP_Error
  */
 function bp_core_signup_disable_inactive( $user = null, $username = '', $password ='' ) {

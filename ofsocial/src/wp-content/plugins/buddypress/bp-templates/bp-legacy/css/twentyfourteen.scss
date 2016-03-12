@@ -139,6 +139,7 @@ $notice-update:          #ced98c;
 $stripe-odd:             #ebf0ff;
 $stripe-even:            #dbe5ff;
 $unread:                 #cddaff;
+$link-action:            #c82b2b;
 
 // 2014 font family
 @mixin default-font() {
@@ -279,6 +280,7 @@ http://codex.buddypress.org/themes/buddypress-companion-stylesheets/
 					width: 50%;
 				}
 			}
+
 			@media screen and (min-width: 594px) {
 				li {
 					width: auto;
@@ -828,7 +830,6 @@ body.activity-permalink {
 #buddypress {
 	.activity {
 		.activity-comments {
-		//	border-left: 1px solid $border-light;
 			margin-left: 0;
 			margin-top: 5px;
 
@@ -1252,6 +1253,7 @@ body.activity-permalink {
 			#search-members-form {
 				@include box-model(border-box);
 				float: left;
+
 				@media screen and (max-width: 400px) {
 					margin: 0;
 					width: 100%;
@@ -1260,6 +1262,7 @@ body.activity-permalink {
 						input[type="text"] {width: 100%;}
 					}
 				}
+
 				@media screen and (min-width: 783px) {
 					margin-left: 3px;
 				}
@@ -1421,10 +1424,11 @@ body.activity-permalink {
 		border-right: 1px solid $border-med;
 
 		tbody > tr:first-child {
+
 			td.bulk-select-check,
 			td.thread-from {
 				border-top: 1px solid $border-med;
-		 }
+			}
 		}
 
 		tr {
@@ -1455,6 +1459,7 @@ body.activity-permalink {
 			td.thread-from {
 				border-left: 0;
 				height: 2.6em;
+
 				@media screen and (max-width: 320px) {
 					height: 5.2em;
 				}
@@ -1495,6 +1500,7 @@ body.activity-permalink {
 				display: block;
 				float: right;
 				line-height: 2;
+
 				@media screen and (max-width: 320px) {
 					clear: both;
 					@include font-size(11);
@@ -1531,7 +1537,6 @@ body.activity-permalink {
 
 	} // close #messages-threads
 
-	/* Read Single thread */
 	#message-thread {
 
 		#message-subject {
@@ -1551,7 +1556,44 @@ body.activity-permalink {
 		}
 	}
 
-	/* Sitewide Notices loop */
+	.acfb-holder {
+		list-style: none;
+		margin: 0;
+
+		li {margin-left: 0;}
+
+		li.friend-tab {
+			background: lighten($notice-info, 20%);
+			border: inherit;
+			margin-right: 0;
+			padding: 0.5em;
+
+			span.p {
+				// the 'X' close
+				padding-left: $spacing-val-sm;
+
+				&:focus,
+				&:hover {
+					color: $link-action;
+					cursor: pointer;
+				}
+			}
+
+			a {
+				border-bottom: 0;
+				text-decoration: none;
+
+				img {
+					// this is the tiny user avatar
+					display: inline;
+					height: 20px;
+					vertical-align: middle;
+					width: 20px !important; // override inline style
+				}
+			}
+		}
+	}
+
 	#message-threads.sitewide-notices {
 		td {
 			width: 100%;
@@ -1575,7 +1617,7 @@ body.activity-permalink {
 		}
 
 		td:first-child + td + td {
-		// notice date
+			// notice date
 			border-bottom: 0;
 
 			span {
@@ -1584,13 +1626,13 @@ body.activity-permalink {
 		}
 
 		td:last-child {
-		// notice actions
+			// notice actions
 			border-bottom-color: $border-med;
 			line-height: 1;
 			text-align: right;
 
 			a:last-child {
-			// hide the 'x' text
+				// hide the 'x' text
 				line-height: 0;
 				margin-left: 0.7em;
 				text-indent: -999em;
@@ -1606,6 +1648,27 @@ body.activity-permalink {
 	}
 
 } // close #buddypress - user acounts item-body
+
+.bp-user {
+
+	// acfb auto complete name list sits in doc footer before body close
+	.ac_results {
+		background: #eee;
+		padding-left: $spacing-val-sm;
+
+		ul {	margin: 0; }
+
+		li {
+			margin: $spacing-val-sm 0;
+
+			&:focus,
+			&:hover {
+				cursor: pointer;
+			}
+		}
+	}
+
+}
 
 /**
 	*------------------------------
@@ -1703,8 +1766,8 @@ body.activity-permalink {
 		float: none;
 		margin: $spacing-val-sm 0;
 
-// Stylise the seach form elements, in part this deals with padding
-// issues on the submit & sizing issues between bp styles & twentyfourteen
+		// Stylise the seach form elements, in part this deals with padding
+		// issues on the submit & sizing issues between bp styles & twentyfourteen
 		form {
 			border: 1px solid #ccc;
 			overflow: hidden;
@@ -1741,7 +1804,7 @@ body.activity-permalink {
 				width: 20%;
 			}
 
-			}// close form
+		}// close form
 
 	} // close .dir-search, .message-search
 
@@ -1839,15 +1902,3 @@ body.activity-permalink {
 * @section 10.0 - Ajax Loading, Widgets, General classes
 *-------------------------------------------------------------------------------
 */
-
-#buddypress {
-	/* Auto Complete background */
-	.acfb-holder {
-
-		li.friend-tab {
-			background: $notice-info;
-			border: inherit;
-	 }
-	}
-}
-

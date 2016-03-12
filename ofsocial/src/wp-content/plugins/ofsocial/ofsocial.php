@@ -22,6 +22,7 @@ Mod functions.php
 -----------------------------------------
 */
 
+
 if ( !function_exists('wp_hash_password') ) :
 
 	function wp_hash_password($password) {

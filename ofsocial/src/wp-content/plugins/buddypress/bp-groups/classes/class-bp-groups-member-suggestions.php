@@ -4,6 +4,7 @@
  *
  * @package BuddyPress
  * @subpackage GroupsClasses
+ * @since 2.1.0
  */
 
 // Exit if accessed directly.
@@ -93,7 +94,7 @@ class BP_Groups_Member_Suggestions extends BP_Members_Suggestions {
 	 */
 	public function get_suggestions() {
 		$user_query = array(
-			'count_total'     => '',  // Prevents total count
+			'count_total'     => '',  // Prevents total count.
 			'populate_extras' => false,
 			'type'            => 'alphabetical',
 
@@ -116,7 +117,7 @@ class BP_Groups_Member_Suggestions extends BP_Members_Suggestions {
 		// Negative Group IDs will restrict the search to members in every other group.
 		} else {
 			$group_query = array(
-				'count_total'     => '',  // Prevents total count
+				'count_total'     => '',  // Prevents total count.
 				'populate_extras' => false,
 				'type'            => 'alphabetical',
 

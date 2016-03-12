@@ -4,13 +4,13 @@
  *
  * @package BuddyPress
  * @subpackage GroupsFilters
+ * @since 1.0.0
  */
 
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
-// Filter bbPress template locations
-
+// Filter bbPress template locations.
 add_filter( 'bp_groups_get_directory_template', 'bp_add_template_locations' );
 add_filter( 'bp_get_single_group_template',    'bp_add_template_locations' );
 
@@ -50,28 +50,35 @@ add_filter( 'groups_new_group_forum_desc', 'bp_create_excerpt' );
 add_filter( 'groups_group_name_before_save',        'force_balance_tags' );
 add_filter( 'groups_group_description_before_save', 'force_balance_tags' );
 
-// Trim trailing spaces from name and description when saving
+// Trim trailing spaces from name and description when saving.
 add_filter( 'groups_group_name_before_save',        'trim' );
 add_filter( 'groups_group_description_before_save', 'trim' );
 
-// Escape output of new group creation details
+// Support emojis.
+if ( function_exists( 'wp_encode_emoji' ) ) {
+	add_filter( 'groups_group_description_before_save', 'wp_encode_emoji' );
+}
+
+// Escape output of new group creation details.
 add_filter( 'bp_get_new_group_id',          'esc_attr'     );
 add_filter( 'bp_get_new_group_name',        'esc_attr'     );
 add_filter( 'bp_get_new_group_description', 'esc_textarea' );
 
-// Format numberical output
+// Format numerical output.
 add_filter( 'bp_get_total_group_count',          'bp_core_number_format' );
 add_filter( 'bp_get_group_total_for_member',     'bp_core_number_format' );
 add_filter( 'bp_get_group_total_members',        'bp_core_number_format' );
 add_filter( 'bp_get_total_group_count_for_user', 'bp_core_number_format' );
+
+// Activity component integration.
+add_filter( 'bp_activity_at_name_do_notifications', 'bp_groups_disable_at_mention_notification_for_non_public_groups', 10, 4 );
 
 /**
  * Filter output of Group Description through WordPress's KSES API.
  *
  * @since 1.1.0
  *
- * @param string $content
- *
+ * @param string $content Content to filter.
  * @return string
  */
 function bp_groups_filter_kses( $content = '' ) {
@@ -86,7 +93,7 @@ function bp_groups_filter_kses( $content = '' ) {
 	// to target the specific `buddypress-groups` context.
 	$allowed_tags = wp_kses_allowed_html( 'buddypress-groups' );
 
-	// Add our own tags allowed in group descriptions
+	// Add our own tags allowed in group descriptions.
 	$allowed_tags['a']['class']    = array();
 	$allowed_tags['img']           = array();
 	$allowed_tags['img']['src']    = array();
@@ -106,7 +113,7 @@ function bp_groups_filter_kses( $content = '' ) {
 	 */
 	$tags = apply_filters( 'bp_groups_filter_kses', $allowed_tags );
 
-	// Return KSES'ed content, allowing the above tags
+	// Return KSES'ed content, allowing the above tags.
 	return wp_kses( $content, $tags );
 }
 
@@ -114,6 +121,8 @@ function bp_groups_filter_kses( $content = '' ) {
 
 /**
  * Filter bbPress query SQL when on group pages or on forums directory.
+ *
+ * @since 1.1.0
  */
 function groups_add_forum_privacy_sql() {
 	add_filter( 'get_topics_fields', 'groups_add_forum_fields_sql' );
@@ -125,8 +134,9 @@ add_filter( 'bbpress_init', 'groups_add_forum_privacy_sql' );
 /**
  * Add fields to bbPress query for group-specific data.
  *
- * @param string $sql
+ * @since 1.1.0
  *
+ * @param string $sql SQL statement to amend.
  * @return string
  */
 function groups_add_forum_fields_sql( $sql = '' ) {
@@ -137,8 +147,9 @@ function groups_add_forum_fields_sql( $sql = '' ) {
 /**
  * Add JOINed tables to bbPress query for group-specific data.
  *
- * @param string $sql
+ * @since 1.1.0
  *
+ * @param string $sql SQL statement to amend.
  * @return string
  */
 function groups_add_forum_tables_sql( $sql = '' ) {
@@ -152,16 +163,17 @@ function groups_add_forum_tables_sql( $sql = '' ) {
 /**
  * Add WHERE clauses to bbPress query for group-specific data and access protection.
  *
- * @param string $sql
+ * @since 1.1.0
  *
+ * @param string $sql SQL Statement to amend.
  * @return string
  */
 function groups_add_forum_where_sql( $sql = '' ) {
 
-	// Define locale variable
+	// Define locale variable.
 	$parts = array();
 
-	// Set this for groups
+	// Set this for groups.
 	$parts['groups'] = "(gm.meta_key = 'forum_id' AND gm.meta_value = t.forum_id)";
 
 	// Restrict to public...
@@ -172,6 +184,7 @@ function groups_add_forum_where_sql( $sql = '' ) {
 	 *
 	 * Decide if private are visible
 	 */
+
 	// Are we in our own profile?
 	if ( bp_is_my_profile() )
 		unset( $parts['private'] );
@@ -180,33 +193,34 @@ function groups_add_forum_where_sql( $sql = '' ) {
 	elseif ( bp_current_user_can( 'bp_moderate' ) )
 		unset( $parts['private'] );
 
-	// No need to filter on a single item
+	// No need to filter on a single item.
 	elseif ( bp_is_single_item() )
 		unset( $parts['private'] );
 
-	// Check the SQL filter that was passed
+	// Check the SQL filter that was passed.
 	if ( !empty( $sql ) )
 		$parts['passed'] = $sql;
 
-	// Assemble Voltron
+	// Assemble Voltron.
 	$parts_string = implode( ' AND ', $parts );
 
 	$bp = buddypress();
 
-	// Set it to the global filter
+	// Set it to the global filter.
 	$bp->groups->filter_sql = $parts_string;
 
-	// Return the global filter
+	// Return the global filter.
 	return $bp->groups->filter_sql;
 }
 
 /**
  * Modify bbPress caps for bp-forums.
  *
- * @param bool $value
- * @param string $cap
- * @param array $args
+ * @since 1.1.0
  *
+ * @param bool   $value Original value for current_user_can check.
+ * @param string $cap   Capability checked.
+ * @param array  $args  Arguments for the caps.
  * @return bool
  */
 function groups_filter_bbpress_caps( $value, $cap, $args ) {
@@ -237,6 +251,9 @@ add_filter( 'bb_current_user_can', 'groups_filter_bbpress_caps', 10, 3 );
  * @since 1.5.0
  *
  * @see BB_Query::_filter_sql()
+ *
+ * @param string $sql SQL statement.
+ * @return string
  */
 function groups_filter_forums_root_page_sql( $sql ) {
 
@@ -261,7 +278,6 @@ add_filter( 'get_latest_topics_fields', 'groups_filter_forums_root_page_sql' );
  *
  * @param bool $load_mentions    True to load mentions assets, false otherwise.
  * @param bool $mentions_enabled True if mentions are enabled.
- *
  * @return bool True if mentions scripts should be loaded.
  */
 function bp_groups_maybe_load_mentions_scripts( $load_mentions, $mentions_enabled ) {
@@ -276,3 +292,30 @@ function bp_groups_maybe_load_mentions_scripts( $load_mentions, $mentions_enable
 	return $load_mentions;
 }
 add_filter( 'bp_activity_maybe_load_mentions_scripts', 'bp_groups_maybe_load_mentions_scripts', 10, 2 );
+
+/**
+ * Disable at-mention notifications for users who are not a member of the non-public group where the activity appears.
+ *
+ * @since 2.5.0
+ *
+ * @param bool                 $send      Whether to send the notification.
+ * @param array                $usernames Array of all usernames being notified.
+ * @param int                  $user_id   ID of the user to be notified.
+ * @param BP_Activity_Activity $activity  Activity object.
+ * @return bool
+ */
+function bp_groups_disable_at_mention_notification_for_non_public_groups( $send, $usernames, $user_id, BP_Activity_Activity $activity ) {
+	// Skip the check for administrators, who can get notifications from non-public groups.
+	if ( user_can( $user_id, 'bp_moderate' ) ) {
+		return $send;
+	}
+
+	if ( 'groups' === $activity->component ) {
+		$group = groups_get_group( array( 'group_id' => $activity->item_id ) );
+		if ( 'public' !== $group->status && ! groups_is_user_member( $user_id, $group->id ) ) {
+			$send = false;
+		}
+	}
+
+	return $send;
+}

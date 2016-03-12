@@ -78,9 +78,9 @@ public class Config extends HttpServlet
 
 			try {
 
-				boolean clientControl = XMPPServer.getInstance().getPluginManager().getPlugin("clientControl") != null || XMPPServer.getInstance().getPluginManager().getPlugin("clientcontrol") != null;
+				boolean isBookmarksAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("bookmarks") != null;
 
-				if (clientControl)
+				if (isBookmarksAvailable)
 				{
 					final Collection<Bookmark> bookmarks = BookmarkManager.getBookmarks();
 
@@ -202,7 +202,7 @@ public class Config extends HttpServlet
 			out.println("			roomnode = Math.random().toString(36).substr(2, 20);");
 			out.println("			window.history.pushState('VideoChat', 'Room: ' + roomnode, path + '?r=' + roomnode);");
 			out.println("		}");
-			out.println("		return roomnode;    ");
+			out.println("		return roomnode.toLowerCase();    ");
 			out.println("    },	");
 			if (!iceServers.trim().equals("")) out.println("    iceServers: " + iceServers + ",");
 			out.println("    useStunTurn: " + useStunTurn + ",");

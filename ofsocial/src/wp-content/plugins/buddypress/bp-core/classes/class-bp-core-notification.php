@@ -4,6 +4,7 @@
  *
  * @package BuddyPress
  * @subpackage Core
+ * @since 1.0.0
  */
 
 // Exit if accessed directly.
@@ -14,7 +15,6 @@ defined( 'ABSPATH' ) || exit;
  *
  * Use BP_Notifications_Notification instead.
  *
- * @package BuddyPress Core
  * @deprecated since 1.9.0
  */
 class BP_Core_Notification {
@@ -80,7 +80,7 @@ class BP_Core_Notification {
 	/**
 	 * Constructor
 	 *
-	 * @param int $id
+	 * @param int $id ID for the notification.
 	 */
 	public function __construct( $id = 0 ) {
 		if ( !empty( $id ) ) {
@@ -101,11 +101,11 @@ class BP_Core_Notification {
 
 		$bp = buddypress();
 
-		// Update
+		// Update.
 		if ( !empty( $this->id ) ) {
 			$sql = $wpdb->prepare( "UPDATE {$bp->core->table_name_notifications} SET item_id = %d, secondary_item_id = %d, user_id = %d, component_name = %s, component_action = %d, date_notified = %s, is_new = %d ) WHERE id = %d", $this->item_id, $this->secondary_item_id, $this->user_id, $this->component_name, $this->component_action, $this->date_notified, $this->is_new, $this->id );
 
-		// Save
+		// Save.
 		} else {
 			$sql = $wpdb->prepare( "INSERT INTO {$bp->core->table_name_notifications} ( item_id, secondary_item_id, user_id, component_name, component_action, date_notified, is_new ) VALUES ( %d, %d, %d, %s, %s, %s, %d )", $this->item_id, $this->secondary_item_id, $this->user_id, $this->component_name, $this->component_action, $this->date_notified, $this->is_new );
 		}
@@ -148,7 +148,6 @@ class BP_Core_Notification {
 	 *
 	 * @param int $user_id         ID to check access for.
 	 * @param int $notification_id Notification ID to check for.
-	 *
 	 * @return string
 	 */
 	public static function check_access( $user_id, $notification_id ) {
@@ -164,11 +163,11 @@ class BP_Core_Notification {
 	 *
 	 * @global wpdb $wpdb WordPress database object
 	 *
+	 * @static
+	 *
 	 * @param int    $user_id User ID.
 	 * @param string $status 'is_new' or 'all'.
-	 *
 	 * @return array Associative array
-	 * @static
 	 */
 	public static function get_all_for_user( $user_id, $status = 'is_new' ) {
 		global $wpdb;
@@ -179,7 +178,7 @@ class BP_Core_Notification {
 			? ' AND is_new = 1 '
 			: '';
 
- 		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$bp->core->table_name_notifications} WHERE user_id = %d {$is_new}", $user_id ) );
+		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$bp->core->table_name_notifications} WHERE user_id = %d {$is_new}", $user_id ) );
 	}
 
 	/**
@@ -187,12 +186,11 @@ class BP_Core_Notification {
 	 *
 	 * @global wpdb $wpdb WordPress database object.
 	 *
-	 * @param int    $user_id
-	 * @param string $component_name
-	 * @param string $component_action
-	 *
 	 * @static
 	 *
+	 * @param int    $user_id          ID of the user to delet notification for.
+	 * @param string $component_name   Component name.
+	 * @param string $component_action Component action.
 	 * @return mixed
 	 */
 	public static function delete_for_user_by_type( $user_id, $component_name, $component_action ) {
@@ -208,14 +206,14 @@ class BP_Core_Notification {
 	 *
 	 * @global wpdb $wpdb WordPress database object.
 	 *
+	 * @static
+	 *
 	 * @param int      $user_id           The ID of the user who the notifications are for.
 	 * @param int      $item_id           The item ID of the notifications we wish to delete.
 	 * @param string   $component_name    The name of the component that the notifications we wish to delete.
 	 * @param string   $component_action  The action of the component that the notifications we wish to delete.
 	 * @param int|bool $secondary_item_id (optional) The secondary item id of the notifications that we wish to
 	 *                                    use to delete.
-	 * @static
-	 *
 	 * @return mixed
 	 */
 	public static function delete_for_user_by_item_id( $user_id, $item_id, $component_name, $component_action, $secondary_item_id = false ) {
@@ -235,11 +233,11 @@ class BP_Core_Notification {
 	 *
 	 * @global wpdb $wpdb WordPress database object.
 	 *
+	 * @static
+	 *
 	 * @param int    $user_id          The ID of the user whose sent notifications we wish to delete.
 	 * @param string $component_name   The name of the component the notification was sent from.
 	 * @param string $component_action The action of the component the notification was sent from.
-	 * @static
-	 *
 	 * @return mixed
 	 */
 	public static function delete_from_user_by_type( $user_id, $component_name, $component_action ) {
@@ -256,12 +254,12 @@ class BP_Core_Notification {
 	 *
 	 * @global wpdb $wpdb WordPress database object.
 	 *
+	 * @static
+	 *
 	 * @param string $item_id           The item id that they notifications are to be for.
 	 * @param string $component_name    The component that the notifications are to be from.
 	 * @param string $component_action  The action that the notifications are to be from.
 	 * @param string $secondary_item_id Optional secondary item id that the notifications are to have.
-	 * @static
-	 *
 	 * @return mixed
 	 */
 	public static function delete_all_by_type( $item_id, $component_name, $component_action, $secondary_item_id ) {

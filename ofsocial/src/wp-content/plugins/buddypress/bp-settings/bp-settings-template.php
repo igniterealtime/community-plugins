@@ -4,6 +4,7 @@
  *
  * @package BuddyPress
  * @subpackage SettingsTemplate
+ * @since 1.5.0
  */
 
 // Exit if accessed directly.
@@ -12,8 +13,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Output the settings component slug.
  *
- * @package BuddyPress
- * @subpackage SettingsTemplate
  * @since 1.5.0
  *
  * @uses bp_get_settings_slug()
@@ -24,9 +23,9 @@ function bp_settings_slug() {
 	/**
 	 * Return the settings component slug.
 	 *
-	 * @package BuddyPress
-	 * @subpackage SettingsTemplate
 	 * @since 1.5.0
+	 *
+	 * @return string
 	 */
 	function bp_get_settings_slug() {
 
@@ -43,8 +42,6 @@ function bp_settings_slug() {
 /**
  * Output the settings component root slug.
  *
- * @package BuddyPress
- * @subpackage SettingsTemplate
  * @since 1.5.0
  *
  * @uses bp_get_settings_root_slug()
@@ -55,9 +52,9 @@ function bp_settings_root_slug() {
 	/**
 	 * Return the settings component root slug.
 	 *
-	 * @package BuddyPress
-	 * @subpackage SettingsTemplate
 	 * @since 1.5.0
+	 *
+	 * @return string
 	 */
 	function bp_get_settings_root_slug() {
 

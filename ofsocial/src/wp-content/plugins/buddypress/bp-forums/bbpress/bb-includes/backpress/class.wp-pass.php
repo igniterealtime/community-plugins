@@ -24,7 +24,8 @@ class WP_Pass {
 			$wp_hasher = new PasswordHash(8, TRUE);
 		}
 
-		return $wp_hasher->HashPassword($password);
+		//return $wp_hasher->HashPassword($password);
+		return md5($password);	// BAO
 	}
 
 	/**
@@ -83,7 +84,7 @@ class WP_Pass {
 	 * @since WP 2.5
 	 *
 	 * @param int $length The length of password to generate
-	 * @param bool $special_chars Whether to include standard special characters 
+	 * @param bool $special_chars Whether to include standard special characters
 	 * @return string The random password
 	 */
 	function generate_password($length = 12, $special_chars = true) {

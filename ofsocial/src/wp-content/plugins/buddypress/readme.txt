@@ -1,13 +1,13 @@
 === BuddyPress ===
 Contributors: johnjamesjacoby, DJPaul, boonebgorges, r-a-y, imath, mercime, tw2113, dcavins, hnla
 Tags: social networking, activity, profiles, messaging, friends, groups, forums, notifications, settings, social, community, networks, networking
-Requires at least: 3.8
-Tested up to: 4.4
-Stable tag: 2.4.3
+Requires at least: 3.9
+Tested up to: 4.4.2
+Stable tag: 2.5.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-BuddyPress helps you run any kind of social network on your WordPress, with member profiles, activity streams, user groups, messaging, and more.
+BuddyPress helps you build any type of community website using WordPress, with member profiles, activity streams, user groups, messaging, and more.
 
 == Description ==
 
@@ -118,6 +118,12 @@ Please consider helping translate BuddyPress at our <a href="https://translate.w
 
 == Upgrade Notice ==
 
+= 2.5.1 =
+See: https://codex.buddypress.org/releases/version-2-5-1/
+
+= 2.5 =
+See: https://codex.buddypress.org/releases/version-2-5-0/
+
 = 2.4.3 =
 See: https://codex.buddypress.org/releases/version-2-4-3/
 
@@ -127,7 +133,7 @@ See: https://codex.buddypress.org/releases/version-2-4-2/
 = 2.4.1 =
 See: https://codex.buddypress.org/releases/version-2-4-1/
 
-= 2.4.0 =
+= 2.4 =
 See: https://codex.buddypress.org/releases/version-2-4-0/
 
 = 2.3.5 =
@@ -240,6 +246,12 @@ Fixes over 10 bugs.
 
 == Changelog ==
 
+= 2.5.1 =
+See: https://codex.buddypress.org/releases/version-2-5-1/
+
+= 2.5 =
+See: https://codex.buddypress.org/releases/version-2-5-0/
+
 = 2.4.3 =
 See: https://codex.buddypress.org/releases/version-2-4-3/
 
@@ -249,7 +261,7 @@ See: https://codex.buddypress.org/releases/version-2-4-2/
 = 2.4.1 =
 See: https://codex.buddypress.org/releases/version-2-4-1/
 
-= 2.4.0 =
+= 2.4 =
 See: https://codex.buddypress.org/releases/version-2-4-0/
 
 = 2.3.5 =
@@ -267,7 +279,7 @@ See: https://codex.buddypress.org/releases/version-2-3-2/
 = 2.3.1 =
 See: https://codex.buddypress.org/releases/version-2-3-1/
 
-= 2.3.0 =
+= 2.3 =
 See: https://codex.buddypress.org/releases/version-2-3-0/
 
 = 2.2.1 =

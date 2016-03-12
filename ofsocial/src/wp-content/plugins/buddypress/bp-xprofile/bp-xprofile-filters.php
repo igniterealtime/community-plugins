@@ -6,6 +6,7 @@
  *
  * @package BuddyPress
  * @subpackage XProfileFilters
+ * @since 1.0.0
  */
 
 // Exit if accessed directly.
@@ -113,8 +114,8 @@ function bp_xprofile_sanitize_field_default( $field_default = '' ) {
 /**
  * Run profile field values through kses with filterable allowed tags.
  *
- * @param string $content  Content to filter.
- * @param object $data_obj The BP_XProfile_ProfileData object.
+ * @param string      $content  Content to filter.
+ * @param object|null $data_obj The BP_XProfile_ProfileData object.
  *
  * @return string $content
  */
@@ -153,10 +154,10 @@ function xprofile_filter_kses( $content, $data_obj = null ) {
 /**
  * Safely runs profile field data through kses and force_balance_tags.
  *
- * @param string $field_value Field value being santized.
- * @param int    $field_id    Field ID being sanitized.
- * @param bool   $reserialize Whether to reserialize arrays before returning. Defaults to true.
- * @param object $data_obj    The BP_XProfile_ProfileData object.
+ * @param string      $field_value Field value being santized.
+ * @param int         $field_id    Field ID being sanitized.
+ * @param bool        $reserialize Whether to reserialize arrays before returning. Defaults to true.
+ * @param object|null $data_obj    The BP_XProfile_ProfileData object.
  *
  * @return string
  */
@@ -221,7 +222,7 @@ function xprofile_sanitize_data_value_before_save( $field_value, $field_id = 0, 
 function xprofile_filter_format_field_value( $field_value, $field_type = '' ) {
 
 	// Valid field values of 0 or '0' get caught by empty(), so we have an extra check for these. See #BP5731.
- 	if ( ! isset( $field_value ) || empty( $field_value ) && ( '0' !== $field_value ) ) {
+	if ( ! isset( $field_value ) || empty( $field_value ) && ( '0' !== $field_value ) ) {
 		return false;
 	}
 
@@ -238,9 +239,9 @@ function xprofile_filter_format_field_value( $field_value, $field_type = '' ) {
  * @since 2.1.0
  * @since 2.4.0 Added `$field_id` parameter.
  *
- * @param mixed  $field_value Field value.
- * @param string $field_type  Field type.
- * @param int    $field_id    Optional. ID of the field.
+ * @param mixed      $field_value Field value.
+ * @param string     $field_type  Field type.
+ * @param string|int $field_id    Optional. ID of the field.
  *
  * @return mixed
  */
@@ -266,7 +267,6 @@ function xprofile_filter_format_field_value_by_type( $field_value, $field_type =
  *
  * @param mixed $field_value Field value.
  * @param int   $field_id    Field type.
- *
  * @return string
  */
 function xprofile_filter_format_field_value_by_field_id( $field_value, $field_id ) {
@@ -282,7 +282,6 @@ function xprofile_filter_format_field_value_by_field_id( $field_value, $field_id
  * @param mixed                  $value          Value passed to the bp_xprofile_set_field_data_pre_validate filter.
  * @param BP_XProfile_Field      $field          Field object.
  * @param BP_XProfile_Field_Type $field_type_obj Field type object.
- *
  * @return mixed
  */
 function xprofile_filter_pre_validate_value_by_field_type( $value, $field, $field_type_obj ) {
@@ -308,7 +307,7 @@ function xprofile_filter_pre_validate_value_by_field_type( $value, $field, $fiel
  */
 function bp_xprofile_escape_field_data( $value, $field_type, $field_id ) {
 	if ( bp_xprofile_is_richtext_enabled_for_field( $field_id ) ) {
-		// xprofile_filter_kses() expects a BP_XProfile_ProfileData object.
+		// The xprofile_filter_kses() expects a BP_XProfile_ProfileData object.
 		$data_obj = null;
 		if ( bp_is_user() ) {
 			$data_obj = new BP_XProfile_ProfileData( $field_id, bp_displayed_user_id() );
@@ -329,16 +328,24 @@ function bp_xprofile_escape_field_data( $value, $field_type, $field_id ) {
  * - Not run on datebox field types.
  * - Not run on values without commas with less than 5 words.
  * - URL's are made clickable.
- * - To disable: remove_filter( 'bp_get_the_profile_field_value', 'xprofile_filter_link_profile_data', 9, 2 );
+ *
+ * To disable globally:
+ *     remove_filter( 'bp_get_the_profile_field_value', 'xprofile_filter_link_profile_data', 9, 3 );
+ *
+ * To disable for a single field, use the 'Autolink' settings in Dashboard > Users > Profile Fields.
  *
  * @since 1.1.0
  *
  * @param string $field_value Profile field data value.
  * @param string $field_type  Profile field type.
- *
  * @return string
  */
 function xprofile_filter_link_profile_data( $field_value, $field_type = 'textbox' ) {
+	global $field;
+
+	if ( ! $field->get_do_autolink() ) {
+		return $field_value;
+	}
 
 	if ( 'datebox' === $field_type ) {
 		return $field_value;
@@ -482,7 +489,6 @@ add_action( 'bp_pre_user_query', 'bp_xprofile_add_xprofile_query_to_user_query' 
  * @access private Do not use.
  *
  * @param string $q SQL query.
- *
  * @return string
  */
 function bp_xprofile_filter_meta_query( $q ) {

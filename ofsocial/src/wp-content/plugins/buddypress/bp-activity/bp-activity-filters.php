@@ -4,12 +4,13 @@
  *
  * @package BuddyPress
  * @subpackage ActivityFilters
+ * @since 1.0.0
  */
 
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
-/** Filters *******************************************************************/
+/* Filters *******************************************************************/
 
 // Apply WordPress defined filters.
 add_filter( 'bp_get_activity_action',                'bp_activity_filter_kses', 1 );
@@ -31,6 +32,10 @@ add_filter( 'bp_get_activity_latest_update_excerpt', 'force_balance_tags' );
 add_filter( 'bp_get_activity_feed_item_description', 'force_balance_tags' );
 add_filter( 'bp_activity_content_before_save',       'force_balance_tags' );
 add_filter( 'bp_activity_action_before_save',        'force_balance_tags' );
+
+if ( function_exists( 'wp_encode_emoji' ) ) {
+	add_filter( 'bp_activity_content_before_save', 'wp_encode_emoji' );
+}
 
 add_filter( 'bp_get_activity_action',                'wptexturize' );
 add_filter( 'bp_get_activity_content_body',          'wptexturize' );
@@ -98,7 +103,7 @@ add_filter( 'bp_get_activity_content',      'bp_activity_truncate_entry', 5 );
 add_filter( 'bp_get_total_favorite_count_for_user', 'bp_core_number_format' );
 add_filter( 'bp_get_total_mention_count_for_user',  'bp_core_number_format' );
 
-/** Actions *******************************************************************/
+/* Actions *******************************************************************/
 
 // At-name filter.
 add_action( 'bp_activity_before_save', 'bp_activity_at_name_filter_updates' );
@@ -342,11 +347,14 @@ function bp_activity_at_name_send_emails( $activity ) {
 		 * Filters BuddyPress' ability to send email notifications for @mentions.
 		 *
 		 * @since 1.6.0
+		 * @since 2.5.0 Introduced `$user_id` and `$activity` parameters.
 		 *
-		 * @param bool  $value     Whether or not BuddyPress should send a notification to the mentioned users.
-		 * @param array $usernames Array of users potentially notified.
+		 * @param bool                 $value     Whether or not BuddyPress should send a notification to the mentioned users.
+		 * @param array                $usernames Array of users potentially notified.
+		 * @param int                  $user_id   ID of the current user being notified.
+		 * @param BP_Activity_Activity $activity  Activity object.
 		 */
-		if ( apply_filters( 'bp_activity_at_name_do_notifications', true, $usernames ) ) {
+		if ( apply_filters( 'bp_activity_at_name_do_notifications', true, $usernames, $user_id, $activity ) ) {
 			bp_activity_at_message_notification( $activity->id, $user_id );
 		}
 
@@ -808,10 +816,6 @@ function bp_activity_filter_mentions_scope( $retval = array(), $filter = array()
 
 		// Overrides.
 		'override' => array(
-
-			// Clear search terms so 'mentions' scope works with other scopes.
-			'search_terms' => false,
-
 			'display_comments' => 'stream',
 			'filter'           => array( 'user_id' => 0 ),
 			'show_hidden'      => true

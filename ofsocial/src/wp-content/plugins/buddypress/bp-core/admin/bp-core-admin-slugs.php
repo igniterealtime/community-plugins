@@ -4,6 +4,7 @@
  *
  * @package BuddyPress
  * @subpackage CoreAdministration
+ * @since 2.3.0
  */
 
 // Exit if accessed directly.
@@ -20,6 +21,8 @@ function bp_core_admin_slugs_settings() {
 ?>
 
 	<div class="wrap">
+
+		<h1><?php _e( 'BuddyPress Settings', 'buddypress' ); ?> </h1>
 
 		<h2 class="nav-tab-wrapper"><?php bp_core_admin_tabs( __( 'Pages', 'buddypress' ) ); ?></h2>
 		<form action="" method="post" id="bp-admin-page-form">
@@ -49,18 +52,20 @@ function bp_core_admin_get_directory_pages() {
 	$bp = buddypress();
 	$directory_pages = array();
 
-	// Loop through loaded components and collect directories
+	// Loop through loaded components and collect directories.
 	if ( is_array( $bp->loaded_components ) ) {
 		foreach( $bp->loaded_components as $component_slug => $component_id ) {
 
-			// Only components that need directories should be listed here
+			// Only components that need directories should be listed here.
 			if ( isset( $bp->{$component_id} ) && !empty( $bp->{$component_id}->has_directory ) ) {
 
-				// component->name was introduced in BP 1.5, so we must provide a fallback
+				// The component->name property was introduced in BP 1.5, so we must provide a fallback.
 				$directory_pages[$component_id] = !empty( $bp->{$component_id}->name ) ? $bp->{$component_id}->name : ucwords( $component_id );
 			}
 		}
 	}
+
+	/** Directory Display *****************************************************/
 
 	/**
 	 * Filters the loaded components needing directory page association to a WordPress page.
@@ -112,8 +117,6 @@ function bp_core_admin_slugs_options() {
 
 	// Set up an array of components (along with component names) that have directory pages.
 	$directory_pages = bp_core_admin_get_directory_pages();
-
-	/** Directory Display *****************************************************/
 
 	if ( !empty( $directory_pages ) ) : ?>
 
@@ -246,7 +249,7 @@ function bp_core_admin_slugs_setup_handler() {
 		if ( !check_admin_referer( 'bp-admin-pages-setup' ) )
 			return false;
 
-		// Then, update the directory pages
+		// Then, update the directory pages.
 		if ( isset( $_POST['bp_pages'] ) ) {
 			$valid_pages = array_merge( bp_core_admin_get_directory_pages(), bp_core_admin_get_static_pages() );
 

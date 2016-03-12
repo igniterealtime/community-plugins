@@ -101,7 +101,7 @@ do_action( 'bp_before_member_messages_loop' ); ?>
 						<?php endif; ?>
 
 						<td class="thread-info">
-							<p><a href="<?php bp_message_thread_view_link(); ?>" title="<?php esc_attr_e( "View Message", "buddypress" ); ?>"><?php bp_message_thread_subject(); ?></a></p>
+							<p><a href="<?php bp_message_thread_view_link(); ?>" title="<?php esc_attr_e( "View Message", 'buddypress' ); ?>"><?php bp_message_thread_subject(); ?></a></p>
 							<p class="thread-excerpt"><?php bp_message_thread_excerpt(); ?></p>
 						</td>
 
@@ -131,6 +131,15 @@ do_action( 'bp_before_member_messages_loop' ); ?>
 							<?php endif; ?>
 							 |
 							<a class="delete" href="<?php bp_message_thread_delete_link(); ?>"><?php _e( 'Delete', 'buddypress' ); ?></a>
+
+							<?php
+
+							/**
+							 * Fires after the thread options links for each message in the messages loop list.
+							 *
+							 * @since 2.5.0
+							 */
+							do_action( 'bp_messages_thread_options' ); ?>
 						</td>
 					</tr>
 
