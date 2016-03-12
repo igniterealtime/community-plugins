@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Candy - Chats are not dead yet</title>
-	<link rel="shortcut icon" href="candy/res/img/favicon.png" type="image/gif" />
+	<title>Openfire Meetings</title>
+	<link rel="shortcut icon" href="chrome-extension/ofmeet.png" type="image/png" />
 	<link rel="stylesheet" type="text/css" href="candy/res/default.css" />
     <script src="/ofmeet/config"></script><!-- BAO -->
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -26,6 +26,8 @@
 	<link rel="stylesheet" type="text/css" href="candy/candyshop/typingnotifications/typingnotifications.css" />
 
 	<script type="text/javascript">
+
+		window.inExtension = urlParam("extension");;
 
 		$(document).ready(function() {
 
@@ -64,6 +66,13 @@
 		{
 
 		});
+
+		function urlParam(name)
+		{
+			var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+			if (!results) { return undefined; }
+			return unescape(results[1] || undefined);
+		};
 	</script>
 </head>
 <body>

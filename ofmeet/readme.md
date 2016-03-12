@@ -108,7 +108,7 @@ addresses:
 * ```https://your-server.com:7443/ofmeet/?r=xxxxx``` - To join a specific room;
 * ```https://your-server.com:7443/ofmeet/?r=xxxxx&novideo=true``` - To join a specific room, audio only (no video);
 
-To use HTTP instead of HTTPS, replace port 7443 by 7070.
+To use HTTP instead of HTTPS, replace port 7443 by 7070. Please note that for webRTC audio and video, HTTPS is mandatory.
 
 ### ... the Openfire Meetings Candy-based web client
 
@@ -116,7 +116,11 @@ Openfire Meetings includes a Candy-based web client. To make use of this client,
 
 * ```https://your-server.com:7443/ofmeet/candy.html```
 
-To use HTTP instead of HTTPS, replace port 7443 by 7070.
+To use HTTP instead of HTTPS, replace port 7443 by 7070. Please note that for webRTC audio and video, HTTPS is mandatory.
+
+Candy can also be accessed as a toolbar panel from the Openfire Meetings Chrome Extension, by clicking on the Openfire icon on the chrome web browser toolbar.
+You must enable Chrome panels otherwise a popup window will be opened instead.
+To enable chrome panels feature in Chrome, type in "chrome://flags/#enable-panels" in the url bar - click on "enable" under "enable panels" - Make sure to click on "relaunch now " at the bottom of the page , to take effect .
 
 ### ... the Meeting/Conference planner and hosting feature
 

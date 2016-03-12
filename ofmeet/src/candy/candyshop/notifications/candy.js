@@ -24,6 +24,7 @@ CandyShop.Notifications = (function(self, Candy, $) {
   var _options = {
     notifyNormalMessage: false,
     notifyPersonalMessage: true,
+    drawAttension: true,
     notifyMention: true,
     closeTime: 3000,
     title: null,
@@ -75,11 +76,13 @@ CandyShop.Notifications = (function(self, Candy, $) {
    */
   self.handleOnShow = function(e, args) {
     // Check if window has focus, so no notification needed
-    if (!document.hasFocus()) {
-      if(_options.notifyNormalMessage ||
-        (self.mentionsMe(args.message) && _options.notifyMention) ||
-        (_options.notifyPersonalMessage && Candy.View.Pane.Chat.rooms[args.roomJid].type === 'chat')) {
+    
+    if (!document.hasFocus()) 
+    {
+      if(_options.notifyNormalMessage || (self.mentionsMe(args.message) && _options.notifyMention) || (_options.notifyPersonalMessage && Candy.View.Pane.Chat.rooms[args.roomJid].type === 'chat')) 
+      {
         // Create the notification.
+        
         var title = !_options.title ? args.name : _options.title ,
           notification = new window.Notification(title, {
           icon: _options.icon,
@@ -90,6 +93,11 @@ CandyShop.Notifications = (function(self, Candy, $) {
         if(_options.closeTime) {
           window.setTimeout(function() { notification.close(); }, _options.closeTime);
         }
+      }
+      
+      if (window.inExtension)
+      {
+      	window.postMessage({type: 'ofmeetDrawAttention'}, '*');	
       }
     }
   };

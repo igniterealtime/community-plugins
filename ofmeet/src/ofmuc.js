@@ -12,6 +12,16 @@ $(document).ready(function ()
 	
 	$("body").append(conferenceList);
 	$("#enter_room_field").attr("list", "conference-list");	
+
+	setTimeout(function()
+	{
+		if ($('#ofmeet-extension-installed').length > 0)
+		{
+			var msg = { type: 'ofmeetSetConfig', host: window.location.host, username: Strophe.getResourceFromJid(this.connection.jid)};
+			console.log("window.post.ofmeetSetConfig", msg);
+			window.postMessage(msg, '*');	
+		}	
+	}, 5000);
 });
 
 
@@ -132,7 +142,6 @@ Strophe.addConnectionPlugin('ofmuc', {
 			that.connection.send(msg);			
 		}
 	});	
-	
     },
         
     statusChanged: function(status, condition)

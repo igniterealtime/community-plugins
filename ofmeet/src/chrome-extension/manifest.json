@@ -3,6 +3,12 @@
       "persistent": true,    
       "scripts": [ "background.js" ]
    },
+   "browser_action": {
+      "default_icon": {
+         "19": "ofmeet.png",
+         "38": "ignite_dl_openfire.png"
+      }     
+   },     
    "content_scripts": [ {
       "all_frames": true,
       "css": [ "cursor.css" ],
@@ -11,14 +17,14 @@
    } ],
    "description": "Openfire Meetings Chrome Extension required for screen sharing, remote control and co-browsing",
    "icons": {
-      "128": "icon128.png",
-      "16": "icon16.png",
-      "48": "icon48.png"
+      "128": "ignite_dl_openfire.png",
+      "16": "ofmeet.png",
+      "48": "ignite_dl_openfire.png"
    },
    "manifest_version": 2,
    "minimum_chrome_version": "34",
    "name": "Openfire Meetings Chrome Extension",
    "permissions": [ "desktopCapture", "background", "nativeMessaging", "http://localhost/"],
    "short_name": "ofmeet chrome extension",
-   "version": "0.0.6"
+   "version": "0.0.7"
 }
