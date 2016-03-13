@@ -132,7 +132,7 @@ function sendRemoteControl(message)
 
 function openRootWindow()
 {
-	var url = "https://" + host + "/ofmeet/candy.html?extension=true";
+	var url = "https://" + host + "/ofmeet/candy.html?extension=true&host=" + host;
 
 	console.log("createRootWindow url", url)
 		

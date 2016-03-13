@@ -1,9 +1,7 @@
 Buildfile: C:\Projects\ignite\community-plugins\ofmeet\build.xml
 
 clean:
-   [delete] Deleting: C:\Projects\ignite\community-plugins\ofmeet\lib\plugin-ofmeet-jspc.jar
-   [delete] Deleting: C:\Projects\ignite\community-plugins\ofmeet\lib\plugin-ofmeet.jar
-   [delete] Deleting: C:\Projects\ignite\community-plugins\openfire_4_0_1\target\openfire\plugins\ofmeet.jar
+   [delete] Deleting directory C:\Projects\ignite\community-plugins\ofmeet\build
 
 init:
     [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofmeet\build\classes
@@ -43,9 +41,8 @@ jar:
      [copy] Copying 504 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
      [copy] Copying 53 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar\lib
      [copy] Copying 59 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
-      [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_1\target\openfire\plugins\remotecontrol.zip
       [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_1\target\openfire\plugins\ofmeet.jar
    [delete] Deleting directory C:\Projects\ignite\community-plugins\ofmeet\build
 
 BUILD SUCCESSFUL
-Total time: 59 seconds
+Total time: 18 seconds

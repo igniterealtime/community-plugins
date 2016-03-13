@@ -27,9 +27,12 @@
 
 	<script type="text/javascript">
 
-		window.inExtension = urlParam("extension");;
+		$(document).ready(function()
+		{
+			window.inExtension = urlParam("extension");
+			var host = urlParam("host");
 
-		$(document).ready(function() {
+			if (host) document.title = "Openfire Meetings - " + host;
 
 			Candy.init(config.bosh, {
 				core: {

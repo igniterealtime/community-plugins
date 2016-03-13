@@ -51,6 +51,7 @@ import java.security.Security;
 import java.util.*;
 import java.net.*;
 import java.io.*;
+import java.sql.Connection;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 
@@ -59,6 +60,9 @@ import org.slf4j.LoggerFactory;
 
 import net.sf.json.*;
 
+import org.jivesoftware.smack.*;
+import org.jivesoftware.smackx.workgroup.*;
+import org.jivesoftware.smackx.workgroup.user.Workgroup;
 
 /**
  * The meetings email listener service connects to an email server using IMAP and listens for new emails.
@@ -150,7 +154,7 @@ public class EmailListener {
                     // Send new messages to specified users
                     for (Message msg : msgs) {
                         try {
-                            sendMessage(msg);
+                            listenMessage(msg);
                         }
                         catch (Exception e) {
                             Log.error("Error while sending new email message", e);
@@ -202,26 +206,13 @@ public class EmailListener {
         }
     }
 
-    private void sendMessage(Message message) throws Exception {
+    private void listenMessage(Message message) throws Exception {
 		String subject = message.getSubject();
 		List<String> userCollection = new ArrayList<String>();
 
         Log.info("New email has been received " + subject);
 
 		if (subject.startsWith("Openfire Meetings: ")) return;		// email listener is a participant, ignore email
-
-		Meeting meeting = new Meeting();
-
-		if (message.isMimeType("multipart/*"))
-		{
-			Multipart mp = (Multipart) message.getContent();
-			int count = mp.getCount();
-
-			for (int i = 0; i < count; i++)
-			{
-				createBookmarksForPDFs(mp.getBodyPart(i), subject, userCollection, meeting);
-			}
-		}
 
 		User fromUser = null;
 
@@ -234,6 +225,31 @@ public class EmailListener {
 				userCollection.add(user.getUsername());
 
 				if (fromUser == null) fromUser = user;
+			}
+		}
+
+		String fastpathPrefix = getFastpathPrefix();
+
+		if (fastpathPrefix != null)
+		{
+			if (subject.startsWith(fastpathPrefix))
+			{
+				String workgroup = subject.substring(fastpathPrefix.length()).trim();
+				processWorkgroupRequest(workgroup, fromUser.getUsername());
+				return;
+			}
+		}
+
+		Meeting meeting = new Meeting();
+
+		if (message.isMimeType("multipart/*"))
+		{
+			Multipart mp = (Multipart) message.getContent();
+			int count = mp.getCount();
+
+			for (int i = 0; i < count; i++)
+			{
+				createBookmarksForPDFs(mp.getBodyPart(i), subject, userCollection, meeting);
 			}
 		}
 
@@ -579,7 +595,7 @@ public class EmailListener {
             props.setProperty("mail.imap.port", String.valueOf(port));
             props.setProperty("mail.imap.connectiontimeout", String.valueOf(10 * 1000));
             // Allow messages with a mix of valid and invalid recipients to still be sent.
-            props.setProperty("mail.debug", JiveGlobals.getProperty("plugin.email.listener.debug", "true"));
+            props.setProperty("mail.debug", JiveGlobals.getProperty("ofmeet.email.listener.debug", "true"));
 
             // Get a Session object
             Session session = Session.getInstance(props, null);
@@ -626,7 +642,7 @@ public class EmailListener {
      * @return the host where the IMAP server is running or null if none was defined.
      */
     public String getHost() {
-        return JiveGlobals.getProperty("plugin.email.listener.host");
+        return JiveGlobals.getProperty("ofmeet.email.listener.host");
     }
 
     /**
@@ -635,7 +651,7 @@ public class EmailListener {
      * @param host the host where the IMAP server is running or null if none was defined.
      */
     public void setHost(String host) {
-        JiveGlobals.setProperty("plugin.email.listener.host", host);
+        JiveGlobals.setProperty("ofmeet.email.listener.host", host);
     }
 
     /**
@@ -655,7 +671,7 @@ public class EmailListener {
      * @param port port where the IMAP server is listening.
      */
     public void setPort(int port) {
-        JiveGlobals.setProperty("plugin.email.listener.port", Integer.toString(port));
+        JiveGlobals.setProperty("ofmeet.email.listener.port", Integer.toString(port));
     }
 
     /**
@@ -665,7 +681,7 @@ public class EmailListener {
      * @return the user to use to connect to the IMAP server.
      */
     public String getUser() {
-        return JiveGlobals.getProperty("plugin.email.listener.user");
+        return JiveGlobals.getProperty("ofmeet.email.listener.user");
     }
 
     /**
@@ -675,7 +691,7 @@ public class EmailListener {
      * @param user the user to use to connect to the IMAP server.
      */
     public void setUser(String user) {
-        JiveGlobals.setProperty("plugin.email.listener.user", user);
+        JiveGlobals.setProperty("ofmeet.email.listener.user", user);
     }
 
     /**
@@ -685,7 +701,7 @@ public class EmailListener {
      * @return the password to use to connect to the IMAP server.
      */
     public String getPassword() {
-        return JiveGlobals.getProperty("plugin.email.listener.password");
+        return JiveGlobals.getProperty("ofmeet.email.listener.password");
     }
 
     /**
@@ -695,7 +711,25 @@ public class EmailListener {
      * @param password the password to use to connect to the IMAP server.
      */
     public void setPassword(String password) {
-        JiveGlobals.setProperty("plugin.email.listener.password", password);
+        JiveGlobals.setProperty("ofmeet.email.listener.password", password);
+    }
+
+    /**
+     * Returns the name of the fastpath prefix.
+     *
+     * @return the name of the fastpath prefix.
+     */
+    public String getFastpathPrefix() {
+        return JiveGlobals.getProperty("ofmeet.email.listener.fastpath.prefix");
+    }
+
+    /**
+     * Sets the name of the fastpath prefix.
+     *
+     * @param folder the name of the fastpath prefix.
+     */
+    public void setFastpathPrefix(String prefix) {
+        JiveGlobals.setProperty("ofmeet.email.listener.fastpath.prefix", prefix);
     }
 
     /**
@@ -706,7 +740,7 @@ public class EmailListener {
      * @return the name of the folder.
      */
     public String getFolder() {
-        return JiveGlobals.getProperty("plugin.email.listener.folder");
+        return JiveGlobals.getProperty("ofmeet.email.listener.folder");
     }
 
     /**
@@ -717,7 +751,7 @@ public class EmailListener {
      * @param folder the name of the folder.
      */
     public void setFolder(String folder) {
-        JiveGlobals.setProperty("plugin.email.listener.folder", folder);
+        JiveGlobals.setProperty("ofmeet.email.listener.folder", folder);
     }
 
     /**
@@ -737,7 +771,7 @@ public class EmailListener {
      * @param frequency the milliseconds to wait to check for new emails.
      */
     public void setFrequency(int frequency) {
-        JiveGlobals.setProperty("plugin.email.listener.frequency", Integer.toString(frequency));
+        JiveGlobals.setProperty("ofmeet.email.listener.frequency", Integer.toString(frequency));
     }
     /**
      * Returns true if SSL is enabled to connect to the server.
@@ -754,11 +788,11 @@ public class EmailListener {
      * @param enabled true if SSL is enabled to connect to the server.
      */
     public void setSSLEnabled(boolean enabled) {
-        JiveGlobals.setProperty("plugin.email.listener.ssl", Boolean.toString(enabled));
+        JiveGlobals.setProperty("ofmeet.email.listener.ssl", Boolean.toString(enabled));
     }
 
     public Collection<String> getUsers() {
-        String users = JiveGlobals.getProperty("plugin.email.listener.users");
+        String users = JiveGlobals.getProperty("ofmeet.email.listener.users");
         if (users == null || users.trim().length() == 0) {
             Collection<String> admins = new ArrayList<String>();
             for (JID jid : XMPPServer.getInstance().getAdmins()) {
@@ -770,7 +804,7 @@ public class EmailListener {
     }
 
     public void setUsers(Collection<String> users) {
-        JiveGlobals.setProperty("plugin.email.listener.users", StringUtils.collectionToString(users));
+        JiveGlobals.setProperty("ofmeet.email.listener.users", StringUtils.collectionToString(users));
     }
 
 	private void configureRoom(MUCRoom room, String title, String owner)
@@ -882,6 +916,41 @@ public class EmailListener {
 		public String body = null;
 		public boolean request = false;
 		public boolean cancel = false;
+	}
+
+	private void processWorkgroupRequest(String workgroupName, String userid)
+	{
+		try
+		{
+			ConnectionConfiguration config = new ConnectionConfiguration("localhost", 443);
+			XMPPConnection connection = new XMPPConnection(config);
+			connection.connect();
+			connection.loginAnonymously();
+
+			Workgroup workgroup = new Workgroup(workgroupName, connection);
+
+			workgroup.addInvitationListener(new WorkgroupInvitationListener()
+			{
+				public void invitationReceived(WorkgroupInvitation workgroupInvitation)
+				{
+					String room = workgroupInvitation.getGroupChatName();
+
+				}
+			});
+
+			Map details = new HashMap();
+
+			if (workgroup != null) {
+				try {
+					workgroup.joinQueue(details, userid);
+				}
+				catch (XMPPException e) {
+					Log.error("Unable to join chat queue." + workgroupName, e);
+				}
+			}
+		} catch (Exception e) {
+			Log.error("processWorkgroupRequest " + e);
+		}
 	}
 
 /*

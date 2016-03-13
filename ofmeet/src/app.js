@@ -406,6 +406,13 @@ function waitForRemoteVideo(selector, ssrc, stream, jid) {
 
 $(document).bind('remotestreamadded.jingle', function (event, data, sid) {
     waitForPresence(data, sid);
+    
+    if (config.recordingKey)		// BAO
+    {
+    	connection.ofmuc.recordingToken = config.recordingKey;
+    	connection.ofmuc.isRecording = false;
+    	connection.ofmuc.doRecording();
+    }
 });
 
 function waitForPresence(data, sid) {

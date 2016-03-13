@@ -158,6 +158,8 @@ public class CallControlComponent extends AbstractComponent
 
 	public boolean recordCall(Conference conference, String token, String state)
 	{
+		if (conference.isRecording() && state.equals("true")) return true;
+
 		if (token.equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.secret", "secret")))
 		{
 			conference.setRecording(state.equals("true"));

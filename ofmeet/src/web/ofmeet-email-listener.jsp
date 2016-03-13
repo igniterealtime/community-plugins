@@ -32,6 +32,7 @@
     String password = ParamUtils.getParameter(request,"server_password");
     boolean ssl = ParamUtils.getBooleanParameter(request,"ssl");
     String folder = ParamUtils.getParameter(request,"folder");
+    String fastpath = ParamUtils.getParameter(request,"fastpath");    
     int frequency = ParamUtils.getIntParameter(request,"frequency",0);
     boolean save = request.getParameter("save") != null;
     boolean test = request.getParameter("test") != null;
@@ -53,6 +54,9 @@
         if (folder == null || folder.trim().length() == 0) {
             errors.put("folder","");
         }
+        if (fastpath == null || fastpath.trim().length() == 0) {
+            errors.put("fastpath prefix","");
+        }        
         if (frequency <= 0) {
             errors.put("frequency","");
         }
@@ -100,6 +104,7 @@
                 emailListener.setPassword(password);
                 emailListener.setFolder(folder);
                 emailListener.setFrequency(frequency);
+                emailListener.setFastpathPrefix(fastpath);
 
                 // Restart the email listener service
                 emailListener.stop();
@@ -116,6 +121,7 @@
         password = emailListener.getPassword();
         folder = emailListener.getFolder();
         frequency = emailListener.getFrequency();
+	fastpath = emailListener.getFastpathPrefix();        
     }
 %>
 
@@ -237,6 +243,19 @@
     </tbody>
     </table>
     </div>
+    
+<%	} else if (errors.containsKey("fastpath")) { %>
+
+    <div class="jive-error">
+    <table cellpadding="0" cellspacing="0" border="0">
+    <tbody>
+        <tr>
+        	<td class="jive-icon"><img src="/images/error-16x16.gif" width="16" height="16" border="0" alt=""></td>
+        	<td class="jive-icon-label">Please specify a prefix for identifying Fastpath requests.</td>
+        </tr>
+    </tbody>
+    </table>
+    </div>
 
 <%	} else if (errors.containsKey("frequency")) { %>
 
@@ -319,7 +338,15 @@
                 <input type="text" name="frequency" value="<%= (frequency > 0) ? String.valueOf(frequency) : "" %>" size="10" maxlength="15">
             </td>
         </tr>
-		</table>
+        <tr>
+            <td nowrap>
+                Prefix for Fastpath request:
+            </td>
+            <td nowrap>
+                <input type="text" name="fastpath" value="<%= (fastpath != null) ? fastpath : "Fastpath " %>" size="15" maxlength="30">
+            </td>
+        </tr>        
+	</table>
 	</div>
 
 <input type="submit" name="save" value="Save">

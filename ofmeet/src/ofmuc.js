@@ -1092,6 +1092,12 @@ Strophe.addConnectionPlugin('ofmuc', {
 		return;
 	}
 
+    	this.doRecording();    
+    },
+    
+    doRecording: function()
+    {
+    	var that = this;    
 	var req = $iq({type: 'set', to: "ofmeet-call-control." + config.hosts.domain});
 	
 	req.c('record',	{xmlns: 'urn:xmpp:rayo:record:1'});
@@ -1113,8 +1119,8 @@ Strophe.addConnectionPlugin('ofmuc', {
 		    Toolbar.setRecordingButtonState(false);
 		    that.isRecording = false;		    
 		}
-	);	    
-    }    
+	);    
+    }
     
 });
 

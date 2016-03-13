@@ -213,7 +213,7 @@ public class XMPPConnection extends Connection
 				authToken = new AuthToken(resource, true);
 			}
 
-			session = SessionManager.getInstance().createClientSession( smackConnection, new BasicStreamID("ofmeet-focus-" + System.currentTimeMillis()));
+			session = SessionManager.getInstance().createClientSession( smackConnection, new BasicStreamID("ofmeet-user-" + System.currentTimeMillis()));
 			smackConnection.setRouter( new SessionPacketRouter( session ) );
 			session.setAuthToken(authToken, resource);
 
@@ -238,7 +238,38 @@ public class XMPPConnection extends Connection
 
     public synchronized void loginAnonymously() throws XMPPException
     {
+        if (!isConnected()) {
+            throw new IllegalStateException("Not connected to server.");
+        }
+        if (authenticated) {
+            throw new IllegalStateException("Already logged in to server.");
+        }
 
+        this.user = "ofmeet-user-" + System.currentTimeMillis();
+        config.setServiceName(StringUtils.parseServer("openfire"));
+
+		AuthToken authToken = new AuthToken(this.user, true);
+
+		session = SessionManager.getInstance().createClientSession( smackConnection, new BasicStreamID("ofmeet-user-" + System.currentTimeMillis()));
+		smackConnection.setRouter( new SessionPacketRouter( session ) );
+		session.setAuthToken(authToken, this.user);
+
+
+        // Set presence to online.
+        packetWriter.sendPacket(new Presence(Presence.Type.available));
+
+        // Indicate that we're now authenticated.
+        authenticated = true;
+        anonymous = true;
+
+        // If debugging is enabled, change the the debug window title to include the
+        // name we are now logged-in as.
+        // If DEBUG_ENABLED was set to true AFTER the connection was created the debugger
+        // will be null
+
+        if (config.isDebuggerEnabled() && debugger != null) {
+            debugger.userHasLogged(user);
+        }
     }
 
     public Roster getRoster()

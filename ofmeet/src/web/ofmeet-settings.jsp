@@ -86,6 +86,9 @@
         
 	String securityenabled = request.getParameter("securityenabled"); 
         JiveGlobals.setProperty("ofmeet.security.enabled", securityenabled);	
+
+	String autorecordenabled = request.getParameter("autorecordenabled"); 
+        JiveGlobals.setProperty("ofmeet.autorecord.enabled", autorecordenabled);	
         
 	String enabled = request.getParameter("enabled"); 	
         JiveGlobals.setProperty(PluginImpl.RECORD_PROPERTY_NAME, enabled);    
@@ -592,7 +595,19 @@
 		<td><input type="password" size="60" maxlength="100" name="recordsecret"
 			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.secret", "secret") %>">
 		</td>
-	    </tr>	    
+	    </tr>
+	    <tr>
+		    <td  nowrap colspan="2">
+			<input type="radio" value="false" name="autorecordenabled" <%= ("false".equals(JiveGlobals.getProperty("ofmeet.autorecord.enabled", "false")) ? "checked" : "") %>>
+			<b><fmt:message key="config.page.configuration.autorecord.disabled" /></b> - <fmt:message key="config.page.configuration.autorecord.disabled_description" />
+		    </td>
+	    </tr>   
+	    <tr>
+		    <td  nowrap colspan="2">
+			<input type="radio" value="true" name="autorecordenabled" <%= ("true".equals(JiveGlobals.getProperty("ofmeet.autorecord.enabled", "false")) ? "checked" : "") %>>
+			<b><fmt:message key="config.page.configuration.autorecord.enabled" /></b> - <fmt:message key="config.page.configuration.autorecord.enabled_description" />
+		    </td>
+	    </tr> 	    
             </tbody>
         </table>
     </p> 
