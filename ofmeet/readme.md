@@ -20,16 +20,16 @@ Openfire Meetings provides a web-based real-time communications application that
 With the optional Openfire Meetings Chrome Extension, these additional features are available:
 * Screen sharing;
 * Co-browsing;
-* Application sharing;
+* Application sharing (PDF presentation, Realtime collaborative scrum board, drawing and text editor) 
 
 When a Remote Desktop Control Native Application is combined with the Openfire Meetings Chrome Extension, the
 following features are enabled:
  * Remote desktop control;
 
-Openfire FastPath is a solution built on top of Openfire that adds support for managed queued chat requests. Openfire
-Meetings includes support for FastPath. This allows all interaction between a website user an agent to occur in Openfire
+Openfire Fastpath is a solution built on top of Openfire that adds support for managed queued chat requests. Openfire
+Meetings includes support for Fastpath. This allows all interaction between a website user an agent to occur in Openfire
 Meetings web clients, which will make available all Openfire Meetings functionality to both parties. Using Openfire
-Meetings, FastPath sessions are thus enhanced with audio, video, desktop sharing (application and screen), remote
+Meetings, Fastpath sessions are thus enhanced with audio, video, desktop sharing (application and screen), remote
 control and all other features of Openfire Meetings!
 
 ## History
@@ -90,9 +90,9 @@ Console, or, alternatively, from the [Openfire Plugins web page](http://www.igni
 
 ### Optional component: Openfire Meetings Spark plugin
 
-The Openfire Meetings Spark plugin provides a button from a MUC room or chat window within the Spark client, to open a
-Crome window to a Jitsi Meet-based web client. From a MUC room, the web client room is the same room name. From a chat,
-an unique, temporariy room will be created.
+The Openfire Meetings Spark plugin provides a button from a Multi User Chat (MUC) room or chat window within the Spark client, 
+to open a Chrome window to a Jitsi Meet-based web client. From a MUC room, the web client room is the same room name. From a chat,
+a unique, temporary room will be created.
 
 The Openfire Meetings Spark plugin is obtained from the Openfire Meetings plugin itself. After installation of Openfire
 Meetings, the Spark plugin can be downloaded from ```https://your-server.com:7443/ofmeet/spark/ofmeet-plugin.jar```
@@ -120,7 +120,7 @@ To use HTTP instead of HTTPS, replace port 7443 by 7070. Please note that for we
 
 Candy can also be accessed as a toolbar panel from the Openfire Meetings Chrome Extension, by clicking on the Openfire icon on the chrome web browser toolbar.
 You must enable Chrome panels otherwise a popup window will be opened instead.
-To enable chrome panels feature in Chrome, type in "chrome://flags/#enable-panels" in the url bar - click on "enable" under "enable panels" - Make sure to click on "relaunch now " at the bottom of the page , to take effect .
+To enable chrome panels feature in Chrome, type in "chrome://flags/#enable-panels" in the url bar - click on "enable" under "enable panels" - Make sure to click on "relaunch now " at the bottom of the page, to take effect.
 
 ### ... the Meeting/Conference planner and hosting feature
 
@@ -141,14 +141,14 @@ In order to use this feature, you will need:
 The calendar is implemented using the excellent open source [FullCalendar](http://fullcalendar.io/) jQuery plugin by
 Adam Shaw.
 
-### ... Openfire Meetings-enhanced FastPath
-The Candy-based web client that ships with Openfire Meetings supports FastPath. When a FastPath Agent logs in and uses
-the client, FastPath functionality will be exposed, similar to the functionality provided by the Spark client that
+### ... Openfire Meetings-enhanced Fastpath
+The Candy-based web client that ships with Openfire Meetings supports Fastpath. When a Fastpath Agent logs in and uses
+the client, Fastpath functionality will be exposed, similar to the functionality provided by the Spark client that
 agents would use in a scenario where Openfire Meetings is not used.
 
-Openfire Meetings ships with a FastPath javascript library that is intended to be integrated within the website that
-is offering FastPath services to end-users. Similar to the FastPath webchat solution, this library allows users to
+Openfire Meetings ships with a Fastpath JavaScript library that is intended to be integrated within the website that
+is offering Fastpath services to end-users. Similar to the Fastpath webchat solution, this library allows users to
 enter a managed queue.
 
-After installation of Openfire Meetings, the FastPath javascript library can be accessed on ```https://your-server.com:7443/ofmeet/fastpath/```.
+After installation of Openfire Meetings, the Fastpath JavaScript library can be accessed at ```https://your-server.com:7443/ofmeet/fastpath/```.
 
