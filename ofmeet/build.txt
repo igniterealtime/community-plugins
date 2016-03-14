@@ -1,7 +1,9 @@
 Buildfile: C:\Projects\ignite\community-plugins\ofmeet\build.xml
 
 clean:
-   [delete] Deleting directory C:\Projects\ignite\community-plugins\ofmeet\build
+   [delete] Deleting: C:\Projects\ignite\community-plugins\ofmeet\lib\plugin-ofmeet-jspc.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins\ofmeet\lib\plugin-ofmeet.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins\openfire_4_0_1\target\openfire\plugins\ofmeet.jar
 
 init:
     [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofmeet\build\classes
@@ -45,4 +47,4 @@ jar:
    [delete] Deleting directory C:\Projects\ignite\community-plugins\ofmeet\build
 
 BUILD SUCCESSFUL
-Total time: 18 seconds
+Total time: 24 seconds

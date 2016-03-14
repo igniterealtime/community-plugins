@@ -535,7 +535,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	   }
 	}
 
-	private void sendEmail(String toName, String toAddress, String subject, String body, String htmlBody)
+	public void sendEmail(String toName, String toAddress, String subject, String body, String htmlBody)
 	{
 	   try {
 		   String fromAddress = "no_reply@" + JiveGlobals.getProperty("ofmeet.email.domain", XMPPServer.getInstance().getServerInfo().getXMPPDomain());
@@ -550,7 +550,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 	}
 
-	private String replaceTokens(String text, Map<String, String> replacements)
+	public String replaceTokens(String text, Map<String, String> replacements)
 	{
 		Pattern pattern = Pattern.compile("\\[(.+?)\\]");
 		Matcher matcher = pattern.matcher(text);

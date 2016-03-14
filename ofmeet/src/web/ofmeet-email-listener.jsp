@@ -32,7 +32,8 @@
     String password = ParamUtils.getParameter(request,"server_password");
     boolean ssl = ParamUtils.getBooleanParameter(request,"ssl");
     String folder = ParamUtils.getParameter(request,"folder");
-    String fastpath = ParamUtils.getParameter(request,"fastpath");    
+    String fastpath = ParamUtils.getParameter(request,"fastpath");   
+    boolean fastpathauth = ParamUtils.getBooleanParameter(request,"fastpathauth");    
     int frequency = ParamUtils.getIntParameter(request,"frequency",0);
     boolean save = request.getParameter("save") != null;
     boolean test = request.getParameter("test") != null;
@@ -105,6 +106,7 @@
                 emailListener.setFolder(folder);
                 emailListener.setFrequency(frequency);
                 emailListener.setFastpathPrefix(fastpath);
+                emailListener.setFastpathAuthEnabled(fastpathauth);                
 
                 // Restart the email listener service
                 emailListener.stop();
@@ -121,7 +123,8 @@
         password = emailListener.getPassword();
         folder = emailListener.getFolder();
         frequency = emailListener.getFrequency();
-	fastpath = emailListener.getFastpathPrefix();        
+	fastpath = emailListener.getFastpathPrefix(); 
+	fastpathauth = emailListener.isFastpathAuthEnabled(); 	
     }
 %>
 
@@ -344,6 +347,14 @@
             </td>
             <td nowrap>
                 <input type="text" name="fastpath" value="<%= (fastpath != null) ? fastpath : "Fastpath " %>" size="15" maxlength="30">
+            </td>
+        </tr>  
+        <tr>
+            <td nowrap>
+                Authenticate Fastpath User:
+            </td>
+            <td nowrap>
+                <input type="checkbox" name="fastpathauth"<%= (fastpathauth) ? " checked" : "" %>>
             </td>
         </tr>        
 	</table>

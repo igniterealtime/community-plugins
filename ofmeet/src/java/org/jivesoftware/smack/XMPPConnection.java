@@ -238,6 +238,11 @@ public class XMPPConnection extends Connection
 
     public synchronized void loginAnonymously() throws XMPPException
     {
+		loginAnonymousUser("ofmeet-user-" + System.currentTimeMillis());
+	}
+
+    public synchronized void loginAnonymousUser(String userId) throws XMPPException
+    {
         if (!isConnected()) {
             throw new IllegalStateException("Not connected to server.");
         }
@@ -245,7 +250,7 @@ public class XMPPConnection extends Connection
             throw new IllegalStateException("Already logged in to server.");
         }
 
-        this.user = "ofmeet-user-" + System.currentTimeMillis();
+        this.user = userId;
         config.setServiceName(StringUtils.parseServer("openfire"));
 
 		AuthToken authToken = new AuthToken(this.user, true);

@@ -44,6 +44,8 @@ import org.xmpp.packet.IQ;
 
 import org.dom4j.*;
 
+import javax.mail.Message;
+import javax.mail.Session;
 import javax.mail.*;
 import javax.mail.event.MessageCountAdapter;
 import javax.mail.event.MessageCountEvent;
@@ -61,6 +63,8 @@ import org.slf4j.LoggerFactory;
 import net.sf.json.*;
 
 import org.jivesoftware.smack.*;
+import org.jivesoftware.smack.filter.*;
+import org.jivesoftware.smack.packet.*;
 import org.jivesoftware.smackx.workgroup.*;
 import org.jivesoftware.smackx.workgroup.user.Workgroup;
 
@@ -82,6 +86,10 @@ public class EmailListener {
     private boolean started = false;
 	private String downloadHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn" + File.separator + "download";
     private UserManager userManager = XMPPServer.getInstance().getUserManager();
+
+    private static Map<String, Presence> workgroupPresence = new HashMap<String, Presence>();
+    private static Map workgroups = new HashMap();
+	private static Map<String, XMPPConnection> globalConnections = new HashMap<String, XMPPConnection>();
 
     public static EmailListener getInstance() {
         return instance;
@@ -234,8 +242,12 @@ public class EmailListener {
 		{
 			if (subject.startsWith(fastpathPrefix))
 			{
-				String workgroup = subject.substring(fastpathPrefix.length()).trim();
-				processWorkgroupRequest(workgroup, fromUser.getUsername());
+				if ((isFastpathAuthEnabled() && fromUser != null) || isFastpathAuthEnabled() == false)
+				{
+					String workgroup = subject.substring(fastpathPrefix.length()).trim();
+					processWorkgroupRequest(workgroup, message, fromUser);
+				}
+
 				return;
 			}
 		}
@@ -661,7 +673,7 @@ public class EmailListener {
      * @return port where the IMAP server is listening.
      */
     public int getPort() {
-        return JiveGlobals.getIntProperty("plugin.email.listener.port", isSSLEnabled() ? 993 : 143);
+        return JiveGlobals.getIntProperty("ofmeet.email.listener.port", isSSLEnabled() ? 993 : 143);
     }
 
     /**
@@ -761,7 +773,7 @@ public class EmailListener {
      * @return the milliseconds to wait to check for new emails.
      */
     public int getFrequency() {
-        return JiveGlobals.getIntProperty("plugin.email.listener.frequency", 5 * 60 * 1000);
+        return JiveGlobals.getIntProperty("ofmeet.email.listener.frequency", 5 * 60 * 1000);
     }
 
     /**
@@ -774,12 +786,29 @@ public class EmailListener {
         JiveGlobals.setProperty("ofmeet.email.listener.frequency", Integer.toString(frequency));
     }
     /**
+     * Returns true if fastpath authentication is required
+     *
+     * @return true if fastpath authentication is required
+     */
+    public boolean isFastpathAuthEnabled() {
+        return JiveGlobals.getBooleanProperty("ofmeet.email.listener.fastpath.auth", false);
+    }
+
+    /**
+     * Sets if fastpath authentication is required.
+     *
+     * @param enabled true if fastpath authentication is required
+     */
+    public void setFastpathAuthEnabled(boolean enabled) {
+        JiveGlobals.setProperty("ofmeet.email.listener.fastpath.auth", Boolean.toString(enabled));
+    }
+    /**
      * Returns true if SSL is enabled to connect to the server.
      *
      * @return true if SSL is enabled to connect to the server.
      */
     public boolean isSSLEnabled() {
-        return JiveGlobals.getBooleanProperty("plugin.email.listener.ssl", false);
+        return JiveGlobals.getBooleanProperty("ofmeet.email.listener.ssl", false);
     }
 
     /**
@@ -918,40 +947,190 @@ public class EmailListener {
 		public boolean cancel = false;
 	}
 
-	private void processWorkgroupRequest(String workgroupName, String userid)
+	private void sendWorkgroupEmail(String email, String workgroupNodeName, String template, String room)
 	{
+		Log.info("sendWorkgroupEmail " + workgroupNodeName + " " + email + " " + room + "\n" + template);
+
+		String videourl = "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?r=" + room;
+		String audiourl = videourl + "&novideo=true";
+		String title = "RE:" + getFastpathPrefix() + workgroupNodeName;
+
+		HashMap variables = new HashMap<String, String>();
+		variables.put("domain", XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+		variables.put("videourl", videourl);
+		variables.put("audiourl", audiourl);
+		variables.put("workgroup", workgroupNodeName);
+
+		OfMeetPlugin.self.sendEmail(email, email, title, OfMeetPlugin.self.replaceTokens(template, variables), null);
+	}
+
+	private void processWorkgroupRequest(String workgroupNodeName, Message message, User fromUser)
+	{
+		Log.info("processWorkgroupRequest " + workgroupNodeName);
+
+		String template = JiveGlobals.getProperty("ofmeet.email.workgroup.unavailable.template", "Hello,\n\nWorkgroup [workgroup] is not taking requests at this moment.\nPlease try later\n\nAdministrator - [domain]");
+
 		try
 		{
-			ConnectionConfiguration config = new ConnectionConfiguration("localhost", 443);
-			XMPPConnection connection = new XMPPConnection(config);
-			connection.connect();
-			connection.loginAnonymously();
+			String userid = null;
+			String username = null;
 
-			Workgroup workgroup = new Workgroup(workgroupName, connection);
+			for (Address address: message.getFrom())
+			{
+				String from = address.toString();
+
+				int ltIndex = from.indexOf('<');
+				int atIndex = from.indexOf('@');
+				int gtIndex = from.indexOf('>');
+
+				if ((ltIndex!=-1) && (atIndex!=-1) && (gtIndex!=-1) && (ltIndex<atIndex) && (atIndex<gtIndex) )
+				{
+					username = from.substring(ltIndex+1, gtIndex);
+					userid = JID.escapeNode(username);
+				}
+			}
+
+			if (userid != null)
+			{
+				Log.info("processWorkgroupRequest userid " + userid);
+
+				String messageBody = null;
+
+				if (message.isMimeType("multipart/*"))
+				{
+					Multipart mp = (Multipart) message.getContent();
+					int count = mp.getCount();
+
+					for (int i = 0; i < count; i++)
+					{
+						Part part = mp.getBodyPart(i);
+
+						if (part.isMimeType("text/plain"))
+						{
+							messageBody = (String) part.getContent();
+						}
+					}
+				}
+				else
+
+				if (message.isMimeType("text/plain"))
+				{
+					messageBody = (String) message.getContent();
+				}
+
+				if (messageBody != null)
+				{
+					Log.info("processWorkgroupRequest body " + messageBody);
+
+					messageBody = messageBody.replace("\n", " ").replace("\r", "").replace("\t", "").replace("\"", "'");
+
+					String workgroupName = workgroupNodeName + "@workgroup." + XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+
+					if (globalConnections.containsKey(userid) == false)
+					{
+						Log.info("processWorkgroupRequest smack session " + workgroupName);
+
+						ConnectionConfiguration config = new ConnectionConfiguration("localhost", 0);
+						XMPPConnection connection = new XMPPConnection(config);
+						connection.connect();
+						connection.loginAnonymousUser(userid);
+						globalConnections.put(userid, connection);
+					}
+
+					XMPPConnection globalConnection = globalConnections.get(userid);
+					Workgroup workgroup = getWorkgroup(workgroupName, globalConnection);
+
+					if (isOnline(workgroupName, globalConnection))
+					{
+						Map details = new HashMap();
+						details.put("username", fromUser == null ? username.split("@")[0] : fromUser.getName());
+						details.put("email", username);
+						details.put("question", messageBody);
+
+						if (workgroup != null) {
+							try {
+								workgroup.joinQueue(details, userid);
+							}
+							catch (XMPPException e) {
+								Log.error("Unable to join chat queue." + workgroupName, e);
+								sendWorkgroupEmail(JID.unescapeNode(userid), workgroupName, template, "");
+							}
+						}
+
+					} else {
+						Log.warn("processWorkgroupRequest workgroup is offline " + workgroupName);
+						sendWorkgroupEmail(JID.unescapeNode(userid), workgroupName, template, "");
+					}
+				} else {
+					Log.warn("processWorkgroupRequest email body is empty" + messageBody);
+					sendWorkgroupEmail(JID.unescapeNode(userid), workgroupNodeName, template, "");
+				}
+
+			} else {
+				Log.warn("processWorkgroupRequest bad email address " + message);
+			}
+
+		} catch (Exception e) {
+			Log.error("processWorkgroupRequest " + e);
+		}
+	}
+
+    private boolean isOnline(final String workgroupName, XMPPConnection globalConnection)
+    {
+        Presence presence = workgroupPresence.get(workgroupName);
+
+        if (presence == null)
+        {
+            Workgroup workgroup  = getWorkgroup(workgroupName, globalConnection);
+            boolean isAvailable = workgroup.isAvailable();
+            presence = new Presence(isAvailable ? Presence.Type.available : Presence.Type.unavailable);
+            workgroupPresence.put(workgroupName, presence);
+
+            // Otherwise
+            PacketFilter fromFilter = new FromContainsFilter(workgroupName);
+            PacketFilter presenceFilter = new PacketTypeFilter(Presence.class);
+            PacketFilter andFilter = new AndFilter(fromFilter, presenceFilter);
+
+            globalConnection.addPacketListener(new PacketListener()
+            {
+                public void processPacket(Packet packet)
+                {
+                    Presence presence = (Presence)packet;
+                    workgroupPresence.put(workgroupName, presence);
+                }
+            }, andFilter);
+
+            return isAvailable;
+        }
+
+        return presence != null && presence.getType() == Presence.Type.available;
+    }
+
+    private Workgroup getWorkgroup(final String workgroupName, final XMPPConnection globalConnection)
+    {
+        Workgroup workgroup = (Workgroup)workgroups.get(workgroupName);
+
+        if (workgroup == null)
+        {
+            workgroup = new Workgroup(workgroupName, globalConnection);
 
 			workgroup.addInvitationListener(new WorkgroupInvitationListener()
 			{
 				public void invitationReceived(WorkgroupInvitation workgroupInvitation)
 				{
-					String room = workgroupInvitation.getGroupChatName();
+					String room = workgroupInvitation.getGroupChatName().split("@")[0];
+					String userid = globalConnection.getUser();
+					String template = JiveGlobals.getProperty("ofmeet.email.workgroup.available.template", "Hello,\n\nAn Agent from [workgroup] is inviting you to a conference\n\nTo join, please click\n[videourl]\nFor audio only with no webcan, please click\n[audiourl]\n\nAdministrator - [domain]");
 
+					sendWorkgroupEmail(JID.unescapeNode(userid), workgroupName, template, room);
 				}
 			});
 
-			Map details = new HashMap();
+            workgroups.put(workgroupName, workgroup);
+        }
 
-			if (workgroup != null) {
-				try {
-					workgroup.joinQueue(details, userid);
-				}
-				catch (XMPPException e) {
-					Log.error("Unable to join chat queue." + workgroupName, e);
-				}
-			}
-		} catch (Exception e) {
-			Log.error("processWorkgroupRequest " + e);
-		}
-	}
+        return workgroup;
+    }
 
 /*
 
