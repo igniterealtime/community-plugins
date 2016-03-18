@@ -4,7 +4,16 @@
 # found in the LICENSE file.
 
 # TODO - make this work for OSX, Linux32 and Linux64 like install_host.sh
+OSTYPE=`uname -s`
 
+if [ $OSTYPE == "Darwin" ]; then
 #./osx/node ofmeet.remote.control.osx.js
-#./linux32/node ofmeet.remote.control.linux32.js
+fi
+if [ $OSTYPE == "Linux" ]; then
+BITS=`uname -p`
+if [ $BITS == "x86_64" ]; then
 #./linux64/node ofmeet.remote.control.linux64.js
+else
+#./linux32/node ofmeet.remote.control.linux32.js
+fi
+fi
