@@ -72,3 +72,54 @@
 p.description.more-top {
     margin-top: 8px;
 }
+
+/* Premium upgrade */
+.premium-upgrade {
+    position: relative;
+    left: 0;
+    -webkit-transition: left ease-in-out .18s;
+    transition: left ease-in-out .18s;
+}
+
+.premium-upgrade a {
+	display: block;
+	padding: 9px 14px;
+	color: #fff;
+	background: #f0ad4e;
+	-webkit-transition: background 0.15s ease-in-out;
+	transition: background 0.15s ease-in-out;
+}
+
+.premium-upgrade a:link,
+.premium-upgrade a:visited,
+.premium-upgrade a:hover,
+.premium-upgrade a:active,
+.premium-upgrade a:focus {
+	color: #fff;
+}
+
+.premium-upgrade a:hover,
+.premium-upgrade a:active,
+.premium-upgrade a:focus {
+	background: #ed9c28;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
+
+.premium-upgrade a:hover span,
+.premium-upgrade a:active span,
+.premium-upgrade a:focus span {
+	right: 14px;
+}
+
+.premium-upgrade span {
+	position: absolute;
+	right: 17px;
+	-webkit-transition: right 0.15s ease-in-out;
+	transition: right 0.15s ease-in-out;
+}
+
+.in-sub-panel .premium-upgrade {
+	left: -300px;
+	width: 300px;
+}

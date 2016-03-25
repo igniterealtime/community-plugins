@@ -1,12 +1,24 @@
+#, fuzzy
 msgid ""
 msgstr ""
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 "Project-Id-Version: Destin Basic\n"
-"POT-Creation-Date: 2015-05-12 11:26-0500\n"
-"PO-Revision-Date: 2015-05-12 11:26-0500\n"
-"Language: en_EN\n"
+"POT-Creation-Date: 2016-03-15 18:06-0400\n"
+"PO-Revision-Date: 2016-03-15 18:06-0400\n"
+"Last-Translator: c.bavota <cbavota@gmail.com>\n"
+"Language-Team: c.bavota <cbavota@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+"X-Poedit-Basepath: ../..\n"
+"X-Poedit-WPHeader: style.css\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
 
 #: 404.php:15
 msgid "Oops! That page can&rsquo;t be found."
@@ -14,45 +26,6 @@ msgstr ""
 
 #: 404.php:18
 msgid "It looks like nothing was found at this location. Perhaps try a search?"
-msgstr ""
-
-#: archive.php:29
-#, php-format
-msgid "%s"
-msgstr ""
-
-#: archive.php:31
-#, php-format
-msgid "Tag Archive for %s"
-msgstr ""
-
-#: archive.php:33
-#, php-format
-msgid "Daily Archives: %s"
-msgstr ""
-
-#: archive.php:35
-#, php-format
-msgid "Monthly Archives: %s"
-msgstr ""
-
-#: archive.php:35
-msgctxt "monthly archives date format"
-msgid "F Y"
-msgstr ""
-
-#: archive.php:37
-#, php-format
-msgid "Yearly Archives: %s"
-msgstr ""
-
-#: archive.php:37
-msgctxt "yearly archives date format"
-msgid "Y"
-msgstr ""
-
-#: archive.php:39
-msgid "Blog Archives"
 msgstr ""
 
 #: comments.php:28
@@ -81,7 +54,7 @@ msgstr ""
 #: content-aside.php:12 content-audio.php:12 content-gallery.php:12
 #: content-image.php:16 content-link.php:12 content-quote.php:12
 #: content-status.php:19 content-video.php:12 content.php:45 functions.php:120
-#: functions.php:337 page.php:25
+#: functions.php:337 page.php:33
 msgid "Continue reading <span class=\"meta-nav\">&rarr;</span>"
 msgstr ""
 
@@ -222,11 +195,11 @@ msgstr ""
 msgid "%1$s search results for \"%2$s\""
 msgstr ""
 
-#: header.php:39
+#: header.php:35
 msgid "Main menu"
 msgstr ""
 
-#: header.php:40
+#: header.php:36
 msgid "Skip to content"
 msgstr ""
 
@@ -302,7 +275,7 @@ msgid ""
 "your main content will also resize your sidebar."
 msgstr ""
 
-#: library/about.php:124 library/customizer.php:134
+#: library/about.php:124 library/customizer.php:130
 msgid "Sidebar Layout"
 msgstr ""
 
@@ -417,32 +390,36 @@ msgid ""
 "my site."
 msgstr ""
 
-#: library/customizer.php:78
+#: library/customizer.php:74
 msgid "Layout"
 msgstr ""
 
-#: library/customizer.php:88
+#: library/customizer.php:84
 msgid "Site Width"
 msgstr ""
 
-#: library/customizer.php:93
+#: library/customizer.php:89
 msgid "1200px"
 msgstr ""
 
-#: library/customizer.php:94
+#: library/customizer.php:90
 msgid "992px"
 msgstr ""
 
-#: library/customizer.php:116
+#: library/customizer.php:112
 msgid "Main Content Width"
 msgstr ""
 
-#: library/customizer.php:129
+#: library/customizer.php:125
 msgid "Left"
 msgstr ""
 
-#: library/customizer.php:130
+#: library/customizer.php:126
 msgid "Right"
+msgstr ""
+
+#: library/customizer.php:140
+msgid "Upgrade to premium version"
 msgstr ""
 
 #: library/preview-pro.php:18
@@ -620,4 +597,32 @@ msgstr ""
 
 #: single.php:19
 msgid "%title <span class=\"meta-nav\">&rarr;</span>"
+msgstr ""
+
+#. Theme Name of the plugin/theme
+msgid "Destin Basic"
+msgstr ""
+
+#. Theme URI of the plugin/theme
+msgid "https://themes.bavotasan.com/themes/destin-wordpress-theme/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Create a truly unique design with Destin Basic, a lightweight and fully "
+"responsive HTML5 theme. Use the Customizer to add your own page layout, site "
+"width and more. Distinguish each post with one of the eight supported post "
+"formats, such as: Video, Image, Aside, Status, Audio, Quote, Link and "
+"Gallery. Install JetPack to display each of your galleries through a tiled "
+"view and jQuery carousel. Compatible with bbPress, BuddyPress and "
+"Woocommerce. Uses Google Fonts for improved typeface readability. Designed "
+"for desktop browsers, tablets and handheld devices."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "c.bavota"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://bavotasan.com/"
 msgstr ""

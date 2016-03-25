@@ -4,7 +4,7 @@
  *
  * @since 1.0.0
  */
-$bavotasan_theme_data = wp_get_theme();
+$bavotasan_theme_data = wp_get_theme( 'destin-basic' );
 define( 'BAVOTASAN_THEME_URL', get_template_directory_uri() );
 define( 'BAVOTASAN_THEME_TEMPLATE', get_template_directory() );
 define( 'BAVOTASAN_THEME_VERSION', trim( $bavotasan_theme_data->Version ) );
@@ -53,7 +53,7 @@ if ( ! function_exists( 'bavotasan_setup' ) ) :
  * @since 1.0.0
  */
 function bavotasan_setup() {
-	load_theme_textdomain( 'destin', BAVOTASAN_THEME_TEMPLATE . '/library/languages' );
+	load_theme_textdomain( 'destin-basic', BAVOTASAN_THEME_TEMPLATE . '/library/languages' );
 
 	// Add default posts and comments RSS feed links to <head>.
 	add_theme_support( 'automatic-feed-links' );
@@ -62,7 +62,7 @@ function bavotasan_setup() {
 	add_editor_style( 'library/css/admin/editor-style.css' );
 
 	// This theme uses wp_nav_menu() in two location.
-	register_nav_menu( 'primary', __( 'Primary Menu', 'destin' ) );
+	register_nav_menu( 'primary', __( 'Primary Menu', 'destin-basic' ) );
 
 	// Add support for a variety of post formats
 	add_theme_support( 'post-formats', array( 'gallery', 'image', 'video', 'audio', 'quote', 'link', 'status', 'aside' ) );
@@ -105,7 +105,7 @@ function bavotasan_front_page_render() {
 	?>
 	<?php while ( have_posts() ) : the_post(); ?>
 		<?php if ( is_front_page() ) { ?>
-		<div class="item">
+		<div class="item item-<?php the_ID(); ?>">
 			<figure class="effect-julia">
 				<?php
 				if ( has_post_thumbnail() )
@@ -117,9 +117,9 @@ function bavotasan_front_page_render() {
 					<h2><?php the_title(); ?></h2>
 					<div>
 						<p><?php echo wp_trim_words( strip_shortcodes( get_the_excerpt() ) , 10 ); ?></p>
-						<p class="more-link-p"><?php _e( 'Continue reading <span class="meta-nav">&rarr;</span>', 'destin' ); ?></p>
+						<p class="more-link-p"><?php _e( 'Continue reading <span class="meta-nav">&rarr;</span>', 'destin-basic' ); ?></p>
 					</div>
-					<a href="<?php the_permalink(); ?>"><?php _e( 'View more', 'destin' ); ?></a>
+					<a href="<?php the_permalink(); ?>"><?php _e( 'View more', 'destin-basic' ); ?></a>
 				</figcaption>
 			</figure>
 		</div>
@@ -203,9 +203,9 @@ function bavotasan_widgets_init() {
 	$bavotasan_theme_options = bavotasan_theme_options();
 
 	register_sidebar( array(
-		'name' => __( 'First Sidebar', 'destin' ),
+		'name' => __( 'First Sidebar', 'destin-basic' ),
 		'id' => 'sidebar',
-		'description' => __( 'This is the first sidebar. It won&rsquo;t appear on the home page unless you set a static front page.', 'destin' ),
+		'description' => __( 'This is the first sidebar. It won&rsquo;t appear on the home page unless you set a static front page.', 'destin-basic' ),
 		'before_widget' => '<aside id="%1$s" class="widget %2$s">',
 		'after_widget' => '</aside>',
 		'before_title' => '<h3 class="widget-title">',
@@ -213,9 +213,9 @@ function bavotasan_widgets_init() {
 	) );
 
 	register_sidebar( array(
-		'name' => __( 'Home Page Corner', 'destin' ),
+		'name' => __( 'Home Page Corner', 'destin-basic' ),
 		'id' => 'home-page-corner',
-		'description' => __( 'Area in the top right on the home page. Add at least one widget to make it appear.', 'destin' ),
+		'description' => __( 'Area in the top right on the home page. Add at least one widget to make it appear.', 'destin-basic' ),
 		'before_widget' => '<aside id="%1$s" class="home-widget %2$s">',
 		'after_widget' => '</aside>',
 		'before_title' => '<h3 class="widget-title">',
@@ -241,13 +241,13 @@ function bavotasan_pagination() {
 	?>
 
 	<nav class="navigation clearfix" role="navigation">
-		<h1 class="sr-only"><?php _e( 'Posts navigation', 'destin' ); ?></h1>
+		<div class="sr-only"><?php _e( 'Posts navigation', 'destin-basic' ); ?></div>
 		<?php if ( get_next_posts_link() ) : ?>
-		<div class="nav-previous"><?php next_posts_link( __( '&larr; Older posts', 'destin' ) ); ?></div>
+		<div class="nav-previous"><?php next_posts_link( __( '&larr; Older posts', 'destin-basic' ) ); ?></div>
 		<?php endif; ?>
 
 		<?php if ( get_previous_posts_link() ) : ?>
-		<div class="nav-next"><?php previous_posts_link( __( 'Newer posts &rarr;', 'destin' ) ); ?></div>
+		<div class="nav-next"><?php previous_posts_link( __( 'Newer posts &rarr;', 'destin-basic' ) ); ?></div>
 		<?php endif; ?>
 	</nav><!-- .navigation -->
 	<?php
@@ -288,12 +288,12 @@ function bavotasan_comment( $comment, $args, $depth ) {
 					</div>
 					<div class="comment-meta">
 						<?php
-						printf( __( '%1$s at %2$s', 'destin' ), get_comment_date(), get_comment_time() );
-						edit_comment_link( __( 'Edit', 'destin' ), '  ', '' );
+						printf( __( '%1$s at %2$s', 'destin-basic' ), get_comment_date(), get_comment_time() );
+						edit_comment_link( __( 'Edit', 'destin-basic' ), '  ', '' );
 						?>
 					</div>
 					<div class="comment-text">
-						<?php if ( '0' == $comment->comment_approved ) { echo '<em>' . __( 'Your comment is awaiting moderation.', 'destin' ) . '</em>'; } ?>
+						<?php if ( '0' == $comment->comment_approved ) { echo '<em>' . __( 'Your comment is awaiting moderation.', 'destin-basic' ) . '</em>'; } ?>
 						<?php comment_text() ?>
 					</div>
 					<?php if ( $args['max_depth'] != $depth && comments_open() && 'pingback' != $comment->comment_type ) { ?>
@@ -312,7 +312,7 @@ function bavotasan_comment( $comment, $args, $depth ) {
 		<li id="comment-<?php comment_ID(); ?>" class="pingback">
 			<div class="comment-body">
 				<i class="fa fa-paperclip"></i>
-				<?php _e( 'Pingback:', 'destin' ); ?> <?php comment_author_link(); ?><?php edit_comment_link( __( '(edit)', 'destin' ), ' ' ); ?>
+				<?php _e( 'Pingback:', 'destin-basic' ); ?> <?php comment_author_link(); ?><?php edit_comment_link( __( '(edit)', 'destin-basic' ), ' ' ); ?>
 			</div>
 			<?php
 			break;
@@ -334,7 +334,7 @@ if ( ! function_exists( 'bavotasan_excerpt' ) ) :
 	 * @since 1.0.0
  */
 function bavotasan_excerpt( $more ) {
-	return '&hellip; <p class="more-link-p"><a class="more-link" href="' . esc_url( get_permalink( get_the_ID() ) ) . '">' . __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'destin' ) . '</a></p>';
+	return '&hellip; <p class="more-link-p"><a class="more-link" href="' . esc_url( get_permalink( get_the_ID() ) ) . '">' . __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'destin-basic' ) . '</a></p>';
 }
 endif; // bavotasan_excerpt
 
@@ -527,7 +527,7 @@ function bavotasan_body_class( $classes ) {
 function bavotasan_search_title() {
 	global $wp_query;
     $num = $wp_query->found_posts;
-	printf( __( '%1$s search results for "%2$s"', 'destin'),
+	printf( __( '%1$s search results for "%2$s"', 'destin-basic'),
 	    absint( $wp_query->found_posts ),
 	    esc_html( get_search_query() )
 	);

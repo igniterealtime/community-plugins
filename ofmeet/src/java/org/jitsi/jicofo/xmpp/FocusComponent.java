@@ -16,6 +16,8 @@ import org.jivesoftware.smack.packet.*;
 import org.xmpp.component.*;
 import org.xmpp.packet.IQ;
 
+import org.jitsi.videobridge.osgi.*;
+
 /**
  * XMPP component that listens for {@link org.jitsi.jicofo.xmpp.ConferenceIq}
  * and allocates {@link org.jitsi.jicofo.JitsiMeetConference}s appropriately.
@@ -92,7 +94,7 @@ public class FocusComponent
      */
     public void init()
     {
-        this.focusManager = ServiceUtils.getService(
+        this.focusManager = ServiceUtils2.getService(
             FocusBundleActivator.bundleContext, FocusManager.class);
 
         focusManager.start();

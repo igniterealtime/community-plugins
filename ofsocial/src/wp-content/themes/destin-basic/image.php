@@ -47,16 +47,16 @@ get_header(); ?>
 	
 					<footer class="entry">
 					    <?php
-					    wp_link_pages( array( 'before' => '<p id="pages">' . __( 'Pages:', 'destin' ) ) );
-					    edit_post_link( __( 'Edit', 'destin' ), '<p class="edit-link">', '</p>' );
+					    wp_link_pages( array( 'before' => '<p id="pages">' . __( 'Pages:', 'destin-basic' ) ) );
+					    edit_post_link( __( 'Edit', 'destin-basic' ), '<p class="edit-link">', '</p>' );
 					    ?>
 					</footer><!-- .entry -->
 				</article><!-- #post-## -->
 	
 				<div id="posts-pagination" class="clearfix">
-					<h3 class="sr-only"><?php _e( 'Post navigation', 'destin' ); ?></h3>
-					<div class="previous pull-left"><?php previous_image_link( false, __( '<span class="meta-nav">&larr;</span> Previous Image', 'destin' ) ); ?></div>
-					<div class="next pull-right"><?php next_image_link( false, __( 'Next Image <span class="meta-nav">&rarr;</span>', 'destin' ) ); ?></div>
+					<h3 class="sr-only"><?php _e( 'Post navigation', 'destin-basic' ); ?></h3>
+					<div class="previous pull-left"><?php previous_image_link( false, __( '<span class="meta-nav">&larr;</span> Previous Image', 'destin-basic' ) ); ?></div>
+					<div class="next pull-right"><?php next_image_link( false, __( 'Next Image <span class="meta-nav">&rarr;</span>', 'destin-basic' ) ); ?></div>
 				</div><!-- #posts-pagination -->
 	
 				<?php comments_template(); ?>

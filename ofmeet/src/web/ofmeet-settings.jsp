@@ -206,6 +206,9 @@
 
 	String enableSip = request.getParameter("enableSip");
 	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.sip.enabled", enableSip);
+
+	String hqVoice = request.getParameter("hqVoice");
+	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.sip.hq.voice", hqVoice);	
         
     }
 
@@ -630,7 +633,14 @@
 			<input type="radio" value="true" name="enableSip" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.sip.enabled", "false")) ? "checked" : "") %>>
 			<b><fmt:message key="config.page.configuration.enabled" /></b> - <fmt:message key="config.page.configuration.telephone.enabled" />
 		    </td>
-	    </tr> 	     	    
+	    </tr> 
+	    
+	    <tr>
+		    <td nowrap  colspan="2">
+			<input type="checkbox" name="hqVoice"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.sip.hq.voice", "off").equals("on")) ? " checked" : "" %>>
+			<fmt:message key="config.page.configuration.telephone.hqvoice" />		
+		    </td>
+	    </tr>   	    
         </table>
    </p>  
 </div>

@@ -25,7 +25,7 @@ if ( post_password_required() )
 	<?php if ( have_comments() ) : ?>
 		<h2 id="comments-title">
 			<?php
-				printf( _n( '1 comment for &ldquo;%2$s&rdquo;', '%1$s comments for &ldquo;%2$s&rdquo;', get_comments_number(), 'destin' ),
+				printf( _n( '1 comment for &ldquo;%2$s&rdquo;', '%1$s comments for &ldquo;%2$s&rdquo;', get_comments_number(), 'destin-basic' ),
 					number_format_i18n( get_comments_number() ), '<span>' . get_the_title() . '</span>' );
 			?>
 		</h2>
@@ -36,9 +36,9 @@ if ( post_password_required() )
 
 		<?php if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : // are there comments to navigate through ?>
 		<div id="comment-nav-below" role="navigation">
-			<h1 class="sr-only section-heading"><?php _e( 'Comment navigation', 'destin' ); ?></h1>
-			<div class="nav-previous"><?php previous_comments_link( __( '&larr; Older Comments', 'destin' ) ); ?></div>
-			<div class="nav-next"><?php next_comments_link( __( 'Newer Comments &rarr;', 'destin' ) ); ?></div>
+			<div class="sr-only section-heading"><?php _e( 'Comment navigation', 'destin-basic' ); ?></div>
+			<div class="nav-previous"><?php previous_comments_link( __( '&larr; Older Comments', 'destin-basic' ) ); ?></div>
+			<div class="nav-next"><?php next_comments_link( __( 'Newer Comments &rarr;', 'destin-basic' ) ); ?></div>
 		</div>
 		<?php endif; // check for comment navigation ?>
 
@@ -47,7 +47,7 @@ if ( post_password_required() )
 		 * But we only want the note on posts and pages that had comments in the first place.
 		 */
 		if ( ! comments_open() && get_comments_number() ) : ?>
-		<p class="nocomments"><?php _e( 'Comments are closed.' , 'destin' ); ?></p>
+		<p class="nocomments"><?php _e( 'Comments are closed.' , 'destin-basic' ); ?></p>
 		<?php endif; ?>
 
 	<?php endif; // have_comments() ?>

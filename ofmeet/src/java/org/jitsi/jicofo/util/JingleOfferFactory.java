@@ -12,6 +12,8 @@ import org.jitsi.service.neomedia.*;
 
 import java.net.*;
 
+import org.jivesoftware.util.*;
+
 /**
  * Contains factory methods for creating Jingle offer sent in 'session-invite'
  * by Jitsi Meet conference focus.
@@ -45,6 +47,7 @@ public class JingleOfferFactory
 
         // FIXME: re-use Format and EncodingConfiguration
         // to construct the offer
+
         if (mediaType == MediaType.AUDIO)
         {
             RtpDescriptionPacketExtension rtpDesc
@@ -59,12 +62,21 @@ public class JingleOfferFactory
                 URI.create("urn:ietf:params:rtp-hdrext:ssrc-audio-level"));
             rtpDesc.addExtmap(ssrcAudioLevel);
 
-			boolean sipEnabled = false;
-			String sipEnabledString = System.getProperty("org.jitsi.videobridge.ofmeet.sip.enabled");	// BAO
-			if (sipEnabledString != null) sipEnabled = sipEnabledString.equals("true");
-
-			if (sipEnabled == false)
+			if (JiveGlobals.getBooleanProperty("org.jitsi.videobridge.ofmeet.sip.enabled", false))
 			{
+				if (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.sip.hq.voice", "off").equals("on"))
+				{
+					// a=rtpmap:9 G722/16000/1
+					PayloadTypePacketExtension g722	= new PayloadTypePacketExtension();
+					g722.setId(9);
+					g722.setName("G722");
+					g722.setClockrate(16000);
+					g722.setChannels(1);
+					rtpDesc.addPayloadType(g722);
+				}
+
+			} else {
+
 				// a=rtpmap:111 opus/48000/2
 				PayloadTypePacketExtension opus
 					= new PayloadTypePacketExtension();
@@ -73,12 +85,16 @@ public class JingleOfferFactory
 				opus.setClockrate(48000);
 				opus.setChannels(2);
 				rtpDesc.addPayloadType(opus);
+
+
 				// fmtp:111 minptime=10
 				ParameterPacketExtension opusMinptime
 					= new ParameterPacketExtension();
 				opusMinptime.setName("minptime");
 				opusMinptime.setValue("10");
 				opus.addParameter(opusMinptime);
+
+
 				// a=rtpmap:103 ISAC/16000
 				PayloadTypePacketExtension isac16
 					= new PayloadTypePacketExtension();
@@ -86,6 +102,7 @@ public class JingleOfferFactory
 				isac16.setName("ISAC");
 				isac16.setClockrate(16000);
 				rtpDesc.addPayloadType(isac16);
+
 				// a=rtpmap:104 ISAC/32000
 				PayloadTypePacketExtension isac32
 					= new PayloadTypePacketExtension();
@@ -95,52 +112,59 @@ public class JingleOfferFactory
 				rtpDesc.addPayloadType(isac32);
 			}
 
-            // a=rtpmap:0 PCMU/8000
-            PayloadTypePacketExtension pcmu
-                = new PayloadTypePacketExtension();
-            pcmu.setId(0);
-            pcmu.setName("PCMU");
-            pcmu.setClockrate(8000);
-            rtpDesc.addPayloadType(pcmu);
-            // a=rtpmap:8 PCMA/8000
-            PayloadTypePacketExtension pcma
-                = new PayloadTypePacketExtension();
-            pcma.setId(8);
-            pcma.setName("PCMA");
-            pcma.setClockrate(8000);
-            rtpDesc.addPayloadType(pcma);
-            // a=rtpmap:106 CN/32000
-            PayloadTypePacketExtension cn
-                = new PayloadTypePacketExtension();
-            cn.setId(106);
-            cn.setName("CN");
-            cn.setClockrate(32000);
-            rtpDesc.addPayloadType(cn);
-            // a=rtpmap:105 CN/16000
-            PayloadTypePacketExtension cn16
-                = new PayloadTypePacketExtension();
-            cn16.setId(105);
-            cn16.setName("CN");
-            cn16.setClockrate(16000);
-            rtpDesc.addPayloadType(cn16);
-            // a=rtpmap:13 CN/8000
-            PayloadTypePacketExtension cn8
-                = new PayloadTypePacketExtension();
-            cn8.setId(13);
-            cn8.setName("CN");
-            cn8.setClockrate(8000);
-            rtpDesc.addPayloadType(cn8);
-            // rtpmap:126 telephone-event/8000
-            PayloadTypePacketExtension teleEvent
-                = new PayloadTypePacketExtension();
-            teleEvent.setId(126);
-            teleEvent.setName("telephone-event");
-            teleEvent.setClockrate(8000);
-            rtpDesc.addPayloadType(teleEvent);
-            // a=maxptime:60
-            rtpDesc.setAttribute("maxptime", "60");
-            content.addChildExtension(rtpDesc);
+			// a=rtpmap:0 PCMU/8000
+			PayloadTypePacketExtension pcmu
+				= new PayloadTypePacketExtension();
+			pcmu.setId(0);
+			pcmu.setName("PCMU");
+			pcmu.setClockrate(8000);
+			rtpDesc.addPayloadType(pcmu);
+
+			// a=rtpmap:8 PCMA/8000
+			PayloadTypePacketExtension pcma
+				= new PayloadTypePacketExtension();
+			pcma.setId(8);
+			pcma.setName("PCMA");
+			pcma.setClockrate(8000);
+			rtpDesc.addPayloadType(pcma);
+
+			// a=rtpmap:106 CN/32000
+			PayloadTypePacketExtension cn
+				= new PayloadTypePacketExtension();
+			cn.setId(106);
+			cn.setName("CN");
+			cn.setClockrate(32000);
+			rtpDesc.addPayloadType(cn);
+
+			// a=rtpmap:105 CN/16000
+			PayloadTypePacketExtension cn16
+				= new PayloadTypePacketExtension();
+			cn16.setId(105);
+			cn16.setName("CN");
+			cn16.setClockrate(16000);
+			rtpDesc.addPayloadType(cn16);
+
+			// a=rtpmap:13 CN/8000
+			PayloadTypePacketExtension cn8
+				= new PayloadTypePacketExtension();
+			cn8.setId(13);
+			cn8.setName("CN");
+			cn8.setClockrate(8000);
+			rtpDesc.addPayloadType(cn8);
+
+			// rtpmap:126 telephone-event/8000
+			PayloadTypePacketExtension teleEvent
+				= new PayloadTypePacketExtension();
+			teleEvent.setId(126);
+			teleEvent.setName("telephone-event");
+			teleEvent.setClockrate(8000);
+			rtpDesc.addPayloadType(teleEvent);
+
+			// a=maxptime:60
+			rtpDesc.setAttribute("maxptime", "60");
+			content.addChildExtension(rtpDesc);
         }
+
         else if (mediaType == MediaType.VIDEO)
         {
             RtpDescriptionPacketExtension rtpDesc

@@ -4,15 +4,15 @@ Theme URI: https://themes.bavotasan.com/themes/destin-wordpress-theme/
 Author: c.bavota
 Author URI: http://bavotasan.com/
 Description: Create a truly unique design with Destin Basic, a lightweight and fully responsive HTML5 theme. Use the Customizer to add your own page layout, site width and more. Distinguish each post with one of the eight supported post formats, such as: Video, Image, Aside, Status, Audio, Quote, Link and Gallery. Install JetPack to display each of your galleries through a tiled view and jQuery carousel. Compatible with bbPress, BuddyPress and Woocommerce. Uses Google Fonts for improved typeface readability. Designed for desktop browsers, tablets and handheld devices.
-Version: 1.0.2
-Text Domain: destin
+Version: 1.0.3
+Text Domain: destin-basic
 Domain Path: /library/languages/
 Tags: black, blue, gray, silver, white, light, one-column, two-columns, three-columns, left-sidebar, right-sidebar, fluid-layout, responsive-layout, buddypress, custom-background, custom-colors, custom-header, custom-menu, editor-style, featured-image-header, featured-images, flexible-header, microformats, post-formats, rtl-language-support, sticky-post, theme-options, threaded-comments, translation-ready
 
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-Destin Basic WordPress Theme, Copyright 2015 c.bavota
+Destin Basic WordPress Theme, Copyright 2016 c.bavota
 Destin Basic is distributed under the terms of the GNU GPL
 */
 /*! normalize.css v3.0.2 | MIT License | git.io/normalize */
@@ -347,7 +347,7 @@ hr {
   border: 0;
   border-top: 1px solid #eeeeee; }
 
-.sr-only {
+.sr-only, .screen-reader-text {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -1983,7 +1983,7 @@ select[multiple].input-lg,
 
 .has-feedback label ~ .form-control-feedback {
   top: 25px; }
-.has-feedback label.sr-only ~ .form-control-feedback {
+.has-feedback label.sr-only ~ .form-control-feedback, .has-feedback label.screen-reader-text ~ .form-control-feedback {
   top: 0; }
 
 .help-block {
@@ -4188,7 +4188,11 @@ input, textarea {
 -------------------------------------------------------------- */
 #site-title {
   float: left;
-  margin: 20px 0; }
+  margin: 20px 0;
+  line-height: 1.1; }
+  .basic #site-title {
+    font-size: 32px;
+    font-family: "Raleway", sans-serif; }
   #site-title a {
     text-decoration: none; }
 
@@ -4323,6 +4327,9 @@ input, textarea {
   margin: 50px 0; }
   .home.blog #primary {
     margin: 5px 5px 50px; }
+  @media (max-width: 768px) {
+    #primary.pull-right {
+      float: none !important; } }
 
 /* =Article
 -------------------------------------------------------------- */
@@ -4645,6 +4652,13 @@ iframe {
   width: 100%;
   position: absolute;
   bottom: 0; }
+  @media (max-width: 600px) {
+    #infinite-handle {
+      position: relative;
+      bottom: auto;
+      margin-top: 30px;
+      float: left;
+      clear: both; } }
 
 #primary #infinite-handle span {
   -moz-border-radius: 3px;
@@ -5364,10 +5378,9 @@ legend {
 /* =WordPress Core
 -------------------------------------------------------------- */
 .alignnone {
-  margin: 0 15px 15px 0; }
+  margin: 0 0 15px 0; }
 
-.aligncenter,
-div.aligncenter {
+.aligncenter {
   display: block;
   margin: 0 auto 15px auto; }
 
@@ -5379,41 +5392,12 @@ div.aligncenter {
   float: left;
   margin: 0 15px 15px 0; }
 
-.aligncenter {
-  display: block;
-  margin: 0 auto 15px auto; }
-
-a img.alignright {
-  float: right;
-  margin: 0 0 15px 15px; }
-
-a img.alignnone {
-  margin: 0 15px 15px 0; }
-
-a img.alignleft {
-  float: left;
-  margin: 0 15px 15px 0; }
-
-a img.aligncenter {
-  display: block;
-  margin-left: auto;
-  margin-right: auto; }
-
 .wp-caption {
   background: #f2f2f2;
   border: 1px solid #e6e6e6;
   max-width: 100%;
   padding: 6px;
   text-align: center; }
-
-.wp-caption.alignnone {
-  margin: 0 15px 15px 0; }
-
-.wp-caption.alignleft {
-  margin: 0 15px 15px 0; }
-
-.wp-caption.alignright {
-  margin: 0 0 15px 15px; }
 
 .wp-caption img {
   border: 0 none;

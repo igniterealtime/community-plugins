@@ -31,6 +31,7 @@
     <script src="libs/popover.js?v=1"></script><!-- bootstrap tooltip lib -->
     <script src="libs/pako.bundle.js?v=1"></script><!-- zlib deflate -->
     <script src="libs/toastr.js?v=1"></script><!-- notifications lib -->
+    <script src="libs/ytapi.js?v=1"></script><!-- you tube api lib -->
     <script src="muc.js?v=17"></script><!-- simple MUC library -->
     <script src="ofmuc.js?v=1"></script><!-- BAO -->
     <script src="roster.js?v=1"></script><!-- BAO -->
@@ -222,14 +223,20 @@
                     </span>
                     <span id="appsButton"><!-- BAO -->
                         <div class="header_button_separator"></div>
-                        <a class="button" data-container="body" data-toggle="popover" data-placement="bottom" content="Shared Application" onclick='connection.ofmuc.openAppsDialog();'>
+                        <a class="button" data-container="body" data-toggle="popover" data-placement="bottom" content="Share Application" onclick='connection.ofmuc.openAppsDialog();'>
                             <i class="icon-share-doc"></i>
                         </a>
                     </span>
                     <span id="etherpadButton">
                         <div class="header_button_separator"></div>
-                        <a class="button" data-container="body" data-toggle="popover" data-placement="bottom" content="Shared document" onclick='Etherpad.toggleEtherpad(0);'>
+                        <a class="button" data-container="body" data-toggle="popover" data-placement="bottom" content="Share document" onclick='Etherpad.toggleEtherpad(0);'>
                             <i class="icon-share-doc"></i>
+                        </a>
+                    </span>
+                    <span id="iconLinkButton">
+                        <div class="header_button_separator"></div>
+                        <a class="button" data-container="body" data-toggle="popover" data-placement="bottom" content="Share link" onclick='connection.ofmuc.openLinkDialog();'>
+                            <i class="icon-kick1"></i>
                         </a>
                     </span>
                     <div class="header_button_separator"></div>

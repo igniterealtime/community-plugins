@@ -5,7 +5,9 @@
   "path": "ofmeet.remote.control.32.cmd",
   "allowed_origins": [
     "chrome-extension://fohfnhgabmicpkjcpjpjongpijcffaba/",
-    "chrome-extension://fejolmchpdfojmcdoihkhbmpjijeefaf/",    
-    "chrome-extension://efhlikchjcajmajchmpkjkfhlgnbhioe/"
+    "chrome-extension://fejolmchpdfojmcdoihkhbmpjijeefaf/",  
+    "chrome-extension://igonliklmoodjjihpmfimgebjnfjgcnm/",  
+    "chrome-extension://efhlikchjcajmajchmpkjkfhlgnbhioe/",
+    "chrome-extension://ppdefpgmheiembcoigbmjmdhjleeeldm/"
   ]
 }

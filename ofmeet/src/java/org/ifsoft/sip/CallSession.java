@@ -70,6 +70,9 @@ public class CallSession
 	public static Payload PAYLOAD_PCMU = new Payload(0, "PCMU", 8000, 64000);
 	public static Payload PAYLOAD_PCMA = new Payload(8, "PCMA", 8000, 64000);
 	public static Payload PAYLOAD_G723 = new Payload(4, "G723", 8000, 6300);
+	public static Payload PAYLOAD_OPUS = new Payload(111, "opus", 48000, 64000);
+	public static Payload PAYLOAD_G722 = new Payload(9, "G722", 8000, 64000);
+
 	public static VPayload PAYLOAD_H263 = new VPayload(34, "H263", 90000, 512000, 320, 200, 15);
 	public static VPayload PAYLOAD_H264 = new VPayload(97, "H264", 90000, 512000, 640, 480, 15);
 	public static VPayload PAYLOAD_H264SVC = new VPayload(96, "H264-SVC", 90000, 512000, 640, 480, 15);
@@ -172,9 +175,6 @@ public class CallSession
 
 		internalCallId = "CS" + String.format("%08x", nextInternalCallId++);
 
-		offerPayloads.add(PAYLOAD_PCMU);
-		answerPayloads.add(PAYLOAD_PCMU);
-
 		try {
 			MediaService mediaService = LibJitsi.getMediaService();
 
@@ -184,6 +184,7 @@ public class CallSession
 
 			boolean useAudioMixer = false;
 			String useAudioString = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.audio.mixer");	// BAO
+
 			if (useAudioString != null) useAudioMixer = useAudioString.equals("true");
 
 			if (useAudioMixer)
@@ -200,16 +201,28 @@ public class CallSession
         	connector.getControlSocket();
 
         	mediaStream.setConnector(connector);
-			mediaStream.addDynamicRTPPayloadType((byte)0, mediaService.getFormatFactory().createMediaFormat("PCMU", 8000, 1));
-			mediaStream.setFormat(mediaService.getFormatFactory().createMediaFormat("PCMU", 8000, 1));
 
+			if (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.sip.hq.voice", "off").equals("on"))
+			{
+				offerPayloads.add(PAYLOAD_G722);
+				answerPayloads.add(PAYLOAD_G722);
 
-			//channel = content.createRtpChannel(null, RawUdpTransportPacketExtension.NAMESPACE, false);
-			//mediaStream = channel.getStream();
-			//channel.setRTPLevelRelayType(RTPLevelRelayType.MIXER);
-			//connector = channel.getTransportManager().getStreamConnector(channel);
-			//mediaStream.addDynamicRTPPayloadType((byte)111, mediaService.getFormatFactory().createMediaFormat("opus", 48000, 2));
-			//channel.getTransportManager().payloadTypesChanged(channel);
+				mediaStream.addDynamicRTPPayloadType((byte)9, mediaService.getFormatFactory().createMediaFormat("G722", 8000, 1));
+				mediaStream.setFormat(mediaService.getFormatFactory().createMediaFormat("g722", 8000, 1));
+
+				//mediaStream.addDynamicRTPPayloadType((byte)111, mediaService.getFormatFactory().createMediaFormat("opus", 48000, 2));
+				//offerPayloads.add(PAYLOAD_OPUS);
+				//answerPayloads.add(PAYLOAD_OPUS);
+
+			} else {
+				offerPayloads.add(PAYLOAD_PCMU);
+				answerPayloads.add(PAYLOAD_PCMU);
+
+				mediaStream.addDynamicRTPPayloadType((byte)0, mediaService.getFormatFactory().createMediaFormat("PCMU", 8000, 1));
+				mediaStream.setFormat(mediaService.getFormatFactory().createMediaFormat("PCMU", 8000, 1));
+			}
+			mediaStream.setDirection(MediaDirection.RECVONLY);
+			mediaStream.start();
 
 		} catch (Exception e) {
 			Log.error("CallSession failure", e);
@@ -851,7 +864,6 @@ public class CallSession
 
 				mediaStream.setTarget(new MediaStreamTarget(new InetSocketAddress(remoteAddr, remotePort),new InetSocketAddress(remoteAddr, remotePort + 1)));
 				mediaStream.setDirection(MediaDirection.SENDRECV);
-				mediaStream.start();
 
 			} catch (Exception e) {
 				Log.error("Error building SDP", e);

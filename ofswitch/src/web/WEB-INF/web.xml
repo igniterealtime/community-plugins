@@ -10,6 +10,21 @@ Automatically created by Apache Tomcat JspC.
 
 
     <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dcalls_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dcalls_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dclear_002dcall_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dclear_002dcall_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dconferences_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dconferences_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002doverview_jsp</servlet-name>
         <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002doverview_jsp</servlet-class>
     </servlet>
@@ -19,20 +34,20 @@ Automatically created by Apache Tomcat JspC.
         <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dregistrations_jsp</servlet-class>
     </servlet>
 
-    <servlet>
+    <servlet-mapping>
         <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dcalls_jsp</servlet-name>
-        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dcalls_jsp</servlet-class>
-    </servlet>
+        <url-pattern>/freeswitch-calls.jsp</url-pattern>
+    </servlet-mapping>
 
-    <servlet>
-        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dconferences_jsp</servlet-name>
-        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dconferences_jsp</servlet-class>
-    </servlet>
-
-    <servlet>
+    <servlet-mapping>
         <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dclear_002dcall_jsp</servlet-name>
-        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dclear_002dcall_jsp</servlet-class>
-    </servlet>
+        <url-pattern>/freeswitch-clear-call.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dconferences_jsp</servlet-name>
+        <url-pattern>/freeswitch-conferences.jsp</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002doverview_jsp</servlet-name>
@@ -42,21 +57,6 @@ Automatically created by Apache Tomcat JspC.
     <servlet-mapping>
         <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dregistrations_jsp</servlet-name>
         <url-pattern>/freeswitch-registrations.jsp</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dcalls_jsp</servlet-name>
-        <url-pattern>/freeswitch-calls.jsp</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dconferences_jsp</servlet-name>
-        <url-pattern>/freeswitch-conferences.jsp</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dclear_002dcall_jsp</servlet-name>
-        <url-pattern>/freeswitch-clear-call.jsp</url-pattern>
     </servlet-mapping>
 
 </web-app>

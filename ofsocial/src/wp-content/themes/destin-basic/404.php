@@ -12,10 +12,10 @@ get_header(); ?>
     			<article id="post-0" class="post error404 not-found">
     				<i class="fa fa-frown-o"></i>
     		    	<header>
-    		    	   	<h1 class="entry-title taggedlink"><?php _e( 'Oops! That page can&rsquo;t be found.', 'destin' ); ?></h1>
+    		    	   	<h1 class="entry-title taggedlink"><?php _e( 'Oops! That page can&rsquo;t be found.', 'destin-basic' ); ?></h1>
     		        </header>
     		        <div class="entry-content description">
-    		            <p><?php _e( 'It looks like nothing was found at this location. Perhaps try a search?', 'destin' ); ?></p>
+    		            <p><?php _e( 'It looks like nothing was found at this location. Perhaps try a search?', 'destin-basic' ); ?></p>
     		        </div>
     		    </article>
 			</div>

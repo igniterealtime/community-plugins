@@ -38,12 +38,12 @@ compile-jsps:
      [copy] Copying 1 file to C:\Projects\ignite\community-plugins\ofsocial\src\web\WEB-INF
 
 jar:
-     [copy] Copying 4111 files to C:\Projects\ignite\community-plugins\ofsocial\build\jar
-     [copy] Copied 612 empty directories to 10 empty directories under C:\Projects\ignite\community-plugins\ofsocial\build\jar
+     [copy] Copying 4130 files to C:\Projects\ignite\community-plugins\ofsocial\build\jar
+     [copy] Copied 618 empty directories to 10 empty directories under C:\Projects\ignite\community-plugins\ofsocial\build\jar
      [copy] Copying 6 files to C:\Projects\ignite\community-plugins\ofsocial\build\jar\lib
      [copy] Copying 12 files to C:\Projects\ignite\community-plugins\ofsocial\build\jar
       [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_1\target\openfire\plugins\ofsocial.jar
    [delete] Deleting directory C:\Projects\ignite\community-plugins\ofsocial\build
 
 BUILD SUCCESSFUL
-Total time: 1 minute 41 seconds
+Total time: 1 minute 51 seconds

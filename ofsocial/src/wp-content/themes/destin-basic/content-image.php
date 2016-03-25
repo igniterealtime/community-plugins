@@ -13,7 +13,7 @@
 			if( has_post_thumbnail() && ! is_single() )
 				the_post_thumbnail( 'large', array( 'class' => 'alignnone' ) );
 			else
-				the_content( __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'destin') );
+				the_content( __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'destin-basic') );
 			?>
 	    </div><!-- .entry-content -->
 

@@ -65,6 +65,7 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
+
 import org.eclipse.jetty.util.security.*;
 import org.eclipse.jetty.security.*;
 import org.eclipse.jetty.security.authentication.*;
@@ -130,16 +131,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				Log.error("Could NOT Initialize jitsi videobridge", e1);
 			}
 
-			try {
-				Log.info("OfMeet Plugin - Initialize call control component ");
-
-				jigasiPlugin = new JigasiPlugin();
-				jigasiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
-			}
-			catch (Exception e1) {
-				Log.error("Could NOT Initialize jigasi component", e1);
-			}
-
 			String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
 			String userName = "focus";
 			String focusUserJid = userName + "@" + domain;
@@ -174,10 +165,25 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			{
 				@Override public void run()
 				{
-					Log.info("OfMeet Plugin - Initialize jitsi conference focus");
+					try {
+						Log.info("OfMeet Plugin - Initialize jitsi conference focus");
 
-     				jicofoPlugin = new JicofoPlugin();
-					jicofoPlugin.initializePlugin(componentManager, manager, pluginDirectory);
+						jicofoPlugin = new JicofoPlugin();
+						jicofoPlugin.initializePlugin(componentManager, manager, pluginDirectory);
+					}
+					catch (Exception e1) {
+						Log.error("Could NOT Initialize jicofo component", e1);
+					}
+
+					try {
+						Log.info("OfMeet Plugin - Initialize call control component ");
+
+						jigasiPlugin = new JigasiPlugin();
+						jigasiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
+					}
+					catch (Exception e1) {
+						Log.error("Could NOT Initialize jigasi component", e1);
+					}
 				}
 			}, 5000);
 

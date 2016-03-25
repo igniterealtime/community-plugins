@@ -31,6 +31,8 @@ Strophe.addConnectionPlugin('ofmuc', {
     members: {},
     sharePDF: null,
     shareApp: null,
+    shareLink: '', 
+    linkSharer: false,
     pdfPage: "1",
     recordingToken: null,
     isRecording: false,
@@ -48,6 +50,8 @@ Strophe.addConnectionPlugin('ofmuc', {
         this.connection.addHandler(this.onRayo.bind(this), 'urn:xmpp:rayo:1');       
         
         var that = this;
+        
+        that.shareLink = "";
         
 	$(window).resize(function () {
 	   that.resize();
@@ -82,7 +86,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 	
 	window.addEventListener("contextmenu", function(e) 	// Block context menu so right-click gets sent properly
 	{
-		cancelEvent(e);
+		e.preventDefault();
 		
 	}, false);
     
@@ -420,6 +424,17 @@ Strophe.addConnectionPlugin('ofmuc', {
 		{				
 			that.handlePdfShare(action, url, farparty);	
 		}
+	});
+	
+	$(msg).find('linkshare').each(function() 
+	{
+		var action = $(this).attr('action');
+		var url = $(this).attr('url');		
+		
+		if (Strophe.getResourceFromJid(from) != Strophe.getResourceFromJid(that.connection.jid))
+		{				
+			that.handleLinkShare(action, url, farparty);	
+		}
 	});	
 	
 	$(msg).find('avatarshare').each(function() 
@@ -624,7 +639,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 	}
 	
 	this.appRunning = true;
-    	this.appFrame.contentWindow.postMessage({ type: 'ofmeetEnableCursor', flag: this.enableCursor}, '*');	
+    	if (this.appFrame) this.appFrame.contentWindow.postMessage({ type: 'ofmeetEnableCursor', flag: this.enableCursor}, '*');	
     },
     
     appShare: function(action, url) {
@@ -803,7 +818,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 	    	
 	    	for (var i=0; i<that.urls.length; i++)
 	    	{
-	    		if (that.urls[i].url.indexOf(".pdf") == -1 && that.urls[i].url.indexOf("mrtp:") == -1 )
+	    		if (that.urls[i].url.indexOf(".PDF") == -1 && that.urls[i].url.indexOf(".pdf") == -1 && that.urls[i].url.indexOf("mrtp:") == -1 )
 	    		{
 	    			appsList = appsList + '<option value="' + that.urls[i].url + '">' + that.urls[i].name + '</option>'
 	    		}
@@ -838,7 +853,6 @@ Strophe.addConnectionPlugin('ofmuc', {
 	}
 	
     },	  
-  
   
 
     pdfReady: function() {
@@ -989,7 +1003,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 	    	
 	    	for (var i=0; i<that.urls.length; i++)
 	    	{
-	    		if (that.urls[i].url.indexOf(".pdf") > -1 ) urlsList = urlsList + '<option value="' + that.urls[i].url + '">' + that.urls[i].name + '</option>'
+	    		if (that.urls[i].url.indexOf(".pdf") > -1 && that.urls[i].url.indexOf(".PDF") > -1) urlsList = urlsList + '<option value="' + that.urls[i].url + '">' + that.urls[i].name + '</option>'
 	    	}
 	    	urlsList = urlsList + '</datalist>'
 	    	
@@ -1041,12 +1055,12 @@ Strophe.addConnectionPlugin('ofmuc', {
                 $('#presentation>iframe').fadeOut(300, function () {
                     $('#presentation>iframe').css({opacity:'0'});
                     $('#reloadPresentation').css({display:'none'});
-                    $('#largeVideo').fadeIn(300, function() {
-                        VideoLayout.setLargeVideoVisible(true);
-                        ToolbarToggler.dockToolbar(true);
-                    });
                 });
-            }
+            }            
+	    $('#largeVideo').fadeIn(300, function() {
+		VideoLayout.setLargeVideoVisible(true);
+		ToolbarToggler.dockToolbar(true);
+	    });            
         }
     },
     
@@ -1120,7 +1134,222 @@ Strophe.addConnectionPlugin('ofmuc', {
 		    that.isRecording = false;		    
 		}
 	);    
-    }
+    },
     
+    openLinkDialog: function()
+    {
+    	var that = this;
+
+    	if (that.shareLink == "" || that.shareLink == null)
+    	{    
+    		that.shareLink = "https://www.youtube.com/watch?v=xNXN7CZk8X0";
+    		
+	    	var urlsList = '<datalist id="urls-list">'
+	    	
+	    	for (var i=0; i<that.urls.length; i++)
+	    	{
+	    		if (that.urls[i].url.indexOf(".pdf") == -1 && that.urls[i].url.indexOf(".PDF") == -1 && that.urls[i].url.indexOf(".html") == -1 && that.urls[i].url.indexOf(".HTML") == -1)
+	    		{
+	    			urlsList = urlsList + '<option value="' + that.urls[i].url + '">' + that.urls[i].name + '</option>'
+	    		}
+	    	}
+	    	urlsList = urlsList + '</datalist>'    		
+    		
+		messageHandler.openTwoButtonDialog
+		(
+		    "Share this link with everyone in conference",
+		    '<input id="shareLinkRef" type="text" value="' + that.shareLink + '" onclick="this.select();" list="urls-list" autofocus >' + urlsList,
+		    false,
+		    "Share a link",
+		    function (e, v) {
+			if (v) {
+				that.shareLink = document.getElementById('shareLinkRef').value;
+				that.linkSharer = true;
+				that.linkShare('yt-start', that.shareLink);
+				
+				setTimeout(function()
+				{
+					that.startLinkShare();
+				}, 500);
+			} else {
+				Toolbar.changeShareLinkButtonState(false);
+			}
+		    },
+		    function () {
+			document.getElementById('shareLinkRef').select();
+		    }
+		);
+		
+	} else {
+		if (that.linkSharer)
+		{
+			that.linkShare('yt-stop', that.shareLink);
+			that.stopLinkShare();
+		} else {
+
+			$.prompt("Another participant is already sharing a link. This conference allows only one link to be shared at the same time.",
+				 {
+				 f: "Share a link",
+				 buttons: { "Ok": true},
+				 defaultButton: 0,
+				 submit: function(e,v,m,f)
+				 {
+
+				 }
+			});		
+		}
+		
+		that.linkSharer = false;
+	}
+    },
+
+    getYoutubeLink: function (url) 
+    {
+        let p = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
+        return (url.match(p)) ? RegExp.$1 : false;
+    },  
+    
+    googleDocsLink: function (url) 
+    {
+        let p = /^.*\.(pdf|pages|ai|psd|tiff|dxf|svg|eps|ps|ttf|xps|zip|rar|((doc|xls|ppt)x?))$/;
+        return (url.match(p)) ? url : false;
+    },  
+    
+
+    stopLinkShare: function()
+    {
+	console.log("stopLinkShare", this.shareLink, this.shareLinkViewer);
+	
+    	var that = this;
+    	
+	if (that.shareLinkViewer && that.shareLinkViewer.stopVideo)
+	{
+		that.shareLinkViewer.stopVideo();
+	}
+	
+	that.shareLinkViewer = null;
+	Toolbar.changeShareLinkButtonState(false);
+	that.shareLink = "";
+	that.setPresentationVisible(false);
+	$('#presentation').html('');
+    
+    },
+    
+    startLinkShare: function()
+    {
+	console.log("startLinkShare", this.shareLink);
+	
+    	var ytLink = this.getYoutubeLink(this.shareLink)
+    	
+    	if (ytLink) this.doYTLinkShare(ytLink);
+    	else
+    	if (this.googleDocsLink(this.shareLink)) this.doGDocsShare();
+    },
+
+    doGDocsShare: function ()
+    {
+	console.log("doGDocsShare");
+	
+    	var that = this;
+    	
+	$.prompt("Please wait....",
+	    {
+		title: "Google Docs Viewer Loader",
+		persistent: false
+	    }
+	);    	
+	console.log("Found google docs", this.shareLink);   
+	
+	$('#presentation').html('<iframe id="gdocViewer"></iframe>');
+	$('#presentation>iframe').width(this.getPresentationWidth());
+	$('#presentation>iframe').height(this.getPresentationHeight());
+	
+	
+	this.shareLinkViewer = document.getElementById("gdocViewer");
+	this.shareLinkViewer.contentWindow.location.href = "https://docs.google.com/viewer?url=" + this.shareLink + "&embedded=true";
+	
+	setTimeout(function()
+	{
+		that.setPresentationVisible(true);
+		Toolbar.changeShareLinkButtonState(true); 
+		$.prompt.close();	
+	}, 1000);
+    },
+    
+    doYTLinkShare: function (ytLink)
+    {
+	console.log("doYTLinkShare", ytLink);
+	
+    	var that = this;
+    	var done = false;
+    	
+	$.prompt("Please wait....",
+	    {
+		title: "YouTube Video Loader",
+		persistent: false
+	    }
+	);    	
+	console.log("Found you tube video", this.shareLink, ytLink);
+
+	$('#presentation').html('<div id="youtube-video"></div>');
+
+	function onPlayerStateChange(event) 
+	{
+		console.log("YT onPlayerStateChange", event);
+
+		if (event.data == YT.PlayerState.PLAYING && !done) 
+		{
+			Toolbar.changeShareLinkButtonState(true); 
+			done = true;
+		}
+	}
+
+	function onPlayerReady(event) 
+	{
+		console.log("YT onPlayerStateChange", event);
+
+		$.prompt.close();
+		that.setPresentationVisible(true);		
+		event.target.playVideo();
+	}	
+
+	this.shareLinkViewer = new YT.Player('youtube-video', 
+	{
+		height: that.getPresentationHeight(),
+		width: that.getPresentationWidth(),
+		videoId: ytLink,
+		events: {
+			'onReady': onPlayerReady,
+			'onStateChange': onPlayerStateChange
+		}
+	});    
+    },
+    
+    handleLinkShare: function (action, url, from)
+    {
+	console.log("local handleLinkShare", url, action, from, this.shareLink);
+	
+	if (this.shareLink == null || this.shareLink == "")
+	{
+		this.shareLink = url;
+		
+		if (this.shareLinkViewer == null) 
+		{
+			if (action == "yt-start") this.startLinkShare();				
+		}
+		
+	} else {
+		
+		if (action == "yt-stop") this.stopLinkShare();	
+	}
+		
+    },
+    
+    linkShare: function(action, url) {
+    	//console.log("ofmuc.linkShare", url, action)
+        var msg = $msg({to: this.roomJid, type: 'groupchat'});
+        msg.c('linkshare', {xmlns: 'http://igniterealtime.org/protocol/linkshare', action: action, url: url}).up();
+        this.connection.send(msg);        
+    }    
 });
 

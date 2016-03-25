@@ -43,6 +43,14 @@ Licensed under the terms of CC0
 
 == CHANGELOG ==
 
+03/15/2016 v1.0.3
+* Fixed sidebar clear issue
+* Fixed H1 tag issue
+* Updated text domain
+* Updated screenshot
+* Tweaked CSS
+* Updated language file
+
 05/12/2015 v1.0.2
 * Updated RTL code
 * Fixed customizer issues

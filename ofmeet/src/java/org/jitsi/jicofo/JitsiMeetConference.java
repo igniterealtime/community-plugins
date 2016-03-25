@@ -29,6 +29,7 @@ import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.filter.*;
 import org.jivesoftware.smack.packet.*;
 import org.jivesoftware.smack.packet.Message;
+import org.jitsi.videobridge.osgi.*;
 
 import java.io.*;
 import java.util.*;
@@ -280,10 +281,7 @@ public class JitsiMeetConference
 
         meetExtensionsHandler = new MeetExtensionsHandler(this);
 
-        services
-            = ServiceUtils.getService(
-                    FocusBundleActivator.bundleContext,
-                    JitsiMeetServices.class);
+        services = ServiceUtils2.getService(FocusBundleActivator.bundleContext, JitsiMeetServices.class);
 
         // Set pre-configured videobridge
         services.getBridgeSelector()

@@ -129,11 +129,21 @@ input, textarea {
 	color: #555;
 }
 
+.screen-reader-text {
+	@extend .sr-only;
+}
+
 /* =Header
 -------------------------------------------------------------- */
 #site-title {
 	float: left;
 	margin: 20px 0;
+	line-height: 1.1;
+
+	.basic & {
+		font-size: 32px;
+		font-family: $font;
+	}
 
 	a {
 		text-decoration: none;
@@ -384,6 +394,13 @@ input, textarea {
 	.home.blog & {
 		margin: 5px 5px 50px;
 	}
+
+	@include breakpoint(tablet) {
+		&.pull-right {
+			float: none !important;
+		}
+	}
+
 }
 
 /* =Article
@@ -820,6 +837,14 @@ iframe {
 	width: 100%;
 	position: absolute;
 	bottom: 0;
+
+	@include breakpoint(600) {
+		position: relative;
+		bottom: auto;
+		margin-top: 30px;
+		float: left;
+		clear: both;
+	}
 }
 
 #primary #infinite-handle span {
