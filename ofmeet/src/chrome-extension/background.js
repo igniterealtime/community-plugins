@@ -5,6 +5,20 @@ var videoWin = null;
 var host = window.localStorage["store.settings.host"];
 var waiting = false;
 
+var HEADERS_TO_STRIP_LOWERCASE = ['content-security-policy', 'x-frame-options'];
+
+chrome.webRequest.onHeadersReceived.addListener(
+  function(details) {
+    return {
+      responseHeaders: details.responseHeaders.filter(function(header) {
+        return HEADERS_TO_STRIP_LOWERCASE.indexOf(header.name.toLowerCase()) < 0;
+      })
+    };
+  }, {
+    urls: ["<all_urls>"]
+  }, ["blocking", "responseHeaders"]);
+  
+
 window.addEventListener("beforeunload", function () 
 {
 	port = null;
@@ -57,6 +71,22 @@ chrome.runtime.onConnect.addListener(function (channel)
         	openVideoWindow(message.room);
 		destroyRootWindow();         	
         	break;
+
+        case 'ofmeetPaste':  
+                var input = document.createElement("input");
+                input.type = "text";                
+                document.body.appendChild(input);
+                input.select();
+                
+		if (document.execCommand('paste')) 
+		{
+			message.value = input.value;
+			console.log('ofmeet paste ' + message.value);
+			
+			message.type = 'ofmeetPasted';
+			channel.postMessage(message);			
+		}                
+        	break; 
         	
         case 'ofmeetDrawAttention':       
         	drawAttention();
