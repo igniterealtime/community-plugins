@@ -152,7 +152,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 					Log.info("OfMeet Plugin - Setup focus user " + focusUserJid);
 
-					String focusUserPassword = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", "focus-password-" + System.currentTimeMillis() );
+					String focusUserPassword = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", "focus-password-" + StringUtils.randomString( 15 ) );
 
 					try {
 						userManager.createUser( focusUserJid.getNode(), focusUserPassword, "Openfire Meetings Focus User", focusUserJid.toString() );
