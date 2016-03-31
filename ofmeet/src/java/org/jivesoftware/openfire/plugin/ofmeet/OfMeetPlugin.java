@@ -151,9 +151,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 					JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.password", focusUserPassword);
 
 					MultiUserChatService mucService = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService("conference");
-					List<JID> allowedJIDs = new ArrayList<JID>();
-					allowedJIDs.add(new JID(focusUserJid));
-					mucService.addSysadmins(allowedJIDs);
+					mucService.addSysadmin( new JID( focusUserJid ) );
 				}
 				catch (Exception e1) {
 
