@@ -159,9 +159,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 						JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", focusUserJid.toString() );
 						JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.password", focusUserPassword);
-
-						MultiUserChatService mucService = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService("conference");
-						mucService.addSysadmin( focusUserJid );
 					}
 					catch (Exception e1) {
 
@@ -170,28 +167,42 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				}
 			}
 
-			new Timer().schedule(new TimerTask()
+			// Ensure that the 'focus' user is a sysadmin of the conference service(s).
+			for ( MultiUserChatService mucService : XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices() )
 			{
-				@Override public void run()
+				if (!mucService.isSysadmin( focusUserJid ))
 				{
-					try {
-						Log.info("OfMeet Plugin - Initialize jitsi conference focus");
+					mucService.addSysadmin( focusUserJid );
+				}
+			}
+
+			new Timer().schedule( new TimerTask()
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						Log.info( "OfMeet Plugin - Initialize jitsi conference focus" );
 
 						jicofoPlugin = new JicofoPlugin();
-						jicofoPlugin.initializePlugin(componentManager, manager, pluginDirectory);
+						jicofoPlugin.initializePlugin( componentManager, manager, pluginDirectory );
 					}
-					catch (Exception e1) {
-						Log.error("Could NOT Initialize jicofo component", e1);
+					catch ( Exception e1 )
+					{
+						Log.error( "Could NOT Initialize jicofo component", e1 );
 					}
 
-					try {
-						Log.info("OfMeet Plugin - Initialize call control component ");
+					try
+					{
+						Log.info( "OfMeet Plugin - Initialize call control component " );
 
 						jigasiPlugin = new JigasiPlugin();
-						jigasiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
+						jigasiPlugin.initializePlugin( componentManager, manager, pluginDirectory );
 					}
-					catch (Exception e1) {
-						Log.error("Could NOT Initialize jigasi component", e1);
+					catch ( Exception e1 )
+					{
+						Log.error( "Could NOT Initialize jigasi component", e1);
 					}
 				}
 			}, 5000);
