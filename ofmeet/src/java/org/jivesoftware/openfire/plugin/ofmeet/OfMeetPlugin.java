@@ -131,27 +131,33 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				Log.error("Could NOT Initialize jitsi videobridge", e1);
 			}
 
-			String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
-			String userName = "focus";
-			String focusUserJid = userName + "@" + domain;
+			final String defaultValue = "focus@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+			final String propertyValue = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid", defaultValue );
+			JID focusUserJid;
+			try {
+				focusUserJid = new JID( propertyValue );
+			} catch (IllegalArgumentException e) {
+				Log.warn( "The 'org.jitsi.videobridge.ofmeet.focus.user.jid' property contains a value ('{}') that appears to be in invalid JID.", propertyValue, e );
+				focusUserJid = new JID( defaultValue );
+			}
 
 			try {
-				userManager.getUser(userName);
+				userManager.getUser( focusUserJid.getNode() );
 			}
 			catch (UserNotFoundException e) {
 
 				Log.info("OfMeet Plugin - Setup focus user " + focusUserJid);
 
-				String focusUserPassword = "focus-password-" + System.currentTimeMillis();
+				String focusUserPassword = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", "focus-password-" + System.currentTimeMillis() );
 
 				try {
-					userManager.createUser(userName, focusUserPassword, "Openfire Meetings Focus User", focusUserJid);
+					userManager.createUser( focusUserJid.getNode(), focusUserPassword, "Openfire Meetings Focus User", focusUserJid.toString() );
 
-					JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", focusUserJid);
+					JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", focusUserJid.toString() );
 					JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.password", focusUserPassword);
 
 					MultiUserChatService mucService = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService("conference");
-					mucService.addSysadmin( new JID( focusUserJid ) );
+					mucService.addSysadmin( focusUserJid );
 				}
 				catch (Exception e1) {
 
