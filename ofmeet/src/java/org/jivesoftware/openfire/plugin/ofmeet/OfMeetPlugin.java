@@ -131,58 +131,78 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				Log.error("Could NOT Initialize jitsi videobridge", e1);
 			}
 
-			String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
-			String userName = "focus";
-			String focusUserJid = userName + "@" + domain;
-
+			// Determine the JID of the 'focus' user.
+			final String defaultValue = "focus@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+			final String propertyValue = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid", defaultValue );
+			JID focusUserJid;
 			try {
-				userManager.getUser(userName);
-			}
-			catch (UserNotFoundException e) {
-
-				Log.info("OfMeet Plugin - Setup focus user " + focusUserJid);
-
-				String focusUserPassword = "focus-password-" + System.currentTimeMillis();
-
-				try {
-					userManager.createUser(userName, focusUserPassword, "Openfire Meetings Focus User", focusUserJid);
-
-					JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", focusUserJid);
-					JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.password", focusUserPassword);
-
-					MultiUserChatService mucService = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService("conference");
-					List<JID> allowedJIDs = new ArrayList<JID>();
-					allowedJIDs.add(new JID(focusUserJid));
-					mucService.addSysadmins(allowedJIDs);
-				}
-				catch (Exception e1) {
-
-					Log.error("Could NOT create focus user", e1);
-				}
+				focusUserJid = new JID( propertyValue );
+			} catch (IllegalArgumentException e) {
+				Log.warn( "The 'org.jitsi.videobridge.ofmeet.focus.user.jid' property contains a value ('{}') that appears to be in invalid JID.", propertyValue, e );
+				focusUserJid = new JID( defaultValue );
 			}
 
-			new Timer().schedule(new TimerTask()
+			// Ensure that the 'focus' user exists if it is supposed to be a user of our domain.
+			if ( focusUserJid.getDomain().equalsIgnoreCase( XMPPServer.getInstance().getServerInfo().getXMPPDomain() ) )
 			{
-				@Override public void run()
-				{
+				try {
+					userManager.getUser( focusUserJid.getNode() );
+				}
+				catch (UserNotFoundException e) {
+
+					Log.info("OfMeet Plugin - Setup focus user " + focusUserJid);
+
+					String focusUserPassword = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", "focus-password-" + StringUtils.randomString( 15 ) );
+
 					try {
-						Log.info("OfMeet Plugin - Initialize jitsi conference focus");
+						userManager.createUser( focusUserJid.getNode(), focusUserPassword, "Openfire Meetings Focus User", focusUserJid.toString() );
+
+						JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", focusUserJid.toString() );
+						JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.password", focusUserPassword);
+					}
+					catch (Exception e1) {
+
+						Log.error("Could NOT create focus user", e1);
+					}
+				}
+			}
+
+			// Ensure that the 'focus' user is a sysadmin of the conference service(s).
+			for ( MultiUserChatService mucService : XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices() )
+			{
+				if (!mucService.isSysadmin( focusUserJid ))
+				{
+					mucService.addSysadmin( focusUserJid );
+				}
+			}
+
+			new Timer().schedule( new TimerTask()
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						Log.info( "OfMeet Plugin - Initialize jitsi conference focus" );
 
 						jicofoPlugin = new JicofoPlugin();
-						jicofoPlugin.initializePlugin(componentManager, manager, pluginDirectory);
+						jicofoPlugin.initializePlugin( componentManager, manager, pluginDirectory );
 					}
-					catch (Exception e1) {
-						Log.error("Could NOT Initialize jicofo component", e1);
+					catch ( Exception e1 )
+					{
+						Log.error( "Could NOT Initialize jicofo component", e1 );
 					}
 
-					try {
-						Log.info("OfMeet Plugin - Initialize call control component ");
+					try
+					{
+						Log.info( "OfMeet Plugin - Initialize call control component " );
 
 						jigasiPlugin = new JigasiPlugin();
-						jigasiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
+						jigasiPlugin.initializePlugin( componentManager, manager, pluginDirectory );
 					}
-					catch (Exception e1) {
-						Log.error("Could NOT Initialize jigasi component", e1);
+					catch ( Exception e1 )
+					{
+						Log.error( "Could NOT Initialize jigasi component", e1);
 					}
 				}
 			}, 5000);
