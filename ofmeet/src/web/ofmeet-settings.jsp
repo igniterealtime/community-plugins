@@ -209,6 +209,9 @@
 
 	String hqVoice = request.getParameter("hqVoice");
 	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.sip.hq.voice", hqVoice);	
+	
+	String globalIntercom = request.getParameter("globalIntercom");
+	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.global.intercom", globalIntercom);		
         
     }
 
@@ -292,6 +295,13 @@
 		<td><input type="text" size="10" maxlength="100" name="videobandwidth"
 			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.video.bandwidth", "512") %>">
 		</td>
+	    </tr>
+	    
+	    <tr>
+		    <td nowrap  colspan="2">
+			<input type="checkbox" name="globalIntercom"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.global.intercom", "off").equals("on")) ? " checked" : "" %>>
+			<fmt:message key="config.page.configuration.global.intercom" />		
+		    </td>
 	    </tr>	    
             </tbody>
         </table>

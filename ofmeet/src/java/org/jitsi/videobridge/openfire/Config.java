@@ -169,14 +169,17 @@ public class Config extends HttpServlet
 				Log.info("Config. got xirsys iceSevers " + iceServers);
 			}
 
-			Videobridge videobridge = PluginImpl.component.getVideobridge();
-
-			if (globalConferenceId == null || videobridge.getConference(globalConferenceId, null) == null)
+			if ("on".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.global.intercom", "off")))
 			{
-				Conference conference = videobridge.createConference(null);
-                if (recordVideo.equals("true")) conference.setRecording(true);
-                conference.setLastKnownFocus(domain);
-				globalConferenceId = conference.getID();
+				Videobridge videobridge = PluginImpl.component.getVideobridge();
+
+				if (globalConferenceId == null || videobridge.getConference(globalConferenceId, null) == null)
+				{
+					Conference conference = videobridge.createConference(null);
+					if (recordVideo.equals("true")) conference.setRecording(true);
+					conference.setLastKnownFocus(domain);
+					globalConferenceId = conference.getID();
+				}
 			}
 
 			String callControl = "'ofmeet-call-control." + domain + "'";
@@ -244,7 +247,7 @@ public class Config extends HttpServlet
 			out.println("    logStats: " + logStats + ",");
 			out.println("    disablePrezi: true,");
 			out.println("    conferences: " + conferences + ",");
-			out.println("    globalConferenceId: '" + globalConferenceId + "',");
+			if (globalConferenceId != null) out.println("    globalConferenceId: '" + globalConferenceId + "',");
 			out.println("    bosh: window.location.protocol + '//' + window.location.host + '/http-bind/'");
 			out.println("};	");
 

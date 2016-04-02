@@ -2,8 +2,8 @@
 <project name="ofswitch" default="jar" basedir = "..">
 	<description>Openfire Switch Build</description>
 
-	<property name="openfire.home" 	value="./openfire_4_0_1/target/openfire" />
-	<property name="lib.ant.dir" 	value="./openfire_4_0_1/build/lib/ant" />	
+	<property name="openfire.home" 	value="./openfire_4_0_2/target/openfire" />
+	<property name="lib.ant.dir" 	value="./openfire_4_0_2/build/lib/ant" />	
 	<property name="ofswitch.dir" 	value="ofswitch" />
 	
 

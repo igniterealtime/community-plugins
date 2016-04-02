@@ -163,7 +163,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 	{
 		this.connection.sendIQ($iq({type: "get"}).c("query", {xmlns: "jabber:iq:private"}).c("storage", {xmlns: "storage:bookmarks"}).tree(), function(resp)
 		{
-			//console.log("get bookmarks", resp)
+			console.log("get bookmarks", resp)
 						
 			$(resp).find('conference').each(function() 
 			{
@@ -827,7 +827,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 	    	
 	    	for (var i=0; i<that.urls.length; i++)
 	    	{
-	    		if (that.urls[i].url.indexOf(".PDF") == -1 && that.urls[i].url.indexOf(".pdf") == -1 && that.urls[i].url.indexOf("mrtp:") == -1 )
+	    		if (that.urls[i].url.indexOf(".HTML") > -1 || that.urls[i].url.indexOf(".html") > -1)
 	    		{
 	    			appsList = appsList + '<option value="' + that.urls[i].url + '">' + that.urls[i].name + '</option>'
 	    		}
@@ -1152,9 +1152,9 @@ Strophe.addConnectionPlugin('ofmuc', {
 
     	if (this.isPresentationVisible() == false)
     	{    
-    		that.shareLink = "https://www.youtube.com/watch?v=xNXN7CZk8X0";
+    		that.shareLink = "https://www.youtube.com/watch?v=9a__jGWTkjg";
     		
-	    	var urlsList = '<datalist id="urls-list">'
+	    	var urlsList = '<datalist id="links-list">'
 	    	
 	    	for (var i=0; i<that.urls.length; i++)
 	    	{
@@ -1168,7 +1168,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 		messageHandler.openTwoButtonDialog
 		(
 		    "Share this link with everyone in conference",
-		    '<input id="shareLinkRef" type="text" value="' + that.shareLink + '" onclick="this.select();" list="urls-list" autofocus >' + urlsList,
+		    '<input id="shareLinkRef" type="text" value="' + that.shareLink + '" onclick="this.select();" list="links-list" autofocus >' + urlsList,
 		    false,
 		    "Share a link",
 		    function (e, v) {

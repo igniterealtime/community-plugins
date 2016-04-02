@@ -1,1 +1,11 @@
-09:23
+13:35
+unexpected web socket data <presence type="unavailable" from="remotecontrol-ofmeet3995@traderlynk.net/remotecontrol-ofmeet3995" to="remotecontrol-ofmeet3995@traderlynk.net/remotecontrol-ofmeet3995"/>
+C:\Projects\ignite\community-plugins\ofmeet\src\remotecontrol\node_modules\ws\lib\WebSocket.js:218
+    else throw new Error('not opened');
+         ^
+
+Error: not opened
+    at WebSocket.send (C:\Projects\ignite\community-plugins\ofmeet\src\remotecontrol\node_modules\ws\lib\WebSocket.js:218:16)
+    at null._repeat (C:\Projects\ignite\community-plugins\ofmeet\src\remotecontrol\ofmeet.remote.control.js:101:41)
+    at wrapper [as _onTimeout] (timers.js:264:19)
+    at Timer.listOnTimeout (timers.js:92:15)

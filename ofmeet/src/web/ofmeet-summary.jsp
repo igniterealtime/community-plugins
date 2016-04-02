@@ -108,8 +108,8 @@
 		<%= conference.getID() %>
         </td>
         <td width="15%" align="center">
-            <% if (conference.getFocus() != null && !"".equals(conference.getFocus())) { %>
-                <%= (new JID(conference.getFocus())).getNode() %>
+            <% if (conference.getLastKnowFocus() != null && !"".equals(conference.getLastKnowFocus())) { %>
+                <%= (new JID(conference.getLastKnowFocus())).getNode() %>
             <% }
                else { %>
                 &nbsp;
