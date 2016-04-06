@@ -298,7 +298,7 @@ function remoteControl()
 		});
 
 	} else {
-		$.prompt("Select a participant and try again",
+		$.prompt("Select a participant below and try again",
 		    {
 			title: "Desktop Remote Control",
 			persistent: false
@@ -345,7 +345,7 @@ function remoteControl()
 		});
 
 	   } else {
-		$.prompt("Select a participant and try again",
+		$.prompt("Select a participant below and try again",
 		    {
 			title: "Desktop Remote Control",
 			persistent: false
