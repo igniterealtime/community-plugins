@@ -1,107 +1,15 @@
-13:35
+09:18
 ofmeet.remote.control starts
 ofmeet.remote.control found robot 900 1440
 ofmeet.remote.control listening on: http://localhost:6060
-ofmeet.remote.control received request: /?action=ofmeetGetScreen&resource=ofmeet3995&server=https://traderlynk.net/http-bind/
-ofmeet.remote.control got server  wss://traderlynk.net/ofmeetws/server?username=null&password=null&resource=remotecontrol-ofmeet3995
-ofmeet.remote.control received request: /?action=ofmeetSetRequestorOn&requester=ofmeet9620
-ofmeet.remote.control got requestor  ofmeet9620
-ofmeet.remote.control mouse down { down: true,
-  button: 0,
-  x: 682.671875,
-  y: 223,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse up { up: true,
-  button: 0,
-  x: 682.671875,
-  y: 223,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse down { down: true,
-  button: 0,
-  x: 502.671875,
-  y: 372,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse up { up: true,
-  button: 0,
-  x: 502.671875,
-  y: 372,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse down { down: true,
-  button: 0,
-  x: 336.671875,
-  y: 739,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse up { up: true,
-  button: 0,
-  x: 336.671875,
-  y: 739,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse down { down: true,
-  button: 0,
-  x: 343.671875,
-  y: 33,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse up { up: true,
-  button: 0,
-  x: 343.671875,
-  y: 33,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse down { down: true,
-  button: 0,
-  x: 343.671875,
-  y: 33,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse up { up: true,
-  button: 0,
-  x: 343.671875,
-  y: 33,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse down { down: true,
-  button: 0,
-  x: 404.671875,
-  y: 49,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse up { up: true,
-  button: 0,
-  x: 486.671875,
-  y: 51,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse down { down: true,
-  button: 0,
-  x: 940.671875,
-  y: 54,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse up { up: true,
-  button: 0,
-  x: 940.671875,
-  y: 54,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse down { down: true,
-  button: 0,
-  x: 647.671875,
-  y: 625,
-  width: 1023.328125,
-  height: 640 }
-ofmeet.remote.control mouse up { up: true,
-  button: 0,
-  x: 647.671875,
-  y: 625,
-  width: 1023.328125,
-  height: 640 }
+ofmeet.remote.control received request: /?action=ofmeetGetScreen&resource=ofmeet4605&server=https://evoludata.com:7443/http-bind/
+ofmeet.remote.control got server  wss://evoludata.com:7443/ofmeetws/server?username=null&password=null&resource=remotecontrol-ofmeet4605
+ofmeet.remote.control received request: /?action=ofmeetSetRequestorOn&requester=ofmeet2017
+ofmeet.remote.control got requestor  ofmeet2017
+ofmeet.remote.control mouse down { down: true, button: 0, x: 690, y: 219, width: 1024, height: 640 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 690, y: 219, width: 1024, height: 640 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 582, y: 65, width: 1024, height: 640 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 534, y: 60, width: 1024, height: 640 }
+ofmeet.remote.control mouse down { down: true, button: 0, x: 651, y: 27, width: 1024, height: 640 }
+ofmeet.remote.control mouse up { up: true, button: 0, x: 651, y: 27, width: 1024, height: 640 }
 ofmeet.remote.control received request: /?action=ofmeetSetRequestorOff
-ofmeet.remote.control received request: /?action=ofmeetGetScreen&resource=ofmeet3995&server=https://traderlynk.net/http-bind/
-ofmeet.remote.control got server  wss://traderlynk.net/ofmeetws/server?username=null&password=null&resource=remotecontrol-ofmeet3995

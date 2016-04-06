@@ -341,12 +341,15 @@
 
 	 for (i = 0; i < presence.childNodes.length; i++) 
 	 {
-		var xmlns = presence.childNodes[i].getAttribute("xmlns");  
+	 	if (presence.childNodes[i].getAttribute)
+	 	{
+			var xmlns = presence.childNodes[i].getAttribute("xmlns");  
 
-		if (xmlns && (xmlns.match(Strophe.NS.MUC) || xmlns.match("urn:xmpp:rayo")))
-		{
-			ignore = true;
-		}		
+			if (xmlns && (xmlns.match(Strophe.NS.MUC) || xmlns.match("urn:xmpp:rayo")))
+			{
+				ignore = true;
+			}
+		}
 	 }
 
 	if (jid.substring(0, 5) == "rayo-") return true;			

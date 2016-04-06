@@ -768,7 +768,8 @@ var VideoLayout = (function (my) {
 
             nameSpan = document.createElement('span');
             nameSpan.className = 'displayname';
-            $('#' + videoSpanId)[0].appendChild(nameSpan);
+            
+            if ($('#' + videoSpanId).length > 0) $('#' + videoSpanId)[0].appendChild(nameSpan);
 
             if (videoSpanId === 'localVideoContainer') {
                 editButton = createEditDisplayNameButton();
@@ -786,7 +787,7 @@ var VideoLayout = (function (my) {
                 nameSpan.id = videoSpanId + '_name';
             } else {
                 nameSpan.id = 'localDisplayName';
-                $('#' + videoSpanId)[0].appendChild(editButton);
+                if ($('#' + videoSpanId).length > 0) $('#' + videoSpanId)[0].appendChild(editButton);
 
                 var editableText = document.createElement('input');
                 editableText.className = 'displayname';
@@ -800,7 +801,7 @@ var VideoLayout = (function (my) {
 
                 editableText.setAttribute('style', 'display:none;');
                 editableText.setAttribute('placeholder', 'ex. Jane Pink');
-                $('#' + videoSpanId)[0].appendChild(editableText);
+                if ($('#' + videoSpanId).length > 0) $('#' + videoSpanId)[0].appendChild(editableText);
 
                 $('#localVideoContainer .displayname')
                     .bind("click", function (e) {
@@ -882,7 +883,7 @@ var VideoLayout = (function (my) {
             statusSpan = document.createElement('span');
             statusSpan.className = 'status';
             statusSpan.id = videoSpanId + '_status';
-            $('#' + videoSpanId)[0].appendChild(statusSpan);
+            if ($('#' + videoSpanId).length > 0) $('#' + videoSpanId)[0].appendChild(statusSpan);
 
             statusSpan = $('#' + videoSpanId + '>span.status');
         }
@@ -959,7 +960,7 @@ var VideoLayout = (function (my) {
                 videoMutedSpan = document.createElement('span');
                 videoMutedSpan.className = 'videoMuted';
 
-                $('#' + videoSpanId)[0].appendChild(videoMutedSpan);
+                if ($('#' + videoSpanId).length > 0) $('#' + videoSpanId)[0].appendChild(videoMutedSpan);
 
                 var mutedIndicator = document.createElement('i');
                 mutedIndicator.className = 'icon-camera-disabled';
@@ -1010,7 +1011,7 @@ var VideoLayout = (function (my) {
                     "Participant is muted",
                     "top");
 
-                $('#' + videoSpanId)[0].appendChild(audioMutedSpan);
+                if ($('#' + videoSpanId).length > 0) $('#' + videoSpanId)[0].appendChild(audioMutedSpan);
                 var mutedIndicator = document.createElement('i');
                 mutedIndicator.className = 'icon-mic-disabled';
                 audioMutedSpan.appendChild(mutedIndicator);
