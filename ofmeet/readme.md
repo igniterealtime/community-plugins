@@ -55,7 +55,7 @@ be adjusted when needed.
 
 ### Optional component: Openfire Meetings Chrome Extension
 
-To enable screen sharing, remote desktop control, co-browsing and application sharing, your users will have to install
+To enable url sharing, screen sharing, remote desktop control, co-browsing and application sharing, your users will have to install
 the [Openfire Meetings Chrome Extension](https://chrome.google.com/webstore/detail/openfire-meetings-chrome/fohfnhgabmicpkjcpjpjongpijcffaba?hl=en-GB)
 in their browser.
 
@@ -110,7 +110,9 @@ addresses:
 
 To use HTTP instead of HTTPS, replace port 7443 by 7070. Please note that for webRTC audio and video, HTTPS is mandatory.
 
-### ... the Openfire Meetings Candy-based web client
+### ... the Openfire Meetings Candy-based web client for group chat
+
+![Candy Group chat with audio/video](https://community.igniterealtime.org/servlet/JiveServlet/downloadImage/38-1730-22278/ofmeet5.png)
 
 Openfire Meetings includes a Candy-based web client. To make use of this client, point your browser to this address:
 
@@ -121,6 +123,27 @@ To use HTTP instead of HTTPS, replace port 7443 by 7070. Please note that for we
 Candy can also be accessed as a toolbar panel from the Openfire Meetings Chrome Extension, by clicking on the Openfire icon on the chrome web browser toolbar.
 You must enable Chrome panels otherwise a popup window will be opened instead.
 To enable chrome panels feature in Chrome, type in "chrome://flags/#enable-panels" in the url bar - click on "enable" under "enable panels" - Make sure to click on "relaunch now " at the bottom of the page, to take effect.
+
+### ... the Meeting/Conference collaboration features
+
+Openfire Meetings enables web applications that can be used in an N:N model (each user can simultaneously interact with all the other users). Some applications are provided to get started and more can be developed using the collaboration API provided. 
+
+Openfire Meetings automatically saves the contents of each application for each meeting on the server as XMPP private data against each user that creates the content. Next time you have the meeting, the application content opens at where you left it from the last meeting.
+
+Each application is accessible directly from the Jitsi-Meet web client toolbar or from the pull down list the Applications menu on the toolbar.
+
+* **Presentations**: Openfire Meetings provides a PDF viewer that enables a presentation to be driven by a presenter and viewed by all participants in the meeting.
+To create a presentation, export your powerpoint presentation as a PDF document and save on a web server. You can use your Openfire server by saving in the resources/spank folder. Use the bookmarks plugin to create a URL bookmark and ensure that the url ends with ".pdf"
+
+* **Cooperative Editing**: This is a modified version of "woot", a rich-text collaborative editor by [kroky](https://github.com/kroky). There are tons of stuff on this subject matter. Just look up "google wave". Etherpad is the most popular and mature implementation so far. [This presentation](https://www.youtube.com/watch?v=NSTZ4mIv_wk) very informative especially explaining operational transformation and why woot  (without operational transformation) is simpler.
+
+* **Cooperative Drawing**: This is the TogetherJS drawing sample application.
+
+* **Co-Browsing**: This is a web site that enables joint navigation by all participants in the meeting. It is using the TogetherJS engine to track and show the multiple cursors and administer remote mouse clicks on each page.
+To create a co-browse, use the bookmarks plugin to create a URL bookmark and ensure that the url ends with ".html".
+
+* **URL Sharing**: This is a generic viewer for various content and specific popluar applications. Currently, only you-tube videos, google maps and document types pdf|pages|ai|psd|tiff|dxf|svg|eps|ps|ttf|xps|zip|rar|doc|xls|ppt files can be viewed.
+The viewer supports also the clipboard. If you copy a URL from another application, it will be shown in the dialog textbox when URL sharing is slected from the JitsiMeet toolbar.
 
 ### ... the Meeting/Conference planner and hosting feature
 
