@@ -169,7 +169,7 @@ public class OfSocialPlugin implements Plugin, ClusterEventListener  {
 	{
 		Log.info("Setting WordPress as new auth Provider");
 
-		JiveGlobals.setProperty("jdbcAuthProvider.passwordSQL", "SELECT user_pass FROM wp_users WHERE user_nicename=?");
+		JiveGlobals.setProperty("jdbcAuthProvider.passwordSQL", "SELECT user_pass FROM wp_users WHERE user_login=?");
 		JiveGlobals.setProperty("jdbcAuthProvider.setPasswordSQL", "");
 		JiveGlobals.setProperty("jdbcAuthProvider.allowUpdate", "false");
 		JiveGlobals.setProperty("jdbcAuthProvider.passwordType", "md5");
@@ -179,11 +179,11 @@ public class OfSocialPlugin implements Plugin, ClusterEventListener  {
 
 		Log.info("Setting WordPress as user Provider");
 
-		JiveGlobals.setProperty("jdbcUserProvider.loadUserSQL", "SELECT user_nicename, user_email FROM wp_users WHERE user_nicename=?");
+		JiveGlobals.setProperty("jdbcUserProvider.loadUserSQL", "SELECT user_login, display_name, user_email FROM wp_users WHERE user_login=?");
 		JiveGlobals.setProperty("jdbcUserProvider.userCountSQL", "SELECT COUNT(*) FROM wp_users");
-		JiveGlobals.setProperty("jdbcUserProvider.allUsersSQL", "SELECT user_nicename FROM wp_users");
-		JiveGlobals.setProperty("jdbcUserProvider.searchSQL", "SELECT user_nicename FROM wp_users WHERE");
-		JiveGlobals.setProperty("jdbcUserProvider.user_loginField", "user_nicename");
+		JiveGlobals.setProperty("jdbcUserProvider.allUsersSQL", "SELECT user_login FROM wp_users");
+		JiveGlobals.setProperty("jdbcUserProvider.searchSQL", "SELECT user_login FROM wp_users WHERE");
+		JiveGlobals.setProperty("jdbcUserProvider.user_loginField", "user_login");
 		JiveGlobals.setProperty("jdbcUserProvider.nameField", "display_name");
 		JiveGlobals.setProperty("jdbcUserProvider.emailField", "user_email");
 		JiveGlobals.setProperty("jdbcUserProvider.useConnectionProvider", "true");
@@ -194,10 +194,10 @@ public class OfSocialPlugin implements Plugin, ClusterEventListener  {
 
 		JiveGlobals.setProperty("jdbcGroupProvider.groupCountSQL", "SELECT count(*) FROM wp_bp_groups");
 		JiveGlobals.setProperty("jdbcGroupProvider.allGroupsSQL", "SELECT name FROM wp_bp_groups");
-		JiveGlobals.setProperty("jdbcGroupProvider.userGroupsSQL", "SELECT name FROM wp_bp_groups INNER JOIN wp_bp_groups_members ON wp_bp_groups.id = wp_bp_groups_members.group_id WHERE wp_bp_groups_members.user_id IN (SELECT ID FROM wp_users WHERE user_nicename=?) AND is_confirmed=1");
+		JiveGlobals.setProperty("jdbcGroupProvider.userGroupsSQL", "SELECT name FROM wp_bp_groups INNER JOIN wp_bp_groups_members ON wp_bp_groups.id = wp_bp_groups_members.group_id WHERE wp_bp_groups_members.user_id IN (SELECT ID FROM wp_users WHERE user_login=?) AND is_confirmed=1");
 		JiveGlobals.setProperty("jdbcGroupProvider.descriptionSQL", "SELECT description FROM wp_bp_groups WHERE name=?");
-		JiveGlobals.setProperty("jdbcGroupProvider.loadMembersSQL", "SELECT user_nicename FROM wp_users INNER JOIN wp_bp_groups_members ON wp_users.ID = wp_bp_groups_members.user_id WHERE wp_bp_groups_members.group_id IN (SELECT id FROM wp_bp_groups WHERE name=?) AND user_nicename<>'admin' AND is_confirmed=1");
-		JiveGlobals.setProperty("jdbcGroupProvider.loadAdminsSQL", "SELECT user_nicename FROM wp_users INNER JOIN wp_bp_groups_members ON wp_users.ID = wp_bp_groups_members.user_id WHERE wp_bp_groups_members.group_id IN (SELECT id FROM wp_bp_groups WHERE name=?) AND user_nicename='admin' AND is_confirmed=1");
+		JiveGlobals.setProperty("jdbcGroupProvider.loadMembersSQL", "SELECT user_login FROM wp_users INNER JOIN wp_bp_groups_members ON wp_users.ID = wp_bp_groups_members.user_id WHERE wp_bp_groups_members.group_id IN (SELECT id FROM wp_bp_groups WHERE name=?) AND user_login<>'admin' AND is_confirmed=1");
+		JiveGlobals.setProperty("jdbcGroupProvider.loadAdminsSQL", "SELECT user_login FROM wp_users INNER JOIN wp_bp_groups_members ON wp_users.ID = wp_bp_groups_members.user_id WHERE wp_bp_groups_members.group_id IN (SELECT id FROM wp_bp_groups WHERE name=?) AND user_login='admin' AND is_confirmed=1");
 		JiveGlobals.setProperty("jdbcGroupProvider.useConnectionProvider", "true");
 
 		JiveGlobals.setProperty("provider.group.className",  "org.jivesoftware.openfire.group.JDBCGroupProvider");

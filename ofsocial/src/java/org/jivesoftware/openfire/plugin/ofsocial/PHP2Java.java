@@ -59,16 +59,23 @@ import java.security.cert.Certificate;
 import org.jivesoftware.openfire.auth.UnauthorizedException;
 import org.jivesoftware.openfire.spi.ConnectionConfiguration;
 
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.net.UnknownHostException;
+import java.sql.*;
+import java.io.*;
+
+import org.dom4j.Element;
+import org.xmpp.packet.*;
 import org.xmpp.packet.Packet;
 
-import java.util.*;
-import java.net.UnknownHostException;
-import org.xmpp.packet.*;
-import java.sql.*;
-import java.io.File;
-import org.dom4j.Element;
-
 import javax.script.ScriptEngine;
+import javax.naming.ServiceUnavailableException;
+
+import com.microsoft.aad.adal4j.AuthenticationContext;
+import com.microsoft.aad.adal4j.AuthenticationResult;
 
 import com.caucho.quercus.script.QuercusScriptEngineFactory;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -77,13 +84,76 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 public class PHP2Java extends AbstractQuercusModule
 {
 	public ScriptEngine engine = (new QuercusScriptEngineFactory()).getScriptEngine();
-    private static final Logger Log = LoggerFactory.getLogger(PHP2Java.class);
+    private final static Logger Log = LoggerFactory.getLogger(PHP2Java.class);
+    private final static String AUTHORITY = "https://login.windows.net/common";
+    private final static String CLIENT_ID = "9ba1a5c7-f17a-4de9-a1f1-6178c8d51223";
 
+    private String accessToken = null;
+    private String refreshToken = null;
+    private String idToken = null;
+    private String givenName = null;
+    private String familyName = null;
 
 	public PHP2Java()
 	{
 
 	}
+
+    public boolean of_authenticate_365(String username, String password)
+    {
+        AuthenticationContext context = null;
+        AuthenticationResult result = null;
+        ExecutorService service = null;
+
+        try {
+            service = Executors.newFixedThreadPool(1);
+            context = new AuthenticationContext(AUTHORITY, false, service);
+
+            Future<AuthenticationResult> future = context.acquireToken("https://graph.windows.net", CLIENT_ID, username, password, null);
+            result = future.get();
+
+        } catch (Exception e) {
+			Log.error("of_authenticate_365", e);
+
+        } finally {
+            service.shutdown();
+        }
+
+        if (result != null)
+        {
+			accessToken = result.getAccessToken();
+			refreshToken = result.getRefreshToken();
+			idToken = result.getIdToken();
+			givenName = result.getUserInfo().getGivenName();
+			familyName = result.getUserInfo().getFamilyName();
+        }
+        return result != null;
+    }
+
+	public String of_get_access_token()
+	{
+		return accessToken;
+	}
+
+	public String of_get_refresh_token()
+	{
+		return refreshToken;
+	}
+
+	public String of_get_id_token()
+	{
+		return idToken;
+	}
+
+    public String of_get_given_name()
+    {
+        return givenName;
+    }
+
+    public String get_family_name()
+    {
+        return familyName;
+    }
 
 	public String registerUser(String username)
 	{
@@ -468,7 +538,7 @@ public class PHP2Java extends AbstractQuercusModule
 
 	public String getUserNameByID(String id)
 	{
-		return getUserByID(id, "user_nicename");
+		return getUserByID(id, "user_login");
 	}
 
 	private String getUserByID(String id, String field)

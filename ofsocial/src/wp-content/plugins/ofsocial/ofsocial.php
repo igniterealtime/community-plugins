@@ -55,6 +55,72 @@ add_action('admin_head', 					'ofsocial_user_page');
 add_action('login_head', 					'ofsocial_user_page');
 add_action('admin_menu', 					'openfire_userimport_menu');
 
+add_filter( 'authenticate', 				'openfire_authenticate', 1, 3 );
+
+
+function openfire_authenticate( $user, $username, $password )
+{
+	global $openfire;
+
+	$openfire->of_logInfo("openfire_authenticate 1 " . $username . " " . $password);
+
+	if( ! openfire_wants_to_login())
+	{
+		return new WP_Error('user_logged_out', sprintf(__( 'You are now logged out of Azure AD.', AADSSO ), $username));
+	}
+
+	// Don't re-authenticate if already authenticated
+
+	if (strrpos($username, "@") == false ||  is_a( $user, 'WP_User' ) ) { return $user; }
+
+	$openfire->of_logInfo("openfire_authenticate 2 ");
+
+	// Try to find an existing user in WP where the UPN of the current AAD user is
+	// (depending on config) the 'login' or 'email' field
+
+	if ($username && $password && $openfire->of_authenticate_365($username, $password))
+	{
+		$user = get_user_by( "email", $username);
+
+		if ( ! is_a( $user, 'WP_User' ) ) {
+
+			$openfire->of_logInfo("openfire_authenticate 3");
+
+			// Since the user was authenticated with AAD, but not found in WordPress,
+			// need to decide whether to create a new user in WP on-the-fly, or to stop here.
+
+
+			$openfire->of_logInfo("openfire_authenticate 4");
+
+			$paras = explode("@", $username);
+			$userid = $paras[0] . "." . $paras[1];
+			$new_user_id = wp_create_user( $userid, $password, $username);
+
+			$user = new WP_User( $new_user_id );
+			$user->set_role('subscriber');
+			$first_name = $openfire->of_get_given_name();
+			$last_name = $openfire->get_family_name();
+			$display_name = $first_name . " " . $last_name;
+
+			wp_update_user( array( 'ID' => $new_user_id, 'display_name' => $display_name, 'first_name' => $first_name, 'last_name' => $last_name));
+		}
+	}
+
+	return $user;
+}
+
+function openfire_wants_to_login()
+{
+	$wants_to_login = false;
+	$action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : 'login';
+	$action = isset( $_GET['loggedout'] ) ? 'loggedout' : $action;
+
+	if( 'login' == $action )
+	{
+		$wants_to_login = true;
+	}
+	return $wants_to_login;
+}
 
 function my_plugin_init() {
       $plugin_dir = basename(dirname(__FILE__));
