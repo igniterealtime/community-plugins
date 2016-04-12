@@ -19,42 +19,33 @@
 
 package org.jivesoftware.openfire.plugin.ofmeet;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.security.Principal;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import javax.security.auth.Subject;
-
+import org.eclipse.jetty.security.DefaultIdentityService;
+import org.eclipse.jetty.security.IdentityService;
+import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.server.UserIdentity;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
-import org.eclipse.jetty.util.security.Credential;
-import org.eclipse.jetty.security.*;
-
-import org.jivesoftware.openfire.auth.UnauthorizedException;
-import org.jivesoftware.openfire.auth.AuthToken;
+import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.auth.AuthFactory;
-import org.jivesoftware.openfire.user.User;
-import org.jivesoftware.openfire.user.UserAlreadyExistsException;
+import org.jivesoftware.openfire.auth.AuthToken;
+import org.jivesoftware.openfire.auth.UnauthorizedException;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
-import org.jivesoftware.openfire.XMPPServer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * A login service that uses Openfire to authenticate users
- *
- */
+import javax.security.auth.Subject;
+import java.io.Serializable;
+import java.security.Principal;
+import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A Jetty login service that uses Openfire to authenticate users.
+ */
 public class OpenfireLoginService extends AbstractLifeCycle implements LoginService
 {
     private static final Logger Log = LoggerFactory.getLogger(OpenfireLoginService.class);
-    public static final ConcurrentHashMap<String, AuthToken> authTokens = new ConcurrentHashMap<String, AuthToken>();
-    public static final ConcurrentHashMap<String, UserIdentity> identities = new ConcurrentHashMap<String, UserIdentity>();
+    public static final ConcurrentHashMap<String, AuthToken> authTokens = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, UserIdentity> identities = new ConcurrentHashMap<>();
 
     private IdentityService _identityService=new DefaultIdentityService();
     private String _name;
@@ -122,6 +113,23 @@ public class OpenfireLoginService extends AbstractLifeCycle implements LoginServ
 
     public UserIdentity login(String userName, Object credential)
     {
+        // AuthFactory supports both a bare username, as well as user@domain. However, UserManager only accepts the bare
+        // username. If the provided value includes a domain, use only the node-part (after verifying that it's actually
+        // a user of our domain).
+        final String[] parts = userName.split( "@", 2 );
+        if ( parts.length > 1 )
+        {
+            if ( XMPPServer.getInstance().getServerInfo().getXMPPDomain().equals( parts[ 1 ] ) )
+            {
+                userName = parts[ 0 ];
+            }
+            else
+            {
+                Log.error( "access denied, unknown domain" + userName );
+                return null;
+            }
+        }
+
 		UserIdentity identity = null;
 
 		if (identities.containsKey(userName))
