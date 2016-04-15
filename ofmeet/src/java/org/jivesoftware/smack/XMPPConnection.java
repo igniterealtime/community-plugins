@@ -20,54 +20,34 @@
 
 package org.jivesoftware.smack;
 
-import org.jivesoftware.openfire.spi.ConnectionManagerImpl;
-import org.jivesoftware.openfire.spi.ConnectionType;
+import org.jivesoftware.openfire.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.cert.Certificate;
 
-import org.jivesoftware.openfire.SessionManager;
-import org.jivesoftware.openfire.StreamID;
-import org.jivesoftware.openfire.session.ClientSession;
 import org.jivesoftware.openfire.session.LocalClientSession;
 import org.jivesoftware.openfire.net.VirtualConnection;
 import org.jivesoftware.openfire.auth.UnauthorizedException;
 import org.jivesoftware.openfire.auth.AuthToken;
 import org.jivesoftware.openfire.auth.AuthFactory;
-import org.jivesoftware.openfire.user.User;
-import org.jivesoftware.openfire.user.UserAlreadyExistsException;
-import org.jivesoftware.openfire.user.UserManager;
-import org.jivesoftware.openfire.user.UserNotFoundException;
-import org.jivesoftware.openfire.SessionPacketRouter;
-import org.jivesoftware.openfire.XMPPServer;
 
+import java.util.Locale;
 import java.util.concurrent.*;
 
-import org.jivesoftware.smack.Connection.ListenerWrapper;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smack.util.PacketParserUtils;
 
 import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.net.*;
-import java.security.*;
-import java.util.Collection;
-import java.util.Iterator;
-import javax.net.SocketFactory;
 import javax.net.ssl.*;
 import javax.security.auth.callback.*;
 
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import org.ifsoft.websockets.BasicStreamID;
 
 import org.xmpp.packet.*;
 
@@ -213,7 +193,7 @@ public class XMPPConnection extends Connection
 				authToken = new AuthToken(resource, true);
 			}
 
-			session = SessionManager.getInstance().createClientSession( smackConnection, new BasicStreamID("ofmeet-user-" + System.currentTimeMillis()));
+			session = SessionManager.getInstance().createClientSession( smackConnection, (Locale) null );
 			smackConnection.setRouter( new SessionPacketRouter( session ) );
 			session.setAuthToken(authToken, resource);
 
@@ -255,7 +235,7 @@ public class XMPPConnection extends Connection
 
 		AuthToken authToken = new AuthToken(this.user, true);
 
-		session = SessionManager.getInstance().createClientSession( smackConnection, new BasicStreamID("ofmeet-user-" + System.currentTimeMillis()));
+		session = SessionManager.getInstance().createClientSession( smackConnection, (Locale) null );
 		smackConnection.setRouter( new SessionPacketRouter( session ) );
 		session.setAuthToken(authToken, this.user);
 
