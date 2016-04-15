@@ -206,7 +206,7 @@ public final class XMPPServlet extends WebSocketServlet
 							}
 						}
 
-						session = SessionManager.getInstance().createClientSession( wsConnection, new BasicStreamID("url" + System.currentTimeMillis()));
+						session = SessionManager.getInstance().createClientSession( wsConnection, (Locale) null );
 						wsConnection.setRouter( new SessionPacketRouter( session ) );
 						session.setAuthToken(authToken, resource);
 						socket.setSession( session );
