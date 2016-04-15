@@ -238,7 +238,7 @@ Candy.Core = function(self, Strophe, $) {
         _addNamespaces();
         _roster = new Candy.Core.ChatRoster();
         // Connect to BOSH/Websocket service
-        _connection = new Openfire.Connection(_service);		// BAO
+        _connection = new Strophe.Connection(_service);
         _connection.rawInput = self.rawInput.bind(self);
         _connection.rawOutput = self.rawOutput.bind(self);
         // set caps node

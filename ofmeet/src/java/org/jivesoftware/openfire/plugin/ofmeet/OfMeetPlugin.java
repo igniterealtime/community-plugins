@@ -19,71 +19,70 @@
 
 package org.jivesoftware.openfire.plugin.ofmeet;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.*;
-import java.text.*;
-import java.util.regex.*;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
-import org.xmpp.packet.*;
-
-import org.jivesoftware.util.*;
-import org.jivesoftware.openfire.plugin.spark.*;
-import org.jivesoftware.openfire.container.Plugin;
-import org.jivesoftware.openfire.container.PluginManager;
-import org.jivesoftware.openfire.http.HttpBindManager;
-import org.jivesoftware.openfire.SessionManager;
-import org.jivesoftware.openfire.session.LocalClientSession;
+import org.dom4j.Element;
+import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
+import org.eclipse.jetty.plus.annotation.ContainerInitializer;
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.webapp.WebAppContext;
+import org.jitsi.jicofo.openfire.JicofoPlugin;
+import org.jitsi.jigasi.openfire.CallControlComponent;
+import org.jitsi.jigasi.openfire.JigasiPlugin;
+import org.jitsi.videobridge.openfire.PluginImpl;
+import org.jivesoftware.openfire.IQHandlerInfo;
+import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
-import org.jivesoftware.openfire.auth.AuthToken;
-import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.container.Plugin;
+import org.jivesoftware.openfire.container.PluginManager;
+import org.jivesoftware.openfire.event.SessionEventDispatcher;
+import org.jivesoftware.openfire.event.SessionEventListener;
+import org.jivesoftware.openfire.group.Group;
+import org.jivesoftware.openfire.group.GroupManager;
+import org.jivesoftware.openfire.group.GroupNotFoundException;
+import org.jivesoftware.openfire.handler.IQHandler;
+import org.jivesoftware.openfire.http.HttpBindManager;
+import org.jivesoftware.openfire.muc.MultiUserChatService;
+import org.jivesoftware.openfire.plugin.spark.Bookmark;
+import org.jivesoftware.openfire.plugin.spark.BookmarkManager;
+import org.jivesoftware.openfire.roster.RosterManager;
+import org.jivesoftware.openfire.security.SecurityAuditManager;
+import org.jivesoftware.openfire.session.ClientSession;
+import org.jivesoftware.openfire.session.Session;
 import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
-import org.jivesoftware.openfire.muc.*;
-import org.jivesoftware.openfire.group.*;
-import org.jivesoftware.openfire.session.*;
-import org.jivesoftware.openfire.event.*;
-import org.jivesoftware.openfire.security.SecurityAuditManager;
-import org.jivesoftware.openfire.handler.IQHandler;
-import org.jivesoftware.openfire.IQHandlerInfo;
-import org.jivesoftware.openfire.roster.RosterManager;
-
-import org.xmpp.component.ComponentManager;
-import org.xmpp.component.ComponentManagerFactory;
-
+import org.jivesoftware.util.EmailService;
+import org.jivesoftware.util.JiveGlobals;
+import org.jivesoftware.util.StringUtils;
+import org.jivesoftware.util.TaskEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xmpp.component.ComponentManager;
+import org.xmpp.component.ComponentManagerFactory;
+import org.xmpp.packet.IQ;
+import org.xmpp.packet.JID;
+import org.xmpp.packet.PacketError;
 
-import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
-import org.eclipse.jetty.plus.annotation.ContainerInitializer;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.webapp.WebAppContext;
-
-import org.eclipse.jetty.util.security.*;
-import org.eclipse.jetty.security.*;
-import org.eclipse.jetty.security.authentication.*;
-
-import org.ifsoft.websockets.*;
-
-import org.jitsi.videobridge.openfire.PluginImpl;
-import org.jitsi.jigasi.openfire.CallControlComponent;
-import org.jitsi.jigasi.openfire.JigasiPlugin;
-import org.jitsi.jicofo.openfire.JicofoPlugin;
-
-import net.sf.json.*;
-import org.dom4j.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.*;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener  {
 
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
-    private final ConcurrentHashMap<String, XMPPServlet.XMPPWebSocket> sockets = new ConcurrentHashMap<String, XMPPServlet.XMPPWebSocket>();
 	private PluginImpl jitsiPlugin;
 	private JigasiPlugin jigasiPlugin;
 	private JicofoPlugin jicofoPlugin;
@@ -232,18 +231,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 			ClusterManager.addListener(this);
 
-			Log.info("OfMeet Plugin - Initialize websockets ");
-
-			ServletContextHandler context = new ServletContextHandler(contexts, "/ofmeetws", ServletContextHandler.SESSIONS);
-			context.addServlet(new ServletHolder(new XMPPServlet()),"/server");
-
-			// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
-
-			final List<ContainerInitializer> initializers = new ArrayList<>();
-			initializers.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-			context.setAttribute("org.eclipse.jetty.containerInitializers", initializers);
-			context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-
 			Log.info("OfMeet Plugin - Initialize webservice");
 
 			WebAppContext context2 = new WebAppContext(contexts, pluginDirectory.getPath(), "/ofmeet");
@@ -290,20 +277,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 			XMPPServer.getInstance().getIQRouter().removeHandler(ofmeetIQHandler);
 			ofmeetIQHandler = null;
-
-			for (XMPPServlet.XMPPWebSocket socket : sockets.values())
-			{
-				try {
-					LocalClientSession session = socket.getSession();
-					session.close();
-					SessionManager.getInstance().removeSession( session );
-					session = null;
-
-				} catch ( Exception e ) { }
-			}
-
-			sockets.clear();
-
 			jitsiPlugin.destroyPlugin();
 			jigasiPlugin.destroyPlugin();
 			jicofoPlugin.destroyPlugin();
@@ -339,11 +312,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         return csh;
     }
-
-	public ConcurrentHashMap<String, XMPPServlet.XMPPWebSocket> getSockets()
-	{
-		return sockets;
-	}
 
     private void checkDownloadFolder(File pluginDirectory)
     {

@@ -128,7 +128,7 @@ function connect(jid, password) {
     }
 
     // BAO
-    connection = new Openfire.Connection(document.getElementById('boshURL').value || config.bosh || '/http-bind');
+    connection = new Strophe.Connection(document.getElementById('boshURL').value || config.bosh || '/http-bind');
 
     var email = SettingsMenu.getEmail();
     var displayName = SettingsMenu.getDisplayName();
