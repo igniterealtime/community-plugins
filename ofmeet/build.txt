@@ -11,7 +11,7 @@ init:
 
 compile:
     [javac] C:\Projects\ignite\community-plugins\ofmeet\build.xml:29: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
-    [javac] Compiling 136 source files to C:\Projects\ignite\community-plugins\ofmeet\build\classes
+    [javac] Compiling 135 source files to C:\Projects\ignite\community-plugins\ofmeet\build\classes
     [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
     [javac] Note: Some input files use or override a deprecated API.
     [javac] Note: Recompile with -Xlint:deprecation for details.
@@ -43,8 +43,9 @@ jar:
      [copy] Copying 506 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
      [copy] Copying 53 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar\lib
      [copy] Copying 59 files to C:\Projects\ignite\community-plugins\ofmeet\build\jar
+      [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_2\target\openfire\plugins\remotecontrol.zip
       [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_2\target\openfire\plugins\ofmeet.jar
    [delete] Deleting directory C:\Projects\ignite\community-plugins\ofmeet\build
 
 BUILD SUCCESSFUL
-Total time: 37 seconds
+Total time: 29 seconds
