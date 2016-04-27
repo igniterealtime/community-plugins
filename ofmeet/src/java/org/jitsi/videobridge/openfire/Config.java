@@ -150,6 +150,7 @@ public class Config extends HttpServlet
 			String desktopShareSrcs		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.desktop.sharing.sources", "[\"screen\", \"window\"]");
 			String minChromeExtVer		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.min.chrome.ext.ver", "0.1");
 			String enableFirefoxSupport = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.firefox.support", "false");
+			String archiveSpeaking 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.archive.speaking", "off");
 			String logStats 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.stats.logging", "false");
 			String focusUserJid 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@"+domain);
 			String iceServers 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.iceservers", "");
@@ -248,6 +249,7 @@ public class Config extends HttpServlet
 			out.println("    disablePrezi: true,");
 			out.println("    conferences: " + conferences + ",");
 			if (globalConferenceId != null) out.println("    globalConferenceId: '" + globalConferenceId + "',");
+			out.println("    archiveSpeaking: " + (archiveSpeaking.equals("on") ? "true" : "false") + ",");
 			out.println("    bosh: window.location.protocol + '//' + window.location.host + '/http-bind/'");
 			out.println("};	");
 

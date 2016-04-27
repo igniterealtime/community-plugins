@@ -12,16 +12,6 @@ $(document).ready(function ()
 	
 	$("body").append(conferenceList);
 	$("#enter_room_field").attr("list", "conference-list");	
-
-	setTimeout(function()
-	{
-		if ($('#ofmeet-extension-installed').length > 0)
-		{
-			var msg = { type: 'ofmeetSetConfig', host: window.location.host, username: Strophe.getResourceFromJid(this.connection.jid)};
-			console.log("window.post.ofmeetSetConfig", msg);
-			window.postMessage(msg, '*');	
-		}	
-	}, 5000);
 });
 
 
@@ -41,6 +31,7 @@ Strophe.addConnectionPlugin('ofmuc', {
     appRunning: false,
     enableCursor: true,
     video: null,
+    speaking: false,
     
     init: function (conn) {
         this.connection = conn;
@@ -56,8 +47,99 @@ Strophe.addConnectionPlugin('ofmuc', {
 	$(window).resize(function () {
 	   that.resize();
 	}); 
-		
 	
+
+	setTimeout(function()
+	{
+		if ($('#ofmeet-extension-installed').length > 0)
+		{
+			var msg = { type: 'ofmeetSetConfig', host: window.location.host, username: Strophe.getResourceFromJid(that.connection.jid)};
+			console.log("window.post.ofmeetSetConfig", msg);
+			window.postMessage(msg, '*');	
+		}	
+	}, 5000);	
+		
+	if (config.archiveSpeaking)
+	{
+		$(document).bind('dominantspeakerchanged', function (event, resourceJid) 
+		{
+			var sendMsg = false;
+
+			if (resourceJid === Strophe.getResourceFromJid(that.connection.emuc.myroomjid))
+			{
+				//console.log("I started speaking", that.connection.jid);
+				var action =  'on';
+				that.speaking = true;
+				sendMsg = true;
+
+			} else if (that.speaking) {
+
+				//console.log("I stopped speaking", that.connection.jid);
+				var action =  'off';	
+				that.speaking = false;
+				sendMsg = true;
+			}
+
+			if (sendMsg && (that.audioSsrc || that.videoSsrc))
+			{
+				that.getConferenceId(Strophe.getBareJidFromJid(that.connection.emuc.myroomjid), function(json)
+				{		
+					//console.log('getConferenceId', json);	
+
+					json.action = action;	
+					json.audiossrc = that.audioSsrc;					
+					json.videossrc = that.videoSsrc;				
+					json.conference = json.conference;	
+					json.jid = that.connection.jid;	
+					json.type = "groupchat";	
+					json.room = Strophe.getNodeFromJid(that.connection.emuc.myroomjid)
+
+					that.connection.emuc.sendMessage(JSON.stringify(json));					
+
+				}, function(err) {
+
+					console.log('getConferenceId', err);	
+				});					
+			}		
+		});
+	}
+	
+	$(document).bind('remotestreamadded.jingle', function (event, data, sid) 
+	{
+		var sess = connection.jingle.sessions[sid];
+		var thessrc;
+
+		if (data.stream.id && data.stream.id.indexOf('mixedmslabel') === -1) 
+		{
+			var ssrclines = SDPUtil.find_lines(sess.peerconnection.remoteDescription.sdp, 'a=ssrc:');
+			var isAudio = data.stream.getAudioTracks().length > 0;
+			var isVideo = data.stream.getVideoTracks().length > 0;			
+			
+			ssrclines = ssrclines.filter(function (line) 
+			{
+		    		return ((line.indexOf('msid:' + data.stream.id) !== -1));
+			});
+			
+			if (ssrclines.length && (isAudio || isVideo)) 
+			{
+            			thessrc = ssrclines[0].substring(7).split(' ')[0];
+            			var member = that.getMember(data.peerjid);
+            			
+            			if (member != null)
+            			{
+            				if (isAudio) member.audioSsrc = thessrc;
+            				if (isVideo) member.videoSsrc = thessrc;
+            				
+            				console.log("SSRCs FOUND ", member); 
+            				
+					var msg = $msg({to: member.jid, type: 'chat'});
+					msg.c('ssrc', {xmlns: 'http://igniterealtime.org/protocol/ofmeet/ssrc', audio: member.audioSsrc, video: member.videoSsrc}).up();
+					that.connection.send(msg)            				
+            			}
+            		}
+            	}
+	});
+    
 	window.addEventListener('message', function (event) 
 	{ 
 		console.log("addListener message ofmuc", event);
@@ -299,7 +381,14 @@ Strophe.addConnectionPlugin('ofmuc', {
 	var farparty = SettingsMenu.getDisplayName();
 		
 	if (type == "chat" && type != "error")
-	{	
+	{
+	
+		$(msg).find('ssrc').each(function() 
+		{
+			that.audioSsrc = $(this).attr('audio');	
+			that.videoSsrc = $(this).attr('video');				
+		});
+		
 		$(msg).find('remotecontrol').each(function() 
 		{
 			var action = $(this).attr('action');
@@ -727,11 +816,29 @@ Strophe.addConnectionPlugin('ofmuc', {
 		} catch (e) { }		
 	}
     },
-    
+
     appGetMembers: function ()
     {
     	return this.connection.emuc.list_members;
     },
+    
+    getMember: function (jid)
+    {
+    	var members = Object.getOwnPropertyNames(this.connection.emuc.members);
+    	var member = null;
+    	var resource = Strophe.getResourceFromJid(jid);
+    	
+	for (var i = 0; i < members.length; i++) 
+	{
+		if (Strophe.getResourceFromJid(this.connection.emuc.members[members[i]].jid) == resource)
+		{
+			member = this.connection.emuc.members[members[i]];
+			break;
+		}
+	}  
+	return member;
+    },
+        
 
     openAppsDialog: function() {
 	//console.log("ofmuc.openAppsDialog"); 
@@ -1437,11 +1544,49 @@ Strophe.addConnectionPlugin('ofmuc', {
 		
     },
     
-    linkShare: function(action, url) {
+    linkShare: function(action, url) 
+    {
     	//console.log("ofmuc.linkShare", url, action)
         var msg = $msg({to: this.roomJid, type: 'groupchat'});
         msg.c('linkshare', {xmlns: 'http://igniterealtime.org/protocol/linkshare', action: action, url: url}).up();
         this.connection.send(msg);        
+    },
+    
+    setProperties: function(props, callback, errorback)
+    {
+	props.action = "set_user_properties";		
+	this.sendJsonRequest(props, callback, errorback);				
+    },
+
+    getProperties: function(callback, errorback)
+    {
+	this.sendJsonRequest({action: "get_user_properties"}, callback, errorback);	
+    },
+    
+    getConferenceId: function(room, callback, errorback)
+    {
+	this.sendJsonRequest({room: room, action: "get_conference_id"}, callback, errorback);	
+    },
+
+    sendJsonRequest: function(request, callback, errorback)
+    {		
+	this.connection.sendIQ($iq({to: this.connection.domain, type: 'get'}).c("request", {xmlns: 'http://igniterealtime.org/protocol/ofmeet'}).t(JSON.stringify(request)),
+
+		function (resp) 
+		{
+			var response  = resp.querySelector("response");
+			var json = response.innerHTML && response.innerHTML != "" ? response.innerHTML : "{}"
+			if (callback) callback(JSON.parse(json));
+		},
+
+		function (err) 
+		{				
+			var code = err.querySelector("error");
+			var text  = err.querySelector("text");
+
+			if (errorback) errorback({code: code.getAttribute("code"), text: text.innerHTML});
+		}
+	);		
     }    
 });
 

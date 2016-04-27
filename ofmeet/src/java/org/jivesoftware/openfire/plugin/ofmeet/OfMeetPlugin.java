@@ -73,6 +73,7 @@ import org.eclipse.jetty.security.authentication.*;
 import org.ifsoft.websockets.*;
 
 import org.jitsi.videobridge.openfire.PluginImpl;
+import org.jitsi.jigasi.openfire.CallControlComponent;
 import org.jitsi.jigasi.openfire.JigasiPlugin;
 import org.jitsi.jicofo.openfire.JicofoPlugin;
 
@@ -655,6 +656,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				if ("get_user_properties".equals(action)) getUserProperties(iq.getFrom().getNode(), reply, requestJSON);
 				if ("set_user_properties".equals(action)) setUserProperties(iq.getFrom().getNode(), reply, requestJSON);
 				if ("get_user_groups".equals(action)) getUserGroups(iq.getFrom().getNode(), reply, requestJSON);
+				if ("get_conference_id".equals(action)) getConferenceId(iq.getFrom().getNode(), reply, requestJSON);
 
 				return reply;
 
@@ -725,6 +727,31 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			} catch (UserNotFoundException e) {
 				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, "User not found"));
 				return;
+
+			} catch (Exception e1) {
+				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, requestJSON.toString() + " " + e1));
+				return;
+			}
+		}
+
+		private void getConferenceId(String defaultUsername, IQ reply, JSONObject requestJSON)
+		{
+			Element childElement = reply.setChildElement("response", "http://igniterealtime.org/protocol/ofmeet");
+
+			try {
+				String roomName = requestJSON.getString("room");
+
+				if (CallControlComponent.self.conferences.containsKey(roomName))
+				{
+					String confId = CallControlComponent.self.conferences.get(roomName);
+
+					JSONObject userJSON = new JSONObject();
+					userJSON.put("conference", confId);
+					childElement.setText(userJSON.toString());
+
+				} else {
+					reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, "Conference room not found"));
+				}
 
 			} catch (Exception e1) {
 				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, requestJSON.toString() + " " + e1));

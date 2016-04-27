@@ -203,12 +203,10 @@ public class PluginImpl
         }
         if (added)
         {
-            this.componentManager = componentManager;
             this.subdomain = subdomain;
         }
         else
         {
-            this.componentManager = null;
             this.subdomain = null;
         }
     }

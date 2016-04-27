@@ -211,7 +211,10 @@
 	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.sip.hq.voice", hqVoice);	
 	
 	String globalIntercom = request.getParameter("globalIntercom");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.global.intercom", globalIntercom);		
+	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.global.intercom", globalIntercom);
+	
+	String archiveSpeaking = request.getParameter("archiveSpeaking");
+	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.archive.speaking", archiveSpeaking);	
         
     }
 
@@ -302,7 +305,16 @@
 			<input type="checkbox" name="globalIntercom"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.global.intercom", "off").equals("on")) ? " checked" : "" %>>
 			<fmt:message key="config.page.configuration.global.intercom" />		
 		    </td>
+	    </tr>
+	    
+	    <tr>
+		    <td nowrap  colspan="2">
+			<input type="checkbox" name="archiveSpeaking"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.archive.speaking", "off").equals("on")) ? " checked" : "" %>>
+			<fmt:message key="config.page.configuration.archive.speaking" />		
+		    </td>
 	    </tr>	    
+	    
+	    
             </tbody>
         </table>
     </p>

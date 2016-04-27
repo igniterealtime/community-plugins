@@ -23209,7 +23209,6 @@ var ofmeet = (function(of)
 		constraints.video = {
 		    mandatory: {
 			chromeMediaSource: "screen",
-			googLeakyBucket: true,
 			maxWidth: window.screen.width,
 			maxHeight: window.screen.height,
 			maxFrameRate: 3
@@ -23222,7 +23221,6 @@ var ofmeet = (function(of)
 		    mandatory: {
 			chromeMediaSource: "desktop",
 			chromeMediaSourceId: desktopStream,
-			googLeakyBucket: true,
 			maxWidth: window.screen.width,
 			maxHeight: window.screen.height,
 			maxFrameRate: 3
@@ -23249,7 +23247,7 @@ var ofmeet = (function(of)
 		);
 		if (um.indexOf('video') >= 0) {
 		    constraints.video.optional.push(
-			{googLeakyBucket: true}
+			{}
 		    );
 		}
 	    }

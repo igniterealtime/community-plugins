@@ -630,7 +630,7 @@ function getUserMediaWithConstraints(um, success_callback, failure_callback, res
         constraints.video = {
             mandatory: {
                 chromeMediaSource: "screen",
-                googLeakyBucket: true,
+                //googLeakyBucket: true,
                 maxWidth: window.screen.width,
                 maxHeight: window.screen.height,
                 maxFrameRate: 3
@@ -643,7 +643,7 @@ function getUserMediaWithConstraints(um, success_callback, failure_callback, res
             mandatory: {
                 chromeMediaSource: "desktop",
                 chromeMediaSourceId: desktopStream,
-                googLeakyBucket: true,
+                //googLeakyBucket: true,
                 maxWidth: window.screen.width,
                 maxHeight: window.screen.height,
                 maxFrameRate: 3
@@ -669,9 +669,9 @@ function getUserMediaWithConstraints(um, success_callback, failure_callback, res
             {googNoiseReduction: false} // chrome 37 workaround for issue 3807, reenable in M38
         );
         if (um.indexOf('video') >= 0) {
-            constraints.video.optional.push(
-                {googLeakyBucket: true}
-            );
+            //constraints.video.optional.push(
+            //    {googLeakyBucket: true}
+            //);
         }
     }
 

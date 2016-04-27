@@ -255,7 +255,7 @@ Strophe.addConnectionPlugin('emuc', {
         }
 
 
-        if (txt) {
+        if (txt && txt.substring(0) != "{" && txt.substring(txt.length - 1) != "}") {
             //console.log('chat', nick, txt);
             Chat.updateChatConversation(from, nick, txt);
             if(APIConnector.isEnabled() && APIConnector.isEventEnabled("incomingMessage"))
