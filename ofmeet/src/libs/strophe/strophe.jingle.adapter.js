@@ -591,7 +591,7 @@ function setupRTC() {
                 return stream.id.replace(/[\{,\}]/g,"");
             },
             getVideoSrc: function (element) {
-                return element.getAttribute("src");
+                return element ? element.getAttribute("src"): null;
             },
             setVideoSrc: function (element, src) {
                 element.setAttribute("src", src);

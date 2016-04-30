@@ -215,6 +215,9 @@
 	
 	String archiveSpeaking = request.getParameter("archiveSpeaking");
 	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.archive.speaking", archiveSpeaking);	
+
+	String archiveRecording = request.getParameter("archiveRecording");
+	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.archive.recording", archiveRecording);	
         
     }
 
@@ -314,6 +317,12 @@
 		    </td>
 	    </tr>	    
 	    
+	    <tr>
+		    <td nowrap  colspan="2">
+			<input type="checkbox" name="archiveRecording"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.archive.recording", "off").equals("on")) ? " checked" : "" %>>
+			<fmt:message key="config.page.configuration.archive.recording" />		
+		    </td>
+	    </tr>	    	    
 	    
             </tbody>
         </table>
@@ -609,7 +618,7 @@
 		    <fmt:message key="config.page.configuration.record.path"/>
 		</td>
 		<td><input type="text" size="60" maxlength="100" name="recordpath"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", container.pluginDirectory.getAbsolutePath() + File.separator + "recordings") %>">
+			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", OfMeetPlugin.ofmeetHome + File.separator + "recordings") %>">
 		</td>
 	    </tr>
 

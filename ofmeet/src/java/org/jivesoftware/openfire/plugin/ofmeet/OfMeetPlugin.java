@@ -95,6 +95,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private OfMeetIQHandler ofmeetIQHandler = null;
 
     public static OfMeetPlugin self;
+	public static String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
 
 	public String sipRegisterStatus = "";
 
@@ -346,8 +347,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     private void checkDownloadFolder(File pluginDirectory)
     {
-		String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
-
         try
         {
 			File ofmeetFolderPath = new File(ofmeetHome);
@@ -367,11 +366,21 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             if(!downloadHome.exists())
             {
                 downloadHome.mkdirs();
+			}
 
+			File recordingsHome = new File(ofmeetHome + File.separator + "recordings");
+
+            if(!recordingsHome.exists())
+            {
+                recordingsHome.mkdirs();
 			}
 
 			lines = Arrays.asList("Move on, nothing here....");
+
 			file = Paths.get(downloadHome + File.separator + "index.html");
+			Files.write(file, lines, Charset.forName("UTF-8"));
+
+			file = Paths.get(recordingsHome + File.separator + "index.html");
 			Files.write(file, lines, Charset.forName("UTF-8"));
         }
         catch (Exception e)
@@ -747,6 +756,25 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 					JSONObject userJSON = new JSONObject();
 					userJSON.put("conference", confId);
+
+					Path dir = Paths.get(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", ofmeetHome + File.separator + "recordings"));
+
+					try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir))
+					{
+						for (Path file: stream)
+						{
+							String fileName = file.getFileName().toString();
+
+							if (fileName.indexOf(confId) > -1)
+							{
+								userJSON.put("folder", fileName);
+							}
+						}
+
+					} catch (IOException | DirectoryIteratorException x) {
+						Log.error("getConferenceId", x);
+					}
+
 					childElement.setText(userJSON.toString());
 
 				} else {

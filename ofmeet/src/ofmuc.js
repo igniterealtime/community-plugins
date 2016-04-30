@@ -31,7 +31,8 @@ Strophe.addConnectionPlugin('ofmuc', {
     appRunning: false,
     enableCursor: true,
     video: null,
-    speaking: false,
+    speaking: false, 
+    recordingArchived: false,     
     
     init: function (conn) {
         this.connection = conn;
@@ -59,27 +60,27 @@ Strophe.addConnectionPlugin('ofmuc', {
 		}	
 	}, 5000);	
 		
-	if (config.archiveSpeaking)
+	$(document).bind('dominantspeakerchanged', function (event, resourceJid) 
 	{
-		$(document).bind('dominantspeakerchanged', function (event, resourceJid) 
+		var sendMsg = false;
+
+		if (resourceJid === Strophe.getResourceFromJid(that.connection.emuc.myroomjid))
 		{
-			var sendMsg = false;
+			//console.log("I started speaking", that.connection.jid);
+			var action =  'on';
+			that.speaking = true;
+			sendMsg = true;
 
-			if (resourceJid === Strophe.getResourceFromJid(that.connection.emuc.myroomjid))
-			{
-				//console.log("I started speaking", that.connection.jid);
-				var action =  'on';
-				that.speaking = true;
-				sendMsg = true;
+		} else if (that.speaking) {
 
-			} else if (that.speaking) {
+			//console.log("I stopped speaking", that.connection.jid);
+			var action =  'off';	
+			that.speaking = false;
+			sendMsg = true;
+		}
 
-				//console.log("I stopped speaking", that.connection.jid);
-				var action =  'off';	
-				that.speaking = false;
-				sendMsg = true;
-			}
-
+		if (config.archiveSpeaking && config.recordingPath.indexOf("spank") > -1)
+		{
 			if (sendMsg && (that.audioSsrc || that.videoSsrc))
 			{
 				that.getConferenceId(Strophe.getBareJidFromJid(that.connection.emuc.myroomjid), function(json)
@@ -98,11 +99,11 @@ Strophe.addConnectionPlugin('ofmuc', {
 
 				}, function(err) {
 
-					console.log('getConferenceId', err);	
+					console.error('getConferenceId', err);	
 				});					
-			}		
-		});
-	}
+			}
+		}
+	});
 	
 	$(document).bind('remotestreamadded.jingle', function (event, data, sid) 
 	{
@@ -381,12 +382,48 @@ Strophe.addConnectionPlugin('ofmuc', {
 	var farparty = SettingsMenu.getDisplayName();
 		
 	if (type == "chat" && type != "error")
-	{
-	
+	{	
 		$(msg).find('ssrc').each(function() 
 		{
 			that.audioSsrc = $(this).attr('audio');	
-			that.videoSsrc = $(this).attr('video');				
+			that.videoSsrc = $(this).attr('video');	
+			
+			if (!that.recordingArchived && config.archiveRecording && (that.audioSsrc || that.videoSsrc) && config.recordingPath.indexOf("spank") > -1)
+			{
+				that.recordingArchived = true;				
+				
+				that.getConferenceId(Strophe.getBareJidFromJid(that.connection.emuc.myroomjid), function(json)
+				{	
+					if (json.conference && json.folder)
+					{
+						var pos = config.recordingPath.indexOf("spank");					
+						var link = window.location.protocol + "//" + window.location.host + "/" + config.recordingPath.substring(pos + 6) + "/" + json.folder + "/";
+						var audioLink = link + that.audioSsrc + ".mp3";
+						var videoLink = link + that.videoSsrc + ".webm";
+
+						setTimeout(function()
+						{
+							console.log('Writing archive files', audioLink, videoLink)
+							
+							that.existURL(audioLink, function()
+							{
+								that.connection.emuc.sendMessage("audio - " + audioLink);						
+							});
+
+							that.existURL(videoLink, function()
+							{						
+								that.connection.emuc.sendMessage("video - " + videoLink);	
+							});
+						}, 60000);
+												
+					} else {
+						console.err('getConferenceId, no recording folder', json);	
+					}
+				}, function(err) {
+
+					console.err('getConferenceId', err);	
+				});				
+			}			
 		});
 		
 		$(msg).find('remotecontrol').each(function() 
@@ -830,10 +867,15 @@ Strophe.addConnectionPlugin('ofmuc', {
     	
 	for (var i = 0; i < members.length; i++) 
 	{
-		if (Strophe.getResourceFromJid(this.connection.emuc.members[members[i]].jid) == resource)
+		var temp = this.connection.emuc.members[members[i]];
+		
+		if (temp && temp.jid)
 		{
-			member = this.connection.emuc.members[members[i]];
-			break;
+			if (Strophe.getResourceFromJid(temp.jid) == resource)
+			{
+				member = this.connection.emuc.members[members[i]];
+				break;
+			}
 		}
 	}  
 	return member;
@@ -1370,6 +1412,26 @@ Strophe.addConnectionPlugin('ofmuc', {
     iframeURL: function (url) 
     {   
     	return url.indexOf("<iframe src=") > -1;
+    },
+    
+    existURL: function (url, callback, errorback)
+    {
+	var xhr = new XMLHttpRequest();
+
+	xhr.onreadystatechange = function() 
+	{
+		if (xhr.readyState == 4 && xhr.status == 200)
+		{
+			if (callback) callback();
+		}
+
+		if (xhr.status >= 400)
+		{
+			if (errorback) errorback();
+		}
+	};
+	xhr.open("GET", url, true);
+	xhr.send();
     },
 
     stopLinkShare: function()

@@ -48,7 +48,8 @@ Openfire.Connection = function(url)
     this.host = url.indexOf("/") < 0 ? url : url.split("/")[2];   
     this.protocol = url.indexOf("/") < 0 ? "wss:" : (url.split("/")[0] == "http:") ? "ws:" : "wss:";   
     this.jid = "";
-    this.resource = "ofmeet" + Math.round(Math.random() * 10000);
+    var randomNo = Math.round(Math.random() * 10000);
+    this.resource = (config && config.userName) ? config.userName + "-" + randomNo : "ofmeet-" + randomNo;
     this.streamId = null;
 
     // handler lists

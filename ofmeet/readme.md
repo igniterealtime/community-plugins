@@ -175,3 +175,7 @@ enter a managed queue.
 
 After installation of Openfire Meetings, the Fastpath JavaScript library can be accessed at ```https://your-server.com:7443/ofmeet/fastpath/```.
 
+### ... Openfire Meetings-enhanced Monitoring
+Openfire Meetings works with the monitoring plugin to enable easy playback of meeting recordings from the server using the monitoring archive search admin web web page or from a client using Jitsi Meet and Candy. For this feature to work, accept the default location for the recordings or ensure your recording folder is under the "./resources/spank" folder. 
+
+Openfire Meetings will inject two groupchat messages into every meeting with clickable weblinks to the audio and video recording files for each participant in a conference. These are then archived and retrieved normally by the monitoring plugin.

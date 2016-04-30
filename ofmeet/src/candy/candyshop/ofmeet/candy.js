@@ -9,8 +9,13 @@ CandyShop.OfMeet = (function(self, Candy, $) {
 		$('#ofmeet-control-icon').click(function(event) 
 		{
 			var roomJid = Candy.View.getCurrent().roomJid;
-			Candy.Core.Action.Jabber.Room.Leave(roomJid);
-			self.showOfMeet(roomJid);
+			
+			if (!Strophe.getResourceFromJid(roomJid))
+			{
+				Candy.Core.Action.Jabber.Room.Leave(roomJid);
+			}
+			
+			self.showOfMeet(roomJid);			
 		});
 		
 		if (!window.inExtension)
@@ -33,7 +38,15 @@ CandyShop.OfMeet = (function(self, Candy, $) {
 
 	self.showOfMeet = function(roomJid) 
 	{
-		var room = Strophe.getNodeFromJid(roomJid);	
+		var room = Strophe.getNodeFromJid(roomJid);
+				
+		if (Strophe.getResourceFromJid(roomJid))
+		{
+			var fromUser = Strophe.escapeNode(Strophe.getResourceFromJid(roomJid));
+			var toUser = Strophe.escapeNode(Candy.Core.getUser().getNick());	
+		
+			room = fromUser > toUser ? toUser + fromUser : fromUser + toUser;
+		}
 		
 		if (!window.inExtension)
 		{		
