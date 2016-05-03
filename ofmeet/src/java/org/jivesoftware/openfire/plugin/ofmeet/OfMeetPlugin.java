@@ -51,6 +51,10 @@ import org.jivesoftware.openfire.group.GroupNotFoundException;
 import org.jivesoftware.openfire.handler.IQHandler;
 import org.jivesoftware.openfire.http.HttpBindManager;
 import org.jivesoftware.openfire.muc.MultiUserChatService;
+import org.jivesoftware.openfire.net.SASLAuthentication;
+import org.jivesoftware.openfire.plugin.ofmeet.jetty.OfMeetLoginService;
+import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslProvider;
+import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslServer;
 import org.jivesoftware.openfire.plugin.spark.Bookmark;
 import org.jivesoftware.openfire.plugin.spark.BookmarkManager;
 import org.jivesoftware.openfire.roster.RosterManager;
@@ -76,6 +80,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.*;
+import java.security.Security;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -268,6 +273,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		} catch (Exception e) {
 			Log.error("Could NOT start open fire meetings", e);
 		}
+
+		// Add support for our access token SASL mechanism.
+		Security.addProvider( new OfMeetSaslProvider() );
+		SASLAuthentication.addSupportedMechanism( OfMeetSaslServer.MECHANISM_NAME );
     }
 
     public void destroyPlugin() {
@@ -285,32 +294,36 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 			EmailListener.getInstance().stop();
 
+			// Remove support for our access token SASL mechanism.
+			SASLAuthentication.removeSupportedMechanism( OfMeetSaslServer.MECHANISM_NAME );
+			Security.removeProvider( OfMeetSaslProvider.NAME );
+
         } catch (Exception e) {
 
         }
     }
 
-    private static final SecurityHandler basicAuth(String realm) {
+    private static SecurityHandler basicAuth( String realm ) {
 
-    	OpenfireLoginService l = new OpenfireLoginService();
-        l.setName(realm);
+    	final OfMeetLoginService loginService = new OfMeetLoginService();
+        loginService.setName(realm);
 
-        Constraint constraint = new Constraint();
-        constraint.setName(Constraint.__BASIC_AUTH);
-        constraint.setRoles(new String[]{"ofmeet"});
-        constraint.setAuthenticate(true);
+        final Constraint constraint = new Constraint();
+        constraint.setName( Constraint.__BASIC_AUTH );
+        constraint.setRoles( new String[] { "ofmeet" } );
+        constraint.setAuthenticate( true );
 
-        ConstraintMapping cm = new ConstraintMapping();
-        cm.setConstraint(constraint);
-        cm.setPathSpec("/*");
+        final ConstraintMapping constraintMapping = new ConstraintMapping();
+        constraintMapping.setConstraint( constraint );
+        constraintMapping.setPathSpec( "/*" );
 
-        ConstraintSecurityHandler csh = new ConstraintSecurityHandler();
-        csh.setAuthenticator(new BasicAuthenticator());
-        csh.setRealmName(realm);
-        csh.addConstraintMapping(cm);
-        csh.setLoginService(l);
+        final ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+        securityHandler.setAuthenticator( new BasicAuthenticator() );
+        securityHandler.setRealmName( realm );
+        securityHandler.addConstraintMapping( constraintMapping );
+        securityHandler.setLoginService( loginService );
 
-        return csh;
+        return securityHandler;
     }
 
     private void checkDownloadFolder(File pluginDirectory)

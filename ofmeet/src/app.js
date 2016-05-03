@@ -1347,13 +1347,14 @@ $(document).ready(function () {
     var jid = document.getElementById('jid').value || config.hosts.anonymousdomain || config.hosts.domain || window.location.hostname;
 
     // BAO
-    
+    var password;
     if (config.userName)
     {
     	jid = config.userName +  "@" + config.hosts.domain;
+        password = config.accessToken;
     	authenticatedUser = true;
     } 
-    connect(jid);        
+    connect(jid, password);
 
     if(config.enableWelcomePage && window.location.href.indexOf("r=") == -1 && window.location.href.indexOf("b=") == -1 &&	// BAO
         (!window.localStorage.welcomePageDisabled

@@ -24,6 +24,7 @@
 	<script type="text/javascript" src="candy/candyshop/typingnotifications/typingnotifications.js"></script>
 	<link rel="stylesheet" type="text/css" href="candy/candyshop/typingnotifications/typingnotifications.css" />
     <script type="text/javascript" src="candy/candyshop/mam/candy.js"></script>
+	<script src="libs/strophe/strophe.ofmeet.sasl.js?v=1"></script> <!-- OFMeet Access Token support -->
 
 	<script type="text/javascript">
 
@@ -44,10 +45,11 @@
 			});
 
 			var jid = config.hosts.domain;
-
+			var accessToken;
 			if (config.userName)
 			{
 				jid = config.userName +  "@" + config.hosts.domain;
+				accessToken = config.accessToken;
 			}
 
     		CandyShop.OfMeet.init();
@@ -59,7 +61,7 @@
 			CandyShop.Notifications.init();
 			CandyShop.Mam.init();
 
-			Candy.Core.connect(jid, "null");
+			Candy.Core.connect(jid, accessToken);
     		CandyShop.NotifyMe.init();
     		CandyShop.Fastpath.init();
 
