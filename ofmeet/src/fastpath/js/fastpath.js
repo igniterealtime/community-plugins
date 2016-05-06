@@ -3,7 +3,7 @@ var userForm = null;
 
 $(document).ready(function () 
 {
-    connection = new Strophe.Connection(window.location.protocol + "//" + window.location.host + '/http-bind/');
+    connection = new Openfire.Connection(window.location.protocol + "//" + window.location.host + '/http-bind/');        	
     connection.resource = Math.random().toString(36).substr(2, 20);
     connection.rawInput = function (data) { console.log('RECV: ' + data); };
     connection.rawOutput = function (data) { console.log('SEND: ' + data); };

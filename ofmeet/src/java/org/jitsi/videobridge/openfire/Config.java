@@ -7,7 +7,6 @@
 
 package org.jitsi.videobridge.openfire;
 
-import org.jivesoftware.openfire.plugin.ofmeet.TokenManager;
 import org.jivesoftware.util.*;
 import org.jivesoftware.openfire.*;
 import org.jivesoftware.openfire.vcard.VCardManager;
@@ -53,7 +52,6 @@ public class Config extends HttpServlet
 			String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
 			String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
 			String userName = "null";
-			String accessToken = "null";
 			String userAvatar = "null";
 			String conferences = "[";
 
@@ -62,11 +60,6 @@ public class Config extends HttpServlet
 			if ("true".equals(securityEnabled))
 			{
 				userName = request.getUserPrincipal().getName();
-
-				final String token = TokenManager.getInstance().retrieveToken( request.getUserPrincipal() );
-				if (token != null) {
-					accessToken = token;
-				}
 				VCardManager vcardManager = VCardManager.getInstance();
 				Element vcard = vcardManager.getVCard(userName);
 
@@ -257,7 +250,6 @@ public class Config extends HttpServlet
 			out.println("    audioBandwidth: '" + audioBandwidth + "',");
 			out.println("    videoBandwidth: '" + videoBandwidth + "',");
 			out.println("    userName: '" + userName + "',");
-			out.println("    accessToken: '" + accessToken + "',");
 			out.println("    userAvatar: '" + userAvatar + "',");
 			out.println("    enableFirefoxSupport: " + enableFirefoxSupport + ",");
 			out.println("    logStats: " + logStats + ",");
