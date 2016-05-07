@@ -1,0 +1,81 @@
+14:40
+ofmeet.remote.control starts
+ofmeet.remote.control found robot 900 1440
+ofmeet.remote.control listening on: http://localhost:6060
+ofmeet.remote.control received request: /?action=ofmeetGetScreen&resource=nigels-11&server=https://btg199251:7443/http-bind/
+ofmeet.remote.control got server  wss://btg199251:7443/ofmeetws/server?username=null&password=null&resource=remotecontrol-nigels-11
+ofmeet.remote.control received request: /?action=ofmeetSetRequestorOn&requester=deleo-51
+ofmeet.remote.control got requestor  deleo-51
+ofmeet.remote.control mouse down { down: true,
+  button: 0,
+  x: 689.671875,
+  y: 225,
+  width: 1023.328125,
+  height: 640 }
+ofmeet.remote.control mouse up { up: true,
+  button: 0,
+  x: 689.671875,
+  y: 225,
+  width: 1023.328125,
+  height: 640 }
+ofmeet.remote.control mouse down { down: true,
+  button: 0,
+  x: 559.671875,
+  y: 363,
+  width: 1023.328125,
+  height: 640 }
+ofmeet.remote.control mouse up { up: true,
+  button: 0,
+  x: 559.671875,
+  y: 363,
+  width: 1023.328125,
+  height: 640 }
+ofmeet.remote.control mouse down { down: true,
+  button: 0,
+  x: 71.671875,
+  y: 175,
+  width: 1023.328125,
+  height: 640 }
+ofmeet.remote.control mouse up { up: true,
+  button: 0,
+  x: 71.671875,
+  y: 175,
+  width: 1023.328125,
+  height: 640 }
+ofmeet.remote.control mouse down { down: true,
+  button: 0,
+  x: 79.671875,
+  y: 190,
+  width: 1023.328125,
+  height: 640 }
+ofmeet.remote.control mouse up { up: true,
+  button: 0,
+  x: 79.671875,
+  y: 190,
+  width: 1023.328125,
+  height: 640 }
+ofmeet.remote.control mouse down { down: true,
+  button: 0,
+  x: 559.671875,
+  y: 360,
+  width: 1023.328125,
+  height: 640 }
+ofmeet.remote.control mouse up { up: true,
+  button: 0,
+  x: 559.671875,
+  y: 360,
+  width: 1023.328125,
+  height: 640 }
+ofmeet.remote.control mouse down { down: true,
+  button: 0,
+  x: 643.671875,
+  y: 621,
+  width: 1023.328125,
+  height: 640 }
+ofmeet.remote.control mouse up { up: true,
+  button: 0,
+  x: 643.671875,
+  y: 621,
+  width: 1023.328125,
+  height: 640 }
+ofmeet.remote.control received request: /?action=ofmeetSetRequestorOff

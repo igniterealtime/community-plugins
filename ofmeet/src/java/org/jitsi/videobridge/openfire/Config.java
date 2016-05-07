@@ -14,7 +14,10 @@ import org.jivesoftware.openfire.plugin.spark.*;
 import org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin;
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.group.GroupManager;
+import org.jivesoftware.openfire.user.*;
 import org.jivesoftware.openfire.group.GroupNotFoundException;
+import org.jivesoftware.openfire.plugin.ofmeet.OpenfireLoginService;
+import org.jivesoftware.openfire.auth.AuthToken;
 
 import org.slf4j.*;
 import org.slf4j.Logger;
@@ -60,6 +63,39 @@ public class Config extends HttpServlet
 			if ("true".equals(securityEnabled))
 			{
 				userName = request.getUserPrincipal().getName();
+
+				if (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.windows.sso", "off").equals("on"))
+				{
+					UserManager userManager = XMPPServer.getInstance().getUserManager();
+					userName = userName.toLowerCase();
+					String [] userNameDetails = userName.split("\\\\");
+
+					if (userNameDetails.length == 2)
+					{
+						userName = userNameDetails[1];
+
+						try {
+							userManager.getUser(userName);
+						}
+						catch (UserNotFoundException e) {
+
+							try {
+								userManager.createUser(userName, "password-" + System.currentTimeMillis(), userName, userName + "@" + domain);
+							}
+							catch (Exception e1) {
+								userName = "null";
+							}
+						}
+
+						if (OpenfireLoginService.authTokens.containsKey(userName) == false)
+						{
+							AuthToken authToken = new AuthToken(userName);
+							OpenfireLoginService.authTokens.put(userName, authToken);
+						}
+					}
+					else userName = "null";
+				}
+
 				VCardManager vcardManager = VCardManager.getInstance();
 				Element vcard = vcardManager.getVCard(userName);
 
