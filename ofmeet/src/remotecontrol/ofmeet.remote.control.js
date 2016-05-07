@@ -62,7 +62,7 @@ function handleRequest(request, response)
 			var host = url.indexOf("/") < 0 ? url : url.split("/")[2];   
 			var protocol = url.indexOf("/") < 0 ? "wss:" : (url.split("/")[0] == "http:") ? "ws:" : "wss:";  
 
-			var wsUrl = protocol + "//" + host + "/http-bind?username=null&password=null&resource=" + "remotecontrol-" + resource;
+			var wsUrl = protocol + "//" + host + "/ofmeetws/server?username=null&password=null&resource=" + "remotecontrol-" + resource;	
 			console.log("ofmeet.remote.control got server ", wsUrl);
 
 			ws = new WebSocket(wsUrl, "xmpp");		
