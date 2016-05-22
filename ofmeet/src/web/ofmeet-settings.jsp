@@ -218,6 +218,9 @@
 
 	String archiveRecording = request.getParameter("archiveRecording");
 	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.archive.recording", archiveRecording);	
+	
+	String windowsSso = request.getParameter("windowsSso");
+	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.windows.sso", windowsSso);	
         
     }
 
@@ -590,6 +593,13 @@
 			<b><fmt:message key="config.page.configuration.security.enabled" /></b> - <fmt:message key="config.page.configuration.security.enabled_description" />
 		    </td>
 	    </tr> 
+	    
+	    <tr>
+		    <td nowrap  colspan="2">
+			<input type="checkbox" name="windowsSso"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.windows.sso", "off").equals("on")) ? " checked" : "" %>>
+			<fmt:message key="config.page.configuration.security.windows.sso" />		
+		    </td>
+	    </tr>	    
             </tbody>
         </table> 
     </p>

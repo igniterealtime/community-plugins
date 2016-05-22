@@ -26,6 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.*;
 import java.text.*;
 import java.util.regex.*;
+import javax.servlet.DispatcherType;
+
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
 import org.xmpp.packet.*;
@@ -64,6 +66,7 @@ import org.eclipse.jetty.plus.annotation.ContainerInitializer;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import org.eclipse.jetty.util.security.*;
@@ -263,7 +266,19 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			if ("true".equals(securityEnabled))
 			{
 				Log.info("OfMeet Plugin - Initialize security");
-				context2.setSecurityHandler(basicAuth("ofmeet"));
+
+				if (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.windows.sso", "off").equals("on"))
+				{
+					waffle.servlet.NegotiateSecurityFilter securityFilter = new waffle.servlet.NegotiateSecurityFilter();
+					FilterHolder filterHolder = new FilterHolder();
+					filterHolder.setFilter(securityFilter);
+					EnumSet<DispatcherType> enums = EnumSet.of(DispatcherType.REQUEST);
+					enums.add(DispatcherType.REQUEST);
+					context2.addFilter(filterHolder, "/*", enums);
+				}
+				else {
+					context2.setSecurityHandler(basicAuth("ofmeet"));
+				}
 			}
 
 			Log.info("OfMeet Plugin - Initialize email listener");
