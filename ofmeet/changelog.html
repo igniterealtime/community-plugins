@@ -49,7 +49,331 @@
     Openfire Meetings Plugin Changelog
 </h1>
 
-<p><b>1.0.1</b> -- April 20, 2016</p>
+<p><b>0.4.1 Alpha</b> -- May 22, 2016</p>
+
+<ul>
+    <li>New version with latest Jitsi videobridge, jifco and meet code. Only basic videoconferencing works!!</li>
+</ul>
+
+<p><b>0.3.22</b> -- May 22, 2016</p>
+
+<ul>
+    <li>Implemented Windows SSO using waffle</li>
+    <li>Fixed multiple users on filmstrip issue when using Azure AD users</li>
+    <li>Reverted 0.3.21 back to 0.3.20</li>
+</ul>
+
+<p><b>0.3.20</b> -- May 1st, 2016</p>
+
+<ul>
+    <li>Added support for Azure AD authentication. Login as "user@domain" to create a new username "user.doman"</li>
+</ul>
+
+<p><b>0.3.19</b> -- April 27, 2016</p>
+
+<ul>
+    <li>Added support for archiving of meeting recording metadata using monitoring plugin</li>
+</ul>
+
+<p><b>0.3.18</b> -- April 17, 2016</p>
+
+<ul>
+    <li>Accepted pull requests</li>
+</ul>
+
+<p><b>0.3.17</b> -- April 8, 2016</p>
+
+<ul>
+    <li>Updated documentation (readme.md)</li>
+    <li>Added MAM plugin to Candy to retrieve history of private chats from Openfire monitoring plugin</li>
+</ul>
+
+<p><b>0.3.16</b> -- April 6, 2016</p>
+
+<ul>
+    <li>Fixed various javascript errors</li>
+</ul>
+
+<p><b>0.3.15</b> -- April 3, 2016</p>
+
+<ul>
+    <li>Upgraded to Openfire 4.0.2</li>
+    <li>Minor fixes to focus code</li>
+    <li>Moved global intercom voice conference behind a setting in admin web page</li>
+</ul>
+
+<p><b>0.3.14</b> -- March 28, 2016</p>
+
+<ul>
+    <li>Added support for wideband audio (g722 codec) to SIP calls</li>
+    <li>Added link sharing to web client. (you-tube videos, google maps and google doc viewer for pdf|pages|ai|psd|tiff|dxf|svg|eps|ps|ttf|xps|zip|rar|doc|xls|ppt files implemented)</li>
+</ul>
+
+<p><b>0.3.13</b> -- March 14, 2016</p>
+
+<ul>
+    <li>Implemented auto-recording of conferences. See Admin settings.</li>
+    <li>Added support for Fastpath to Openfire Meetings Email Listener. Fastpath annonymous or authenticated end-users can send requests to Candy user-agents via email. See Admin settings.</li>
+</ul>
+
+<p><b>0.3.12</b> -- March 12, 2016</p>
+
+<ul>
+    <li>Replaced reference to clientcontrol plugin with bookmarks plugin</li>
+    <li>Modified Candy to handle Openfire bookmarks autojoin properly.</li>
+    <li>Fixed issue when user does not provide a servername to Chrome extension</li>
+    <li>Fixed issue with mixed case room names failing</li>
+    <li>Updated Chrome extension version to 0.0.8</li>
+</ul>
+
+<p><b>0.3.11</b> -- March 11, 2016</p>
+
+<ul>
+    <li>Remote desktop control; included linux32, linux64 and osx binaries (untested)</li>
+    <li>Upgraded Candy to version 2.2.0. Includes the responsive changes for mobile, using the Bootstrap front-end framework.</li>
+    <li>Candy is now available as a desktop application from the chrome extension version 0.0.7</li>
+</ul>
+
+<p><b>0.3.10</b> -- February 29, 2016</p>
+
+<ul>
+    <li>Remote desktop control (Tested on win32 and win64 only)</li>
+    <li>Changed recording to work without focus</li>
+    <li>Some responsive design changes</li>
+    <li>Woot collaborative editor integration to make it work out of the box. Removed redundant nodejs server.</li>
+</ul>
+
+<p><b>0.3.9</b> -- February 4, 2016</p>
+
+<ul>
+    <li>Fixed minimum Java support to Java 7 (which is equal to Openfire 4.0.1)</li>
+</ul>
+
+<p><b>0.3.8</b> -- February 1, 2016</p>
+
+<ul>
+	<li>Build for Openfire 4.0.1</li>
+</ul>
+
+<p><b>0.3.7</b> -- January 14, 2016</p>
+
+<ul>
+	<li>Fixed reported broken room password</li>
+</ul>
+
+<p><b>0.3.6</b> -- January 2, 2016</p>
+
+<ul>
+	<li>Added support for xirsys hosted TURN service</li>
+</ul>
+
+<p><b>0.3.5</b> -- December 27, 2015</p>
+
+<ul>
+	<li>Added support for iCalendar attachment to create meeting planner event</li>
+</ul>
+
+<p><b>0.3.4</b> -- December 22, 2015</p>
+
+<ul>
+	<li>Added support for lobby and unattended mode. Control is by emails</li>
+</ul>
+
+<p><b>0.3.3</b> -- December 21, 2015</p>
+
+<ul>
+	<li>MUC Room bookmarks now have a URL for meetings that only permits users and group users assigned to bookmark.</li>
+    <li>Added email listener feature that connects to an email server using IMAP and listens for new emails from registered users. Meeting room and bookmark are created, PDF attachments are uploaded and email with meeting URL is sent to sender and all copied users.</li>
+</ul>
+
+<p><b>0.3.2</b> -- December 18, 2015</p>
+
+<ul>
+    <li>Moved Openfire meetings from Openfire repository to Community plugins repository</li>
+</ul>
+
+<p><b>0.3.1</b> -- December 12, 2015</p>
+
+<ul>
+    <li>Fixed issue with broken presence broadcast</li>
+    <li>Fixed issue with broken desktop/screen sharing</li>
+    <li>Fixed issue with missing jnsctp.dll dependencies</li>
+    <li>Removed some more redundant or duplicate jar files in jitsivideobridge lib</li>
+</ul>
+
+<p><b>0.3.0</b> -- October 12, 2015</p>
+
+<ul>
+    <li>[<a href='http://www.igniterealtime.org/issues/browse/OF-953'>OF-953</a>] - Updated JSP libraries.</li>
+    <li>Requires Openfire 3.11.0.</li>
+</ul>
+
+<p><b>0.2.3</b> -- Nov 14th, 2015</p>
+
+<ul>
+    <li>Simplified build, removed classes folder in WEB-INF</li>
+    <li>Changed default value for voip gateway to false</li>
+    <li>Removed some redundant and duplicate jar file in jitsivideobridge lib</li>
+    <li>Removed tinder.jar and whack.jar which caused ComponentManagerFactory.getComponentManager() to fail with OF 3.11</li>
+</ul>
+
+<p><b>0.2.2</b> -- Oct 9th, 2015</p>
+
+<ul>
+    <li>Reverted Jitsi Videobridge latest code because of issues on linux builds</li>
+</ul>
+
+<p><b>0.2.1</b> -- Oct 8th, 2015</p>
+
+<ul>
+    <li>Updated Jitsi Videobridge to latest code</li>
+    <li>Fixed issues with Jigasi voip gateway</li>
+    <li>Added Multicast RTP to Jigasi voip gateway</li>
+</ul>
+
+<p><b>0.2.0</b> -- Aug 29th, 2015</p>
+
+<ul>
+    <li>Updated Jitsi Videobridge to latest code</li>
+    <li>Removed support for jingle nodes, redundant.</li>
+    <li>Used IP Address instead of host name for NAT_HARVESTER_LOCAL_ADDRESS and NAT_HARVESTER_PUBLIC_ADDRESS.</li>
+</ul>
+
+<p><b>0.1.9</b> -- Aug 4th, 2015</p>
+
+<ul>
+    <li>Fixed issue in build process (the J2EE version that is used should not be platform-dependant).</li>
+</ul>
+
+<p><b>0.1.8</b> -- May 20th, 2015</p>
+
+<ul>
+    <li>Added conference UI customization to Meetings Settings Admin web page</li>
+    <li>Fixed issue with room locking not working</li>
+    <li>Updated Jitsi Videobridge</li>
+</ul>
+
+<p><b>0.1.7</b> -- May 13th, 2015</p>
+
+<ul>
+    <li>Logs openfire meeting audit events with Openfire security auditor</li>
+    <li>Logs meeting SIP calls via SIP plugin</li>
+    <li>Added support for audio conferencing meetings (no video)</li>
+    <li>Updated Jitsi Videobridge</li>
+</ul>
+
+<p><b>0.1.6</b> -- May 9th, 2015</p>
+
+<ul>
+    <li>Added support for media relaying using the JingleNodes plugin</li>
+</ul>
+
+<p><b>0.1.5</b> -- May 4th, 2015</p>
+
+<ul>
+    <li>Implemented Meeting Planner and automatic invites. Requires bookmarks from the clientcontrol plugin</li>
+    <li>Fixed error modified setLocalDescription failed with desktop share</li>
+    <li>Prevents sending invalid presence packets, before MUC jid is defined</li>
+    <li>Added support for web+meet: protocol handling</li>
+    <li>Updated Jitsi Videobridge</li>
+</ul>
+
+<p><b>0.1.4</b> -- March 13th, 2015</p>
+
+<ul>
+    <li>Added focus username and password to the admin settings page</li>
+    <li>Updated Jitsi Videobridge</li>
+</ul>
+
+<p><b>0.1.3</b> -- Feb 28th, 2015</p>
+
+<ul>
+    <li>Implemented server-side Smack Virtual XMPP Connection for conference focus instead of default TCP connection</li>
+    <li>Updated chrome extension to 0.0.5</li>
+    <li>Updated Jitsi Videobridge</li>
+</ul>
+
+<p><b>0.1.2</b> -- Feb 15th, 2015</p>
+
+<ul>
+    <li>Added shared scrum board (post-it notes) Openfire Meetings Collaboration Application</li>
+    <li>Added "disable cursor" feature to Openfire Meetings Collaboration API</li>
+    <li>Added "ofmeet.js" and "ofmeet.css" to enable Openfire Meetings to be used as an API in other web applications</li>
+    <li>Provided webcomponent to wrap Openfire Meetings API into an HTML tag &lt;openfire-meetings&gt;</li>
+    <li>Updated chrome extension to 0.0.3</li>
+</ul>
+
+<p><b>0.1.1</b> -- Feb 8th, 2015</p>
+
+<ul>
+    <li>Added co-browsing to collaboration api</li>
+    <li>Moved collaboration api to chrome extension for co-browsing</li>
+    <li>Updated chrome extension to 0.0.2</li>
+</ul>
+
+<p><b>0.1.0</b> -- Feb 4th, 2015</p>
+
+<ul>
+    <li>Implemented Openfire Meeting collaborative applications api</li>
+    <li>Added simple sample applications for rich text editing and whiteboard</li>
+</ul>
+
+<p><b>0.0.9</b> -- Jan 26th, 2015</p>
+
+<ul>
+    <li>Fixed error when webcam is not available</li>
+    <li>Jitsi Videobridge server code refresh</li>
+</ul>
+
+<p><b>0.0.8</b> -- Jan 16th, 2015</p>
+
+<ul>
+    <li>Fixed race condition causing focus xmpp connection to fail</li>
+    <li>Increased response timeout for focus</li>
+    <li>Improved error handling for read-only user providers like LDAP</li>
+    <li>Disable SIP gateway with a property (org.jitsi.videobridge.ofmeet.sip.enabled)</li>
+</ul>
+
+<p><b>0.0.7</b> -- Jan 5th, 2015</p>
+
+<ul>
+    <li>Implemented PDF cursor sharing</li>
+</ul>
+
+<p><b>0.0.6</b> -- Dec 29th, 2014</p>
+
+<ul>
+    <li>Fixed fault with exception when clientcontrol plugin is missing</li>
+    <li>Fixed fault with focus when hostname is localhost</li>
+    <li>Removed install logic for chrome extension. Always requires a manual install</li>
+    <li>Fixed broken audio and video bandwidth configuration with server-side focus change.</li>
+</ul>
+
+<p><b>0.0.5</b> -- Dec 15th, 2014</p>
+
+<ul>
+    <li>Added support for clientcontrol plugin groupchat bookmarks and pdf urls</li>
+    <li>Added jicofo, server-side conference focus</li>
+    <li>Updated to latest Jitsi Meet and Jitsi Videobridge</li>
+</ul>
+
+<p><b>0.0.3</b> -- Dec 6th, 2014</p>
+
+<ul>
+    <li>Changed version to 3.9.9 to overcome bug in openfire version control</li>
+    <li>Added recording parameters to admin web page</li>
+    <li>Updated Jitsi Meet and Jitsi Videobridge</li>
+    <li>Added Spark plugin</li>
+    <li>Added support for Openfire vCard avatars</li>
+</ul>
+
+<p><b>0.0.2</b> -- Nov 30th, 2014</p>
+
+<ul>
+    <li>Added Candy and Fastpath.</li>
+</ul>
+
+<p><b>0.0.1</b> -- Nov 27th, 2014</p>
 
 <ul>
     <li>Initial release.</li>
