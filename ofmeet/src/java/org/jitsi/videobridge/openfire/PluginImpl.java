@@ -20,15 +20,39 @@ import java.lang.reflect.*;
 import java.net.*;
 import java.util.*;
 import java.util.jar.*;
+import java.util.concurrent.*;
 
-import org.jitsi.service.neomedia.*;
-import org.jitsi.util.*;
-import org.jitsi.videobridge.xmpp.*;
 import org.jivesoftware.openfire.container.*;
 import org.jivesoftware.util.*;
+import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.http.HttpBindManager;
 import org.slf4j.*;
 import org.slf4j.Logger;
 import org.xmpp.component.*;
+
+import org.osgi.framework.*;
+
+import net.java.sip.communicator.service.protocol.*;
+import org.jitsi.service.neomedia.*;
+import org.jitsi.util.*;
+import org.jitsi.videobridge.xmpp.*;
+
+import org.jitsi.cmd.*;
+import org.jitsi.meet.*;
+import org.jitsi.service.neomedia.*;
+import org.jitsi.videobridge.xmpp.*;
+import org.jitsi.videobridge.*;
+
+import org.jitsi.jicofo.*;
+import org.jitsi.jicofo.xmpp.*;
+
+import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
+import org.eclipse.jetty.plus.annotation.ContainerInitializer;
+import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+
+import org.apache.tomcat.InstanceManager;
+import org.apache.tomcat.SimpleInstanceManager;
 
 /**
  * Implements <tt>org.jivesoftware.openfire.container.Plugin</tt> to integrate
@@ -63,18 +87,39 @@ public class PluginImpl
     /**
      * The minimum port number default value.
      */
-    public static final int MIN_PORT_DEFAULT_VALUE = 5000;
+    public static final int MIN_PORT_DEFAULT_VALUE = 50000;
 
     /**
      * The maximum port number default value.
      */
-    public static final int MAX_PORT_DEFAULT_VALUE = 6000;
+    public static final int MAX_PORT_DEFAULT_VALUE = 60000;
+
+    /**
+     * The name of the property that contains the name of video conference application
+     */
+    public static final String CHECKREPLAY_PROPERTY_NAME = "org.jitsi.videobridge.video.srtpcryptocontext.checkreplay";
+
+    /**
+     * The name of the property that contains the name of video conference application
+     */
+    public static final String NAT_HARVESTER_LOCAL_ADDRESS = "org.jitsi.videobridge.nat.harvester.local.address";
+    /**
+     * The name of the property that contains the name of video conference application
+     */
+    public static final String NAT_HARVESTER_PUBLIC_ADDRESS = "org.jitsi.videobridge.nat.harvester.public.address";
+
+    /**
+     * The name of the property that contains the maximum port number that we'd
+     * like our RTP managers to bind upon.
+     */
+    public static final String RECORD_PROPERTY_NAME = "org.jitsi.videobridge.ofmeet.media.record";
 
     /**
      * The Jabber component which has been added to {@link #componentManager}
      * i.e. Openfire.
      */
-    private Component component;
+    private FocusComponent jicofoComponent;
+    public static ComponentImpl component;
 
     /**
      * The <tt>ComponentManager</tt> to which the {@link #component} of this
@@ -86,7 +131,15 @@ public class PluginImpl
      * The subdomain of the address of {@link #component} with which it has been
      * added to {@link #componentManager}.
      */
-    private String subdomain;
+    private String jitsiSubdomain;
+    private String jicofoSubdomain;
+
+    private BundleActivator jitsiActivator = null;
+    private BundleActivator jicofoActivator = null;
+
+	private ExecutorService executor1;
+	private ExecutorService executor2;
+
 
     /**
      * Destroys this <tt>Plugin</tt> i.e. releases the resources acquired by
@@ -99,20 +152,29 @@ public class PluginImpl
     {
         PropertyEventDispatcher.removeListener(this);
 
-        if ((componentManager != null) && (subdomain != null))
+        if ((componentManager != null) && (jitsiSubdomain != null))
         {
             try
             {
-                componentManager.removeComponent(subdomain);
+				jicofoComponent.dispose();
+                componentManager.removeComponent(jitsiSubdomain);
+                componentManager.removeComponent(jicofoSubdomain);
+
+                if (executor1 != null) executor1.shutdown();
+                if (executor2 != null) executor2.shutdown();
             }
             catch (ComponentException ce)
             {
                 // TODO Auto-generated method stub
             }
             componentManager = null;
-            subdomain = null;
-            component = null;
+            jitsiSubdomain = null;
+            jicofoSubdomain = null;
+            jicofoComponent = null;
         }
+
+        if (jitsiActivator != null) OSGi.stop(jitsiActivator);
+        if (jicofoActivator != null) OSGi.stop(jicofoActivator);
     }
 
     /**
@@ -126,50 +188,161 @@ public class PluginImpl
      */
     public void initializePlugin(PluginManager manager, File pluginDirectory)
     {
+		Log.info("initializePlugin start web service...");
+
+		ContextHandlerCollection contexts = HttpBindManager.getInstance().getContexts();
+		WebAppContext context2 = new WebAppContext(contexts, pluginDirectory.getPath(), "/jitsimeet");
+		context2.setClassLoader(this.getClass().getClassLoader());
+		final List<ContainerInitializer> initializers2 = new ArrayList<>();
+		initializers2.add(new ContainerInitializer(new JettyJasperInitializer(), null));
+		context2.setAttribute("org.eclipse.jetty.containerInitializers", initializers2);
+		context2.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+		context2.setWelcomeFiles(new String[]{"index.html"});
+
+		String enableRecording = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.media.record", "false");
+		String recordingPath = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", pluginDirectory.getAbsolutePath() + File.separator + "recordings");
+		String recordingSecret = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.secret", "secret");
+
+		String ourIpAddress = "127.0.0.1";
+		String ourHostname = XMPPServer.getInstance().getServerInfo().getHostname();
+
+		try {
+			ourIpAddress = InetAddress.getByName(ourHostname).getHostAddress();
+		} catch (Exception e) {
+
+		}
+		String localAddress = JiveGlobals.getProperty(NAT_HARVESTER_LOCAL_ADDRESS, ourIpAddress);
+		String publicAddress = JiveGlobals.getProperty(NAT_HARVESTER_PUBLIC_ADDRESS, ourIpAddress);
+
+		System.setProperty("net.java.sip.communicator.SC_HOME_DIR_LOCATION", pluginDirectory.getPath());
+		System.setProperty("net.java.sip.communicator.SC_HOME_DIR_NAME", ".");
+		System.setProperty("org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext.checkReplay", JiveGlobals.getProperty(CHECKREPLAY_PROPERTY_NAME, "false"));
+
+		System.setProperty("org.jitsi.videobridge.ENABLE_MEDIA_RECORDING", enableRecording);
+		System.setProperty("org.jitsi.videobridge.MEDIA_RECORDING_PATH", recordingPath);
+		System.setProperty("org.jitsi.videobridge.MEDIA_RECORDING_TOKEN", recordingSecret);
+		System.setProperty("org.jitsi.videobridge.NAT_HARVESTER_LOCAL_ADDRESS", localAddress);
+		System.setProperty("org.jitsi.videobridge.NAT_HARVESTER_PUBLIC_ADDRESS", publicAddress);
+
+		System.setProperty("org.jitsi.videobridge.defaultOptions", "2");	// allow videobridge access without focus
+
         PropertyEventDispatcher.addListener(this);
+
+        final String jitsiSubdomain = "videobridge";
+        final String jicofoSubdomain = "focus";
+
+		final String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+		final String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
+
+		final String focusUserName = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@btg199251");
+		final String focusPassword = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.password", "focus-password-" + System.currentTimeMillis());
 
         // Let's check for custom configuration
         String maxVal = JiveGlobals.getProperty(MAX_PORT_NUMBER_PROPERTY_NAME);
         String minVal = JiveGlobals.getProperty(MIN_PORT_NUMBER_PROPERTY_NAME);
 
         if(maxVal != null)
-            setIntProperty(
-                DefaultStreamConnector.MAX_PORT_NUMBER_PROPERTY_NAME,
-                maxVal);
+        {
+            setIntProperty(DefaultStreamConnector.MAX_PORT_NUMBER_PROPERTY_NAME,  maxVal);
+            setIntProperty(OperationSetBasicTelephony.MAX_MEDIA_PORT_NUMBER_PROPERTY_NAME,  maxVal);
+		}
+
         if(minVal != null)
-            setIntProperty(
-                DefaultStreamConnector.MIN_PORT_NUMBER_PROPERTY_NAME,
-                minVal);
+        {
+            setIntProperty(DefaultStreamConnector.MIN_PORT_NUMBER_PROPERTY_NAME, minVal);
+            setIntProperty(OperationSetBasicTelephony.MIN_MEDIA_PORT_NUMBER_PROPERTY_NAME, minVal);
+		}
 
-        checkNatives();
+		Log.info("initializePlugin set properties...");
 
-        ComponentManager componentManager
-            = ComponentManagerFactory.getComponentManager();
-        String subdomain = ComponentImpl.SUBDOMAIN;
-        Component component = new ComponentImpl();
-        boolean added = false;
+        System.setProperty(Videobridge.REST_API_PNAME, "false");
+        System.setProperty(Videobridge.XMPP_API_PNAME, "true");
 
-        try
-        {
-            componentManager.addComponent(subdomain, component);
-            added = true;
-        }
-        catch (ComponentException ce)
-        {
-            ce.printStackTrace(System.err);
-        }
-        if (added)
-        {
-            this.componentManager = componentManager;
-            this.subdomain = subdomain;
-            this.component = component;
-        }
-        else
-        {
-            this.componentManager = null;
-            this.subdomain = null;
-            this.component = null;
-        }
+        System.setProperty("org.jitsi.videobridge.ENABLE_STATISTICS", "true");
+
+        System.setProperty(FocusManager.HOSTNAME_PNAME, hostname);
+        System.setProperty(FocusManager.XMPP_DOMAIN_PNAME, domain);
+        System.setProperty(FocusManager.FOCUS_USER_DOMAIN_PNAME, domain);
+        System.setProperty(FocusManager.FOCUS_USER_NAME_PNAME, focusUserName.split("@")[0]);
+        System.setProperty(FocusManager.FOCUS_USER_PASSWORD_PNAME, focusPassword);
+
+        checkNatives(pluginDirectory);
+        this.componentManager = ComponentManagerFactory.getComponentManager();
+
+		executor1 = Executors.newCachedThreadPool();
+		executor2 = Executors.newCachedThreadPool();
+
+		Log.info("initializePlugin OSGi - Jvb");
+
+		JvbBundleConfig osgiBundles = new JvbBundleConfig();
+		OSGi.setBundleConfig(osgiBundles);
+		osgiBundles.setSystemPropertyDefaults();
+
+		jitsiActivator = new BundleActivator()
+		{
+			@Override
+			public void start(BundleContext bundleContext) throws Exception
+			{
+				// We're doing nothing
+				Log.info("initializePlugin BundleActivator start - Jvb");
+			}
+
+			@Override
+			public void stop(BundleContext bundleContext) throws Exception
+			{
+				// We're doing nothing
+			}
+		};
+
+		OSGi.start(jitsiActivator);
+
+		PluginImpl.component = new ComponentImpl(hostname, 0, domain, jitsiSubdomain, null);
+		boolean added = false;
+		try
+		{
+			Log.info("initializePlugin component - Jvb");
+			componentManager.addComponent(jitsiSubdomain, PluginImpl.component);
+			added = true;
+		}
+		catch (ComponentException ce)
+		{
+			Log.error("ComponentException", ce);
+		}
+		if (added)
+		{
+			this.jitsiSubdomain = jitsiSubdomain;
+		}
+		else
+		{
+			this.jitsiSubdomain = null;
+		}
+
+		Log.info("initializePlugin OSGi - Jicofo");
+
+		FocusComponent jicofoComponent = new FocusComponent(hostname, 0, domain, jicofoSubdomain, null, false, focusUserName);
+		added = false;
+
+		try
+		{
+			Log.info("initializePlugin component - Jicofo");
+			componentManager.addComponent(jicofoSubdomain, jicofoComponent);
+			jicofoComponent.init();
+			added = true;
+		}
+		catch (ComponentException ce)
+		{
+			Log.error("ComponentException", ce);
+		}
+		if (added)
+		{;
+			this.jicofoSubdomain = jicofoSubdomain;
+			this.jicofoComponent = jicofoComponent;
+		}
+		else
+		{
+			this.jicofoSubdomain = null;
+			this.jicofoComponent = null;
+		}
     }
 
     /**
@@ -179,19 +352,13 @@ public class PluginImpl
      * If folder with natives exist add it to the java.library.path so
      * libjitsi can use those native libs.
      */
-    private void checkNatives()
+    private void checkNatives(File pluginDirectory)
     {
         // Find the root path of the class that will be our plugin lib folder.
         try
         {
-            String binaryPath =
-                (new URL(ComponentImpl.class.getProtectionDomain()
-                    .getCodeSource().getLocation(), ".")).openConnection()
-                    .getPermission().getName();
-
-            File pluginJarfile = new File(binaryPath);
-            File nativeLibFolder =
-                new File(pluginJarfile.getParentFile(), "native");
+			String nativeLibsJarPath = pluginDirectory.getAbsolutePath() + File.separator + "lib";
+            File nativeLibFolder = new File(nativeLibsJarPath, "native");
 
             if(!nativeLibFolder.exists())
             {
@@ -202,32 +369,28 @@ public class PluginImpl
                 String jarFileSuffix = null;
                 if(OSUtils.IS_LINUX32)
                 {
-                    jarFileSuffix = "-native-linux-32.jar";
+                    jarFileSuffix = "jitsi-videobridge-native-linux-32.jar";
                 }
                 else if(OSUtils.IS_LINUX64)
                 {
-                    jarFileSuffix = "-native-linux-64.jar";
+                    jarFileSuffix = "jitsi-videobridge-native-linux-64.jar";
                 }
                 else if(OSUtils.IS_WINDOWS32)
                 {
-                    jarFileSuffix = "-native-windows-32.jar";
+                    jarFileSuffix = "jitsi-videobridge-native-windows-32.jar";
                 }
                 else if(OSUtils.IS_WINDOWS64)
                 {
-                    jarFileSuffix = "-native-windows-64.jar";
+                    jarFileSuffix = "jitsi-videobridge-native-windows-64.jar";
                 }
                 else if(OSUtils.IS_MAC)
                 {
-                    jarFileSuffix = "-native-macosx.jar";
+                    jarFileSuffix = "jitsi-videobridge-native-macosx.jar";
                 }
 
-                String nativeLibsJarPath =
-                    pluginJarfile.getCanonicalPath();
-                nativeLibsJarPath =
-                    nativeLibsJarPath.replaceFirst("\\.jar", jarFileSuffix);
-
-                JarFile jar = new JarFile(nativeLibsJarPath);
+                JarFile jar = new JarFile(nativeLibsJarPath + File.separator + jarFileSuffix);
                 Enumeration en = jar.entries();
+
                 while (en.hasMoreElements())
                 {
                     try
@@ -257,10 +420,8 @@ public class PluginImpl
             else
                 Log.info("Native lib folder already exist.");
 
-            String newLibPath =
-                nativeLibFolder.getCanonicalPath() + File.pathSeparator +
-                    System.getProperty("java.library.path");
 
+            String newLibPath = nativeLibFolder.getCanonicalPath() + File.pathSeparator + System.getProperty("java.library.path");
             System.setProperty("java.library.path", newLibPath);
 
             // this will reload the new setting
@@ -315,15 +476,13 @@ public class PluginImpl
     {
         if(property.equals(MAX_PORT_NUMBER_PROPERTY_NAME))
         {
-            setIntProperty(
-                DefaultStreamConnector.MAX_PORT_NUMBER_PROPERTY_NAME,
-                (String)params.get("value"));
+            setIntProperty(DefaultStreamConnector.MAX_PORT_NUMBER_PROPERTY_NAME, (String)params.get("value"));
+            setIntProperty(OperationSetBasicTelephony.MAX_MEDIA_PORT_NUMBER_PROPERTY_NAME, (String)params.get("value"));
         }
         else if(property.equals(MIN_PORT_NUMBER_PROPERTY_NAME))
         {
-            setIntProperty(
-                DefaultStreamConnector.MIN_PORT_NUMBER_PROPERTY_NAME,
-                (String)params.get("value"));
+            setIntProperty(DefaultStreamConnector.MIN_PORT_NUMBER_PROPERTY_NAME, (String)params.get("value"));
+            setIntProperty(OperationSetBasicTelephony.MIN_MEDIA_PORT_NUMBER_PROPERTY_NAME, (String)params.get("value"));
         }
     }
 
@@ -358,15 +517,13 @@ public class PluginImpl
     {
         if(property.equals(MAX_PORT_NUMBER_PROPERTY_NAME))
         {
-            System.setProperty(
-                DefaultStreamConnector.MAX_PORT_NUMBER_PROPERTY_NAME,
-                String.valueOf(MAX_PORT_DEFAULT_VALUE));
+            System.setProperty(DefaultStreamConnector.MAX_PORT_NUMBER_PROPERTY_NAME, String.valueOf(MAX_PORT_DEFAULT_VALUE));
+            System.setProperty(OperationSetBasicTelephony.MAX_MEDIA_PORT_NUMBER_PROPERTY_NAME, String.valueOf(MAX_PORT_DEFAULT_VALUE));
         }
         else if(property.equals(MIN_PORT_NUMBER_PROPERTY_NAME))
         {
-            System.setProperty(
-                DefaultStreamConnector.MIN_PORT_NUMBER_PROPERTY_NAME,
-                String.valueOf(MIN_PORT_DEFAULT_VALUE));
+            System.setProperty(DefaultStreamConnector.MIN_PORT_NUMBER_PROPERTY_NAME, String.valueOf(MIN_PORT_DEFAULT_VALUE));
+            System.setProperty(OperationSetBasicTelephony.MIN_MEDIA_PORT_NUMBER_PROPERTY_NAME, String.valueOf(MIN_PORT_DEFAULT_VALUE));
         }
     }
 
