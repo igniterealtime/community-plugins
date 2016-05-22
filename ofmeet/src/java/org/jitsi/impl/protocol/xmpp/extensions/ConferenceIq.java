@@ -1,19 +1,28 @@
 /*
  * Jicofo, the Jitsi Conference Focus.
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Copyright @ 2015 Atlassian Pty Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.impl.protocol.xmpp.extensions;
 
 import net.java.sip.communicator.impl.protocol.jabber.extensions.*;
-import org.jitsi.util.*;
-import org.jivesoftware.smack.packet.*;
 
 import java.util.*;
 
 /**
- * FIXME: move to Jitsi ?
+ * FIXME: move to Jitsi or shared lib eventually
  *
  * The IQ used by Jitsi Meet conference participant to contact the focus and ask
  * it to handle the conference in some multi user chat room.
@@ -21,7 +30,7 @@ import java.util.*;
  * @author Pawel Domas
  */
 public class ConferenceIq
-    extends IQ
+    extends AbstractIQ
 {
     /**
      * Focus namespace.
@@ -52,6 +61,22 @@ public class ConferenceIq
     public static final String FOCUS_JID_ATTR_NAME = "focusjid";
 
     /**
+     * The attribute that holds a string identifier of authentication session.
+     */
+    public static final String SESSION_ID_ATTR_NAME = "session-id";
+
+    /**
+     * The name of the attribute that holds machine unique identifier used to
+     * distinguish session for the same user on different machines.
+     */
+    public static final String MACHINE_UID_ATTR_NAME = "machine-uid";
+
+    /**
+     * The name of the attribute that carries user's authenticated identity name
+     */
+    public static final String IDENTITY_ATTR_NAME = "identity";
+
+    /**
      * MUC room name hosting Jitsi Meet conference.
      */
     private String room;
@@ -68,69 +93,42 @@ public class ConferenceIq
     private String focusJid;
 
     /**
-     * The list of configuration properties that are contained in this IQ.
+     * Client's authentication session ID.
      */
-    private List<Property> properties = new ArrayList<Property>();
+    private String sessionId;
+
+    /**
+     * Machine unique identifier.
+     */
+    private String machineUID;
+
+    /**
+     * User's authenticated identity name(login name).
+     */
+    private String identity;
+
+    /**
+     * Creates new instance of <tt>ConferenceIq</tt>.
+     */
+    public ConferenceIq()
+    {
+        super(NAMESPACE, ELEMENT_NAME);
+    }
 
     /**
      * Prints attributes in XML format to given <tt>StringBuilder</tt>.
      * @param out the <tt>StringBuilder</tt> instance used to construct XML
      *            representation of this element.
      */
-    void printAttributes(StringBuilder out)
-    {
-        out.append(ROOM_ATTR_NAME)
-            .append("=")
-            .append("'").append(room).append("' ");
-
-        if (ready != null)
-        {
-            out.append(READY_ATTR_NAME)
-                .append("=")
-                .append("'").append(ready).append("' ");
-        }
-
-        if (!StringUtils.isNullOrEmpty(focusJid))
-        {
-            out.append(FOCUS_JID_ATTR_NAME)
-                .append("=")
-                .append("'").append(focusJid).append("' ");
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public String getChildElementXML()
+    protected void printAttributes(StringBuilder out)
     {
-        StringBuilder xml = new StringBuilder();
-
-        xml.append('<').append(ELEMENT_NAME);
-        xml.append(" xmlns='").append(NAMESPACE).append("' ");
-
-        printAttributes(xml);
-
-        Collection<PacketExtension> extensions =  getExtensions();
-        if (extensions.size() > 0 || properties.size() > 0)
-        {
-            xml.append(">");
-            for (PacketExtension extension : extensions)
-            {
-                xml.append(extension.toXML());
-            }
-            for (Property property : properties)
-            {
-                xml.append(property.toXML());
-            }
-            xml.append("</").append(ELEMENT_NAME).append(">");
-        }
-        else
-        {
-            xml.append("/>");
-        }
-
-        return xml.toString();
+        printStrAttr(out, ROOM_ATTR_NAME, room);
+        printObjAttr(out, READY_ATTR_NAME, ready);
+        printStrAttr(out, FOCUS_JID_ATTR_NAME, focusJid);
+        printStrAttr(out, SESSION_ID_ATTR_NAME, sessionId);
+        printStrAttr(out, MACHINE_UID_ATTR_NAME, machineUID);
+        printStrAttr(out, IDENTITY_ATTR_NAME, identity);
     }
 
     /**
@@ -191,7 +189,7 @@ public class ConferenceIq
      */
     public void addProperty(Property property)
     {
-        properties.add(property);
+        addExtension(property);
     }
 
     /**
@@ -200,7 +198,7 @@ public class ConferenceIq
      */
     public List<Property> getProperties()
     {
-        return properties;
+        return getChildExtensionsOfType(Property.class);
     }
 
     /**
@@ -210,12 +208,68 @@ public class ConferenceIq
      */
     public Map<String, String> getPropertiesMap()
     {
-        Map<String, String> properties= new HashMap<String, String>();
-        for (Property property : this.properties)
+        List<Property> properties = getProperties();
+        Map<String, String> propertiesMap= new HashMap<String, String>();
+
+        for (Property property : properties)
         {
-            properties.put(property.getName(), property.getValue());
+            propertiesMap.put(property.getName(), property.getValue());
         }
-        return properties;
+        return propertiesMap;
+    }
+
+    /**
+     * Returns the value of {@link ConferenceIq#SESSION_ID_ATTR_NAME}
+     * attribute which corresponds to the ID of client authentication
+     * session. <tt>null</tt> if not specified.
+     */
+    public String getSessionId()
+    {
+        return sessionId;
+    }
+
+    /**
+     * Sets the value of {@link ConferenceIq#SESSION_ID_ATTR_NAME} attribute.
+     * @param sessionId the ID of client's authentication session.
+     */
+    public void setSessionId(String sessionId)
+    {
+        this.sessionId = sessionId;
+    }
+
+    /**
+     * Returns the value of {@link #MACHINE_UID_ATTR_NAME} carried by this IQ
+     * instance(if any).
+     */
+    public String getMachineUID()
+    {
+        return machineUID;
+    }
+
+    /**
+     * Sets new value for {@link #MACHINE_UID_ATTR_NAME} attribute.
+     * @param machineUID machine unique identifier to set.
+     */
+    public void setMachineUID(String machineUID)
+    {
+        this.machineUID = machineUID;
+    }
+
+    /**
+     * Returns the value of {@link #IDENTITY_ATTR_NAME} stored in this IQ.
+     */
+    public String getIdentity()
+    {
+        return identity;
+    }
+
+    /**
+     * Sets new value for {@link #IDENTITY_ATTR_NAME} attribute.
+     * @param identity the user's authenticated identity name to set.
+     */
+    public void setIdentity(String identity)
+    {
+        this.identity = identity;
     }
 
     /**

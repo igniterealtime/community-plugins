@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.*;
 import java.text.*;
 import java.util.regex.*;
-import javax.servlet.DispatcherType;
+import java.security.Security;
 
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
@@ -54,6 +54,10 @@ import org.jivesoftware.openfire.security.SecurityAuditManager;
 import org.jivesoftware.openfire.handler.IQHandler;
 import org.jivesoftware.openfire.IQHandlerInfo;
 import org.jivesoftware.openfire.roster.RosterManager;
+import org.jivesoftware.openfire.net.SASLAuthentication;
+import org.jivesoftware.openfire.plugin.ofmeet.jetty.OfMeetLoginService;
+import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslProvider;
+import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslServer;
 
 import org.xmpp.component.ComponentManager;
 import org.xmpp.component.ComponentManagerFactory;
@@ -66,19 +70,13 @@ import org.eclipse.jetty.plus.annotation.ContainerInitializer;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import org.eclipse.jetty.util.security.*;
 import org.eclipse.jetty.security.*;
 import org.eclipse.jetty.security.authentication.*;
 
-import org.ifsoft.websockets.*;
-
 import org.jitsi.videobridge.openfire.PluginImpl;
-import org.jitsi.jigasi.openfire.CallControlComponent;
-import org.jitsi.jigasi.openfire.JigasiPlugin;
-import org.jitsi.jicofo.openfire.JicofoPlugin;
 
 import net.sf.json.*;
 import org.dom4j.*;
@@ -86,10 +84,7 @@ import org.dom4j.*;
 public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener  {
 
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
-    private final ConcurrentHashMap<String, XMPPServlet.XMPPWebSocket> sockets = new ConcurrentHashMap<String, XMPPServlet.XMPPWebSocket>();
 	private PluginImpl jitsiPlugin;
-	private JigasiPlugin jigasiPlugin;
-	private JicofoPlugin jicofoPlugin;
 	private PluginManager manager;
 	public File pluginDirectory;
     private TaskEngine taskEngine = TaskEngine.getInstance();
@@ -98,7 +93,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private OfMeetIQHandler ofmeetIQHandler = null;
 
     public static OfMeetPlugin self;
-	public static String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
 
 	public String sipRegisterStatus = "";
 
@@ -130,87 +124,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				Log.info("OfMeet Plugin - Initialize jitsi videobridge ");
 
 				jitsiPlugin = new PluginImpl();
-				jitsiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
+				jitsiPlugin.initializePlugin(manager, pluginDirectory);
 			}
 			catch (Exception e1) {
 				Log.error("Could NOT Initialize jitsi videobridge", e1);
 			}
-
-			// Determine the JID of the 'focus' user.
-			final String defaultValue = "focus@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain();
-			final String propertyValue = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid", defaultValue );
-			JID focusUserJid;
-			try {
-				focusUserJid = new JID( propertyValue );
-			} catch (IllegalArgumentException e) {
-				Log.warn( "The 'org.jitsi.videobridge.ofmeet.focus.user.jid' property contains a value ('{}') that appears to be in invalid JID.", propertyValue, e );
-				focusUserJid = new JID( defaultValue );
-			}
-
-			// Ensure that the 'focus' user exists if it is supposed to be a user of our domain.
-			if ( focusUserJid.getDomain().equalsIgnoreCase( XMPPServer.getInstance().getServerInfo().getXMPPDomain() ) )
-			{
-				try {
-					userManager.getUser( focusUserJid.getNode() );
-				}
-				catch (UserNotFoundException e) {
-
-					Log.info("OfMeet Plugin - Setup focus user " + focusUserJid);
-
-					String focusUserPassword = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", "focus-password-" + StringUtils.randomString( 15 ) );
-
-					try {
-						userManager.createUser( focusUserJid.getNode(), focusUserPassword, "Openfire Meetings Focus User", focusUserJid.toString() );
-
-						JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", focusUserJid.toString() );
-						JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.password", focusUserPassword);
-					}
-					catch (Exception e1) {
-
-						Log.error("Could NOT create focus user", e1);
-					}
-				}
-			}
-
-			// Ensure that the 'focus' user is a sysadmin of the conference service(s).
-			for ( MultiUserChatService mucService : XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices() )
-			{
-				if (!mucService.isSysadmin( focusUserJid ))
-				{
-					mucService.addSysadmin( focusUserJid );
-				}
-			}
-
-			new Timer().schedule( new TimerTask()
-			{
-				@Override
-				public void run()
-				{
-					try
-					{
-						Log.info( "OfMeet Plugin - Initialize jitsi conference focus" );
-
-						jicofoPlugin = new JicofoPlugin();
-						jicofoPlugin.initializePlugin( componentManager, manager, pluginDirectory );
-					}
-					catch ( Exception e1 )
-					{
-						Log.error( "Could NOT Initialize jicofo component", e1 );
-					}
-
-					try
-					{
-						Log.info( "OfMeet Plugin - Initialize call control component " );
-
-						jigasiPlugin = new JigasiPlugin();
-						jigasiPlugin.initializePlugin( componentManager, manager, pluginDirectory );
-					}
-					catch ( Exception e1 )
-					{
-						Log.error( "Could NOT Initialize jigasi component", e1);
-					}
-				}
-			}, 5000);
 
 			try {
 
@@ -235,17 +153,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 			ClusterManager.addListener(this);
 
-			Log.info("OfMeet Plugin - Initialize websockets ");
-
-			ServletContextHandler context = new ServletContextHandler(contexts, "/ofmeetws", ServletContextHandler.SESSIONS);
-			context.addServlet(new ServletHolder(new XMPPServlet()),"/server");
-
 			// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
 
 			final List<ContainerInitializer> initializers = new ArrayList<>();
 			initializers.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-			context.setAttribute("org.eclipse.jetty.containerInitializers", initializers);
-			context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
 
 			Log.info("OfMeet Plugin - Initialize webservice");
 
@@ -266,19 +177,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			if ("true".equals(securityEnabled))
 			{
 				Log.info("OfMeet Plugin - Initialize security");
-
-				if (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.windows.sso", "off").equals("on"))
-				{
-					waffle.servlet.NegotiateSecurityFilter securityFilter = new waffle.servlet.NegotiateSecurityFilter();
-					FilterHolder filterHolder = new FilterHolder();
-					filterHolder.setFilter(securityFilter);
-					EnumSet<DispatcherType> enums = EnumSet.of(DispatcherType.REQUEST);
-					enums.add(DispatcherType.REQUEST);
-					context2.addFilter(filterHolder, "/*", enums);
-				}
-				else {
-					context2.setSecurityHandler(basicAuth("ofmeet"));
-				}
+				context2.setSecurityHandler(basicAuth("ofmeet"));
 			}
 
 			Log.info("OfMeet Plugin - Initialize email listener");
@@ -296,6 +195,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		} catch (Exception e) {
 			Log.error("Could NOT start open fire meetings", e);
 		}
+
+		Security.addProvider( new OfMeetSaslProvider() );
+		SASLAuthentication.addSupportedMechanism( OfMeetSaslServer.MECHANISM_NAME );
     }
 
     public void destroyPlugin() {
@@ -305,27 +207,14 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 			XMPPServer.getInstance().getIQRouter().removeHandler(ofmeetIQHandler);
 			ofmeetIQHandler = null;
-
-			for (XMPPServlet.XMPPWebSocket socket : sockets.values())
-			{
-				try {
-					LocalClientSession session = socket.getSession();
-					session.close();
-					SessionManager.getInstance().removeSession( session );
-					session = null;
-
-				} catch ( Exception e ) { }
-			}
-
-			sockets.clear();
-
 			jitsiPlugin.destroyPlugin();
-			jigasiPlugin.destroyPlugin();
-			jicofoPlugin.destroyPlugin();
 
         	ClusterManager.removeListener(this);
 
 			EmailListener.getInstance().stop();
+
+			SASLAuthentication.removeSupportedMechanism( OfMeetSaslServer.MECHANISM_NAME );
+			Security.removeProvider( OfMeetSaslProvider.NAME );
 
         } catch (Exception e) {
 
@@ -334,34 +223,31 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     private static final SecurityHandler basicAuth(String realm) {
 
-    	OpenfireLoginService l = new OpenfireLoginService();
-        l.setName(realm);
+    	final OfMeetLoginService loginService = new OfMeetLoginService();
+        loginService.setName(realm);
 
-        Constraint constraint = new Constraint();
-        constraint.setName(Constraint.__BASIC_AUTH);
-        constraint.setRoles(new String[]{"ofmeet"});
-        constraint.setAuthenticate(true);
+        final Constraint constraint = new Constraint();
+        constraint.setName( Constraint.__BASIC_AUTH );
+        constraint.setRoles( new String[] { "ofmeet" } );
+        constraint.setAuthenticate( true );
 
-        ConstraintMapping cm = new ConstraintMapping();
-        cm.setConstraint(constraint);
-        cm.setPathSpec("/*");
+        final ConstraintMapping constraintMapping = new ConstraintMapping();
+        constraintMapping.setConstraint( constraint );
+        constraintMapping.setPathSpec( "/*" );
 
-        ConstraintSecurityHandler csh = new ConstraintSecurityHandler();
-        csh.setAuthenticator(new BasicAuthenticator());
-        csh.setRealmName(realm);
-        csh.addConstraintMapping(cm);
-        csh.setLoginService(l);
+        final ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+        securityHandler.setAuthenticator( new BasicAuthenticator() );
+        securityHandler.setRealmName( realm );
+        securityHandler.addConstraintMapping( constraintMapping );
+        securityHandler.setLoginService( loginService );
 
-        return csh;
+        return securityHandler;
     }
-
-	public ConcurrentHashMap<String, XMPPServlet.XMPPWebSocket> getSockets()
-	{
-		return sockets;
-	}
 
     private void checkDownloadFolder(File pluginDirectory)
     {
+		String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
+
         try
         {
 			File ofmeetFolderPath = new File(ofmeetHome);
@@ -381,21 +267,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             if(!downloadHome.exists())
             {
                 downloadHome.mkdirs();
-			}
 
-			File recordingsHome = new File(ofmeetHome + File.separator + "recordings");
-
-            if(!recordingsHome.exists())
-            {
-                recordingsHome.mkdirs();
 			}
 
 			lines = Arrays.asList("Move on, nothing here....");
-
 			file = Paths.get(downloadHome + File.separator + "index.html");
-			Files.write(file, lines, Charset.forName("UTF-8"));
-
-			file = Paths.get(recordingsHome + File.separator + "index.html");
 			Files.write(file, lines, Charset.forName("UTF-8"));
         }
         catch (Exception e)
@@ -415,8 +291,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	{
 		Log.info("OfMeet Plugin - joinedCluster");
 		jitsiPlugin.destroyPlugin();
-		jigasiPlugin.destroyPlugin();
-		jicofoPlugin.destroyPlugin();
 	}
 
 	@Override
@@ -430,9 +304,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	public void leftCluster()
 	{
 		Log.info("OfMeet Plugin - leftCluster");
-		jitsiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
-		jigasiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
-		jicofoPlugin.initializePlugin(componentManager, manager, pluginDirectory);
+		jitsiPlugin.initializePlugin(manager, pluginDirectory);
 	}
 
 	@Override
@@ -446,10 +318,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	public void markedAsSeniorClusterMember()
 	{
 		Log.info("OfMeet Plugin - markedAsSeniorClusterMember");
-
-		jitsiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
-		jigasiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
-		jicofoPlugin.initializePlugin(componentManager, manager, pluginDirectory);
+		jitsiPlugin.initializePlugin(manager, pluginDirectory);
 	}
 
 	//-------------------------------------------------------
@@ -680,7 +549,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				if ("get_user_properties".equals(action)) getUserProperties(iq.getFrom().getNode(), reply, requestJSON);
 				if ("set_user_properties".equals(action)) setUserProperties(iq.getFrom().getNode(), reply, requestJSON);
 				if ("get_user_groups".equals(action)) getUserGroups(iq.getFrom().getNode(), reply, requestJSON);
-				if ("get_conference_id".equals(action)) getConferenceId(iq.getFrom().getNode(), reply, requestJSON);
 
 				return reply;
 
@@ -751,50 +619,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			} catch (UserNotFoundException e) {
 				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, "User not found"));
 				return;
-
-			} catch (Exception e1) {
-				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, requestJSON.toString() + " " + e1));
-				return;
-			}
-		}
-
-		private void getConferenceId(String defaultUsername, IQ reply, JSONObject requestJSON)
-		{
-			Element childElement = reply.setChildElement("response", "http://igniterealtime.org/protocol/ofmeet");
-
-			try {
-				String roomName = requestJSON.getString("room");
-
-				if (CallControlComponent.self.conferences.containsKey(roomName))
-				{
-					String confId = CallControlComponent.self.conferences.get(roomName);
-
-					JSONObject userJSON = new JSONObject();
-					userJSON.put("conference", confId);
-
-					Path dir = Paths.get(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", ofmeetHome + File.separator + "recordings"));
-
-					try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir))
-					{
-						for (Path file: stream)
-						{
-							String fileName = file.getFileName().toString();
-
-							if (fileName.indexOf(confId) > -1)
-							{
-								userJSON.put("folder", fileName);
-							}
-						}
-
-					} catch (IOException | DirectoryIteratorException x) {
-						Log.error("getConferenceId", x);
-					}
-
-					childElement.setText(userJSON.toString());
-
-				} else {
-					reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, "Conference room not found"));
-				}
 
 			} catch (Exception e1) {
 				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, requestJSON.toString() + " " + e1));

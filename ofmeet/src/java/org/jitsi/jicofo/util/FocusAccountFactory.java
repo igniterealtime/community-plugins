@@ -1,8 +1,19 @@
 /*
  * Jicofo, the Jitsi Conference Focus.
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Copyright @ 2015 Atlassian Pty Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.jicofo.util;
 
@@ -47,9 +58,7 @@ public class FocusAccountFactory
         properties.put(ProtocolProviderFactory.SERVER_PORT, "5222");
 
         // This is used as the multi user chat nick when joining the room
-        properties.put(
-            ProtocolProviderFactory.ACCOUNT_DISPLAY_NAME,
-            userName);
+        properties.put(ProtocolProviderFactory.DISPLAY_NAME, userName);
 
         properties.put(ProtocolProviderFactory.RESOURCE,
                        resource);
@@ -63,7 +72,6 @@ public class FocusAccountFactory
         properties.put("ENCRYPTION_PROTOCOL_STATUS.DTLS-SRTP", "true");
 
         properties.put(ProtocolProviderFactory.IS_USE_ICE, "true");
-        //properties.put(ProtocolProviderFactory.IS_USE_GOOGLE_ICE, "true");
         properties.put(ProtocolProviderFactory.IS_ACCOUNT_DISABLED, "false");
         properties.put(ProtocolProviderFactory.IS_PREFERRED_PROTOCOL, "false");
         properties.put(ProtocolProviderFactory.IS_SERVER_OVERRIDDEN, "false");

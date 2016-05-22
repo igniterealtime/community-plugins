@@ -1,15 +1,29 @@
 /*
  * Jicofo, the Jitsi Conference Focus.
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Copyright @ 2015 Atlassian Pty Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.jicofo.recording;
 
+import org.jitsi.assertions.*;
 import org.jitsi.protocol.xmpp.*;
 
 import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.filter.*;
+
+import net.java.sip.communicator.impl.protocol.jabber.extensions.colibri.ColibriConferenceIQ.Recording.*;
 
 /**
  * Abstract class used by {@link org.jitsi.jicofo.JitsiMeetConference} for
@@ -24,7 +38,7 @@ public abstract class Recorder
     /**
      * Recorder component XMPP address.
      */
-    protected final String recorderComponentJid;
+    protected String recorderComponentJid;
 
     /**
      * Smack operation set for current XMPP connection.
@@ -35,9 +49,17 @@ public abstract class Recorder
                     OperationSetDirectSmackXmpp xmpp)
     {
         this.recorderComponentJid = recorderComponentJid;
+
+        Assert.notNull(xmpp, "xmpp");
         this.xmpp = xmpp;
         xmpp.addPacketHandler(this, this);
     }
+
+    /**
+     * Method called by {@link org.jitsi.jicofo.JitsiMeetConference} after it
+     * joins the MUC.
+     */
+    public void init() { }
 
     /**
      * Releases resources and stops any future processing.
@@ -67,5 +89,5 @@ public abstract class Recorder
      *         otherwise.
      */
     public abstract boolean setRecording(
-        String from, String token, boolean doRecord, String path);
+        String from, String token, State doRecord, String path);
 }

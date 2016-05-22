@@ -1,10 +1,26 @@
 /*
  * Jicofo, the Jitsi Conference Focus.
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Copyright @ 2015 Atlassian Pty Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.jicofo.auth;
+
+import org.jitsi.impl.protocol.xmpp.extensions.*;
+import org.jitsi.protocol.xmpp.util.*;
+import org.jitsi.util.*;
+import org.jivesoftware.smack.packet.*;
 
 /**
  * XMPP domain authentication authority that authorizes user who are logged
@@ -29,27 +45,71 @@ public class XMPPDomainAuthAuthority
 
     private boolean verifyJid(String fullJid)
     {
-        String bareJid = fullJid.substring(0, fullJid.indexOf("/"));
+        String bareJid = getBareJid(fullJid);
 
         return bareJid.endsWith("@" + domain);
     }
 
-    @Override
-    public boolean isAllowedToCreateRoom(String peerJid, String roomName)
+    private String getBareJid(String fullJid)
     {
-        return verifyJid(peerJid);
+        int slashIdx = fullJid.indexOf("/");
+        if (slashIdx != -1)
+        {
+            return fullJid.substring(0, slashIdx);
+        }
+        else
+        {
+            // Bare already ?
+            return fullJid;
+        }
     }
 
     @Override
-    public boolean isUserAuthenticated(String jabberID, String roomName)
+    protected IQ processAuthLocked(ConferenceIq query, ConferenceIq response)
     {
-        return verifyJid(jabberID);
+        String peerJid = query.getFrom();
+        String sessionId = query.getSessionId();
+        AuthenticationSession session = getSession(sessionId);
+
+        // Check for invalid session
+        IQ error = verifySession(query);
+        if (error != null)
+        {
+            return error;
+        }
+
+        // Create new session if JID is valid
+        if (session == null && verifyJid(peerJid))
+        {
+            // Create new session
+            String bareJid = getBareJid(peerJid);
+            String machineUID = query.getMachineUID();
+            if (StringUtils.isNullOrEmpty(machineUID))
+            {
+                return ErrorFactory.createNotAcceptableError(query,
+                        "Missing mandatory attribute '"
+                                + ConferenceIq.MACHINE_UID_ATTR_NAME + "'");
+            }
+            session = createNewSession(
+                machineUID, bareJid, query.getRoom(), null);
+        }
+
+        // Authenticate JID with session(if it exists)
+        if (session != null)
+        {
+            authenticateJidWithSession(session, peerJid, response);
+        }
+
+        return null;
     }
 
     @Override
-    public String createAuthenticationUrl(String peerFullJid, String roomName)
+    public String createLoginUrl(
+            String machineUID, String peerFullJid, String roomName, boolean popup)
     {
-        return "null";
+        roomName = MucUtil.extractName(roomName);
+
+        return "./" + roomName + "?login=true";
     }
 
     @Override
@@ -59,14 +119,8 @@ public class XMPPDomainAuthAuthority
     }
 
     @Override
-    public void start()
+    protected String createLogoutUrl(String sessionId)
     {
-
-    }
-
-    @Override
-    public void stop()
-    {
-
+        return null;
     }
 }

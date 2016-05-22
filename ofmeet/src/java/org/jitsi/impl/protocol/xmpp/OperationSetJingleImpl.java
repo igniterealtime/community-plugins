@@ -1,8 +1,19 @@
 /*
  * Jicofo, the Jitsi Conference Focus.
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Copyright @ 2015 Atlassian Pty Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.impl.protocol.xmpp;
 
@@ -82,7 +93,7 @@ class OperationSetJingleImpl
         try
         {
             // We handle JingleIQ and SessionIQ.
-            if (!(packet instanceof JingleIQ))
+            /*if (!(packet instanceof JingleIQ))
             {
                 // FIXME: find session for packet ID to make sure
                 // that the error belongs to this class
@@ -94,9 +105,9 @@ class OperationSetJingleImpl
 
                     logger.error(
                         "Received an error: code=" + error.getCode()
-                            + " message=" + errorMessage);
+                            + " message=" + errorMessage+", " + packet.toXML());
                 }
-            }
+            }*/
 
             return packet instanceof JingleIQ
                 && getSession(((JingleIQ) packet).getSID()) != null;
@@ -113,17 +124,10 @@ class OperationSetJingleImpl
      *
      * {@inheritDoc}
      */
+    @Override
     public void processPacket(Packet packet)
     {
         IQ iq = (IQ) packet;
-
-        //first ack all "set" requests.
-        if(iq.getType() == IQ.Type.SET)
-        {
-            IQ ack = IQ.createResultIQ(iq);
-
-            getConnection().sendPacket(ack);
-        }
 
         try
         {

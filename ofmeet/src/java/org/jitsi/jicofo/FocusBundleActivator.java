@@ -1,18 +1,29 @@
 /*
  * Jicofo, the Jitsi Conference Focus.
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Copyright @ 2015 Atlassian Pty Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.jicofo;
 
 import net.java.sip.communicator.impl.protocol.jabber.extensions.caps.*;
-import net.java.sip.communicator.util.*;
 
+import org.jitsi.eventadmin.*;
+import org.jitsi.jicofo.util.*;
 import org.jitsi.service.configuration.*;
+import org.jitsi.osgi.*;
 
-import org.jitsi.videobridge.log.*;
-import org.jitsi.videobridge.osgi.*;
 import org.osgi.framework.*;
 
 import java.util.concurrent.*;
@@ -38,7 +49,18 @@ public class FocusBundleActivator
     /**
      * {@link ConfigurationService} instance cached by the activator.
      */
-    private static ConfigurationService configService;
+    private static OSGIServiceRef<ConfigurationService> configServiceRef;
+
+    /**
+     * {@link EventAdmin} service reference.
+     */
+    private static OSGIServiceRef<EventAdmin> eventAdminRef;
+
+    /**
+     * Shared thread pool available through OSGi for other components that do
+     * not like to manage their own pool.
+     */
+    private static ScheduledExecutorService sharedThreadPool;
 
     /**
      * {@link org.jitsi.jicofo.FocusManager} instance created by this activator.
@@ -46,10 +68,14 @@ public class FocusBundleActivator
     private FocusManager focusManager;
 
     /**
-     * Shared thread pool available through OSGi for other components that do
-     * not like to manage their own pool.
+     * <tt>FocusManager</tt> service registration.
      */
-    private static ExecutorService sharedThreadPool;
+    private ServiceRegistration<FocusManager> focusMangerRegistration;
+
+    /**
+     * Global configuration of Jitsi COnference FOcus
+     */
+    private JitsiMeetGlobalConfig globalConfig;
 
     @Override
     public void start(BundleContext context)
@@ -59,25 +85,57 @@ public class FocusBundleActivator
 
         EntityCapsManager.setBundleContext(context);
 
-        sharedThreadPool = Executors.newFixedThreadPool(SHARED_POOL_SIZE);
+        // Make threads daemon, so that they won't prevent from doing shutdown
+        sharedThreadPool
+            = Executors.newScheduledThreadPool(
+                    SHARED_POOL_SIZE, new DaemonThreadFactory());
 
-        context.registerService(ExecutorService.class, sharedThreadPool, null);
+        eventAdminRef = new OSGIServiceRef<>(context, EventAdmin.class);
 
-        this.focusManager = new FocusManager();
+        configServiceRef
+            = new OSGIServiceRef<>(context, ConfigurationService.class);
 
-        context.registerService(FocusManager.class, focusManager, null);
+        context.registerService(
+            ExecutorService.class, sharedThreadPool, null);
+        context.registerService(
+            ScheduledExecutorService.class, sharedThreadPool, null);
+
+        globalConfig = JitsiMeetGlobalConfig.startGlobalConfigService(context);
+
+        focusManager = new FocusManager();
+        focusManager.start();
+        focusMangerRegistration
+            = context.registerService(FocusManager.class, focusManager, null);
     }
 
     @Override
     public void stop(BundleContext context)
         throws Exception
     {
+        if (focusMangerRegistration != null)
+        {
+            focusMangerRegistration.unregister();
+            focusMangerRegistration = null;
+        }
+        if (focusManager != null)
+        {
+            focusManager.stop();
+            focusManager = null;
+        }
+
         sharedThreadPool.shutdownNow();
         sharedThreadPool = null;
 
-        configService = null;
+        configServiceRef = null;
+        eventAdminRef = null;
 
         EntityCapsManager.setBundleContext(null);
+
+        if (globalConfig != null)
+        {
+            globalConfig.stopGlobalConfigService();
+            globalConfig = null;
+        }
     }
 
     /**
@@ -85,34 +143,23 @@ public class FocusBundleActivator
      */
     public static ConfigurationService getConfigService()
     {
-        if (configService == null)
-        {
-            configService = ServiceUtils.getService(
-                bundleContext, ConfigurationService.class);
-        }
-        return configService;
+        return configServiceRef.get();
     }
 
     /**
-     * Returns the <tt>LoggingService</tt> instance, if any.
-     * @return the <tt>LoggingService</tt> instance, if any.
+     * Returns the <tt>EventAdmin</tt> instance, if any.
+     * @return the <tt>EventAdmin</tt> instance, if any.
      */
-    public static LoggingService getLoggingService()
+    public static EventAdmin getEventAdmin()
     {
-        if (bundleContext != null)
-        {
-            return ServiceUtils2.getService(bundleContext,
-                                            LoggingService.class);
-        }
-        return null;
+        return eventAdminRef.get();
     }
 
     /**
      * Returns shared thread pool service.
      */
-    public static ExecutorService getSharedThreadPool()
+    public static ScheduledExecutorService getSharedThreadPool()
     {
         return sharedThreadPool;
     }
-
 }

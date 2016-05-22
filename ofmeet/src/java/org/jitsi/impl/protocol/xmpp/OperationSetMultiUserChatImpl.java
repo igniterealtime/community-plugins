@@ -1,13 +1,23 @@
 /*
  * Jicofo, the Jitsi Conference Focus.
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Copyright @ 2015 Atlassian Pty Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.impl.protocol.xmpp;
 
 import net.java.sip.communicator.service.protocol.*;
-import net.java.sip.communicator.util.*;
 
 import org.jivesoftware.smack.*;
 
@@ -23,11 +33,6 @@ public class OperationSetMultiUserChatImpl
     extends AbstractOperationSetMultiUserChat
 {
     /**
-     * The logger.
-     */
-    private Logger logger = Logger.getLogger(OperationSetMultiUserChatImpl.class);
-
-    /**
      * Parent protocol provider.
      */
     private final XmppProtocolProvider protocolProvider;
@@ -35,8 +40,8 @@ public class OperationSetMultiUserChatImpl
     /**
      * The map of active chat rooms mapped by their names.
      */
-    private Map<String, ChatRoomImpl> rooms
-            = new HashMap<String, ChatRoomImpl>();
+    private final Map<String, ChatRoomImpl> rooms
+        = new HashMap<String, ChatRoomImpl>();
 
     /**
      * Creates new instance of {@link OperationSetMultiUserChatImpl}.
@@ -86,6 +91,8 @@ public class OperationSetMultiUserChatImpl
                                    Map<String, Object> roomProperties)
         throws OperationFailedException, OperationNotSupportedException
     {
+        roomName = roomName.toLowerCase();
+
         if (rooms.containsKey(roomName))
         {
             throw new OperationFailedException(
@@ -107,6 +114,8 @@ public class OperationSetMultiUserChatImpl
     public ChatRoom findRoom(String roomName)
         throws OperationFailedException, OperationNotSupportedException
     {
+        roomName = roomName.toLowerCase();
+
         ChatRoom room = rooms.get(roomName);
         if (room == null)
         {
@@ -157,5 +166,10 @@ public class OperationSetMultiUserChatImpl
     public XmppProtocolProvider getProtocolProvider()
     {
         return protocolProvider;
+    }
+
+    public void removeRoom(ChatRoomImpl chatRoom)
+    {
+        rooms.remove(chatRoom.getName());
     }
 }

@@ -19,7 +19,6 @@
 
 <%@ page import="org.jivesoftware.util.*,
                  org.jitsi.videobridge.*,
-                 org.jitsi.jigasi.openfire.*,
                  org.jitsi.videobridge.openfire.PluginImpl,
                  java.util.*,
                  java.net.URLEncoder"                 
@@ -109,24 +108,16 @@
         </td>
         <td width="15%" align="center">
             <% if (conference.getLastKnowFocus() != null && !"".equals(conference.getLastKnowFocus())) { %>
-                <%= (new JID(conference.getLastKnowFocus())).getNode() %>
+                <%= conference.getLastKnowFocus() %>
             <% }
                else { %>
                 &nbsp;
             <% } %>
         </td>
         <td width="25%" align="center">
-            <%
-            String room = "&nbsp;";
-            
-            for (Map.Entry<String, String> entry  : CallControlComponent.self.conferences.entrySet())
-            {
-            	if (entry.getValue().equals(conference.getID()))
-            	{
-            		room = "<a href='/muc-room-edit-form.jsp?roomJID=" + entry.getKey() + "'>" + entry.getKey() + "</a>";            		
-            	}
-            }            
-            %><%= room %>
+            <%            
+            String room = conference.getName();            
+            %><%= room != null ? room : "&nbsp;" %>
         </td>
         <td width="15%" align="center">
         	<%

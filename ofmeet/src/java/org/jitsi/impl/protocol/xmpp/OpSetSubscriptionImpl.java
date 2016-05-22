@@ -1,21 +1,36 @@
 /*
  * Jicofo, the Jitsi Conference Focus.
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Copyright @ 2015 Atlassian Pty Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.impl.protocol.xmpp;
 
 import net.java.sip.communicator.util.*;
 
+import org.jitsi.assertions.*;
 import org.jitsi.jicofo.*;
 import org.jitsi.protocol.xmpp.*;
 
+import org.jitsi.retry.*;
+import org.jitsi.service.configuration.*;
 import org.jivesoftware.smack.*;
 import org.jivesoftware.smackx.pubsub.*;
 import org.jivesoftware.smackx.pubsub.listener.*;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * XMPP Pub-sub node implementation of {@link OperationSetSubscription}.
@@ -39,6 +54,13 @@ public class OpSetSubscriptionImpl
         = "org.jitsi.focus.pubsub.ADDRESS";
 
     /**
+     * The name of configuration property which specifies re-try interval for
+     * PubSub subscribe operation.
+     */
+    public static final String PUBUSB_RETRY_INT_PNAME
+        = "org.jitsi.focus.pubsub.RETRY_INTERVAL";
+
+    /**
      * Smack PubSub manager.
      */
     private PubSubManager manager;
@@ -54,15 +76,20 @@ public class OpSetSubscriptionImpl
     private String ourJid;
 
     /**
-     * The map of PubSub node listeners.
+     * The map of Subscriptions
      */
-    private Map<String, SubscriptionListener> listenerMap
-        = new HashMap<String, SubscriptionListener>();
+    private Map<String, Subscription> subscriptionsMap
+        = new HashMap<String, Subscription>();
 
     /**
-     * Parent XMPP provider used to hndle the protocol.
+     * Parent XMPP provider used to handle the protocol.
      */
     private final XmppProtocolProvider parentProvider;
+
+    /**
+     * How often do we retry PubSub subscribe operation(in ms).
+     */
+    private Long retryInterval;
 
     /**
      * Creates new instance of {@link OpSetSubscriptionImpl}.
@@ -79,6 +106,23 @@ public class OpSetSubscriptionImpl
     }
 
     /**
+     * Returns retry interval for PuSub subscribe operation in ms.
+     */
+    private Long getRetryInterval()
+    {
+        if (retryInterval == null)
+        {
+            ConfigurationService config
+                = ServiceUtils.getService(
+                        FocusBundleActivator.bundleContext,
+                        ConfigurationService.class);
+
+            retryInterval = config.getLong(PUBUSB_RETRY_INT_PNAME, 15000L);
+        }
+        return retryInterval;
+    }
+
+    /**
      * Lazy initializer for our JID field(it's not available before provider
      * gets connected).
      */
@@ -86,7 +130,7 @@ public class OpSetSubscriptionImpl
     {
         if (ourJid == null)
         {
-            this.ourJid = parentProvider.getOurJid();
+            ourJid = parentProvider.getOurJid();
         }
         return ourJid;
     }
@@ -98,8 +142,10 @@ public class OpSetSubscriptionImpl
     {
         if (manager == null)
         {
-            manager = new PubSubManager(
-                parentProvider.getConnection(), pubSubAddress);
+            manager
+                = new PubSubManager(
+                        parentProvider.getConnection(),
+                        pubSubAddress);
         }
         return manager;
     }
@@ -113,7 +159,8 @@ public class OpSetSubscriptionImpl
     {
         // FIXME: consider using local flag rather than getting the list
         // of subscriptions
-        for (Subscription subscription : node.getSubscriptions())
+        for (org.jivesoftware.smackx.pubsub.Subscription subscription
+                    : node.getSubscriptions())
         {
             if (subscription.getJid().equals(jid))
             {
@@ -127,26 +174,19 @@ public class OpSetSubscriptionImpl
      * {@inheritDoc}
      */
     @Override
-    public void subscribe(String node, SubscriptionListener listener)
+    public synchronized void subscribe(String               node,
+                                       SubscriptionListener listener)
     {
-        listenerMap.put(node, listener);
-
-        PubSubManager manager = getManager();
-        try
+        Subscription subscription = subscriptionsMap.get(node);
+        if (subscription == null)
         {
-            Node pubSubNode = manager.getNode(node);
-            if (!isSubscribed(getOurJid(), pubSubNode))
-            {
-                // FIXME: Is it possible that we will be subscribed after
-                // our connection dies ? If yes we won't add listener here
-                // and won't receive notifications
-                pubSubNode.addItemEventListener(this);
-                pubSubNode.subscribe(parentProvider.getOurJid());
-            }
+            subscription = new Subscription(node, listener);
+            subscriptionsMap.put(node, subscription);
+            subscription.subscribe();
         }
-        catch (XMPPException e)
+        else
         {
-            logger.error(e.getMessage(), e);
+            subscription.addListener(listener);
         }
     }
 
@@ -154,28 +194,46 @@ public class OpSetSubscriptionImpl
      * {@inheritDoc}
      */
     @Override
-    public void unSubscribe(String node)
+    public synchronized void unSubscribe(String               node,
+                                         SubscriptionListener listener)
     {
-        if (!listenerMap.containsKey(node))
+        Subscription subscription = subscriptionsMap.get(node);
+        if (subscription != null)
         {
-            logger.warn("No PUBSUB listener for " + node);
-            return;
+            if (!subscription.removeListener(listener))
+            {
+                subscription.unSubscribe();
+                subscriptionsMap.remove(node);
+            }
         }
+        else
+        {
+            logger.warn("No PubSub subscription for " + node);
+        }
+    }
 
-        PubSubManager manager = getManager();
-
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<PayloadItem> getItems(String nodeName)
+    {
         try
         {
-            Node pubSubNode = manager.getNode(node);
-            if (isSubscribed(getOurJid(), pubSubNode))
+            Node pubSubNode = getManager().getNode(nodeName);
+            if (pubSubNode instanceof LeafNode)
             {
-                pubSubNode.unsubscribe(getOurJid());
+                LeafNode leafPubSubNode = (LeafNode) pubSubNode;
+                return leafPubSubNode.getItems();
             }
         }
         catch (XMPPException e)
         {
-            logger.error(e.getMessage(), e);
+            logger.error(
+                "Failed to fetch PubSub items of: " + nodeName +
+                ", reason: " + e);
         }
+        return null;
     }
 
     /**
@@ -191,8 +249,9 @@ public class OpSetSubscriptionImpl
         if (logger.isDebugEnabled())
             logger.debug("PubSub update for node: " + nodeId);
 
-        SubscriptionListener listener = listenerMap.get(nodeId);
-        if (listener != null)
+        Subscription subscription = subscriptionsMap.get(nodeId);
+
+        if (subscription != null)
         {
             for(Object item : event.getItems())
             {
@@ -200,8 +259,185 @@ public class OpSetSubscriptionImpl
                     continue;
 
                 PayloadItem payloadItem = (PayloadItem) item;
-                listener.onSubscriptionUpdate(nodeId, payloadItem.getPayload());
+                subscription.notifyListeners(payloadItem);
             }
+        }
+    }
+
+    /**
+     * Class holds info about PubSub subscription and implement subscribe
+     * re-try logic.
+     */
+    class Subscription
+    {
+        /**
+         * The address of PubSub Node.
+         */
+        private final String node;
+
+        /**
+         * Subscription listeners.
+         */
+        private final List<SubscriptionListener> listeners
+            = new CopyOnWriteArrayList<SubscriptionListener>();
+
+        /**
+         * Retry strategy for subscribe operation.
+         */
+        private final RetryStrategy retryStrategy;
+
+        /**
+         * Creates new subscription instance.
+         * @param node the address of PubSub node.
+         * @param listener subscription listener which will be notified about
+         *                 PubSub updates.
+         */
+        public Subscription(String node, SubscriptionListener listener)
+        {
+            Assert.notNull(node, "node");
+            Assert.notNull(listener, "listener");
+
+            this.node = node;
+            this.listeners.add(listener);
+            this.retryStrategy
+                = new RetryStrategy(
+                        XmppProtocolActivator.bundleContext);
+        }
+
+        /**
+         * Registers <tt>SubscriptionListener</tt> which will be notified about
+         * published PubSub items.
+         * @param listener the <tt>SubscriptionListener</tt> to be registered
+         */
+        void addListener(SubscriptionListener listener)
+        {
+            listeners.add(listener);
+        }
+
+        /**
+         * Removes <tt>SubscriptionListener</tt>.
+         * @param listener the instance of <tt>SubscriptionListener</tt> to be
+         *                 unregistered from PubSub notifications.
+         * @return <tt>false</tt> if there are no more listeners registered to
+         *         this <tt>Subscription</tt>
+         */
+        boolean removeListener(SubscriptionListener listener)
+        {
+            listeners.remove(listener);
+
+            return listeners.size() > 0;
+        }
+
+        /**
+         * Notifies all <tt>SubscriptionListener</tt>s about published
+         * <tt>PayloadItem</tt>.
+         * @param payloadItem new <tt>PayloadItem</tt> published to the PubSub
+         *                    node observed by this subscription.
+         */
+        void notifyListeners(PayloadItem payloadItem)
+        {
+            for (SubscriptionListener l : listeners)
+            {
+                l.onSubscriptionUpdate(
+                    node, payloadItem.getId(), payloadItem.getPayload());
+            }
+        }
+
+        /**
+         * Tries to subscribe to PubSub node notifications and returns
+         * <tt>true</> on success.
+         *
+         * @throws Exception if application specific error occurs
+         */
+        synchronized private boolean doSubscribe()
+            throws Exception
+        {
+            if (retryStrategy.isCancelled())
+                return false;
+
+            logger.info("Subscribing to " + node + " node at " + pubSubAddress);
+
+            PubSubManager manager = getManager();
+
+            try
+            {
+                Node pubSubNode = manager.getNode(node);
+                if (!isSubscribed(getOurJid(), pubSubNode))
+                {
+                    // FIXME: Is it possible that we will be subscribed after
+                    // our connection dies? If yes, we won't add listener here
+                    // and won't receive notifications.
+                    pubSubNode.addItemEventListener(OpSetSubscriptionImpl.this);
+                    pubSubNode.subscribe(parentProvider.getOurJid());
+                }
+                return false;
+            }
+            catch (XMPPException e)
+            {
+                logger.error(
+                    "Failed to subscribe to " + node +
+                    " at "+ pubSubAddress + " error: " + e);
+
+                return true;
+            }
+        }
+
+        /**
+         * Subscribes to PubSub node notifications.
+         */
+        synchronized void subscribe()
+        {
+            retryStrategy.runRetryingTask(
+                new SimpleRetryTask(
+                        0, getRetryInterval(), true, getRetryCallable()));
+        }
+
+        /**
+         * Cancels PubSub subscription.
+         */
+        synchronized void unSubscribe()
+        {
+            retryStrategy.cancel();
+
+            if (!parentProvider.isRegistered())
+            {
+                logger.warn(
+                    "No connection - skipped PubSub unsubscribe for: " + node);
+                return;
+            }
+
+            PubSubManager manager = getManager();
+
+            try
+            {
+                Node pubSubNode = manager.getNode(node);
+                String ourJid = getOurJid();
+
+                if (isSubscribed(ourJid, pubSubNode))
+                {
+                    pubSubNode.unsubscribe(ourJid);
+                }
+            }
+            catch (XMPPException e)
+            {
+                logger.error(
+                    "An error occurred while trying to unsubscribe from" +
+                    " PubSub: " + node + " at " + pubSubAddress +
+                    ", reason: " + e);
+            }
+        }
+
+        private Callable<Boolean> getRetryCallable()
+        {
+            return new Callable<Boolean>()
+            {
+                @Override
+                public Boolean call()
+                    throws Exception
+                {
+                    return doSubscribe();
+                }
+            };
         }
     }
 }

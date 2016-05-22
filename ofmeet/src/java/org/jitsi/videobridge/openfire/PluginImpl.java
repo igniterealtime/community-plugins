@@ -1,8 +1,17 @@
 /*
- * Jitsi Videobridge, OpenSource video conferencing.
+ * Copyright @ 2015 Atlassian Pty Ltd
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.videobridge.openfire;
 
@@ -15,14 +24,11 @@ import java.util.jar.*;
 import org.jitsi.service.neomedia.*;
 import org.jitsi.util.*;
 import org.jitsi.videobridge.xmpp.*;
-import org.jivesoftware.openfire.*;
 import org.jivesoftware.openfire.container.*;
 import org.jivesoftware.util.*;
 import org.slf4j.*;
 import org.slf4j.Logger;
 import org.xmpp.component.*;
-import org.xmpp.component.ComponentManager;
-import org.xmpp.component.ComponentManagerFactory;
 
 /**
  * Implements <tt>org.jivesoftware.openfire.container.Plugin</tt> to integrate
@@ -32,7 +38,8 @@ import org.xmpp.component.ComponentManagerFactory;
  * @author Damian Minkov
  */
 public class PluginImpl
-    implements PropertyEventListener
+    implements Plugin,
+               PropertyEventListener
 {
     /**
      * The logger.
@@ -64,31 +71,10 @@ public class PluginImpl
     public static final int MAX_PORT_DEFAULT_VALUE = 6000;
 
     /**
-     * The name of the property that contains the name of video conference application
-     */
-    public static final String CHECKREPLAY_PROPERTY_NAME = "org.jitsi.videobridge.video.srtpcryptocontext.checkreplay";
-
-    /**
-     * The name of the property that contains the name of video conference application
-     */
-    public static final String NAT_HARVESTER_LOCAL_ADDRESS = "org.jitsi.videobridge.nat.harvester.local.address";
-    /**
-     * The name of the property that contains the name of video conference application
-     */
-    public static final String NAT_HARVESTER_PUBLIC_ADDRESS = "org.jitsi.videobridge.nat.harvester.public.address";
-
-    /**
-     * The name of the property that contains the maximum port number that we'd
-     * like our RTP managers to bind upon.
-     */
-    public static final String RECORD_PROPERTY_NAME = "org.jitsi.videobridge.ofmeet.media.record";
-
-
-    /**
      * The Jabber component which has been added to {@link #componentManager}
      * i.e. Openfire.
      */
-    public static ComponentImpl component;
+    private Component component;
 
     /**
      * The <tt>ComponentManager</tt> to which the {@link #component} of this
@@ -111,8 +97,6 @@ public class PluginImpl
      */
     public void destroyPlugin()
     {
-		Log.info("PluginImpl destroyPlugin");
-
         PropertyEventDispatcher.removeListener(this);
 
         if ((componentManager != null) && (subdomain != null))
@@ -127,6 +111,7 @@ public class PluginImpl
             }
             componentManager = null;
             subdomain = null;
+            component = null;
         }
     }
 
@@ -139,39 +124,8 @@ public class PluginImpl
      * located
      * @see Plugin#initializePlugin(PluginManager, File)
      */
-    public void initializePlugin(ComponentManager componentManager, PluginManager manager, File pluginDirectory)
+    public void initializePlugin(PluginManager manager, File pluginDirectory)
     {
-		this.componentManager = componentManager;
-
-		Log.info("PluginImpl initializePlugin "+ pluginDirectory);
-
-		String enableRecording = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.media.record", "false");
-		String recordingPath = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", pluginDirectory.getAbsolutePath() + File.separator + "recordings");
-		String recordingSecret = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.secret", "secret");
-
-		String ourIpAddress = "127.0.0.1";
-		String ourHostname = XMPPServer.getInstance().getServerInfo().getHostname();
-
-		try {
-			ourIpAddress = InetAddress.getByName(ourHostname).getHostAddress();
-		} catch (Exception e) {
-
-		}
-		String localAddress = JiveGlobals.getProperty(NAT_HARVESTER_LOCAL_ADDRESS, ourIpAddress);
-		String publicAddress = JiveGlobals.getProperty(NAT_HARVESTER_PUBLIC_ADDRESS, ourIpAddress);
-
-		System.setProperty("net.java.sip.communicator.SC_HOME_DIR_LOCATION", pluginDirectory.getPath());
-		System.setProperty("net.java.sip.communicator.SC_HOME_DIR_NAME", ".");
-		System.setProperty("org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext.checkReplay", JiveGlobals.getProperty(CHECKREPLAY_PROPERTY_NAME, "false"));
-
-		System.setProperty("org.jitsi.videobridge.ENABLE_MEDIA_RECORDING", enableRecording);
-		System.setProperty("org.jitsi.videobridge.MEDIA_RECORDING_PATH", recordingPath);
-		System.setProperty("org.jitsi.videobridge.MEDIA_RECORDING_TOKEN", recordingSecret);
-		System.setProperty("org.jitsi.videobridge.NAT_HARVESTER_LOCAL_ADDRESS", localAddress);
-		System.setProperty("org.jitsi.videobridge.NAT_HARVESTER_PUBLIC_ADDRESS", publicAddress);
-
-		System.setProperty("org.jitsi.videobridge.defaultOptions", "2");	// allow videobridge access without focus
-
         PropertyEventDispatcher.addListener(this);
 
         // Let's check for custom configuration
@@ -187,14 +141,17 @@ public class PluginImpl
                 DefaultStreamConnector.MIN_PORT_NUMBER_PROPERTY_NAME,
                 minVal);
 
-        checkNatives(pluginDirectory);
-        String subdomain = "ofmeet-jitsi-videobridge"; //ComponentImpl.SUBDOMAIN;
-        PluginImpl.component = new ComponentImpl();
+        checkNatives();
+
+        ComponentManager componentManager
+            = ComponentManagerFactory.getComponentManager();
+        String subdomain = ComponentImpl.SUBDOMAIN;
+        Component component = new ComponentImpl();
         boolean added = false;
 
         try
         {
-            componentManager.addComponent(subdomain, PluginImpl.component);
+            componentManager.addComponent(subdomain, component);
             added = true;
         }
         catch (ComponentException ce)
@@ -203,11 +160,15 @@ public class PluginImpl
         }
         if (added)
         {
+            this.componentManager = componentManager;
             this.subdomain = subdomain;
+            this.component = component;
         }
         else
         {
+            this.componentManager = null;
             this.subdomain = null;
+            this.component = null;
         }
     }
 
@@ -218,13 +179,19 @@ public class PluginImpl
      * If folder with natives exist add it to the java.library.path so
      * libjitsi can use those native libs.
      */
-    private void checkNatives(File pluginDirectory)
+    private void checkNatives()
     {
         // Find the root path of the class that will be our plugin lib folder.
         try
         {
-			String nativeLibsJarPath = pluginDirectory.getAbsolutePath() + File.separator + "lib";
-            File nativeLibFolder = new File(nativeLibsJarPath, "native");
+            String binaryPath =
+                (new URL(ComponentImpl.class.getProtectionDomain()
+                    .getCodeSource().getLocation(), ".")).openConnection()
+                    .getPermission().getName();
+
+            File pluginJarfile = new File(binaryPath);
+            File nativeLibFolder =
+                new File(pluginJarfile.getParentFile(), "native");
 
             if(!nativeLibFolder.exists())
             {
@@ -235,28 +202,32 @@ public class PluginImpl
                 String jarFileSuffix = null;
                 if(OSUtils.IS_LINUX32)
                 {
-                    jarFileSuffix = "jitsi-videobridge-native-linux-32.jar";
+                    jarFileSuffix = "-native-linux-32.jar";
                 }
                 else if(OSUtils.IS_LINUX64)
                 {
-                    jarFileSuffix = "jitsi-videobridge-native-linux-64.jar";
+                    jarFileSuffix = "-native-linux-64.jar";
                 }
                 else if(OSUtils.IS_WINDOWS32)
                 {
-                    jarFileSuffix = "jitsi-videobridge-native-windows-32.jar";
+                    jarFileSuffix = "-native-windows-32.jar";
                 }
                 else if(OSUtils.IS_WINDOWS64)
                 {
-                    jarFileSuffix = "jitsi-videobridge-native-windows-64.jar";
+                    jarFileSuffix = "-native-windows-64.jar";
                 }
                 else if(OSUtils.IS_MAC)
                 {
-                    jarFileSuffix = "jitsi-videobridge-native-macosx.jar";
+                    jarFileSuffix = "-native-macosx.jar";
                 }
 
-                JarFile jar = new JarFile(nativeLibsJarPath + File.separator + jarFileSuffix);
-                Enumeration en = jar.entries();
+                String nativeLibsJarPath =
+                    pluginJarfile.getCanonicalPath();
+                nativeLibsJarPath =
+                    nativeLibsJarPath.replaceFirst("\\.jar", jarFileSuffix);
 
+                JarFile jar = new JarFile(nativeLibsJarPath);
+                Enumeration en = jar.entries();
                 while (en.hasMoreElements())
                 {
                     try
@@ -286,8 +257,10 @@ public class PluginImpl
             else
                 Log.info("Native lib folder already exist.");
 
+            String newLibPath =
+                nativeLibFolder.getCanonicalPath() + File.pathSeparator +
+                    System.getProperty("java.library.path");
 
-            String newLibPath = nativeLibFolder.getCanonicalPath() + File.pathSeparator + System.getProperty("java.library.path");
             System.setProperty("java.library.path", newLibPath);
 
             // this will reload the new setting

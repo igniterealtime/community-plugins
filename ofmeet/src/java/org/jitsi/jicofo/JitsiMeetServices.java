@@ -1,30 +1,49 @@
 /*
  * Jicofo, the Jitsi Conference Focus.
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Copyright @ 2015 Atlassian Pty Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.jicofo;
 
 import net.java.sip.communicator.impl.protocol.jabber.*;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.colibri.*;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.jirecon.*;
-import net.java.sip.communicator.service.protocol.*;
-import net.java.sip.communicator.service.protocol.event.*;
-import net.java.sip.communicator.util.*;
+import net.java.sip.communicator.util.Logger;
 
+import org.jitsi.assertions.*;
+import org.jitsi.eventadmin.*;
+import org.jitsi.jicofo.discovery.*;
+import org.jitsi.jicofo.discovery.Version;
+import org.jitsi.jicofo.event.*;
+import org.jitsi.jicofo.recording.jibri.*;
+import org.jitsi.osgi.*;
 import org.jitsi.protocol.xmpp.*;
+import org.jitsi.util.*;
+
+import org.osgi.framework.*;
 
 import java.util.*;
 
 /**
- * Class handles discovery of Jitsi Meet application services like bridge,
- * recording, SIP gateway and so on...
+ * Class manages discovered components discovery of Jitsi Meet application
+ * services like bridge, recording, SIP gateway and so on...
  *
  * @author Pawel Domas
  */
 public class JitsiMeetServices
-    implements RegistrationStateChangeListener
+    extends EventHandlerActivator
 {
     /**
      * The logger
@@ -47,6 +66,28 @@ public class JitsiMeetServices
         };
 
     /**
+     * Feature set advertised by videobridge which does support health-checks.
+     */
+    public static final String[] VIDEOBRIDGE_FEATURES2 = new String[]
+        {
+            ColibriConferenceIQ.NAMESPACE,
+            DiscoveryUtil.FEATURE_HEALTH_CHECK,
+            ProtocolProviderServiceJabberImpl
+                .URN_XMPP_JINGLE_DTLS_SRTP,
+            ProtocolProviderServiceJabberImpl
+                .URN_XMPP_JINGLE_ICE_UDP_1,
+            ProtocolProviderServiceJabberImpl
+                .URN_XMPP_JINGLE_RAW_UDP_0
+        };
+
+    /**
+     * The XMPP Service Discovery features of MUC service provided by the XMPP
+     * server.
+     */
+    private static final String[] MUC_FEATURES
+        = { "http://jabber.org/protocol/muc" };
+
+    /**
      * Features advertised by Jirecon recorder container.
      */
     private static final String[] JIRECON_RECORDER_FEATURES = new String[]
@@ -66,31 +107,26 @@ public class JitsiMeetServices
     /**
      * Features used to recognize pub-sub service.
      */
-    private static final String[] PUBSUB_FEATURES = new String[]
+    /*private static final String[] PUBSUB_FEATURES = new String[]
         {
             "http://jabber.org/protocol/pubsub",
             "http://jabber.org/protocol/pubsub#subscribe"
-        };
+        };*/
 
     /**
-     * Capabilities operation set used to discover services info.
+     * Manages Jitsi Videobridge component XMPP addresses.
      */
-    private OperationSetSimpleCaps capsOpSet;
+    private final BridgeSelector bridgeSelector;
 
     /**
-     * XMPP xmppDomain for which we're discovering service info.
+     * Instance of {@link JibriDetector} which manages Jibri instances.
      */
-    private String xmppDomain;
+    private JibriDetector jibriDetector;
 
     /**
-     * Videobridge component XMPP address.
+     * The name of XMPP domain to which Jicofo user logs in.
      */
-    private BridgeSelector bridgeSelector;
-
-    /**
-     * The protocol service handler that provides XMPP service.
-     */
-    private ProtocolProviderHandler protocolProviderHandler;
+    private final String jicofoUserDomain;
 
     /**
      * Jirecon recorder component XMPP address.
@@ -98,125 +134,160 @@ public class JitsiMeetServices
     private String jireconRecorder;
 
     /**
+     * The {@link ProtocolProviderHandler} for Jicofo XMPP connection.
+     */
+    private final ProtocolProviderHandler protocolProvider;
+
+    /**
      * SIP gateway component XMPP address.
      */
     private String sipGateway;
 
     /**
-     * Starts this instance.
-     *
-     * @param xmppDomain server address/main service XMPP xmppDomain that hosts
-     *                      the conference system.
-     * @param xmppAuthDomain the xmppDomain used for XMPP authentication.
-     * @param xmppUserName the user name used to login.
-     * @param xmppLoginPassword the password used for authentication.
-     *
-     * @throws java.lang.IllegalStateException if started already.
+     * The address of MUC component served by our XMPP domain.
      */
-    public void start(String serverAddress,
-                      String xmppDomain,
-                      String xmppAuthDomain,
-                      String xmppUserName,
-                      String xmppLoginPassword)
+    private String mucService;
+
+    /**
+     * <tt>Version</tt> IQ instance holding detected XMPP server's version
+     * (if any).
+     */
+    private Version XMPPServerVersion;
+
+    /**
+     * Returns <tt>true</tt> if given list of features complies with JVB feature
+     * list.
+     * @param features the list of feature to be checked.
+     */
+    static public boolean isJitsiVideobridge(List<String> features)
     {
-        if (protocolProviderHandler != null)
-        {
-            throw new IllegalStateException("Already started");
-        }
+        return DiscoveryUtil.checkFeatureSupport(
+                VIDEOBRIDGE_FEATURES, features);
+    }
 
-        this.xmppDomain = xmppDomain;
+    /**
+     * Creates new instance of <tt>JitsiMeetServices</tt>
+     *
+     * @param protocolProviderHandler {@link ProtocolProviderHandler} for Jicofo
+     *        XMPP connection.
+     * @param jicofoUserDomain the name of the XMPP domain to which Jicofo user
+     *        is connecting to.
+     */
+    public JitsiMeetServices(ProtocolProviderHandler protocolProviderHandler,
+                             String jicofoUserDomain)
+    {
+        super(new String[] { BridgeEvent.HEALTH_CHECK_FAILED });
 
-        this.protocolProviderHandler
-            = new ProtocolProviderHandler();
+        Assert.notNull(protocolProviderHandler, "protocolProviderHandler");
 
-        protocolProviderHandler.start(
-            serverAddress, xmppAuthDomain, xmppLoginPassword,
-            xmppUserName, this);
-
-        this.capsOpSet
+        OperationSetSubscription subscriptionOpSet
             = protocolProviderHandler.getOperationSet(
-                    OperationSetSimpleCaps.class);
+                    OperationSetSubscription.class);
 
-        this.bridgeSelector
-            = new BridgeSelector(
-                    protocolProviderHandler
-                        .getProtocolProvider()
-                        .getOperationSet(OperationSetSubscription.class));
+        Assert.notNull(subscriptionOpSet, "subscriptionOpSet");
 
-        if (protocolProviderHandler.isRegistered())
-        {
-            init();
-        }
-        else
-        {
-            protocolProviderHandler.register();
-        }
+        this.jicofoUserDomain = jicofoUserDomain;
+        this.protocolProvider = protocolProviderHandler;
+        this.bridgeSelector = new BridgeSelector(subscriptionOpSet);
     }
 
     /**
-     * Stops this instance and disposes XMPP connection.
+     * Called by other classes when they detect JVB instance.
+     * @param bridgeJid the JID of discovered JVB component.
      */
-    public void stop()
+    void newBridgeDiscovered(String bridgeJid, Version version)
     {
-        if (protocolProviderHandler != null)
-        {
-            protocolProviderHandler.stop();
-
-            protocolProviderHandler = null;
-        }
+        bridgeSelector.addJvbAddress(bridgeJid, version);
     }
 
     /**
-     * Initializes this instance and discovers Jitsi Meet services.
+     * Call when new component becomes available.
+     *
+     * @param node component XMPP address
+     * @param features list of features supported by <tt>node</tt>
+     * @param version the <tt>Version</tt> IQ which carries the info about
+     *                <tt>node</tt> version(if any).
      */
-    public void init()
+    void newNodeDiscovered(String node, List<String> features, Version version)
     {
-        List<String> items = capsOpSet.getItems(xmppDomain);
-        for (String item : items)
+        if (isJitsiVideobridge(features))
         {
-            if (capsOpSet.hasFeatureSupport(item, VIDEOBRIDGE_FEATURES))
-            {
-                logger.info("Discovered videobridge: " + item);
-
-                bridgeSelector.addJvbAddress(item);
-            }
-            else if (jireconRecorder == null
-                && capsOpSet.hasFeatureSupport(item, JIRECON_RECORDER_FEATURES))
-            {
-                logger.info("Discovered Jirecon recorder: " + item);
-
-                setJireconRecorder(item);
-            }
-            else if (sipGateway == null
-                && capsOpSet.hasFeatureSupport(item, SIP_GW_FEATURES))
-            {
-                logger.info("Discovered SIP gateway: " + item);
-
-                setSipGateway(item);
-            }
-            /*
-            FIXME: pub-sub service auto-detect ?
-            else if (capsOpSet.hasFeatureSupport(item, PUBSUB_FEATURES))
-            {
-                // Potential PUBSUB service
-                logger.info("Potential PUBSUB service:" + item);
-                List<String> subItems = capsOpSet.getItems(item);
-                for (String subItem: subItems)
-                {
-                    logger.info("Subnode " + subItem + " of " + item);
-                    capsOpSet.hasFeatureSupport(
-                        item, subItem, VIDEOBRIDGE_FEATURES);
-                }
-            }*/
+            newBridgeDiscovered(node, version);
         }
+        else if (
+            jireconRecorder == null
+                && DiscoveryUtil.checkFeatureSupport(
+                        JIRECON_RECORDER_FEATURES, features))
+        {
+            logger.info("Discovered Jirecon recorder: " + node);
+
+            setJireconRecorder(node);
+        }
+        else if (sipGateway == null
+            && DiscoveryUtil.checkFeatureSupport(SIP_GW_FEATURES, features))
+        {
+            logger.info("Discovered SIP gateway: " + node);
+
+            setSipGateway(node);
+        }
+        else if (mucService == null
+            && DiscoveryUtil.checkFeatureSupport(MUC_FEATURES, features))
+        {
+            logger.info("MUC component discovered: " + node);
+
+            setMucService(node);
+        }
+        else if (jicofoUserDomain != null && jicofoUserDomain.equals(node))
+        {
+            this.XMPPServerVersion = version;
+
+            logger.info("Detected XMPP server version: " + version);
+        }
+        /*
+        FIXME: pub-sub service auto-detect ?
+        else if (capsOpSet.hasFeatureSupport(item, PUBSUB_FEATURES))
+        {
+            // Potential PUBSUB service
+            logger.info("Potential PUBSUB service:" + item);
+            List<String> subItems = capsOpSet.getItems(item);
+            for (String subItem: subItems)
+            {
+                logger.info("Subnode " + subItem + " of " + item);
+                capsOpSet.hasFeatureSupport(
+                    item, subItem, VIDEOBRIDGE_FEATURES);
+            }
+        }*/
     }
 
     /**
-     * Returns the XMPP address of videobridge component.
+     * Call when components goes offline.
+     *
+     * @param node XMPP address of disconnected XMPP component.
      */
-    public String getVideobridge()
+    void nodeNoLongerAvailable(String node)
     {
-        return bridgeSelector.selectVideobridge();
+        if (bridgeSelector.isJvbOnTheList(node))
+        {
+            bridgeSelector.removeJvbAddress(node);
+        }
+        else if (node.equals(jireconRecorder))
+        {
+            logger.warn("Jirecon recorder went offline: " + node);
+
+            jireconRecorder = null;
+        }
+        else if (node.equals(sipGateway))
+        {
+            logger.warn("SIP gateway went offline: " + node);
+
+            sipGateway = null;
+        }
+        else if (node.equals(mucService))
+        {
+            logger.warn("MUC component went offline: " + node);
+
+            mucService = null;
+        }
     }
 
     /**
@@ -224,9 +295,17 @@ public class JitsiMeetServices
      * @param sipGateway the XMPP address to be set as SIP gateway component
      *                   address.
      */
-    private void setSipGateway(String sipGateway)
+    void setSipGateway(String sipGateway)
     {
         this.sipGateway = sipGateway;
+    }
+
+    /**
+     * Returns XMPP address of SIP gateway component.
+     */
+    public String getSipGateway()
+    {
+        return sipGateway;
     }
 
     /**
@@ -237,6 +316,16 @@ public class JitsiMeetServices
     public void setJireconRecorder(String jireconRecorder)
     {
         this.jireconRecorder = jireconRecorder;
+    }
+
+    /**
+     * Returns {@link JibriDetector} instance that manages Jibri pool used by
+     * this Jicofo process or <tt>null</tt> if unavailable in the current
+     * session.
+     */
+    public JibriDetector getJibriDetector()
+    {
+        return jibriDetector;
     }
 
     /**
@@ -256,22 +345,91 @@ public class JitsiMeetServices
         return bridgeSelector;
     }
 
-    @Override
-    public void registrationStateChanged(RegistrationStateChangeEvent evt)
+    /**
+     * Returns the address of MUC component for our XMPP domain.
+     */
+    public String getMucService()
     {
-        //FIXME: do something here (start PBU-SUB)
-        if (RegistrationState.REGISTERED.equals(evt.getNewState()))
+        return mucService;
+    }
+
+    /**
+     * Sets the address of MUC component.
+     * @param mucService component sub domain that refers to MUC
+     */
+    public void setMucService(String mucService)
+    {
+        this.mucService = mucService;
+    }
+
+    @Override
+    public void start(BundleContext bundleContext)
+        throws Exception
+    {
+        bridgeSelector.init();
+
+        super.start(bundleContext);
+
+        String jibriBreweryName
+            = JibriDetector.loadBreweryName(
+                    FocusBundleActivator.getConfigService());
+
+        if (!StringUtils.isNullOrEmpty(jibriBreweryName))
         {
-            init();
+            jibriDetector
+                = new JibriDetector(protocolProvider, jibriBreweryName);
+
+            jibriDetector.init();
+        }
+    }
+
+    @Override
+    public void stop(BundleContext bundleContext)
+        throws Exception
+    {
+        if (jibriDetector != null)
+        {
+            jibriDetector.dispose();
+            jibriDetector = null;
+        }
+
+        super.stop(bundleContext);
+    }
+
+    @Override
+    public void handleEvent(Event event)
+    {
+        if (BridgeEvent.HEALTH_CHECK_FAILED.equals(event.getTopic()))
+        {
+            BridgeEvent bridgeEvent = (BridgeEvent) event;
+
+            bridgeSelector.removeJvbAddress(bridgeEvent.getBridgeJid());
         }
     }
 
     /**
-     * Returns capabilities operation set used by this instance to discover
-     * services info.
+     * The version of XMPP server to which Jicofo user is connecting to.
+     *
+     * @return {@link Version} instance which holds the version details. Can be
+     *         <tt>null</tt> if not discovered yet.
      */
-    public OperationSetSimpleCaps getCapsOpSet()
+    public Version getXMPPServerVersion()
     {
-        return capsOpSet;
+        return XMPPServerVersion;
+    }
+
+    /**
+     * Finds the version of the videobridge identified by given
+     * <tt>bridgeJid</tt>.
+     *
+     * @param bridgeJid the XMPP address of the videobridge for which we want to
+     *        obtain the version.
+     *
+     * @return {@link Version} instance which holds the details about JVB
+     *         version or <tt>null</tt> if unknown.
+     */
+    public Version getBridgeVersion(String bridgeJid)
+    {
+        return bridgeSelector.getBridgeVersion(bridgeJid);
     }
 }

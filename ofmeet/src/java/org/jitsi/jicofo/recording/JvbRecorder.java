@@ -1,8 +1,19 @@
 /*
  * Jicofo, the Jitsi Conference Focus.
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Copyright @ 2015 Atlassian Pty Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.jicofo.recording;
 
@@ -11,6 +22,7 @@ import net.java.sip.communicator.impl.protocol.jabber.extensions.colibri.Colibri
 import net.java.sip.communicator.util.*;
 
 import org.jitsi.protocol.xmpp.*;
+import org.jitsi.xmpp.util.*;
 
 import org.jivesoftware.smack.packet.*;
 
@@ -38,21 +50,26 @@ public class JvbRecorder
      */
     boolean isRecording;
 
+    private final String roomName;
+
     /**
      * Creates new instance of <tt>JvbRecorder</tt>.
      * @param conferenceId colibri conference ID obtained when allocated
      *                     on the bridge
      * @param videoBridgeComponentJid videobridge component address.
+     * @param roomName the room name.
      * @param xmpp {@link OperationSetDirectSmackXmpp}
      *              for current XMPP connection.
      */
     public JvbRecorder(String conferenceId,
                        String videoBridgeComponentJid,
+                       String roomName,
                        OperationSetDirectSmackXmpp xmpp)
     {
         super(videoBridgeComponentJid, xmpp);
 
         this.conferenceId = conferenceId;
+        this.roomName = roomName;
     }
 
     /**
@@ -69,21 +86,23 @@ public class JvbRecorder
      */
     @Override
     public boolean setRecording(String from, String token,
-                                boolean doRecord, String path)
+                                State doRecord, String path)
     {
         ColibriConferenceIQ toggleRecordingIq = new ColibriConferenceIQ();
 
         toggleRecordingIq.setID(conferenceId);
         toggleRecordingIq.setTo(recorderComponentJid);
         toggleRecordingIq.setType(IQ.Type.SET);
+        toggleRecordingIq.setName(roomName);
 
         toggleRecordingIq.setRecording(
             new ColibriConferenceIQ.Recording(
                 !isRecording ? State.ON : State.OFF, token));
+
         Packet reply
             = xmpp.getXmppConnection()
                     .sendPacketAndGetReply(toggleRecordingIq);
-        logger.info("REC reply received: " + reply.toXML());
+        logger.info("REC reply received: " + IQUtils.responseToXML(reply));
         if (reply instanceof ColibriConferenceIQ)
         {
             ColibriConferenceIQ colibriReply = (ColibriConferenceIQ) reply;
@@ -104,8 +123,8 @@ public class JvbRecorder
         else
         {
             logger.error(
-                conferenceId
-                    + " unexpected response received: " + reply.toXML());
+                    conferenceId + " unexpected response received: "
+                        + IQUtils.responseToXML(reply));
         }
         return true;
     }

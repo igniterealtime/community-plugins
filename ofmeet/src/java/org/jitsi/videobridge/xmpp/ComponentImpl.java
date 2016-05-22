@@ -1,8 +1,17 @@
 /*
- * Jitsi Videobridge, OpenSource video conferencing.
+ * Copyright @ 2015 Atlassian Pty Ltd
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.videobridge.xmpp;
 
@@ -10,9 +19,17 @@ import java.util.*;
 
 import net.java.sip.communicator.impl.protocol.jabber.*;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.colibri.*;
+import net.java.sip.communicator.impl.protocol.jabber.extensions.health.*;
+import net.java.sip.communicator.util.*;
 
+import org.jitsi.meet.*;
+import org.jitsi.osgi.*;
+import org.jitsi.service.configuration.*;
+import org.jitsi.service.version.*;
 import org.jitsi.videobridge.*;
-import org.jitsi.videobridge.osgi.*;
+import org.jitsi.xmpp.component.*;
+import org.jitsi.xmpp.util.*;
+import org.jivesoftware.smack.packet.*;
 import org.osgi.framework.*;
 import org.xmpp.component.*;
 import org.xmpp.packet.*;
@@ -26,7 +43,7 @@ import org.xmpp.packet.Packet;
  * @author Lyubomir Marinov
  */
 public class ComponentImpl
-    extends AbstractComponent
+    extends ComponentBase
     implements BundleActivator
 {
     private static final org.jitsi.util.Logger logger
@@ -93,9 +110,23 @@ public class ComponentImpl
 
     /**
      * Initializes a new <tt>ComponentImpl</tt> instance.
+     * @param host the hostname or IP address to which this component will be
+     *             connected.
+     * @param port the port of XMPP server to which this component will connect.
+     * @param domain the name of main XMPP domain on which this component will
+     *               be served.
+     * @param subDomain the name of subdomain on which this component will be
+     *                  available.
+     * @param secret the password used by the component to authenticate with
+     *               XMPP server.
      */
-    public ComponentImpl()
+    public ComponentImpl(String          host,
+                         int             port,
+                         String        domain,
+                         String     subDomain,
+                         String        secret)
     {
+        super(host, port, domain, subDomain, secret);
     }
 
     /**
@@ -111,12 +142,15 @@ public class ComponentImpl
             new String[]
                     {
                         ColibriConferenceIQ.NAMESPACE,
+                        HealthCheckIQ.NAMESPACE,
                         ProtocolProviderServiceJabberImpl
                             .URN_XMPP_JINGLE_DTLS_SRTP,
                         ProtocolProviderServiceJabberImpl
                             .URN_XMPP_JINGLE_ICE_UDP_1,
                         ProtocolProviderServiceJabberImpl
-                            .URN_XMPP_JINGLE_RAW_UDP_0
+                            .URN_XMPP_JINGLE_RAW_UDP_0,
+                        ProtocolProviderServiceJabberImpl
+                            .URN_XMPP_IQ_VERSION
                     };
     }
 
@@ -186,53 +220,23 @@ public class ComponentImpl
     }
 
     /**
-     * Handles a <tt>ColibriConferenceIQ</tt> stanza which represents a request.
+     * Returns the <tt>VersionService</tt> used by this
+     * <tt>Videobridge</tt>.
      *
-     * @param conferenceIQ the <tt>ColibriConferenceIQ</tt> stanza represents
-     * the request to handle
-     * @return an <tt>org.jivesoftware.smack.packet.IQ</tt> stanza which
-     * represents the response to the specified request or <tt>null</tt> to
-     * reply with <tt>feature-not-implemented</tt>
-     * @throws Exception to reply with <tt>internal-server-error</tt> to the
-     * specified request
+     * @return the <tt>VersionService</tt> used by this
+     * <tt>Videobridge</tt>.
      */
-    private org.jivesoftware.smack.packet.IQ handleColibriConferenceIQ(
-            ColibriConferenceIQ conferenceIQ)
-        throws Exception
+    public VersionService getVersionService()
     {
-        Videobridge videobridge = getVideobridge();
-        org.jivesoftware.smack.packet.IQ iq;
+        BundleContext bundleContext = getBundleContext();
 
-        if (videobridge == null)
-            iq = null;
-        else
-            iq = videobridge.handleColibriConferenceIQ(conferenceIQ);
-        return iq;
-    }
+        if (bundleContext != null)
+        {
+            return ServiceUtils2.getService(bundleContext,
+                VersionService.class);
+        }
 
-    /**
-     * Handles a <tt>GracefulShutdownIQ</tt> stanza which represents a request.
-     *
-     * @param shutdownIQ the <tt>GracefulShutdownIQ</tt> stanza represents
-     * the request to handle
-     * @return an <tt>org.jivesoftware.smack.packet.IQ</tt> stanza which
-     * represents the response to the specified request or <tt>null</tt> to
-     * reply with <tt>feature-not-implemented</tt>
-     * @throws Exception to reply with <tt>internal-server-error</tt> to the
-     * specified request
-     */
-    private org.jivesoftware.smack.packet.IQ handleGracefulShutdownIQ(
-            GracefulShutdownIQ shutdownIQ)
-        throws Exception
-    {
-        Videobridge videobridge = getVideobridge();
-        org.jivesoftware.smack.packet.IQ iq;
-
-        if (videobridge == null)
-            iq = null;
-        else
-            iq = videobridge.handleGracefulShutdownIQ(shutdownIQ);
-        return iq;
+        return null;
     }
 
     /**
@@ -368,21 +372,90 @@ public class ComponentImpl
             org.jivesoftware.smack.packet.IQ request)
         throws Exception
     {
-        /*
-         * Requests can be categorized in pieces of Videobridge functionality
-         * based on the org.jivesoftware.smack.packet.IQ runtime type (of their
-         * child element) and forwarded to specialized Videobridge methods for
-         * convenience.
-         */
+        // Requests can be categorized in pieces of Videobridge functionality
+        // based on the org.jivesoftware.smack.packet.IQ runtime type (of their
+        // child element) and forwarded to specialized Videobridge methods for
+        // convenience.
+        if (request instanceof org.jivesoftware.smackx.packet.Version)
+        {
+            return
+                handleVersionIQ(
+                        (org.jivesoftware.smackx.packet.Version) request);
+        }
+
+        Videobridge videobridge = getVideobridge();
+        if (videobridge == null)
+        {
+            return null;
+        }
+
         org.jivesoftware.smack.packet.IQ response;
 
         if (request instanceof ColibriConferenceIQ)
-            response = handleColibriConferenceIQ((ColibriConferenceIQ) request);
-        else if (request instanceof GracefulShutdownIQ)
-            response = handleGracefulShutdownIQ((GracefulShutdownIQ)request);
+        {
+            response
+                = videobridge.handleColibriConferenceIQ(
+                        (ColibriConferenceIQ) request);
+        }
+        else if (request instanceof HealthCheckIQ)
+        {
+            response = videobridge.handleHealthCheckIQ((HealthCheckIQ) request);
+        }
+        else if (request instanceof ShutdownIQ)
+        {
+            response = videobridge.handleShutdownIQ((ShutdownIQ) request);
+        }
         else
+        {
             response = null;
+        }
         return response;
+    }
+
+    /**
+     * Handles a <tt>Version</tt> stanza which represents a request.
+     *
+     * @param versionRequest the <tt>Version</tt> stanza represents
+     * the request to handle
+     * @return an <tt>org.jivesoftware.smack.packet.IQ</tt> stanza which
+     * represents the response to the specified request.
+     */
+    private org.jivesoftware.smack.packet.IQ handleVersionIQ(
+            org.jivesoftware.smackx.packet.Version versionRequest)
+    {
+        VersionService versionService = getVersionService();
+        if (versionService == null)
+        {
+            return org.jivesoftware.smack.packet.IQ.createErrorResponse(
+                versionRequest,
+                new XMPPError(XMPPError.Condition.service_unavailable));
+        }
+
+        org.jitsi.service.version.Version
+            currentVersion = versionService.getCurrentVersion();
+
+        if (currentVersion == null)
+        {
+            return org.jivesoftware.smack.packet.IQ.createErrorResponse(
+                versionRequest,
+                new XMPPError(XMPPError.Condition.interna_server_error));
+        }
+
+        // send packet
+        org.jivesoftware.smackx.packet.Version versionResult =
+            new org.jivesoftware.smackx.packet.Version();
+
+        // to, from and packetId are set by the caller.
+        // versionResult.setTo(versionRequest.getFrom());
+        // versionResult.setFrom(versionRequest.getTo());
+        // versionResult.setPacketID(versionRequest.getPacketID());
+        versionResult.setType(org.jivesoftware.smack.packet.IQ.Type.RESULT);
+
+        versionResult.setName(currentVersion.getApplicationName());
+        versionResult.setVersion(currentVersion.toString());
+        versionResult.setOs(System.getProperty("os.name"));
+
+        return versionResult;
     }
 
     private void handleIQResponse(org.jivesoftware.smack.packet.IQ response)
@@ -533,6 +606,17 @@ public class ComponentImpl
 
         if (!components.contains(this))
             bundleContext.registerService(ComponentImpl.class, this, null);
+
+        // Schedule ping task
+        // note: the task if stopped automatically on component shutdown
+        ConfigurationService config
+            = ServiceUtils.getService(
+                    bundleContext, ConfigurationService.class);
+
+        loadConfig(config, "org.jitsi.videobridge");
+
+        if (!isPingTaskStarted())
+            startPingTask();
     }
 
     /**

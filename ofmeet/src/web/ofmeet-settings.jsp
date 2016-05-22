@@ -147,8 +147,8 @@
 	String adaptivesimulcast = request.getParameter("adaptivesimulcast"); 
         JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.adaptive.simulcast", adaptivesimulcast);         
 
-	String enablesimulcast = request.getParameter("enablesimulcast"); 
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.enable.simulcast", enablesimulcast); 
+	String disablesimulcast = request.getParameter("disablesimulcast"); 
+        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.disable.simulcast", disablesimulcast); 
 
 	String focusjid = request.getParameter("focusjid"); 
         JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", focusjid); 
@@ -211,16 +211,7 @@
 	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.sip.hq.voice", hqVoice);	
 	
 	String globalIntercom = request.getParameter("globalIntercom");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.global.intercom", globalIntercom);
-	
-	String archiveSpeaking = request.getParameter("archiveSpeaking");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.archive.speaking", archiveSpeaking);	
-
-	String archiveRecording = request.getParameter("archiveRecording");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.archive.recording", archiveRecording);	
-	
-	String windowsSso = request.getParameter("windowsSso");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.windows.sso", windowsSso);	
+	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.global.intercom", globalIntercom);		
         
     }
 
@@ -311,22 +302,7 @@
 			<input type="checkbox" name="globalIntercom"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.global.intercom", "off").equals("on")) ? " checked" : "" %>>
 			<fmt:message key="config.page.configuration.global.intercom" />		
 		    </td>
-	    </tr>
-	    
-	    <tr>
-		    <td nowrap  colspan="2">
-			<input type="checkbox" name="archiveSpeaking"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.archive.speaking", "off").equals("on")) ? " checked" : "" %>>
-			<fmt:message key="config.page.configuration.archive.speaking" />		
-		    </td>
 	    </tr>	    
-	    
-	    <tr>
-		    <td nowrap  colspan="2">
-			<input type="checkbox" name="archiveRecording"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.archive.recording", "off").equals("on")) ? " checked" : "" %>>
-			<fmt:message key="config.page.configuration.archive.recording" />		
-		    </td>
-	    </tr>	    	    
-	    
             </tbody>
         </table>
     </p>
@@ -593,13 +569,6 @@
 			<b><fmt:message key="config.page.configuration.security.enabled" /></b> - <fmt:message key="config.page.configuration.security.enabled_description" />
 		    </td>
 	    </tr> 
-	    
-	    <tr>
-		    <td nowrap  colspan="2">
-			<input type="checkbox" name="windowsSso"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.windows.sso", "off").equals("on")) ? " checked" : "" %>>
-			<fmt:message key="config.page.configuration.security.windows.sso" />		
-		    </td>
-	    </tr>	    
             </tbody>
         </table> 
     </p>
@@ -628,7 +597,7 @@
 		    <fmt:message key="config.page.configuration.record.path"/>
 		</td>
 		<td><input type="text" size="60" maxlength="100" name="recordpath"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", OfMeetPlugin.ofmeetHome + File.separator + "recordings") %>">
+			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", container.pluginDirectory.getAbsolutePath() + File.separator + "recordings") %>">
 		</td>
 	    </tr>
 
@@ -803,14 +772,14 @@
 
 	    <tr>
 		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="enablesimulcast" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.simulcast", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.enablesimulcast.disabled" /></b> - <fmt:message key="config.page.configuration.enablesimulcast.disabled_description" />
+			<input type="radio" value="false" name="disablesimulcast" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.simulcast", "false")) ? "checked" : "") %>>
+			<b><fmt:message key="config.page.configuration.disablesimulcast.disabled" /></b> - <fmt:message key="config.page.configuration.disablesimulcast.disabled_description" />
 		    </td>
 	    </tr>   
 	    <tr>
 		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="enablesimulcast" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.simulcast", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.enablesimulcast.enabled" /></b> - <fmt:message key="config.page.configuration.enablesimulcast.enabled_description" />
+			<input type="radio" value="true" name="disablesimulcast" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.simulcast", "false")) ? "checked" : "") %>>
+			<b><fmt:message key="config.page.configuration.disablesimulcast.enabled" /></b> - <fmt:message key="config.page.configuration.disablesimulcast.enabled_description" />
 		    </td>
 	    </tr>	    
         </table>

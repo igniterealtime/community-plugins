@@ -1,8 +1,19 @@
 /*
  * Jicofo, the Jitsi Conference Focus.
  *
- * Distributable under LGPL license.
- * See terms of license at gnu.org.
+ * Copyright @ 2015 Atlassian Pty Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jitsi.impl.protocol.xmpp.extensions;
 
@@ -15,7 +26,7 @@ import org.jivesoftware.smack.provider.*;
 import org.xmlpull.v1.*;
 
 /**
- * Provider handles parsing of {@link ConferenceIq} and {@link AuthUrlIQ}
+ * Provider handles parsing of {@link ConferenceIq} and {@link LoginUrlIQ}
  * stanzas and converting objects back to their XML representation.
  *
  * @author Pawel Domas
@@ -37,7 +48,11 @@ public class ConferenceIqProvider
 
         // <auth-url>
         providerManager.addIQProvider(
-            AuthUrlIQ.ELEMENT_NAME, AuthUrlIQ.NAMESPACE, this);
+            LoginUrlIQ.ELEMENT_NAME, LoginUrlIQ.NAMESPACE, this);
+
+        //<logout>
+        providerManager.addIQProvider(
+            LogoutIq.ELEMENT_NAME, LogoutIq.NAMESPACE, this);
     }
 
     /**
@@ -58,7 +73,8 @@ public class ConferenceIqProvider
         String rootElement = parser.getName();
 
         ConferenceIq iq = null;
-        AuthUrlIQ authUrlIQ = null;
+        LoginUrlIQ authUrlIQ = null;
+        LogoutIq logoutIq = null;
 
         if (ConferenceIq.ELEMENT_NAME.equals(rootElement))
         {
@@ -81,22 +97,74 @@ public class ConferenceIqProvider
             {
                 iq.setFocusJid(focusJid);
             }
+            String sessionId
+                = parser.getAttributeValue(
+                        "", ConferenceIq.SESSION_ID_ATTR_NAME);
+            if (!StringUtils.isNullOrEmpty(sessionId))
+            {
+                iq.setSessionId(sessionId);
+            }
+            String machineUID = parser.getAttributeValue(
+                    "", ConferenceIq.MACHINE_UID_ATTR_NAME);
+            if (!StringUtils.isNullOrEmpty(machineUID))
+            {
+                iq.setMachineUID(machineUID);
+            }
+            String identity = parser.getAttributeValue(
+                    "", ConferenceIq.IDENTITY_ATTR_NAME);
+            if (!StringUtils.isNullOrEmpty(identity))
+            {
+                iq.setIdentity(identity);
+            }
         }
-        else if (AuthUrlIQ.ELEMENT_NAME.equals(rootElement))
+        else if (LoginUrlIQ.ELEMENT_NAME.equals(rootElement))
         {
-            authUrlIQ = new AuthUrlIQ();
+            authUrlIQ = new LoginUrlIQ();
 
             String url = parser.getAttributeValue(
-                    "", AuthUrlIQ.URL_ATTRIBUTE_NAME);
+                    "", LoginUrlIQ.URL_ATTRIBUTE_NAME);
             if (!StringUtils.isNullOrEmpty(url))
             {
                 authUrlIQ.setUrl(url);
             }
             String room = parser.getAttributeValue(
-                    "", AuthUrlIQ.ROOM_NAME_ATTR_NAME);
+                    "", LoginUrlIQ.ROOM_NAME_ATTR_NAME);
             if (!StringUtils.isNullOrEmpty(room))
             {
                 authUrlIQ.setRoom(room);
+            }
+            String popup = parser.getAttributeValue(
+                    "", LoginUrlIQ.POPUP_ATTR_NAME);
+            if (!StringUtils.isNullOrEmpty(popup))
+            {
+                Boolean popupBool = Boolean.parseBoolean(popup);
+                authUrlIQ.setPopup(popupBool);
+            }
+            String machineUID = parser.getAttributeValue(
+                    "", LoginUrlIQ.MACHINE_UID_ATTR_NAME);
+            if (!StringUtils.isNullOrEmpty(machineUID))
+            {
+                authUrlIQ.setMachineUID(machineUID);
+            }
+        }
+        else if (LogoutIq.ELEMENT_NAME.endsWith(rootElement))
+        {
+            logoutIq = new LogoutIq();
+
+            String sessionId = parser.getAttributeValue(
+                    "", LogoutIq.SESSION_ID_ATTR);
+
+            if (!StringUtils.isNullOrEmpty(sessionId))
+            {
+                logoutIq.setSessionId(sessionId);
+            }
+
+            String logoutUrl = parser.getAttributeValue(
+                    "", LogoutIq.LOGOUT_URL_ATTR);
+
+            if (!StringUtils.isNullOrEmpty(logoutUrl))
+            {
+                logoutIq.setLogoutUrl(logoutUrl);
             }
         }
         else
@@ -163,6 +231,17 @@ public class ConferenceIqProvider
             }
         }
 
-        return iq != null ? iq : authUrlIQ;
+        if (iq != null)
+        {
+            return iq;
+        }
+        else if (authUrlIQ != null)
+        {
+            return authUrlIQ;
+        }
+        else
+        {
+            return logoutIq;
+        }
     }
 }

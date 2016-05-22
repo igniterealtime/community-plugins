@@ -11,13 +11,9 @@ import org.jivesoftware.util.*;
 import org.jivesoftware.openfire.*;
 import org.jivesoftware.openfire.vcard.VCardManager;
 import org.jivesoftware.openfire.plugin.spark.*;
-import org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin;
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.group.GroupManager;
-import org.jivesoftware.openfire.user.*;
 import org.jivesoftware.openfire.group.GroupNotFoundException;
-import org.jivesoftware.openfire.plugin.ofmeet.OpenfireLoginService;
-import org.jivesoftware.openfire.auth.AuthToken;
 
 import org.slf4j.*;
 import org.slf4j.Logger;
@@ -36,6 +32,7 @@ import java.security.Principal;
 
 import org.jitsi.videobridge.openfire.PluginImpl;
 import org.jitsi.videobridge.*;
+import org.jivesoftware.openfire.plugin.ofmeet.TokenManager;
 
 import org.dom4j.*;
 
@@ -56,7 +53,13 @@ public class Config extends HttpServlet
 			String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
 			String userName = "null";
 			String userAvatar = "null";
-			String conferences = "[";
+			String connectionUrl = "window.location.protocol + '//' + window.location.host + '/http-bind/'";
+			String accessToken = "null";
+
+			if (XMPPServer.getInstance().getPluginManager().getPlugin("websocket") != null)
+			{
+				connectionUrl = "'wss://' + window.location.host + '/ws/'";
+			}
 
 			String securityEnabled = JiveGlobals.getProperty("ofmeet.security.enabled", "true");
 
@@ -64,36 +67,11 @@ public class Config extends HttpServlet
 			{
 				userName = request.getUserPrincipal().getName();
 
-				if (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.windows.sso", "off").equals("on"))
+				final String token = TokenManager.getInstance().retrieveToken(request.getUserPrincipal());
+
+				if (token != null)
 				{
-					UserManager userManager = XMPPServer.getInstance().getUserManager();
-					userName = userName.toLowerCase();
-					String [] userNameDetails = userName.split("\\\\");
-
-					if (userNameDetails.length == 2)
-					{
-						userName = userNameDetails[1];
-
-						try {
-							userManager.getUser(userName);
-						}
-						catch (UserNotFoundException e) {
-
-							try {
-								userManager.createUser(userName, "password-" + System.currentTimeMillis(), userName, userName + "@" + domain);
-							}
-							catch (Exception e1) {
-								userName = "null";
-							}
-						}
-
-						if (OpenfireLoginService.authTokens.containsKey(userName) == false)
-						{
-							AuthToken authToken = new AuthToken(userName);
-							OpenfireLoginService.authTokens.put(userName, authToken);
-						}
-					}
-					else userName = "null";
+					accessToken = token;
 				}
 
 				VCardManager vcardManager = VCardManager.getInstance();
@@ -110,42 +88,43 @@ public class Config extends HttpServlet
 						userAvatar = "data:" + type + ";base64," + binval.replace("\n", "").replace("\r", "");;
 					}
 				}
+			}
 
-				try {
+			String conferences = "[";
 
-					boolean isBookmarksAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("bookmarks") != null;
+			try {
 
-					if (isBookmarksAvailable)
+				boolean isBookmarksAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("bookmarks") != null;
+
+				if (isBookmarksAvailable)
+				{
+					final Collection<Bookmark> bookmarks = BookmarkManager.getBookmarks();
+
+					for (Bookmark bookmark : bookmarks)
 					{
-						final Collection<Bookmark> bookmarks = BookmarkManager.getBookmarks();
+						boolean addBookmarkForUser = bookmark.isGlobalBookmark() || isBookmarkForJID(userName, bookmark);
 
-						for (Bookmark bookmark : bookmarks)
+						if (addBookmarkForUser)
 						{
-							boolean addBookmarkForUser = bookmark.isGlobalBookmark() || isBookmarkForJID(userName, bookmark);
-
-							if (addBookmarkForUser)
+							if (bookmark.getType() == Bookmark.Type.group_chat)
 							{
-								if (bookmark.getType() == Bookmark.Type.group_chat)
-								{
-									String url = bookmark.getProperty("url");
+								String url = bookmark.getProperty("url");
 
-									if (url == null)
-									{
-										String id = bookmark.getBookmarkID() + "" + System.currentTimeMillis();
-										String rootUrl = JiveGlobals.getProperty("ofmeet.root.url.secure", "https://" + hostname + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443"));
-										url = rootUrl + "/ofmeet/?b=" + id;
-										bookmark.setProperty("url", url);
-									}
-									conferences = conferences + (conferences.equals("[") ? "" : ",");
-									conferences = conferences + "{url: '" + url + "', name: '" + bookmark.getName() + "', jid: '" + bookmark.getValue() + "'}";
+								if (url == null)
+								{
+									String id = bookmark.getBookmarkID() + "" + System.currentTimeMillis();
+									String rootUrl = JiveGlobals.getProperty("ofmeet.root.url.secure", "https://" + hostname + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443"));
+									url = rootUrl + "/ofmeet/?b=" + id;
+									bookmark.setProperty("url", url);
 								}
+								conferences = conferences + (conferences.equals("[") ? "" : ",");
+								conferences = conferences + "{url: '" + url + "', name: '" + bookmark.getName() + "', jid: '" + bookmark.getValue() + "'}";
 							}
 						}
 					}
-
-				} catch (Exception e) {
-
 				}
+
+			} catch (Exception e) {
 
 			}
 
@@ -164,6 +143,10 @@ public class Config extends HttpServlet
 				recordingKey = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.secret", "secret");
 			}
 
+			// new ones
+			String disableSimulcast 	= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.disable.simulcast", "false");
+			String minHDHeight			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.min.hdheight", "540");
+
 			String resolution 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.resolution", "360");
 			String audioMixer			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.audio.mixer", "false");
 			String audioBandwidth 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.audio.bandwidth", "128");
@@ -176,9 +159,8 @@ public class Config extends HttpServlet
 			String adaptiveLastN 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.adaptive.lastn", "false");
 			String adaptiveSimulcast	= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.adaptive.simulcast", "false");
 			String useRtcpMux 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.use.rtcp.mux", "true");
-			String useBundle 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.use.bundle", "false");
+			String useBundle 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.use.bundle", "true");
 			String enableWelcomePage	= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.welcomePage", "true");
-			String enableSimulcast 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.simulcast", "false");
 			String enableRtpStats 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.rtp.stats", "true");
 			String openSctp 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.open.sctp", "true");
 			String desktopSharing 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.desktop.sharing", "ext");
@@ -187,9 +169,6 @@ public class Config extends HttpServlet
 			String desktopShareSrcs		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.desktop.sharing.sources", "[\"screen\", \"window\"]");
 			String minChromeExtVer		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.min.chrome.ext.ver", "0.1");
 			String enableFirefoxSupport = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.firefox.support", "false");
-			String archiveSpeaking 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.archive.speaking", "off");
-			String archiveRecording		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.archive.recording", "off");
-			String recordingPath		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", OfMeetPlugin.ofmeetHome + File.separator + "recordings");
 			String logStats 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.stats.logging", "false");
 			String focusUserJid 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@"+domain);
 			String iceServers 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.iceservers", "");
@@ -216,13 +195,9 @@ public class Config extends HttpServlet
 				if (globalConferenceId == null || videobridge.getConference(globalConferenceId, null) == null)
 				{
 					Conference conference = videobridge.createConference(null);
-
-					if (conference != null)
-					{
-						if (recordVideo.equals("true")) conference.setRecording(true);
-						conference.setLastKnownFocus(domain);
-						globalConferenceId = conference.getID();
-					}
+					if (recordVideo.equals("true")) conference.setRecording(true);
+					conference.setLastKnownFocus(domain);
+					globalConferenceId = conference.getID();
 				}
 			}
 
@@ -237,9 +212,9 @@ public class Config extends HttpServlet
 			out.println("    hosts: {");
 			out.println("        domain: '" + domain + "',");
 			out.println("        muc: 'conference." + domain + "',");
-			out.println("        bridge: 'ofmeet-jitsi-videobridge." + domain + "',");
+			out.println("        bridge: 'videobridge." + domain + "',");
 			out.println("        call_control: " + callControl + ",");
-			out.println("        focus: 'ofmeet-focus." + domain + "',");
+			out.println("        focus: 'focus." + domain + "',");
 			out.println("    },");
 			out.println("    getroomnode: function (path)");
 			out.println("    {");
@@ -259,6 +234,8 @@ public class Config extends HttpServlet
 			out.println("		return roomnode.toLowerCase();    ");
 			out.println("    },	");
 			if (!iceServers.trim().equals("")) out.println("    iceServers: " + iceServers + ",");
+			out.println("    enforcedBridge: 'videobridge." + domain + "',");
+			out.println("    disableSimulcast: " + disableSimulcast + ",");
 			out.println("    useStunTurn: " + useStunTurn + ",");
 			out.println("    useIPv6: " + useIPv6 + ",");
 			out.println("    useNicks: " + useNicks + ",");
@@ -267,7 +244,6 @@ public class Config extends HttpServlet
 			out.println("    useRtcpMux: " + useRtcpMux + ",");
 			out.println("    useBundle: " + useBundle + ",");
 			out.println("    enableWelcomePage: " + enableWelcomePage + ",");
-			out.println("    enableSimulcast: " + enableSimulcast + ",");
 			out.println("    enableRtpStats: " + enableRtpStats + ",");
 			out.println("    openSctp: " + openSctp + ",");
 			if (recordingKey == null) out.println("    enableRecording: " + recordVideo + ",");
@@ -280,22 +256,36 @@ public class Config extends HttpServlet
 			out.println("    desktopSharingSources: '" + desktopShareSrcs + "',");
 			out.println("    minChromeExtVersion: '" + minChromeExtVer + "',");
 			out.println("    channelLastN: " + channelLastN + ",");
+			out.println("    minHDHeight: " + minHDHeight + ",");
 			out.println("    useNodeJs: " + (nodejs ? "true" : "false") + ",");
+
+			out.println("    desktopSharingFirefoxExtId: 'jidesha@meet.jit.si',");
+			out.println("    desktopSharingFirefoxDisabled: false,");
+			out.println("    desktopSharingFirefoxMaxVersionExtRequired: -1,");
+			out.println("    desktopSharingFirefoxExtensionURL: window.location.protocol + '//' + window.location.host + '/ofmeet/jidesha-0.1.1-fx.xpi',");
+			out.println("    desktopSharingFirefoxExtId: 'jidesha@meet.jit.si',");
+
+			out.println("    hiddenDomain: 'recorder." + domain + "',");
+			out.println("    startBitrate: '800',");
+			out.println("    recordingType: 'colibri',");
+			out.println("    disableAudioLevels: false,");
+			out.println("    stereo: false,");
+			out.println("    requireDisplayName: false,");
+			out.println("    startAudioMuted: 9,");
+			out.println("    startVideoMuted: 9,");
+
 			out.println("    resolution: '" + resolution + "',");
 			out.println("    audioMixer: " + audioMixer + ",");
 			out.println("    audioBandwidth: '" + audioBandwidth + "',");
 			out.println("    videoBandwidth: '" + videoBandwidth + "',");
-			out.println("    userName: '" + userName + "',");
+			out.println("    id: '" + userName + "@" + domain + "',");
+			out.println("    password: '" + accessToken + "',");
 			out.println("    userAvatar: '" + userAvatar + "',");
 			out.println("    enableFirefoxSupport: " + enableFirefoxSupport + ",");
 			out.println("    logStats: " + logStats + ",");
-			out.println("    disablePrezi: true,");
 			out.println("    conferences: " + conferences + ",");
 			if (globalConferenceId != null) out.println("    globalConferenceId: '" + globalConferenceId + "',");
-			out.println("    archiveSpeaking: " + (archiveSpeaking.equals("on") ? "true" : "false") + ",");
-			out.println("    archiveRecording: " + (archiveRecording.equals("on") ? "true" : "false") + ",");
-			out.println("    recordingPath: '" + recordingPath.replace("\\", File.separator) + "',");
-			out.println("    bosh: window.location.protocol + '//' + window.location.host + '/http-bind/'");
+			out.println("    bosh: " + connectionUrl);
 			out.println("};	");
 
 			String canvasExtra				= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.canvas.extra", "104");
@@ -315,6 +305,9 @@ public class Config extends HttpServlet
 			String applicationName			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.application.name", "Openfire Meetings");
 			String activeSpkrAvatarSize		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.active.speaker.avatarsize", "100");
 
+			String initationPoweredBy			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.invitation.poweredby", "true");
+			String toolbarButtons			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.toolbar.buttons", "'authentication', 'microphone', 'camera', 'desktop','recording', 'security', 'invite', 'chat', 'etherpad', 'sharedvideo','fullscreen', 'sip', 'dialpad', 'settings', 'hangup', 'filmstrip','contacts'");
+
 			out.println("var interfaceConfig = {");
 			out.println("    CANVAS_EXTRA: " + canvasExtra + ",");
     		out.println("	 CANVAS_RADIUS: " + canvasRadius + ",");
@@ -331,22 +324,16 @@ public class Config extends HttpServlet
 			out.println("    SHOW_POWERED_BY: " + showPoweredBy + ",");
 			out.println("    GENERATE_ROOMNAMES_ON_WELCOME_PAGE: " + randomRoomNames + ",");
 			out.println("    APP_NAME: '" + applicationName + "',");
+
+			out.println("    INVITATION_POWERED_BY: " + initationPoweredBy + ",");
+			out.println("    TOOLBAR_BUTTONS: [" + toolbarButtons + "],");
+			out.println("    filmStripOnly: false,");
+			out.println("    RANDOM_AVATAR_URL_PREFIX: false,");
+			out.println("    RANDOM_AVATAR_URL_SUFFIX: false,");
+			out.println("    FILM_STRIP_MAX_HEIGHT: 120,");
+
 			out.println("    ACTIVE_SPEAKER_AVATAR_SIZE: " + activeSpkrAvatarSize);
 			out.println("}; ");
-
-			if ("true".equals(securityEnabled))
-			{
-				out.println("setTimeout(function()");
-				out.println("{");
-				out.println("if ($('#ofmeet-extension-installed').length > 0)");
-				out.println("	{");
-				out.println("		var msg = {type: 'ofmeetSetConfig', host: window.location.host, username: '" + userName + "'};");
-				out.println("		console.log('window.post.ofmeetSetConfig', msg);");
-				out.println("		window.postMessage(msg, '*');");
-				out.println("	}");
-				out.println("}, 5000);");
-			}
-
 		}
 		catch(Exception e) {
 			Log.error("Config doGet Error", e);
