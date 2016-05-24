@@ -211,7 +211,14 @@
 	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.sip.hq.voice", hqVoice);	
 	
 	String globalIntercom = request.getParameter("globalIntercom");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.global.intercom", globalIntercom);		
+	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.global.intercom", globalIntercom);
+	
+	String windowsSso = request.getParameter("windowsSso");
+	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.windows.sso", windowsSso);
+
+	String azureClientId = request.getParameter("azureClientId");
+	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.azure.clientid", azureClientId);	
+	
         
     }
 
@@ -569,6 +576,20 @@
 			<b><fmt:message key="config.page.configuration.security.enabled" /></b> - <fmt:message key="config.page.configuration.security.enabled_description" />
 		    </td>
 	    </tr> 
+	    <tr>
+		    <td nowrap  colspan="2">
+			<input type="checkbox" name="windowsSso"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.windows.sso", "off").equals("on")) ? " checked" : "" %>>
+			<fmt:message key="config.page.configuration.security.windows.sso" />		
+		    </td>
+	    </tr>
+	    <tr>
+		<td align="left" width="200">
+		    <fmt:message key="config.page.configuration.azure.clientid"/>
+		</td>
+		<td><input type="text" size="40" maxlength="100" name="azureClientId"
+			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.azure.clientid", "9ba1a5c7-f17a-4de9-a1f1-6178c8d51223") %>">
+		</td>
+	    </tr>	    
             </tbody>
         </table> 
     </p>

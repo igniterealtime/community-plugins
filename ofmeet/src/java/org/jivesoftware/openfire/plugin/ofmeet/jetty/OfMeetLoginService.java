@@ -42,7 +42,6 @@ public class OfMeetLoginService extends AbstractLoginService
             }
             else
             {
-                Log.error( "access denied, unknown domain" + username );
                 return null;
             }
         }
@@ -58,9 +57,16 @@ public class OfMeetLoginService extends AbstractLoginService
      * @return A UserIdentity if the credentials matched, otherwise null
      */
     @Override
-    public UserIdentity login( String username, Object credentials )
+    public UserIdentity login( String userName, Object credentials )
     {
-        username = asUserNameOfDomain( username );
+        String username = asUserNameOfDomain( userName );
+
+        if (username == null)
+        {
+			OfMeetAzure ofmeetAzure = new OfMeetAzure();
+			username = ofmeetAzure.authenticateUser(userName, (String) credentials);
+			credentials = ofmeetAzure.getAccessToken();
+		}
 
         try
         {

@@ -25,7 +25,7 @@ import java.util.concurrent.*;
 import org.jivesoftware.openfire.container.*;
 import org.jivesoftware.util.*;
 import org.jivesoftware.openfire.XMPPServer;
-import org.jivesoftware.openfire.http.HttpBindManager;
+
 import org.slf4j.*;
 import org.slf4j.Logger;
 import org.xmpp.component.*;
@@ -45,14 +45,6 @@ import org.jitsi.videobridge.*;
 
 import org.jitsi.jicofo.*;
 import org.jitsi.jicofo.xmpp.*;
-
-import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
-import org.eclipse.jetty.plus.annotation.ContainerInitializer;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-
-import org.apache.tomcat.InstanceManager;
-import org.apache.tomcat.SimpleInstanceManager;
 
 /**
  * Implements <tt>org.jivesoftware.openfire.container.Plugin</tt> to integrate
@@ -188,17 +180,6 @@ public class PluginImpl
      */
     public void initializePlugin(PluginManager manager, File pluginDirectory)
     {
-		Log.info("initializePlugin start web service...");
-
-		ContextHandlerCollection contexts = HttpBindManager.getInstance().getContexts();
-		WebAppContext context2 = new WebAppContext(contexts, pluginDirectory.getPath(), "/jitsimeet");
-		context2.setClassLoader(this.getClass().getClassLoader());
-		final List<ContainerInitializer> initializers2 = new ArrayList<>();
-		initializers2.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-		context2.setAttribute("org.eclipse.jetty.containerInitializers", initializers2);
-		context2.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-		context2.setWelcomeFiles(new String[]{"index.html"});
-
 		String enableRecording = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.media.record", "false");
 		String recordingPath = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", pluginDirectory.getAbsolutePath() + File.separator + "recordings");
 		String recordingSecret = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.secret", "secret");
