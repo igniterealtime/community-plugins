@@ -81,6 +81,10 @@ import org.jitsi.videobridge.openfire.PluginImpl;
 import net.sf.json.*;
 import org.dom4j.*;
 
+import org.jitsi.videobridge.*;
+
+
+
 public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener  {
 
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
@@ -549,6 +553,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				if ("get_user_properties".equals(action)) getUserProperties(iq.getFrom().getNode(), reply, requestJSON);
 				if ("set_user_properties".equals(action)) setUserProperties(iq.getFrom().getNode(), reply, requestJSON);
 				if ("get_user_groups".equals(action)) getUserGroups(iq.getFrom().getNode(), reply, requestJSON);
+				if ("get_conference_id".equals(action)) getConferenceId(iq.getFrom().getNode(), reply, requestJSON);
 
 				return reply;
 
@@ -562,6 +567,46 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         @Override public IQHandlerInfo getInfo()
         {
 			return new IQHandlerInfo("request", "http://igniterealtime.org/protocol/ofmeet");
+		}
+
+		private void getConferenceId(String defaultUsername, IQ reply, JSONObject requestJSON)
+		{
+			Element childElement = reply.setChildElement("response", "http://igniterealtime.org/protocol/ofmeet");
+
+			try {
+				String roomName = requestJSON.getString("room");
+
+				Videobridge videobridge = jitsiPlugin.component.getVideobridge();
+
+				for (Conference conference : videobridge.getConferences())
+				{
+					String room = conference.getName();
+
+					if (room != null && !"".equals(room) && roomName.equals(room))
+					{
+						if (JiveGlobals.getProperty("ofmeet.autorecord.enabled", "false").equals("true") && !conference.isRecording())
+						{
+							conference.setRecording(true);
+						}
+
+						JSONObject userJSON = new JSONObject();
+						userJSON.put("room", roomName);
+						userJSON.put("id", conference.getID());
+						userJSON.put("lastActivityTime", String.valueOf(conference.getLastActivityTime()));
+						userJSON.put("focus", conference.getFocus());
+						userJSON.put("recording", conference.isRecording() ? "yes" : "no");
+						userJSON.put("expired", conference.isExpired() ? "yes" : "no");
+
+						childElement.setText(userJSON.toString());
+
+						break;
+					}
+				}
+
+			} catch (Exception e1) {
+				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, requestJSON.toString() + " " + e1));
+				return;
+			}
 		}
 
 		private void setUserProperties(String username, IQ reply, JSONObject requestJSON)

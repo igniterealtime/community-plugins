@@ -12,17 +12,21 @@ Strophe.addConnectionPlugin('ofmeetsasl', {
      */
     init: function (connection) {
         // Implementation of the new SASLMechanism.
-        Strophe.SASLOFMeet = function () {
-        };
-        Strophe.SASLOFMeet.prototype = new Strophe.SASLMechanism("OFMEET", true, 2000);
-        Strophe.SASLOFMeet.test = function (connection) {
-            return config.password !== null;
-        };
-        Strophe.SASLOFMeet.prototype.onChallenge = function (connection) {
-            return config.password;
-        };
+        
+        if (config.id && config.password)
+        {
+		Strophe.SASLOFMeet = function () {
+		};
+		Strophe.SASLOFMeet.prototype = new Strophe.SASLMechanism("OFMEET", true, 2000);
+		Strophe.SASLOFMeet.test = function (connection) {
+		    return config.password !== null;
+		};
+		Strophe.SASLOFMeet.prototype.onChallenge = function (connection) {
+		    return config.password;
+		};
 
-        // Register the new SASL mechanism.
-        connection.mechanisms[Strophe.SASLOFMeet.prototype.name] = Strophe.SASLOFMeet;
+		// Register the new SASL mechanism.
+		connection.mechanisms[Strophe.SASLOFMeet.prototype.name] = Strophe.SASLOFMeet;
+	}
     }
 });

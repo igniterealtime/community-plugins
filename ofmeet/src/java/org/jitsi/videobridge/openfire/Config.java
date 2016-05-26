@@ -51,10 +51,10 @@ public class Config extends HttpServlet
 			Log.info("Config servlet");
 			String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
 			String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
-			String userName = "null";
+			String userName = null;
 			String userAvatar = "null";
 			String connectionUrl = "window.location.protocol + '//' + window.location.host + '/http-bind/'";
-			String accessToken = "null";
+			String accessToken = null;
 
 			if (XMPPServer.getInstance().getPluginManager().getPlugin("websocket") != null)
 			{
@@ -278,8 +278,8 @@ public class Config extends HttpServlet
 			out.println("    audioMixer: " + audioMixer + ",");
 			out.println("    audioBandwidth: '" + audioBandwidth + "',");
 			out.println("    videoBandwidth: '" + videoBandwidth + "',");
-			out.println("    id: '" + userName + "@" + domain + "',");
-			out.println("    password: '" + accessToken + "',");
+			if (userName != null) out.println("    id: '" + userName + "@" + domain + "',");
+			if (accessToken != null) out.println("    password: '" + accessToken + "',");
 			out.println("    userAvatar: '" + userAvatar + "',");
 			out.println("    enableFirefoxSupport: " + enableFirefoxSupport + ",");
 			out.println("    logStats: " + logStats + ",");

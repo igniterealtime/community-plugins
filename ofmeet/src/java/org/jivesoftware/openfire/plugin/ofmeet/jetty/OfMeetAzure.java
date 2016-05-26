@@ -70,7 +70,7 @@ public class OfMeetAzure
 				return parts[0];
 			}
 
-			userName = parts[0] + "." + parts[1];
+			userName = (parts[0] + "_" + parts[1]).replaceAll("\\.", "_");
 			User user = null;
 
 			try {
