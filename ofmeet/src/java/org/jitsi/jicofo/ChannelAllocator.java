@@ -368,9 +368,8 @@ public class ChannelAllocator implements Runnable
 
                 if (StringUtils.isNullOrEmpty(bridge))
                 {
-                    throw new OperationFailedException(
-                        "Failed to allocate channels - no bridge configured",
-                        BRIDGE_FAILURE_ERR_CODE);
+                    //throw new OperationFailedException("Failed to allocate channels - no bridge configured", BRIDGE_FAILURE_ERR_CODE);
+                    bridge = "videobridge." + org.jivesoftware.openfire.XMPPServer.getInstance().getServerInfo().getXMPPDomain();
                 }
 
                 colibriConference.setJitsiVideobridge(bridge);

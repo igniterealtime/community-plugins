@@ -1,9 +1,7 @@
 Buildfile: C:\Projects\ignite\community-plugins-dele\ofmeet\build.xml
 
 clean:
-   [delete] Deleting: C:\Projects\ignite\community-plugins-dele\ofmeet\lib\plugin-ofmeet-jspc.jar
-   [delete] Deleting: C:\Projects\ignite\community-plugins-dele\ofmeet\lib\plugin-ofmeet.jar
-   [delete] Deleting: C:\Projects\ignite\community-plugins-dele\openfire_4_0_2\target\openfire\plugins\ofmeet.jar
+   [delete] Deleting directory C:\Projects\ignite\community-plugins-dele\ofmeet\build
 
 init:
     [mkdir] Created dir: C:\Projects\ignite\community-plugins-dele\ofmeet\build\classes
@@ -11,7 +9,7 @@ init:
 
 compile:
     [javac] C:\Projects\ignite\community-plugins-dele\ofmeet\build.xml:29: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
-    [javac] Compiling 129 source files to C:\Projects\ignite\community-plugins-dele\ofmeet\build\classes
+    [javac] Compiling 176 source files to C:\Projects\ignite\community-plugins-dele\ofmeet\build\classes
     [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
     [javac] Note: Some input files use or override a deprecated API.
     [javac] Note: Recompile with -Xlint:deprecation for details.
@@ -31,8 +29,8 @@ compile-jsps:
      [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins-dele/openfire_4_0_2/build/lib/ant/slf4j-simple.jar!/org/slf4j/impl/StaticLoggerBinder.class]
      [java] SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
      [java] SLF4J: Actual binding is of type [org.slf4j.impl.JDK14LoggerFactory]
-     [java] May 27, 2016 12:06:29 AM org.eclipse.jetty.util.log.Log initialized
-     [java] INFO: Logging initialized @326ms
+     [java] Jun 01, 2016 4:48:01 PM org.eclipse.jetty.util.log.Log initialized
+     [java] INFO: Logging initialized @287ms
     [javac] C:\Projects\ignite\community-plugins-dele\ofmeet\build.xml:60: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
     [javac] Compiling 6 source files to C:\Projects\ignite\community-plugins-dele\ofmeet\build\jspc\classes
     [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
@@ -40,11 +38,11 @@ compile-jsps:
      [copy] Copying 1 file to C:\Projects\ignite\community-plugins-dele\ofmeet\src\web\WEB-INF
 
 jar:
-     [copy] Copying 150 files to C:\Projects\ignite\community-plugins-dele\ofmeet\build\jar
-     [copy] Copying 88 files to C:\Projects\ignite\community-plugins-dele\ofmeet\build\jar\lib
-     [copy] Copying 93 files to C:\Projects\ignite\community-plugins-dele\ofmeet\build\jar
+     [copy] Copying 151 files to C:\Projects\ignite\community-plugins-dele\ofmeet\build\jar
+     [copy] Copying 89 files to C:\Projects\ignite\community-plugins-dele\ofmeet\build\jar\lib
+     [copy] Copying 94 files to C:\Projects\ignite\community-plugins-dele\ofmeet\build\jar
       [jar] Building jar: C:\Projects\ignite\community-plugins-dele\openfire_4_0_2\target\openfire\plugins\ofmeet.jar
    [delete] Deleting directory C:\Projects\ignite\community-plugins-dele\ofmeet\build
 
 BUILD SUCCESSFUL
-Total time: 21 seconds
+Total time: 20 seconds
