@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Openfire Meetings</title>
+	<link rel="shortcut icon" href="chrome-extension/ofmeet.png" type="image/png" />
+	<link rel="stylesheet" type="text/css" href="candy/res/default.css" />
+    <script src="/ofmeet/config"></script><!-- BAO -->
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="candy/libs.bundle.js"></script>
+	<script type="text/javascript" src="candy/candy.min.js"></script>
+
+	<script type="text/javascript" src="candy/candyshop/colors/candy.js"></script>
+	<link rel="stylesheet" type="text/css" href="candy/candyshop/colors/candy.css" />
+	<script type="text/javascript" src="candy/candyshop/notifications/candy.js"></script>
+    <script type="text/javascript" src="candy/candyshop/notifyme/candy.js"></script>
+    <link rel="stylesheet" type="text/css" href="candy/candyshop/notifyme/candy.css" />
+    <script type="text/javascript" src="candy/candyshop/ofmeet/candy.js"></script>
+    <link rel="stylesheet" type="text/css" href="candy/candyshop/ofmeet/candy.css" />
+    <script type="text/javascript" src="candy/candyshop/fastpath/candy.js"></script>
+	<script type="text/javascript" src="candy/candyshop/slash-commands/slash-commands.js"></script>
+	<script type="text/javascript" src="candy/candyshop/timeago/candy.js"></script>
+	<link rel="stylesheet" type="text/css" href="candy/candyshop/timeago/candy.css" />
+	<script type="text/javascript" src="candy/candyshop/typingnotifications/typingnotifications.js"></script>
+	<link rel="stylesheet" type="text/css" href="candy/candyshop/typingnotifications/typingnotifications.css" />
+    <script type="text/javascript" src="candy/candyshop/mam/candy.js"></script>
+
+	<script type="text/javascript">
+
+		Strophe.addConnectionPlugin('ofmeetsasl', {
+
+			/**
+			 * Initializes the plugin by registering the new SASL mechanism as part of the Strophe SASL mechanisms.
+			 *
+			 * Invoked by the Strophe.Connection constructor.
+			 */
+			init: function (connection) {
+				// Implementation of the new SASLMechanism.
+				Strophe.SASLOFMeet = function () {
+				};
+				Strophe.SASLOFMeet.prototype = new Strophe.SASLMechanism("OFMEET", true, 2000);
+				Strophe.SASLOFMeet.test = function (connection) {
+					return config.password !== null;
+				};
+				Strophe.SASLOFMeet.prototype.onChallenge = function (connection) {
+					return config.password;
+				};
+
+				// Register the new SASL mechanism.
+				connection.mechanisms[Strophe.SASLOFMeet.prototype.name] = Strophe.SASLOFMeet;
+			}
+		});
+
+		$(document).ready(function()
+		{
+			window.inExtension = urlParam("extension");
+			var host = urlParam("host");
+
+			if (host) document.title = "Openfire Meetings - " + host;
+
+			Candy.init(config.bosh, {
+				core: {
+					// only set this to true if developing / debugging errors
+					debug: false,
+					autojoin: true
+				},
+				view: { assets: 'candy/res/' }
+			});
+
+			var jid = config.hosts.domain;
+			if (config.id) jid = config.id;
+
+    		CandyShop.OfMeet.init();
+			CandyShop.SlashCommands.defaultConferenceDomain = config.hosts.muc;
+			CandyShop.SlashCommands.init();
+			CandyShop.Timeago.init();
+			CandyShop.TypingNotifications.init();
+			CandyShop.Colors.init();
+			CandyShop.Notifications.init();
+			CandyShop.Mam.init();
+
+			Candy.Core.connect(jid, config.password);
+    		CandyShop.NotifyMe.init();
+    		CandyShop.Fastpath.init();
+
+
+		});
+
+		window.addEventListener("unload", function ()
+		{
+
+		});
+
+		function urlParam(name)
+		{
+			var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+			if (!results) { return undefined; }
+			return unescape(results[1] || undefined);
+		};
+	</script>
+</head>
+<body>
+	<div id="candy"></div>
+</body>
+</html>

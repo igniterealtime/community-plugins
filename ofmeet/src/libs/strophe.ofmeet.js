@@ -1867,7 +1867,7 @@ Strophe.addConnectionPlugin('ofmeet',
 			return true;	
 		});
 		
-		$( "#toolbar" ).prepend('<a class="button icon-presentation" data-container="body" data-toggle="popover" data-placement="bottom" content="Share PDF Presentation" onclick="Strophe._connectionPlugins.ofmeet.openPDFDialog();"></a><a class="button icon-share-doc" data-container="body" data-toggle="popover" data-placement="bottom" content="Share Application" onclick="Strophe._connectionPlugins.ofmeet.openAppsDialog();"></a>');	
+		//$( "#toolbar" ).prepend('<a class="button icon-presentation" data-container="body" data-toggle="popover" data-placement="bottom" content="Share PDF Presentation" onclick="Strophe._connectionPlugins.ofmeet.openPDFDialog();"></a><a class="button icon-share-doc" data-container="body" data-toggle="popover" data-placement="bottom" content="Share Application" onclick="Strophe._connectionPlugins.ofmeet.openAppsDialog();"></a>');	
 	},
 	
 	resize: function() 
