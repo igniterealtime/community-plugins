@@ -46,9 +46,8 @@ import org.jitsi.videobridge.*;
 import org.jitsi.jicofo.*;
 import org.jitsi.jicofo.xmpp.*;
 
-import org.ifsoft.jigasi.*;
-import org.ifsoft.jigasi.openfire.*;
-import org.ifsoft.jigasi.xmpp.*;
+import org.jitsi.jigasi.*;
+import org.jitsi.jigasi.xmpp.*;
 
 
 /**
@@ -347,7 +346,7 @@ public class PluginImpl
 
 		if ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.sip.enabled", "false")))
 		{
-			CallControlComponent jigasiComponent = new CallControlComponent(pluginDirectory);
+			CallControlComponent jigasiComponent = new CallControlComponent(hostname, 0, domain, jigasiSubdomain, null);
 			added = false;
 
 			try

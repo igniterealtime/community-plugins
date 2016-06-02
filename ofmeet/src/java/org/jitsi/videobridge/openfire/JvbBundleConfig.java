@@ -18,14 +18,17 @@ package org.jitsi.videobridge.openfire;
 import java.io.*;
 import java.util.*;
 import org.ice4j.*;
+import org.jitsi.impl.neomedia.*;
 import org.jitsi.impl.neomedia.device.*;
 import org.jitsi.impl.neomedia.transform.csrc.*;
 import org.jitsi.impl.neomedia.transform.srtp.*;
+import org.jitsi.impl.osgi.framework.launch.*;
 import org.jitsi.meet.*;
 import org.jitsi.service.configuration.*;
 import org.jitsi.service.neomedia.*;
 import org.jitsi.service.packetlogging.*;
 import org.jitsi.util.*;
+import net.java.sip.communicator.impl.protocol.jabber.*;
 
 /**
  * OSGi bundles description for the Jitsi Videobridge.
@@ -54,11 +57,15 @@ public class JvbBundleConfig
 	private static final String[] protocols =
 		{
 			"org/jitsi/impl/protocol/xmpp/XmppProtocolActivator"
+			//"net/java/sip/communicator/impl/protocol/sip/SipActivator",
+			//"net/java/sip/communicator/impl/protocol/jabber/JabberActivator"
+
 		};
 
 	private static final String[] mockProtocols =
 		{
-			"mock/MockActivator"
+			"mock/MockActivator",
+            "net/java/sip/communicator/service/protocol/mock/MockActivator"
 		};
 
     private static final String[][] BUNDLES
@@ -79,12 +86,17 @@ public class JvbBundleConfig
         {
             "net/java/sip/communicator/impl/resources/ResourceManagementActivator"
         },
-        {
-            "net/java/sip/communicator/impl/netaddr/NetaddrActivator"
-        },
+		{
+			"net/java/sip/communicator/impl/dns/DnsUtilActivator"
+		},
 		{
 			"net/java/sip/communicator/impl/credentialsstorage/CredentialsStorageActivator"
 		},
+        {
+            "net/java/sip/communicator/impl/netaddr/NetaddrActivator",
+            //"net/java/sip/communicator/impl/sysactivity/SysActivityActivator"
+        },
+
         {
             "net/java/sip/communicator/impl/packetlogging/PacketLoggingActivator"
         },
@@ -94,6 +106,25 @@ public class JvbBundleConfig
         {
             "net/java/sip/communicator/service/protocol/media/ProtocolMediaActivator"
         },
+		{
+			"net/java/sip/communicator/service/notification/NotificationServiceActivator",
+			"net/java/sip/communicator/impl/globaldisplaydetails/GlobalDisplayDetailsActivator"
+		},
+		{
+			"net/java/sip/communicator/impl/neomedia/NeomediaActivator"
+		},
+		{
+			"net/java/sip/communicator/impl/certificate/CertificateVerificationActivator"
+		},
+		{
+			"net/java/sip/communicator/impl/version/VersionActivator"
+		},
+		{
+			"net/java/sip/communicator/service/protocol/ProtocolProviderActivator"
+		},
+		{
+			"net/java/sip/communicator/plugin/reconnectplugin/ReconnectPluginActivator"
+		},
         {
             "org/jitsi/videobridge/eventadmin/influxdb/Activator",
             "org/jitsi/videobridge/eventadmin/callstats/Activator"
@@ -125,12 +156,6 @@ public class JvbBundleConfig
 
 		useMockProtocols ? new String[] {"mock/media/MockMediaActivator"} : new String[]
 		{
-			//"net/java/sip/communicator/impl/neomedia/NeomediaActivator"
-		},
-		{
-			//"net/java/sip/communicator/impl/certificate/CertificateVerificationActivator"
-		},
-		{
 			"org/jitsi/jicofo/version/VersionActivator"
 		},
 		{
@@ -149,7 +174,10 @@ public class JvbBundleConfig
 		{
 			"org/jitsi/jicofo/JvbDoctor",
 			"org/jitsi/jicofo/VersionBroadcaster"
-		}
+		},
+		{
+            //"org/jitsi/jigasi/JigasiBundleActivator"
+		},
     };
 
     /**
@@ -269,6 +297,12 @@ public class JvbBundleConfig
     @Override
     public Map<String, String> getSystemPropertyDefaults()
     {
+        // BAO JIGASI defaults
+
+        // FIXME: some threads must be kept alive that prevent JVM
+        // from shutting down
+        //FrameworkImpl.killAfterShutdown = true;
+
         // "super" is setting defaults common to all components
         Map<String, String> defaults = super.getSystemPropertyDefaults();
 
@@ -305,6 +339,27 @@ public class JvbBundleConfig
         defaults.put(
                 PacketLoggingConfiguration.PACKET_LOGGING_ENABLED_PROPERTY_NAME,
                 false_);
+
+
+        // Audio system should not be disabled
+        defaults.put(
+            MediaServiceImpl.DISABLE_AUDIO_SUPPORT_PNAME,
+            false_);
+
+        defaults.put(
+            DeviceConfiguration.PROP_AUDIO_SYSTEM,
+            AudioSystem.LOCATOR_PROTOCOL_AUDIOSILENCE);
+        defaults.put(
+            "org.jitsi.impl.neomedia.device.PortAudioSystem.disabled",
+            true_);
+        defaults.put(
+            "org.jitsi.impl.neomedia.device.PulseAudioSystem.disabled",
+            true_);
+
+        // Disables COIN notifications
+        defaults.put(
+            OperationSetTelephonyConferencingJabberImpl.DISABLE_COIN_PROP_NAME,
+            true_);
 
         // This causes RTP/RTCP packets received before the DTLS agent is ready
         // to decrypt them to be dropped. Without it, these packets are passed
