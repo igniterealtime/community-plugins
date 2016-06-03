@@ -182,7 +182,7 @@ public class OpenfireLoginService extends AbstractLifeCycle implements LoginServ
                 	return null;
 				}
 
-                userName = parts[0] + "." + parts[1];
+				userName = (parts[0] + "_" + parts[1]).replaceAll("\\.", "_");
 
 				try {
 					userManager.getUser(userName);
