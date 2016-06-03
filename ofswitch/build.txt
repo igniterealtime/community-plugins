@@ -1,52 +1,51 @@
-Buildfile: C:\Projects\ignite\community-plugins\ofswitch\build.xml
+Buildfile: C:\Projects\ignite\community-plugins-dele\ofswitch\build.xml
 
 clean:
-   [delete] Deleting: C:\Projects\ignite\community-plugins\ofswitch\lib\plugin-ofswitch-jspc.jar
-   [delete] Deleting: C:\Projects\ignite\community-plugins\ofswitch\lib\plugin-ofswitch.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins-dele\ofswitch\lib\plugin-ofswitch-jspc.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins-dele\ofswitch\lib\plugin-ofswitch.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins-dele\openfire_4_0_2\target\openfire\plugins\ofswitch.jar
 
 init:
-    [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofswitch\build\classes
-    [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofswitch\build\jar
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins-dele\ofswitch\build\classes
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins-dele\ofswitch\build\jar
 
 compile:
-    [javac] C:\Projects\ignite\community-plugins\ofswitch\build.xml:29: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
-    [javac] Compiling 28 source files to C:\Projects\ignite\community-plugins\ofswitch\build\classes
+    [javac] C:\Projects\ignite\community-plugins-dele\ofswitch\build.xml:29: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 30 source files to C:\Projects\ignite\community-plugins-dele\ofswitch\build\classes
     [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
-    [javac] Note: C:\Projects\ignite\community-plugins\ofswitch\src\java\org\jivesoftware\openfire\plugin\ofswitch\FreeSwitchThread.java uses or overrides a deprecated API.
+    [javac] Note: C:\Projects\ignite\community-plugins-dele\ofswitch\src\java\org\jivesoftware\openfire\plugin\ofswitch\FreeSwitchThread.java uses or overrides a deprecated API.
     [javac] Note: Recompile with -Xlint:deprecation for details.
-    [javac] Note: C:\Projects\ignite\community-plugins\ofswitch\src\java\org\jivesoftware\openfire\plugin\ofswitch\OfSwitchPlugin.java uses unchecked or unsafe operations.
+    [javac] Note: C:\Projects\ignite\community-plugins-dele\ofswitch\src\java\org\jivesoftware\openfire\plugin\ofswitch\OfSwitchPlugin.java uses unchecked or unsafe operations.
     [javac] Note: Recompile with -Xlint:unchecked for details.
     [javac] 1 warning
 
 lib:
-      [jar] Building jar: C:\Projects\ignite\community-plugins\ofswitch\lib\plugin-ofswitch.jar
+      [jar] Building jar: C:\Projects\ignite\community-plugins-dele\ofswitch\lib\plugin-ofswitch.jar
 
 compile-jsps:
-    [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofswitch\build\jspc\java
-    [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofswitch\build\jspc\classes
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins-dele\ofswitch\build\jspc\java
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins-dele\ofswitch\build\jspc\classes
      [java] SLF4J: Class path contains multiple SLF4J bindings.
-     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins/openfire_4_0_1/target/openfire/lib/slf4j-log4j12.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins/openfire_4_0_1/build/lib/ant/slf4j-simple.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins-dele/openfire_4_0_2/target/openfire/lib/slf4j-log4j12.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins-dele/openfire_4_0_2/build/lib/ant/slf4j-simple.jar!/org/slf4j/impl/StaticLoggerBinder.class]
      [java] SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
      [java] SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
      [java] log4j:WARN No appenders could be found for logger (org.eclipse.jetty.util.log).
      [java] log4j:WARN Please initialize the log4j system properly.
-    [javac] C:\Projects\ignite\community-plugins\ofswitch\build.xml:60: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
-    [javac] Compiling 5 source files to C:\Projects\ignite\community-plugins\ofswitch\build\jspc\classes
+    [javac] C:\Projects\ignite\community-plugins-dele\ofswitch\build.xml:60: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 5 source files to C:\Projects\ignite\community-plugins-dele\ofswitch\build\jspc\classes
     [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
     [javac] 1 warning
-      [jar] Building jar: C:\Projects\ignite\community-plugins\ofswitch\lib\plugin-ofswitch-jspc.jar
-     [copy] Copying 1 file to C:\Projects\ignite\community-plugins\ofswitch\src\web\WEB-INF
+      [jar] Building jar: C:\Projects\ignite\community-plugins-dele\ofswitch\lib\plugin-ofswitch-jspc.jar
+     [copy] Copying 1 file to C:\Projects\ignite\community-plugins-dele\ofswitch\src\web\WEB-INF
 
 jar:
-     [copy] Copying 1460 files to C:\Projects\ignite\community-plugins\ofswitch\build\jar
-     [copy] Copied 93 empty directories to 22 empty directories under C:\Projects\ignite\community-plugins\ofswitch\build\jar
-     [copy] Copying 7 files to C:\Projects\ignite\community-plugins\ofswitch\build\jar\lib
-     [copy] Copying 12 files to C:\Projects\ignite\community-plugins\ofswitch\build\jar
-     [copy] Copying 212 files to C:\Projects\ignite\community-plugins\ofswitch\build\jar\native\win-32\conf
-     [copy] Copying 212 files to C:\Projects\ignite\community-plugins\ofswitch\build\jar\native\win-64\conf
-      [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_0_1\target\openfire\plugins\ofswitch.jar
-   [delete] Deleting directory C:\Projects\ignite\community-plugins\ofswitch\build
+     [copy] Copying 36 files to C:\Projects\ignite\community-plugins-dele\ofswitch\build\jar
+     [copy] Copied 38 empty directories to 24 empty directories under C:\Projects\ignite\community-plugins-dele\ofswitch\build\jar
+     [copy] Copying 7 files to C:\Projects\ignite\community-plugins-dele\ofswitch\build\jar\lib
+     [copy] Copying 12 files to C:\Projects\ignite\community-plugins-dele\ofswitch\build\jar
+      [jar] Building jar: C:\Projects\ignite\community-plugins-dele\openfire_4_0_2\target\openfire\plugins\ofswitch.jar
+   [delete] Deleting directory C:\Projects\ignite\community-plugins-dele\ofswitch\build
 
 BUILD SUCCESSFUL
-Total time: 1 minute 31 seconds
+Total time: 6 seconds

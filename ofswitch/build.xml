@@ -90,17 +90,7 @@
                         	<exclude name="src/**"/>                          	
 			</fileset>			
 		</copy>
-		
-		<copy todir="${ofswitch.dir}/build/jar/native/win-32/conf" overwrite="true">			
-			<fileset dir="${ofswitch.dir}/src/conf">				
-			</fileset>
-		</copy>	
-		
-		<copy todir="${ofswitch.dir}/build/jar/native/win-64/conf" overwrite="true">			
-			<fileset dir="${ofswitch.dir}/src/conf">				
-			</fileset>
-		</copy>			
-				
+						
 		<jar destfile="${openfire.home}/plugins/ofswitch.jar">
 			<fileset dir="${ofswitch.dir}/build/jar">				
 			</fileset>			
