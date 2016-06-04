@@ -38,6 +38,8 @@ import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
 import org.eclipse.jetty.plus.annotation.ContainerInitializer;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import org.jitsi.util.OSUtils;
@@ -51,6 +53,7 @@ import org.freeswitch.esl.client.transport.event.EslEvent;
 
 import org.jboss.netty.channel.ExceptionEvent;
 
+import org.ifsoft.websockets.*;
 
 public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventListener, PropertyEventListener  {
 
@@ -88,6 +91,18 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 			ClusterManager.addListener(this);
 			PropertyEventDispatcher.addListener(this);
 
+			Log.info("OfMeet Plugin - Initialize websockets ");
+
+			ServletContextHandler context = new ServletContextHandler(contexts, "/sip", ServletContextHandler.SESSIONS);
+			context.addServlet(new ServletHolder(new XMPPServlet()),"/proxy");
+
+			// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
+			final List<ContainerInitializer> initializers = new ArrayList<>();
+			initializers.add(new ContainerInitializer(new JettyJasperInitializer(), null));
+			context.setAttribute("org.eclipse.jetty.containerInitializers", initializers);
+			context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+
+
 			Log.info("OfSwitch Plugin - Initialize Webservice");
 
 			// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
@@ -107,31 +122,38 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 
 			String freeswitchServer = JiveGlobals.getProperty("freeswitch.server.hostname", "127.0.0.1");
 			String freeswitchPassword = JiveGlobals.getProperty("freeswitch.server.password", "Welcome123");
+			boolean freeswitchInstalled = JiveGlobals.getBooleanProperty("wirelynk.freeswitch.installed", true);
 
-			if (freeSwitchExePath != null)
+			freeSwitchHomePath = JiveGlobals.getProperty("freeswitch.server.homepath", freeSwitchHomePath);
+			freeSwitchExePath = JiveGlobals.getProperty("freeswitch.server.exepath", freeSwitchExePath);
+
+			if (freeswitchInstalled == false)
 			{
-				executor = Executors.newCachedThreadPool();
-
-				executor.submit(new Callable<Boolean>()
+				if (freeSwitchExePath != null)
 				{
-					public Boolean call() throws Exception {
-						try {
-							Log.info("FreeSwitch executable path " + freeSwitchExePath);
+					executor = Executors.newCachedThreadPool();
 
-							freeSwitchThread = new FreeSwitchThread();
-							freeSwitchThread.start(freeSwitchExePath + " ",  new File(freeSwitchHomePath));
+					executor.submit(new Callable<Boolean>()
+					{
+						public Boolean call() throws Exception {
+							try {
+								Log.info("FreeSwitch executable path " + freeSwitchExePath);
+
+								freeSwitchThread = new FreeSwitchThread();
+								freeSwitchThread.start(freeSwitchExePath + " ",  new File(freeSwitchHomePath));
+							}
+
+							catch (Exception e) {
+								Log.error("FreeSwitch initializePluginn", e);
+							}
+
+							return true;
 						}
+					});
 
-						catch (Exception e) {
-							Log.error("FreeSwitch initializePluginn", e);
-						}
-
-						return true;
-					}
-				});
-
-			} else {
-				Log.info("FreeSwitch external server " + freeswitchServer);
+				} else {
+					Log.error("FreeSwitch path error server " + freeswitchServer + " " + freeSwitchHomePath);
+				}
 			}
 
 			managerConnection = new DefaultManagerConnection(freeswitchServer, freeswitchPassword);

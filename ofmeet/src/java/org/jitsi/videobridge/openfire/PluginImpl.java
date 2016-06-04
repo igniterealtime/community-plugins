@@ -46,9 +46,6 @@ import org.jitsi.videobridge.*;
 import org.jitsi.jicofo.*;
 import org.jitsi.jicofo.xmpp.*;
 
-import org.jitsi.jigasi.*;
-import org.jitsi.jigasi.xmpp.*;
-
 
 /**
  * Implements <tt>org.jivesoftware.openfire.container.Plugin</tt> to integrate
@@ -114,7 +111,6 @@ public class PluginImpl
      * The Jabber component which has been added to {@link #componentManager}
      * i.e. Openfire.
      */
-    private CallControlComponent jigasiComponent = null;
     private FocusComponent jicofoComponent;
     public static ComponentImpl component;
 
@@ -130,7 +126,6 @@ public class PluginImpl
      */
     private String jitsiSubdomain;
     private String jicofoSubdomain;
-    private String jigasiSubdomain;
 
     private BundleActivator jitsiActivator = null;
 
@@ -152,15 +147,7 @@ public class PluginImpl
             {
 				jicofoComponent.dispose();
                 componentManager.removeComponent(jicofoSubdomain);
-
-				if (jigasiComponent != null)
-				{
-					jigasiComponent.dispose();
-                	componentManager.removeComponent(jigasiSubdomain);
-				}
-
-               componentManager.removeComponent(jitsiSubdomain);
-
+               	componentManager.removeComponent(jitsiSubdomain);
             }
             catch (ComponentException ce)
             {
@@ -170,10 +157,8 @@ public class PluginImpl
 
             jitsiSubdomain = null;
             jicofoSubdomain = null;
-            jigasiSubdomain = null;
 
             jicofoComponent = null;
-            jigasiComponent = null;
             component = null;
         }
 
@@ -226,7 +211,6 @@ public class PluginImpl
 
         final String jitsiSubdomain = "videobridge";
         final String jicofoSubdomain = "focus";
-        final String jigasiSubdomain = "call-control";
 
 		final String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
 		final String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
@@ -263,12 +247,6 @@ public class PluginImpl
         System.setProperty(FocusManager.FOCUS_USER_DOMAIN_PNAME, domain);
         System.setProperty(FocusManager.FOCUS_USER_NAME_PNAME, focusUserName.split("@")[0]);
         System.setProperty(FocusManager.FOCUS_USER_PASSWORD_PNAME, focusPassword);
-
-		Log.info("initializePlugin set jigasi properties...");
-
-        System.setProperty("net.java.sip.communicator.service.gui.ALWAYS_TRUST_MODE_ENABLED", "true");
-        System.setProperty("net.java.sip.communicator.SIP_PREFERRED_CLEAR_PORT", "5030");
-        System.setProperty("net.java.sip.communicator.SIP_PREFERRED_SECURE_PORT", "5031");
 
         checkNatives(pluginDirectory);
         this.componentManager = ComponentManagerFactory.getComponentManager();
@@ -342,34 +320,6 @@ public class PluginImpl
 		{
 			this.jicofoSubdomain = null;
 			this.jicofoComponent = null;
-		}
-
-		if ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.sip.enabled", "false")))
-		{
-			CallControlComponent jigasiComponent = new CallControlComponent(hostname, 0, domain, jigasiSubdomain, null);
-			added = false;
-
-			try
-			{
-				Log.info("initializePlugin component - Jigasi");
-				componentManager.addComponent(jigasiSubdomain, jigasiComponent);
-				jigasiComponent.init();
-				added = true;
-			}
-			catch (ComponentException ce)
-			{
-				Log.error("Jigasi ComponentException", ce);
-			}
-			if (added)
-			{;
-				this.jicofoSubdomain = jigasiSubdomain;
-				this.jigasiComponent = jigasiComponent;
-			}
-			else
-			{
-				this.jigasiSubdomain = null;
-				this.jigasiComponent = null;
-			}
 		}
     }
 

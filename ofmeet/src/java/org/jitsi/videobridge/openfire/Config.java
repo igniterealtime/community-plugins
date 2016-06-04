@@ -33,6 +33,7 @@ import java.security.Principal;
 import org.jitsi.videobridge.openfire.PluginImpl;
 import org.jitsi.videobridge.*;
 import org.jivesoftware.openfire.plugin.ofmeet.TokenManager;
+import org.jivesoftware.openfire.sip.sipaccount.*;
 
 import org.dom4j.*;
 
@@ -55,6 +56,7 @@ public class Config extends HttpServlet
 			String userAvatar = "null";
 			String connectionUrl = "window.location.protocol + '//' + window.location.host + '/http-bind/'";
 			String accessToken = null;
+			SipAccount sipAccount = null;
 
 			if (XMPPServer.getInstance().getPluginManager().getPlugin("websocket") != null)
 			{
@@ -87,6 +89,14 @@ public class Config extends HttpServlet
 						String binval = photo.element("BINVAL").getText();
 						userAvatar = "data:" + type + ";base64," + binval.replace("\n", "").replace("\r", "");;
 					}
+				}
+
+				boolean sipAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("sip") != null;
+				boolean switchAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("ofswitch") != null;
+
+				if (sipAvailable)
+				{
+					sipAccount = SipAccountDAO.getAccountByUser(userName);
 				}
 			}
 
@@ -233,6 +243,21 @@ public class Config extends HttpServlet
 			out.println("		}");
 			out.println("		return roomnode.toLowerCase();    ");
 			out.println("    },	");
+
+			if (sipAccount != null)
+			{
+				out.println("    sip: {");
+				out.println("        username: '" 			+ sipAccount.getSipUsername() + "',");
+				out.println("        authusername: '" 		+ sipAccount.getAuthUsername() + "',");
+				out.println("        displayname: '" 		+ sipAccount.getDisplayName() + "',");
+				out.println("        password: '" 			+ sipAccount.getPassword() + "',");
+				out.println("        server: '" 			+ sipAccount.getServer() + "',");
+				out.println("        enabled: " 			+ sipAccount.isEnabled() + ",");
+				out.println("        voicemail: '" 			+ sipAccount.getVoiceMailNumber() + "',");
+				out.println("        outboundproxy: '" 		+ sipAccount.getOutboundproxy() + "',");
+				out.println("    },");
+			}
+
 			if (!iceServers.trim().equals("")) out.println("    iceServers: " + iceServers + ",");
 			out.println("    enforcedBridge: 'videobridge." + domain + "',");
 			out.println("    disableSimulcast: " + disableSimulcast + ",");

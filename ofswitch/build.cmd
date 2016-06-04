@@ -1,9 +1,9 @@
 call ant jar >build.txt
 
-rd "C:\Program Files (x86)\Openfire\plugins\ofswitch" /q /s
-del "C:\Program Files (x86)\Openfire\plugins\ofswitch.jar"
-copy C:\Projects\ignite\community-plugins\openfire_4_0_2\target\openfire\plugins\ofswitch.jar "C:\Program Files (x86)\Openfire\plugins"
+rd "C:\openfire_4_0_2\plugins\ofswitch" /q /s
+del "C:\openfire_4_0_2\plugins\ofswitch.jar"
+copy C:\Projects\ignite\community-plugins-dele\openfire_4_0_2\target\openfire\plugins\ofswitch.jar "C:\openfire_4_0_2\plugins"
 
-del "C:\Program Files (x86)\Openfire\logs\*.*"
+del "C:\openfire_4_0_2\logs\*.*"
 
 pause

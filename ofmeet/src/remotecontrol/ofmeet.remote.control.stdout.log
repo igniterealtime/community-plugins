@@ -1,6 +1,4 @@
-13:12
+15:24
 ofmeet.remote.control starts
 ofmeet.remote.control found robot 900 1440
 ofmeet.remote.control listening on: http://localhost:6060
-ofmeet.remote.control received request: /?action=ofmeetGetScreen&resource=null&server=wss://traderlynk.net/ws/
-ofmeet.remote.control got server  wss://traderlynk.net/ofmeetws/server?username=null&password=null&resource=remotecontrol-null

@@ -1867,7 +1867,8 @@ Strophe.addConnectionPlugin('ofmeet',
 			return true;	
 		});
 		
-		//$( "#toolbar" ).prepend('<a class="button icon-presentation" data-container="body" data-toggle="popover" data-placement="bottom" content="Share PDF Presentation" onclick="Strophe._connectionPlugins.ofmeet.openPDFDialog();"></a><a class="button icon-share-doc" data-container="body" data-toggle="popover" data-placement="bottom" content="Share Application" onclick="Strophe._connectionPlugins.ofmeet.openAppsDialog();"></a>');	
+		//$( "#toolbar" ).prepend('<a class="button icon-presentation" data-container="body" data-toggle="popover" data-placement="bottom" content="Share PDF Presentation" onclick="Strophe._connectionPlugins.ofmeet.openPDFDialog();"></a>');			
+		//$( "#toolbar" ).prepend('<a class="button icon-share-doc" data-container="body" data-toggle="popover" data-placement="bottom" content="Share Application" onclick="Strophe._connectionPlugins.ofmeet.openAppsDialog();"></a>');			
 	},
 	
 	resize: function() 
@@ -2117,7 +2118,28 @@ Strophe.addConnectionPlugin('ofmeet',
 	
 	openAppsDialog: function()
 	{
-		console.log("ofmeet plugin: openAppsDialog");		
+		console.log("ofmeet plugin: openAppsDialog");			
+	},
+	
+	sipPhone: function()
+	{
+		console.log("ofmeet plugin: openAppsDialog", this.sipEnabled);	
+		
+		if (this.sipEnabled)
+		{	
+			$("#siphone").css({display: "none"});	
+			this.sipEnabled = false;
+			
+			$("#contactlist").css({display: "block"});			
+			APP.UI.toggleContactList();				
+		} else {
+			APP.UI.toggleContactList();
+			$("#contactlist").css({display: "none"});
+			
+			$("#siphone").css({display: "block"});
+			this.sipEnabled = true;			
+		}
+	
 	},
 
 	onPresence: function (pres) 
@@ -2130,8 +2152,20 @@ Strophe.addConnectionPlugin('ofmeet',
 
 		presence.find('ofmeet').each(function() 
 		{
-			__that.roomJid = bare_jid;
-			window.xmppRoomJid = bare_jid;
+			if (!__that.roomJid)
+			{
+				window.xmppRoomJid = bare_jid;
+
+				if (config.sip)
+				{
+					var room = Strophe.getNodeFromJid(jid);
+					$( "#toolbar" ).prepend('<a class="button icon-telephone" data-container="body" data-toggle="popover" data-placement="bottom" content="SIP Phone" onclick="Strophe._connectionPlugins.ofmeet.sipPhone();"></a>');			
+					$( "#videoconference_page" ).append('<div id="siphone" class="right-panel" style="display:none;height: 100%;width:30%"><iframe style="height: 100%;width:100%" src="phone/index.html?room=' + room + '" id="sipPhoneDiv"></iframe></div>');
+				}
+
+				__that.roomJid = bare_jid;
+			}
+			
 		});
 
 		if (jid.substring(0, 5) == "rayo-") return true;			
