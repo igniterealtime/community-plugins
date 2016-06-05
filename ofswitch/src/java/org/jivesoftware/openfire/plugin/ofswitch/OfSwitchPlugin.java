@@ -19,9 +19,11 @@
 
 package org.jivesoftware.openfire.plugin.ofswitch;
 
+import java.sql.*;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.*;
+
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
 
@@ -31,6 +33,8 @@ import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.http.HttpBindManager;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
+import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.database.DbConnectionManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +59,11 @@ import org.jboss.netty.channel.ExceptionEvent;
 
 import org.ifsoft.websockets.*;
 
+import org.jivesoftware.openfire.sip.sipaccount.*;
+import org.xmpp.packet.*;
+import org.dom4j.*;
+
+
 public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventListener, PropertyEventListener  {
 
     private static final Logger Log = LoggerFactory.getLogger(OfSwitchPlugin.class);
@@ -68,6 +77,7 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
     private Client client;
     private ScheduledFuture<ConnectThread> connectTask;
     private volatile boolean subscribed = false;
+    private XMPPServer server;
 
     public static OfSwitchPlugin self;
 
@@ -85,6 +95,7 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 		ContextHandlerCollection contexts = HttpBindManager.getInstance().getContexts();
 
 		self = this;
+		server = XMPPServer.getInstance();
 
 		try {
 
@@ -219,6 +230,7 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 						client.setEventSubscriptions( "plain", "all" );
 						client.addEventFilter( "Event-Name", "heartbeat" );
 						client.addEventFilter( "Event-Name", "custom" );
+						client.addEventFilter( "Event-Name", "channel_callstate" );
 						client.addEventFilter( "Event-Name", "background_job" );
 						subscribed = true;
 					}
@@ -356,7 +368,81 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 
     @Override public void eventReceived( EslEvent event )
     {
-		Log.info("eventReceived " + event.getEventName());
+		String eventName = event.getEventName();
+		Map<String, String> headers = event.getEventHeaders();
+		String eventType = headers.get("Event-Subclass");
+
+		Log.info("eventReceived " + eventName + " " + eventType);
+
+		for (String key : headers.keySet())
+		{
+			String value = headers.get(key);
+			Log.debug("Generic Event parameter, " + key + "=[" + value + "]");
+		}
+
+		if (eventName.equals("CHANNEL_CALLSTATE"))
+		{
+			String callState = headers.get("Channel-Call-State");
+
+			if ("HANGUP".equals(callState))
+			{
+				final String source = headers.get("Caller-Caller-ID-Number");
+				final String destination = headers.get("Caller-Destination-Number");
+				final int duration = (int)((Long.parseLong(headers.get("Caller-Channel-Hangup-Time")) - Long.parseLong( headers.get("Caller-Channel-Answered-Time"))) / 1000000);
+				final String direction = headers.get("Caller-Direction");
+				final long startTimestamp = Long.parseLong(headers.get("Caller-Profile-Created-Time")) /1000;
+
+				ExecutorService executorWriteRecord = Executors.newCachedThreadPool();
+
+				executorWriteRecord.submit(new Callable<Boolean>()
+				{
+					public Boolean call() throws Exception
+					{
+						try {
+							String username = "";
+							SipAccount sipAccount = SipAccountDAO.getAccountByExtn(source);
+							if (sipAccount != null) username = sipAccount.getUsername();
+
+							createCallRecord(username, source, destination, startTimestamp, duration, "inbound".equals(direction) ? "received" : "dialed");
+						}
+
+						catch (Exception e) {
+							Log.error("createCallRecord failed", e);
+						}
+
+						return true;
+					}
+				});
+			}
+		}
+
+		if (eventName.equals("CUSTOM") && eventType != null && (eventType.equals("sofia::register") || eventType.equals("sofia::unregister")))
+		{
+			final String extension = headers.get("from-user");
+			final boolean registered = eventType.equals("sofia::register");
+
+			ExecutorService executorWriteRecord = Executors.newCachedThreadPool();
+
+			executorWriteRecord.submit(new Callable<Boolean>()
+			{
+				public Boolean call() throws Exception
+				{
+					SipAccount sipAccount = SipAccountDAO.getAccountByExtn(extension);
+
+					if (sipAccount != null)
+					{
+						IQ iq = new IQ(IQ.Type.set);
+						iq.setFrom(sipAccount.getUsername() + "@sipark." + server.getServerInfo().getXMPPDomain());
+						iq.setTo("sipark." + server.getServerInfo().getXMPPDomain());
+
+						Element child = iq.setChildElement("spark", "http://www.jivesoftware.com/protocol/sipark");
+						child.addElement("status").setText(registered ? "Registered" : "Unregistered");
+						server.getIQRouter().route(iq);
+					}
+					return true;
+				}
+			});
+		}
 	}
 
     @Override public void conferenceEventJoin(String uniqueId, String confName, int confSize, EslEvent event)
@@ -528,6 +614,20 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 		return value;
 	}
 
+	public String sendAsyncFWCommand(String command)
+	{
+		Log.info("sendAsyncFWCommand " + command);
+
+		String response = null;
+
+		if (client != null)
+		{
+			response = client.sendAsyncApiCommand(command, "");
+		}
+
+		return response;
+	}
+
 	public EslMessage sendFWCommand(String command)
 	{
 		Log.info("sendFWCommand " + command);
@@ -561,5 +661,39 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 
 		return ip;
 	}
+
+   private void createCallRecord(String username, String addressFrom, String addressTo, long datetime, int duration, String calltype)
+   {
+		boolean sipPlugin = XMPPServer.getInstance().getPluginManager().getPlugin("sip") != null;
+
+		if (sipPlugin)
+		{
+			Log.info("createCallRecord " + username + " " + addressFrom + " " + addressTo + " " + datetime);
+
+			String sql = "INSERT INTO ofSipPhoneLog (username, addressFrom, addressTo, datetime, duration, calltype) values  (?, ?, ?, ?, ?, ?)";
+
+			Connection con = null;
+			PreparedStatement psmt = null;
+			ResultSet rs = null;
+
+			try {
+				con = DbConnectionManager.getConnection();
+				psmt = con.prepareStatement(sql);
+				psmt.setString(1, username);
+				psmt.setString(2, addressFrom);
+				psmt.setString(3, addressTo);
+				psmt.setLong(4, datetime);
+				psmt.setInt(5, duration);
+				psmt.setString(6, calltype);
+
+				psmt.executeUpdate();
+
+			} catch (SQLException e) {
+				Log.error(e.getMessage(), e);
+			} finally {
+				DbConnectionManager.closeConnection(rs, psmt, con);
+			}
+		}
+    }
 
 }

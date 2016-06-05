@@ -20,7 +20,7 @@
 <%@ page import="org.jivesoftware.util.*,
                  java.util.*,
                  org.freeswitch.esl.client.transport.message.EslMessage,                 
-                 java.net.URLEncoder"                 
+                 java.net.URLDecoder"                 
     errorPage="error.jsp"
 %>
 <%@ page import="org.xmpp.packet.JID" %>
@@ -76,9 +76,11 @@
 <thead>
     <tr>
         <th>Conference Id</th>
-        <th nowrap>Member Count</th>           
+        <th nowrap>Count</th>    
+        <th nowrap>Participants</th>              
+        <th nowrap>Recording Path</th>            
         <th nowrap>Rate</th>
-        <th nowrap>Running</th>         
+        <th nowrap>Running</th>           
     </tr>
 </thead>
 <tbody>
@@ -106,22 +108,56 @@
 		{
 			Element conference = (Element) conferences.next(); 
 
-			String uuid = conference.attributeValue("uuid");
-			String members = conference.attributeValue("member-count");
+			String name = conference.attributeValue("name");
+			String memberCount = conference.attributeValue("member-count");
 			String rate = conference.attributeValue("rate");
 			String running = conference.attributeValue("running");	
+			String participants = "";
+			String recordPath = "";
+			
+			Iterator members = conference.element("members").elementIterator("member");	
+			
+			while (members.hasNext()) 
+			{
+				Element member = (Element) members.next(); 
+				String callerIdName = "";
+				String callerIdNumber = "";
+
+				if (member.element("record_path") != null) 
+				{
+					recordPath = URLDecoder.decode(member.elementTextTrim("record_path"), "UTF-8");
+				}
+				
+				if (member.element("caller_id_name") != null) 
+				{
+					callerIdName = URLDecoder.decode(member.elementTextTrim("caller_id_name"), "UTF-8");
+				}
+				
+				if (member.element("caller_id_number") != null) 
+				{
+					callerIdNumber = URLDecoder.decode(member.elementTextTrim("caller_id_number"), "UTF-8");
+				}
+				
+				participants = participants + callerIdName + "&nbsp;" + callerIdNumber + "<br/>";
+			}
 %>
 			<tr class="jive-<%= (((count%2)==0) ? "even" : "odd") %>">
+			<td width="10%">
+			    <%= name %>
+			</td>
+			<td width="10%">
+				<%= memberCount %>
+			</td>
+			<td width="40%">
+				<%= participants %>
+			</td>			
 			<td width="30%">
-			    <%= uuid %>
+				<%= recordPath %>           
 			</td>
-			<td width="10%" align="center">
-				<%= members %>
-			</td>
-			<td width="30%" align="center">
+			<td width="5%">
 				<%= rate %>           
-			</td>
-			<td width="30%" align="center">
+			</td>			
+			<td width="5%">
 				<%= running %>           
 			</td>	
 			</tr>
