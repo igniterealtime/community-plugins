@@ -50,8 +50,7 @@
 
 			for (String line : overviewLines) 
 			{
-				%><p><%= line %></p><%
-
+				%><p style="font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace!important;"><%= line %></p><%
 			}
 		} else {
 			
