@@ -16,7 +16,6 @@ var Moderator = (function (my) {
 
     my.onModeratorStatusChanged = function (isModerator) {
 
-        Toolbar.showSipCallButton(isModerator);
         Toolbar.showRecordingButton(
                 isModerator); //&&
                 // FIXME:

@@ -1805,54 +1805,8 @@ $(document).bind("pinnedendpointchanged", function(event, userJid) {
 });
 
 function callSipButtonClicked()
-{
-    var button = $("#sipCallButton > a");
-
-    if (button.hasClass("glow"))
-    {
-	connection.rayo.hang_up();	// BAO  
-	button.removeClass("glow")
-	
-    } else {
-	var phoneList = '<datalist id="phoneLabel">'
-
-	for (var i=0; i<connection.ofmuc.urls.length; i++)
-	{
-		if (connection.ofmuc.urls[i].url.indexOf("mrtp:") == 0 || connection.ofmuc.urls[i].url.indexOf("sip:") == 0 || connection.ofmuc.urls[i].url.indexOf("tel:") == 0)
-		{
-			phoneList = phoneList + '<option value="' + connection.ofmuc.urls[i].url + '">' + connection.ofmuc.urls[i].name + '</option>'
-		}
-	}
-	
-	phoneList = phoneList + '</datalist>'
-		    	
-	var defaultNumber = config.defaultSipNumber ? config.defaultSipNumber : '';
-
-	messageHandler.openTwoButtonDialog
-	(
-		null,
-		'<h2>Add Telephone Participant</h2>Enter a sip: uri or tel: uri or mrtp: uri or telephone number' + phoneList +
-		    '<input id="sipNumber" list="phoneLabel" type="text"' +
-		    ' value="' + defaultNumber + '" autofocus>',
-		false,
-		"Dial",
-		function (e, v, m, f) {
-		    if (v) {
-			var numberInput = document.getElementById('sipNumber');
-
-			if (numberInput.value) 
-			{
-			    connection.rayo.dial(numberInput.value, roomName, roomName);	// BAO
-			    button.addClass("glow");
-			}
-		    }
-		},
-
-		function (event) {
-		    document.getElementById('sipNumber').focus();
-		}
-	);
-    }
+{    
+    PanelToggler.toggleSipPhone();    
 }
 
 function hangup() {

@@ -36,8 +36,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.zip.*;
 
-import org.jitsi.jigasi.openfire.CallControlComponent;		// BAO
-
 
 /**
  * Class represents the focus of Jitsi Meet conference. Responsibilities:
@@ -579,8 +577,6 @@ public class JitsiMeetConference
                                         conferenceId,
                                         roomName));
                         }
-
-                        CallControlComponent.self.conferences.put(roomName, conferenceId);	// BAO
                     }
                 }
                 return peerChannels;

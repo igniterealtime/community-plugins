@@ -49,6 +49,7 @@ Strophe.addConnectionPlugin('ofmuc', {
 	   that.resize();
 	}); 
 	
+	Toolbar.showSipCallButton(!!config.sip);		// only show if we have a SIP profile
 
 	setTimeout(function()
 	{

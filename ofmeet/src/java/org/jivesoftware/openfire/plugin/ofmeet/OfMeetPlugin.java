@@ -76,9 +76,8 @@ import org.eclipse.jetty.security.authentication.*;
 import org.ifsoft.websockets.*;
 
 import org.jitsi.videobridge.openfire.PluginImpl;
-import org.jitsi.jigasi.openfire.CallControlComponent;
-import org.jitsi.jigasi.openfire.JigasiPlugin;
 import org.jitsi.jicofo.openfire.JicofoPlugin;
+import org.jitsi.videobridge.*;
 
 import net.sf.json.*;
 import org.dom4j.*;
@@ -88,7 +87,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
     private final ConcurrentHashMap<String, XMPPServlet.XMPPWebSocket> sockets = new ConcurrentHashMap<String, XMPPServlet.XMPPWebSocket>();
 	private PluginImpl jitsiPlugin;
-	private JigasiPlugin jigasiPlugin;
 	private JicofoPlugin jicofoPlugin;
 	private PluginManager manager;
 	public File pluginDirectory;
@@ -196,18 +194,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 					catch ( Exception e1 )
 					{
 						Log.error( "Could NOT Initialize jicofo component", e1 );
-					}
-
-					try
-					{
-						Log.info( "OfMeet Plugin - Initialize call control component " );
-
-						jigasiPlugin = new JigasiPlugin();
-						jigasiPlugin.initializePlugin( componentManager, manager, pluginDirectory );
-					}
-					catch ( Exception e1 )
-					{
-						Log.error( "Could NOT Initialize jigasi component", e1);
 					}
 				}
 			}, 5000);
@@ -320,7 +306,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			sockets.clear();
 
 			jitsiPlugin.destroyPlugin();
-			jigasiPlugin.destroyPlugin();
 			jicofoPlugin.destroyPlugin();
 
         	ClusterManager.removeListener(this);
@@ -415,7 +400,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	{
 		Log.info("OfMeet Plugin - joinedCluster");
 		jitsiPlugin.destroyPlugin();
-		jigasiPlugin.destroyPlugin();
 		jicofoPlugin.destroyPlugin();
 	}
 
@@ -431,7 +415,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	{
 		Log.info("OfMeet Plugin - leftCluster");
 		jitsiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
-		jigasiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
 		jicofoPlugin.initializePlugin(componentManager, manager, pluginDirectory);
 	}
 
@@ -448,7 +431,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		Log.info("OfMeet Plugin - markedAsSeniorClusterMember");
 
 		jitsiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
-		jigasiPlugin.initializePlugin(componentManager, manager, pluginDirectory);
 		jicofoPlugin.initializePlugin(componentManager, manager, pluginDirectory);
 	}
 
@@ -765,35 +747,51 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			try {
 				String roomName = requestJSON.getString("room");
 
-				if (CallControlComponent.self.conferences.containsKey(roomName))
+				Videobridge videobridge = jitsiPlugin.component.getVideobridge();
+
+				for (Conference conference : videobridge.getConferences())
 				{
-					String confId = CallControlComponent.self.conferences.get(roomName);
+					String room = conference.getName();
 
-					JSONObject userJSON = new JSONObject();
-					userJSON.put("conference", confId);
-
-					Path dir = Paths.get(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", ofmeetHome + File.separator + "recordings"));
-
-					try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir))
+					if (room != null && !"".equals(room) && roomName.equals(room))
 					{
-						for (Path file: stream)
+						if (JiveGlobals.getProperty("ofmeet.autorecord.enabled", "false").equals("true") && !conference.isRecording())
 						{
-							String fileName = file.getFileName().toString();
-
-							if (fileName.indexOf(confId) > -1)
-							{
-								userJSON.put("folder", fileName);
-							}
+							conference.setRecording(true);
 						}
 
-					} catch (IOException | DirectoryIteratorException x) {
-						Log.error("getConferenceId", x);
+						String confId = conference.getID();
+
+						JSONObject userJSON = new JSONObject();
+						userJSON.put("room", roomName);
+						userJSON.put("id", confId);
+						userJSON.put("lastActivityTime", String.valueOf(conference.getLastActivityTime()));
+						userJSON.put("focus", conference.getFocus());
+						userJSON.put("recording", conference.isRecording() ? "yes" : "no");
+						userJSON.put("expired", conference.isExpired() ? "yes" : "no");
+
+						Path dir = Paths.get(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", ofmeetHome + File.separator + "recordings"));
+
+						try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir))
+						{
+							for (Path file: stream)
+							{
+								String fileName = file.getFileName().toString();
+
+								if (fileName.indexOf(confId) > -1)
+								{
+									userJSON.put("folder", fileName);
+								}
+							}
+
+						} catch (IOException | DirectoryIteratorException x) {
+							Log.error("getConferenceId", x);
+						}
+
+						childElement.setText(userJSON.toString());
+
+						break;
 					}
-
-					childElement.setText(userJSON.toString());
-
-				} else {
-					reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, "Conference room not found"));
 				}
 
 			} catch (Exception e1) {

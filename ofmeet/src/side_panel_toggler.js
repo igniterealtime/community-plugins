@@ -220,6 +220,22 @@ var PanelToggler = (function(my) {
             },
             null);
     };
+    
+    /**
+     * Opens / closes the sip phone
+     */
+    my.toggleSipPhone = function() {
+        resizeVideoArea(Phone.isVisible(), function (){});
+        toggle(Phone,
+            '#siphone',
+            null,
+            function() {
+		Phone.open();
+            },
+            function() {
+		Phone.close();
+            });
+    };    
 
     /**
      * Returns the size of the side panel.
@@ -228,8 +244,8 @@ var PanelToggler = (function(my) {
         var availableHeight = window.innerHeight;
         var availableWidth = window.innerWidth;
 
-        var panelWidth = 200;
-//        if (availableWidth * 0.2 < 200) {
+        var panelWidth = 300;
+//        if (availableWidth * 0.2 < 300) {
 //            panelWidth = availableWidth * 0.2;
 //        }
 

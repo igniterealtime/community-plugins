@@ -36,6 +36,7 @@ import java.security.Principal;
 
 import org.jitsi.videobridge.openfire.PluginImpl;
 import org.jitsi.videobridge.*;
+import org.jivesoftware.openfire.sip.sipaccount.*;
 
 import org.dom4j.*;
 
@@ -56,6 +57,7 @@ public class Config extends HttpServlet
 			String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
 			String userName = "null";
 			String userAvatar = "null";
+			SipAccount sipAccount = null;
 			String conferences = "[";
 
 			String securityEnabled = JiveGlobals.getProperty("ofmeet.security.enabled", "true");
@@ -109,6 +111,14 @@ public class Config extends HttpServlet
 						String binval = photo.element("BINVAL").getText();
 						userAvatar = "data:" + type + ";base64," + binval.replace("\n", "").replace("\r", "");;
 					}
+				}
+
+				boolean sipAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("sip") != null;
+				boolean switchAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("ofswitch") != null;
+
+				if (sipAvailable)
+				{
+					sipAccount = SipAccountDAO.getAccountByUser(userName);
 				}
 
 				try {
@@ -226,19 +236,11 @@ public class Config extends HttpServlet
 				}
 			}
 
-			String callControl = "'ofmeet-call-control." + domain + "'";
-
-			if (JiveGlobals.getBooleanProperty("org.jitsi.videobridge.ofmeet.sip.enabled", true) == false)
-			{
-				callControl = "null";
-			}
-
 			out.println("var config = {");
 			out.println("    hosts: {");
 			out.println("        domain: '" + domain + "',");
 			out.println("        muc: 'conference." + domain + "',");
 			out.println("        bridge: 'ofmeet-jitsi-videobridge." + domain + "',");
-			out.println("        call_control: " + callControl + ",");
 			out.println("        focus: 'ofmeet-focus." + domain + "',");
 			out.println("    },");
 			out.println("    getroomnode: function (path)");
@@ -258,6 +260,21 @@ public class Config extends HttpServlet
 			out.println("		}");
 			out.println("		return roomnode.toLowerCase();    ");
 			out.println("    },	");
+
+			if (sipAccount != null)
+			{
+				out.println("    sip: {");
+				out.println("        username: '" 			+ sipAccount.getSipUsername() + "',");
+				out.println("        authusername: '" 		+ sipAccount.getAuthUsername() + "',");
+				out.println("        displayname: '" 		+ sipAccount.getDisplayName() + "',");
+				out.println("        password: '" 			+ sipAccount.getPassword() + "',");
+				out.println("        server: '" 			+ sipAccount.getServer() + "',");
+				out.println("        enabled: " 			+ sipAccount.isEnabled() + ",");
+				out.println("        voicemail: '" 			+ sipAccount.getVoiceMailNumber() + "',");
+				out.println("        outboundproxy: '" 		+ sipAccount.getOutboundproxy() + "',");
+				out.println("    },");
+			}
+
 			if (!iceServers.trim().equals("")) out.println("    iceServers: " + iceServers + ",");
 			out.println("    useStunTurn: " + useStunTurn + ",");
 			out.println("    useIPv6: " + useIPv6 + ",");
