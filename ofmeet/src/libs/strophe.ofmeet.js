@@ -2169,7 +2169,7 @@ Strophe.addConnectionPlugin('ofmeet',
 				{
 					var room = Strophe.getNodeFromJid(jid);
 					$( "#toolbar" ).prepend('<a class="button icon-telephone" data-container="body" data-toggle="popover" data-placement="bottom" content="SIP Phone" onclick="Strophe._connectionPlugins.ofmeet.sipPhone();"></a>');			
-					$( "#videoconference_page" ).append('<div id="siphone" class="right-panel" style="display:none;height: 100%;width: 100%;max-width:300px"><iframe style="height: 100%;width:100%" src="phone/index.html?room=' + room + '" id="sipPhoneDiv"></iframe></div>');
+					$( "#videoconference_page" ).append('<div id="siphone" class="right-panel" style="display:none;height: 100%;width: 100%;max-width:300px"></div>');
 				}
 
 				__that.roomJid = bare_jid;

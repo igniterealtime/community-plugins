@@ -57,6 +57,7 @@ public class Config extends HttpServlet
 			String connectionUrl = "window.location.protocol + '//' + window.location.host + '/http-bind/'";
 			String accessToken = null;
 			SipAccount sipAccount = null;
+			String conferences = "[";
 
 			if (XMPPServer.getInstance().getPluginManager().getPlugin("websocket") != null)
 			{
@@ -98,44 +99,42 @@ public class Config extends HttpServlet
 				{
 					sipAccount = SipAccountDAO.getAccountByUser(userName);
 				}
-			}
 
-			String conferences = "[";
+				try {
 
-			try {
+					boolean isBookmarksAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("bookmarks") != null;
 
-				boolean isBookmarksAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("bookmarks") != null;
-
-				if (isBookmarksAvailable)
-				{
-					final Collection<Bookmark> bookmarks = BookmarkManager.getBookmarks();
-
-					for (Bookmark bookmark : bookmarks)
+					if (isBookmarksAvailable)
 					{
-						boolean addBookmarkForUser = bookmark.isGlobalBookmark() || isBookmarkForJID(userName, bookmark);
+						final Collection<Bookmark> bookmarks = BookmarkManager.getBookmarks();
 
-						if (addBookmarkForUser)
+						for (Bookmark bookmark : bookmarks)
 						{
-							if (bookmark.getType() == Bookmark.Type.group_chat)
-							{
-								String url = bookmark.getProperty("url");
+							boolean addBookmarkForUser = bookmark.isGlobalBookmark() || isBookmarkForJID(userName, bookmark);
 
-								if (url == null)
+							if (addBookmarkForUser)
+							{
+								if (bookmark.getType() == Bookmark.Type.group_chat)
 								{
-									String id = bookmark.getBookmarkID() + "" + System.currentTimeMillis();
-									String rootUrl = JiveGlobals.getProperty("ofmeet.root.url.secure", "https://" + hostname + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443"));
-									url = rootUrl + "/ofmeet/?b=" + id;
-									bookmark.setProperty("url", url);
+									String url = bookmark.getProperty("url");
+
+									if (url == null)
+									{
+										String id = bookmark.getBookmarkID() + "" + System.currentTimeMillis();
+										String rootUrl = JiveGlobals.getProperty("ofmeet.root.url.secure", "https://" + hostname + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443"));
+										url = rootUrl + "/ofmeet/?b=" + id;
+										bookmark.setProperty("url", url);
+									}
+									conferences = conferences + (conferences.equals("[") ? "" : ",");
+									conferences = conferences + "{url: '" + url + "', name: '" + bookmark.getName() + "', jid: '" + bookmark.getValue() + "'}";
 								}
-								conferences = conferences + (conferences.equals("[") ? "" : ",");
-								conferences = conferences + "{url: '" + url + "', name: '" + bookmark.getName() + "', jid: '" + bookmark.getValue() + "'}";
 							}
 						}
 					}
+
+				} catch (Exception e) {
+
 				}
-
-			} catch (Exception e) {
-
 			}
 
 			conferences = conferences + "]";
@@ -211,19 +210,11 @@ public class Config extends HttpServlet
 				}
 			}
 
-			String callControl = "'ofmeet-call-control." + domain + "'";
-
-			if (JiveGlobals.getBooleanProperty("org.jitsi.videobridge.ofmeet.sip.enabled", true) == false)
-			{
-				callControl = "null";
-			}
-
 			out.println("var config = {");
 			out.println("    hosts: {");
 			out.println("        domain: '" + domain + "',");
 			out.println("        muc: 'conference." + domain + "',");
 			out.println("        bridge: 'videobridge." + domain + "',");
-			out.println("        call_control: " + callControl + ",");
 			out.println("        focus: 'focus." + domain + "',");
 			out.println("    },");
 			out.println("    getroomnode: function (path)");
