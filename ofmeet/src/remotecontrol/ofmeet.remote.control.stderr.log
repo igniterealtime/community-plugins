@@ -1,1 +1,16 @@
-15:24
+12:25
+events.js:141
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: unexpected server response (404)
+    at ClientRequest.response (C:\Projects\ignite\community-plugins-dele\ofmeet\src\remotecontrol\node_modules\ws\lib\WebSocket.js:695:15)
+    at ClientRequest.g (events.js:260:16)
+    at emitOne (events.js:77:13)
+    at ClientRequest.emit (events.js:169:7)
+    at HTTPParser.parserOnIncomingClient [as onIncoming] (_http_client.js:415:21)
+    at HTTPParser.parserOnHeadersComplete (_http_common.js:88:23)
+    at TLSSocket.socketOnData (_http_client.js:305:20)
+    at emitOne (events.js:77:13)
+    at TLSSocket.emit (events.js:169:7)
+    at readableAddChunk (_stream_readable.js:146:16)

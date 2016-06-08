@@ -204,7 +204,7 @@ public class Config extends HttpServlet
 
 				if (globalConferenceId == null || videobridge.getConference(globalConferenceId, null) == null)
 				{
-					Conference conference = videobridge.createConference(null);
+					Conference conference = videobridge.createConference(null, "Openfire Meetings");
 					if (recordVideo.equals("true")) conference.setRecording(true);
 					conference.setLastKnownFocus(domain);
 					globalConferenceId = conference.getID();
@@ -223,7 +223,6 @@ public class Config extends HttpServlet
 			out.println("        domain: '" + domain + "',");
 			out.println("        muc: 'conference." + domain + "',");
 			out.println("        bridge: 'videobridge." + domain + "',");
-			out.println("        call_control: " + callControl + ",");
 			out.println("        focus: 'focus." + domain + "',");
 			out.println("    },");
 			out.println("    getroomnode: function (path)");
