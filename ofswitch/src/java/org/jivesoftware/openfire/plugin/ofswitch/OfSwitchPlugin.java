@@ -22,6 +22,7 @@ package org.jivesoftware.openfire.plugin.ofswitch;
 import java.sql.*;
 import java.io.File;
 import java.util.*;
+import java.net.*;
 import java.util.concurrent.*;
 
 import org.apache.tomcat.InstanceManager;
@@ -34,6 +35,7 @@ import org.jivesoftware.openfire.http.HttpBindManager;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.SessionManager;
 import org.jivesoftware.database.DbConnectionManager;
 
 import org.slf4j.Logger;
@@ -131,46 +133,51 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 
 			checkNatives(pluginDirectory);
 
-			String freeswitchServer = JiveGlobals.getProperty("freeswitch.server.hostname", "127.0.0.1");
-			String freeswitchPassword = JiveGlobals.getProperty("freeswitch.server.password", "Welcome123");
-			boolean freeswitchInstalled = JiveGlobals.getBooleanProperty("wirelynk.freeswitch.installed", true);
+			boolean freeswitchEnabled = JiveGlobals.getBooleanProperty("freeswitch.enabled", true);
 
-			freeSwitchHomePath = JiveGlobals.getProperty("freeswitch.server.homepath", freeSwitchHomePath);
-			freeSwitchExePath = JiveGlobals.getProperty("freeswitch.server.exepath", freeSwitchExePath);
-
-			if (freeswitchInstalled == false)
+			if (freeswitchEnabled)
 			{
-				if (freeSwitchExePath != null)
+				String freeswitchServer = JiveGlobals.getProperty("freeswitch.server.hostname", "127.0.0.1");
+				String freeswitchPassword = JiveGlobals.getProperty("freeswitch.server.password", "Welcome123");
+				boolean freeswitchInstalled = JiveGlobals.getBooleanProperty("freeswitch.installed", true);
+
+				freeSwitchHomePath = JiveGlobals.getProperty("freeswitch.server.homepath", freeSwitchHomePath);
+				freeSwitchExePath = JiveGlobals.getProperty("freeswitch.server.exepath", freeSwitchExePath);
+
+				if (freeswitchInstalled == false)
 				{
-					executor = Executors.newCachedThreadPool();
-
-					executor.submit(new Callable<Boolean>()
+					if (freeSwitchExePath != null && !"".equals(freeSwitchExePath) && freeSwitchHomePath != null && !"".equals(freeSwitchHomePath))
 					{
-						public Boolean call() throws Exception {
-							try {
-								Log.info("FreeSwitch executable path " + freeSwitchExePath);
+						executor = Executors.newCachedThreadPool();
 
-								freeSwitchThread = new FreeSwitchThread();
-								freeSwitchThread.start(freeSwitchExePath + " ",  new File(freeSwitchHomePath));
+						executor.submit(new Callable<Boolean>()
+						{
+							public Boolean call() throws Exception {
+								try {
+									Log.info("FreeSwitch executable path " + freeSwitchExePath);
+
+									freeSwitchThread = new FreeSwitchThread();
+									freeSwitchThread.start(freeSwitchExePath + " ",  new File(freeSwitchHomePath));
+								}
+
+								catch (Exception e) {
+									Log.error("FreeSwitch initializePluginn", e);
+								}
+
+								return true;
 							}
+						});
 
-							catch (Exception e) {
-								Log.error("FreeSwitch initializePluginn", e);
-							}
-
-							return true;
-						}
-					});
-
-				} else {
-					Log.error("FreeSwitch path error server " + freeswitchServer + " " + freeSwitchHomePath);
+					} else {
+						Log.error("FreeSwitch path error server " + freeswitchServer + " " + freeSwitchHomePath);
+					}
 				}
-			}
 
-			managerConnection = new DefaultManagerConnection(freeswitchServer, freeswitchPassword);
-			Client client = managerConnection.getESLClient();
-			ConnectThread connector = new ConnectThread();
-			connectTask = (ScheduledFuture<ConnectThread>) connExec.scheduleAtFixedRate(connector, 30, 5, TimeUnit.SECONDS);
+				managerConnection = new DefaultManagerConnection(freeswitchServer, freeswitchPassword);
+				Client client = managerConnection.getESLClient();
+				ConnectThread connector = new ConnectThread();
+				connectTask = (ScheduledFuture<ConnectThread>) connExec.scheduleAtFixedRate(connector, 30,  freeswitchInstalled ? 5 : 0, TimeUnit.SECONDS);
+			}
 
 
 		} catch (Exception e) {
@@ -205,6 +212,29 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
         }
     }
 
+	public String getDomain()
+	{
+		return server.getServerInfo().getXMPPDomain();
+	}
+
+	public String getHostname()
+	{
+		return server.getServerInfo().getHostname();
+	}
+
+	public String getIpAddress()
+	{
+		String ourHostname = server.getServerInfo().getHostname();
+		String ourIpAddress = ourHostname;
+
+		try {
+			ourIpAddress = InetAddress.getByName(ourHostname).getHostAddress();
+		} catch (Exception e) {
+
+		}
+
+		return ourIpAddress;
+	}
 
 //-------------------------------------------------------
 //
@@ -231,6 +261,7 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 						client.addEventFilter( "Event-Name", "heartbeat" );
 						client.addEventFilter( "Event-Name", "custom" );
 						client.addEventFilter( "Event-Name", "channel_callstate" );
+						client.addEventFilter( "Event-Name", "presence_in" );
 						client.addEventFilter( "Event-Name", "background_job" );
 						subscribed = true;
 					}
@@ -378,6 +409,31 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 		{
 			String value = headers.get(key);
 			Log.debug("Generic Event parameter, " + key + "=[" + value + "]");
+		}
+
+		if (eventName.equals("PRESENCE_IN"))
+		{
+			final String state = headers.get("presence-call-info-state");
+			final String direction = headers.get("presence-call-direction");
+			final String presenceId = headers.get("Channel-Presence-ID");
+			final String source = headers.get("Caller-Caller-ID-Number");
+			final String destination = headers.get("Caller-Destination-Number");
+
+			if (state != null)
+			{
+				Log.info("eventReceived " + state + " " + direction + " " + presenceId + " " + source + " " + destination);
+
+				Message message = new Message();
+				message.setFrom(server.getServerInfo().getXMPPDomain());
+				Element element = message.addChildElement("sippresence", "http://ignitereatime.org/sippresence");
+				element.addAttribute("state", state);
+				element.addAttribute("direction", direction);
+				element.addAttribute("id", presenceId);
+				element.addAttribute("source", source);
+				element.addAttribute("destination", destination);
+
+				server.getSessionManager().broadcast(message);
+			}
 		}
 
 		if (eventName.equals("CHANNEL_CALLSTATE"))

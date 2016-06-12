@@ -54,7 +54,12 @@
 			}
 		} else {
 			
-			%>Please wait.......<%
+			if (JiveGlobals.getBooleanProperty("freeswitch.enabled", true))
+			{
+				%>Please wait.......<%
+			} else {
+				%>Disabled<%			
+			}
 		}
 	}
 %>
