@@ -9,6 +9,7 @@ package org.jitsi.videobridge.openfire;
 
 import org.jivesoftware.util.*;
 import org.jivesoftware.openfire.*;
+import org.jivesoftware.openfire.roster.*;
 import org.jivesoftware.openfire.vcard.VCardManager;
 import org.jivesoftware.openfire.plugin.spark.*;
 import org.jivesoftware.openfire.group.Group;
@@ -237,7 +238,24 @@ public class Config extends HttpServlet
 
 			if (sipAccount != null)
 			{
+				Roster roster = XMPPServer.getInstance().getRosterManager().getRoster(userName);
+				String sipPeers = "[";
+
+				for (RosterItem item : roster.getRosterItems())
+				{
+					String peerUser = item.getJid().getNode();
+					SipAccount peerAccount = SipAccountDAO.getAccountByUser(peerUser);
+
+					if (peerAccount != null)
+					{
+						sipPeers = sipPeers + (sipPeers.equals("[") ? "" : ",");
+						sipPeers = sipPeers + "{username: '" + peerAccount.getSipUsername() + "', name: '" + peerAccount.getDisplayName() + "'}";
+					}
+				}
+				sipPeers = sipPeers + "]";
+
 				out.println("    sip: {");
+				out.println("        peers: " 				+ sipPeers + ",");
 				out.println("        username: '" 			+ sipAccount.getSipUsername() + "',");
 				out.println("        authusername: '" 		+ sipAccount.getAuthUsername() + "',");
 				out.println("        displayname: '" 		+ sipAccount.getDisplayName() + "',");
@@ -321,7 +339,7 @@ public class Config extends HttpServlet
 			String applicationName			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.application.name", "Openfire Meetings");
 			String activeSpkrAvatarSize		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.active.speaker.avatarsize", "100");
 
-			String initationPoweredBy			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.invitation.poweredby", "true");
+			String initationPoweredBy		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.invitation.poweredby", "true");
 			String toolbarButtons			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.toolbar.buttons", "'authentication', 'microphone', 'camera', 'desktop','recording', 'security', 'invite', 'chat', 'etherpad', 'sharedvideo','fullscreen', 'sip', 'dialpad', 'settings', 'hangup', 'filmstrip','contacts'");
 
 			out.println("var interfaceConfig = {");
