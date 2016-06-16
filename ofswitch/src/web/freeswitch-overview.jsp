@@ -50,12 +50,16 @@
 
 			for (String line : overviewLines) 
 			{
-				%><p><%= line %></p><%
-
+				%><p style="font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace!important;"><%= line %></p><%
 			}
 		} else {
 			
-			%>Please wait.......<%
+			if (JiveGlobals.getBooleanProperty("freeswitch.enabled", true))
+			{
+				%>Please wait.......<%
+			} else {
+				%>Disabled<%			
+			}
 		}
 	}
 %>

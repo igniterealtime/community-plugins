@@ -19,9 +19,12 @@
 
 package org.jivesoftware.openfire.plugin.ofswitch;
 
+import java.sql.*;
 import java.io.File;
 import java.util.*;
+import java.net.*;
 import java.util.concurrent.*;
+
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
 
@@ -31,6 +34,9 @@ import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.http.HttpBindManager;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
+import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.SessionManager;
+import org.jivesoftware.database.DbConnectionManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +61,11 @@ import org.jboss.netty.channel.ExceptionEvent;
 
 import org.ifsoft.websockets.*;
 
+import org.jivesoftware.openfire.sip.sipaccount.*;
+import org.xmpp.packet.*;
+import org.dom4j.*;
+
+
 public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventListener, PropertyEventListener  {
 
     private static final Logger Log = LoggerFactory.getLogger(OfSwitchPlugin.class);
@@ -68,6 +79,7 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
     private Client client;
     private ScheduledFuture<ConnectThread> connectTask;
     private volatile boolean subscribed = false;
+    private XMPPServer server;
 
     public static OfSwitchPlugin self;
 
@@ -85,6 +97,7 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 		ContextHandlerCollection contexts = HttpBindManager.getInstance().getContexts();
 
 		self = this;
+		server = XMPPServer.getInstance();
 
 		try {
 
@@ -120,46 +133,51 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 
 			checkNatives(pluginDirectory);
 
-			String freeswitchServer = JiveGlobals.getProperty("freeswitch.server.hostname", "127.0.0.1");
-			String freeswitchPassword = JiveGlobals.getProperty("freeswitch.server.password", "Welcome123");
-			boolean freeswitchInstalled = JiveGlobals.getBooleanProperty("wirelynk.freeswitch.installed", true);
+			boolean freeswitchEnabled = JiveGlobals.getBooleanProperty("freeswitch.enabled", true);
 
-			freeSwitchHomePath = JiveGlobals.getProperty("freeswitch.server.homepath", freeSwitchHomePath);
-			freeSwitchExePath = JiveGlobals.getProperty("freeswitch.server.exepath", freeSwitchExePath);
-
-			if (freeswitchInstalled == false)
+			if (freeswitchEnabled)
 			{
-				if (freeSwitchExePath != null)
+				String freeswitchServer = JiveGlobals.getProperty("freeswitch.server.hostname", "127.0.0.1");
+				String freeswitchPassword = JiveGlobals.getProperty("freeswitch.server.password", "Welcome123");
+				boolean freeswitchInstalled = JiveGlobals.getBooleanProperty("freeswitch.installed", true);
+
+				freeSwitchHomePath = JiveGlobals.getProperty("freeswitch.server.homepath", freeSwitchHomePath);
+				freeSwitchExePath = JiveGlobals.getProperty("freeswitch.server.exepath", freeSwitchExePath);
+
+				if (freeswitchInstalled == false)
 				{
-					executor = Executors.newCachedThreadPool();
-
-					executor.submit(new Callable<Boolean>()
+					if (freeSwitchExePath != null && !"".equals(freeSwitchExePath) && freeSwitchHomePath != null && !"".equals(freeSwitchHomePath))
 					{
-						public Boolean call() throws Exception {
-							try {
-								Log.info("FreeSwitch executable path " + freeSwitchExePath);
+						executor = Executors.newCachedThreadPool();
 
-								freeSwitchThread = new FreeSwitchThread();
-								freeSwitchThread.start(freeSwitchExePath + " ",  new File(freeSwitchHomePath));
+						executor.submit(new Callable<Boolean>()
+						{
+							public Boolean call() throws Exception {
+								try {
+									Log.info("FreeSwitch executable path " + freeSwitchExePath);
+
+									freeSwitchThread = new FreeSwitchThread();
+									freeSwitchThread.start(freeSwitchExePath + " ",  new File(freeSwitchHomePath));
+								}
+
+								catch (Exception e) {
+									Log.error("FreeSwitch initializePluginn", e);
+								}
+
+								return true;
 							}
+						});
 
-							catch (Exception e) {
-								Log.error("FreeSwitch initializePluginn", e);
-							}
-
-							return true;
-						}
-					});
-
-				} else {
-					Log.error("FreeSwitch path error server " + freeswitchServer + " " + freeSwitchHomePath);
+					} else {
+						Log.error("FreeSwitch path error server " + freeswitchServer + " " + freeSwitchHomePath);
+					}
 				}
-			}
 
-			managerConnection = new DefaultManagerConnection(freeswitchServer, freeswitchPassword);
-			Client client = managerConnection.getESLClient();
-			ConnectThread connector = new ConnectThread();
-			connectTask = (ScheduledFuture<ConnectThread>) connExec.scheduleAtFixedRate(connector, 30, 5, TimeUnit.SECONDS);
+				managerConnection = new DefaultManagerConnection(freeswitchServer, freeswitchPassword);
+				Client client = managerConnection.getESLClient();
+				ConnectThread connector = new ConnectThread();
+				connectTask = (ScheduledFuture<ConnectThread>) connExec.scheduleAtFixedRate(connector, 30,  freeswitchInstalled ? 5 : 0, TimeUnit.SECONDS);
+			}
 
 
 		} catch (Exception e) {
@@ -194,6 +212,29 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
         }
     }
 
+	public String getDomain()
+	{
+		return server.getServerInfo().getXMPPDomain();
+	}
+
+	public String getHostname()
+	{
+		return server.getServerInfo().getHostname();
+	}
+
+	public String getIpAddress()
+	{
+		String ourHostname = server.getServerInfo().getHostname();
+		String ourIpAddress = ourHostname;
+
+		try {
+			ourIpAddress = InetAddress.getByName(ourHostname).getHostAddress();
+		} catch (Exception e) {
+
+		}
+
+		return ourIpAddress;
+	}
 
 //-------------------------------------------------------
 //
@@ -219,6 +260,8 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 						client.setEventSubscriptions( "plain", "all" );
 						client.addEventFilter( "Event-Name", "heartbeat" );
 						client.addEventFilter( "Event-Name", "custom" );
+						client.addEventFilter( "Event-Name", "channel_callstate" );
+						client.addEventFilter( "Event-Name", "presence_in" );
 						client.addEventFilter( "Event-Name", "background_job" );
 						subscribed = true;
 					}
@@ -356,7 +399,106 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 
     @Override public void eventReceived( EslEvent event )
     {
-		Log.info("eventReceived " + event.getEventName());
+		String eventName = event.getEventName();
+		Map<String, String> headers = event.getEventHeaders();
+		String eventType = headers.get("Event-Subclass");
+
+		Log.info("eventReceived " + eventName + " " + eventType);
+
+		for (String key : headers.keySet())
+		{
+			String value = headers.get(key);
+			Log.debug("Generic Event parameter, " + key + "=[" + value + "]");
+		}
+
+		if (eventName.equals("PRESENCE_IN"))
+		{
+			final String state = headers.get("presence-call-info-state");
+			final String direction = headers.get("presence-call-direction");
+			final String presenceId = headers.get("Channel-Presence-ID");
+			final String source = headers.get("Caller-Caller-ID-Number");
+			final String destination = headers.get("Caller-Destination-Number");
+
+			if (state != null)
+			{
+				Log.info("eventReceived " + state + " " + direction + " " + presenceId + " " + source + " " + destination);
+
+				Message message = new Message();
+				message.setFrom(server.getServerInfo().getXMPPDomain());
+				Element element = message.addChildElement("sippresence", "http://ignitereatime.org/sippresence");
+				element.addAttribute("state", state);
+				element.addAttribute("direction", direction);
+				element.addAttribute("id", presenceId);
+				element.addAttribute("source", source);
+				element.addAttribute("destination", destination);
+
+				server.getSessionManager().broadcast(message);
+			}
+		}
+
+		if (eventName.equals("CHANNEL_CALLSTATE"))
+		{
+			String callState = headers.get("Channel-Call-State");
+
+			if ("HANGUP".equals(callState))
+			{
+				final String source = headers.get("Caller-Caller-ID-Number");
+				final String destination = headers.get("Caller-Destination-Number");
+				final int duration = (int)((Long.parseLong(headers.get("Caller-Channel-Hangup-Time")) - Long.parseLong( headers.get("Caller-Channel-Answered-Time"))) / 1000000);
+				final String direction = headers.get("Caller-Direction");
+				final long startTimestamp = Long.parseLong(headers.get("Caller-Profile-Created-Time")) /1000;
+
+				ExecutorService executorWriteRecord = Executors.newCachedThreadPool();
+
+				executorWriteRecord.submit(new Callable<Boolean>()
+				{
+					public Boolean call() throws Exception
+					{
+						try {
+							String username = "";
+							SipAccount sipAccount = SipAccountDAO.getAccountByExtn(source);
+							if (sipAccount != null) username = sipAccount.getUsername();
+
+							createCallRecord(username, source, destination, startTimestamp, duration, "inbound".equals(direction) ? "received" : "dialed");
+						}
+
+						catch (Exception e) {
+							Log.error("createCallRecord failed", e);
+						}
+
+						return true;
+					}
+				});
+			}
+		}
+
+		if (eventName.equals("CUSTOM") && eventType != null && (eventType.equals("sofia::register") || eventType.equals("sofia::unregister")))
+		{
+			final String extension = headers.get("from-user");
+			final boolean registered = eventType.equals("sofia::register");
+
+			ExecutorService executorWriteRecord = Executors.newCachedThreadPool();
+
+			executorWriteRecord.submit(new Callable<Boolean>()
+			{
+				public Boolean call() throws Exception
+				{
+					SipAccount sipAccount = SipAccountDAO.getAccountByExtn(extension);
+
+					if (sipAccount != null)
+					{
+						IQ iq = new IQ(IQ.Type.set);
+						iq.setFrom(sipAccount.getUsername() + "@sipark." + server.getServerInfo().getXMPPDomain());
+						iq.setTo("sipark." + server.getServerInfo().getXMPPDomain());
+
+						Element child = iq.setChildElement("spark", "http://www.jivesoftware.com/protocol/sipark");
+						child.addElement("status").setText(registered ? "Registered" : "Unregistered");
+						server.getIQRouter().route(iq);
+					}
+					return true;
+				}
+			});
+		}
 	}
 
     @Override public void conferenceEventJoin(String uniqueId, String confName, int confSize, EslEvent event)
@@ -528,6 +670,20 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 		return value;
 	}
 
+	public String sendAsyncFWCommand(String command)
+	{
+		Log.info("sendAsyncFWCommand " + command);
+
+		String response = null;
+
+		if (client != null)
+		{
+			response = client.sendAsyncApiCommand(command, "");
+		}
+
+		return response;
+	}
+
 	public EslMessage sendFWCommand(String command)
 	{
 		Log.info("sendFWCommand " + command);
@@ -561,5 +717,39 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 
 		return ip;
 	}
+
+   private void createCallRecord(String username, String addressFrom, String addressTo, long datetime, int duration, String calltype)
+   {
+		boolean sipPlugin = XMPPServer.getInstance().getPluginManager().getPlugin("sip") != null;
+
+		if (sipPlugin)
+		{
+			Log.info("createCallRecord " + username + " " + addressFrom + " " + addressTo + " " + datetime);
+
+			String sql = "INSERT INTO ofSipPhoneLog (username, addressFrom, addressTo, datetime, duration, calltype) values  (?, ?, ?, ?, ?, ?)";
+
+			Connection con = null;
+			PreparedStatement psmt = null;
+			ResultSet rs = null;
+
+			try {
+				con = DbConnectionManager.getConnection();
+				psmt = con.prepareStatement(sql);
+				psmt.setString(1, username);
+				psmt.setString(2, addressFrom);
+				psmt.setString(3, addressTo);
+				psmt.setLong(4, datetime);
+				psmt.setInt(5, duration);
+				psmt.setString(6, calltype);
+
+				psmt.executeUpdate();
+
+			} catch (SQLException e) {
+				Log.error(e.getMessage(), e);
+			} finally {
+				DbConnectionManager.closeConnection(rs, psmt, con);
+			}
+		}
+    }
 
 }
