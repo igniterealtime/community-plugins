@@ -522,6 +522,7 @@ var VideoLayout = (function (my) {
     my.addRemoteVideoContainer = function(peerJid, spanId) {
         var container = document.createElement('span');
         container.id = spanId;
+        container.title = Strophe.getResourceFromJid(peerJid);
         container.className = 'videocontainer';
         var remotes = document.getElementById('remoteVideos');
 

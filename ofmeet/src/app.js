@@ -223,12 +223,26 @@ function obtainAudioAndVideoPermissions(callback) {
     
     var media = ['audio', 'video'];
     var resolution = config.resolution || '360';
+   
+    if (urlParam("noaudio"))
+    {
+    	media = ['video'];
+    	
+	if (urlParam("novideo"))
+	{
+		media = [];
+		resolution = null;
+    		console.log("using no media, chat only");		
+		return;
+	}    	
+    }    
+    else  
     
     if (urlParam("novideo"))
     {
     	media = ['audio'];
     	resolution = null;
-    }
+    }  
     
     console.log("using media", media);
     
@@ -258,8 +272,7 @@ function obtainAudioAndVideoPermissions(callback) {
 function maybeDoJoin() {
 console.log("maybeDoJoin");
 
-    if (connection && connection.connected && Strophe.getResourceFromJid(connection.jid) // .connected is true while connecting?
-        && (connection.jingle.localAudio || connection.jingle.localVideo)) {
+    if (connection && connection.connected && Strophe.getResourceFromJid(connection.jid)) {
         doJoin();
     }
 }

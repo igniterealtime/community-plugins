@@ -644,9 +644,13 @@ $(document).ready(function()
 	    });
 	    
 	    $('.sipConference').click(function(event) {
-		event.preventDefault();
-		var room = urlParam("room");
-		if (room) ctxSip.sipCall(room);
+				
+		if (!ctxSip.callActiveID) {
+			var room = urlParam("room");
+			if (room) ctxSip.sipCall(room);		
+		
+		} else ctxSip.setCallSessionStatus('Busy!!');		    
+
 	    });	    
 	    
 

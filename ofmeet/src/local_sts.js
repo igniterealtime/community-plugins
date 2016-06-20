@@ -36,7 +36,7 @@ var LocalStatsCollector = (function() {
      * Starts the collecting the statistics.
      */
     LocalStatsCollectorProto.prototype.start = function () {
-        if (!window.AudioContext)
+        if (!window.AudioContext || this.stream.getAudioTracks().length == 0)
             return;
 
         var context = new AudioContext();
