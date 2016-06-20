@@ -36,6 +36,7 @@ import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.SessionManager;
+import org.jivesoftware.openfire.sip.sipaccount.*;
 import org.jivesoftware.database.DbConnectionManager;
 
 import org.slf4j.Logger;
@@ -52,14 +53,20 @@ import org.dom4j.*;
 import net.sf.json.*;
 
 import org.ifsoft.skype.SkypeClient;
+import org.ifsoft.sip.*;
+
 
 public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEventListener  {
 
     private static final Logger Log = LoggerFactory.getLogger(OfSkypePlugin.class);
     private XMPPServer server;
+    private boolean sipPluginAvailable;
+    private boolean freeswitchPluginAvailable;
     public static OfSkypePlugin self;
     private ExecutorService executor;
-
+	public HashMap<String, SkypeClient> clients = new HashMap<String, SkypeClient>();
+	public ConcurrentHashMap<String, CallSession> callSessions = new ConcurrentHashMap<String, CallSession>();
+	public SipService sipService = null;
 
     public String getName() {
         return "ofskype";
@@ -75,6 +82,8 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 
 		self = this;
 		server = XMPPServer.getInstance();
+		sipPluginAvailable = server.getPluginManager().getPlugin("sip") != null;
+		freeswitchPluginAvailable = server.getPluginManager().getPlugin("ofswitch") != null;
 
 		try {
 
@@ -93,45 +102,25 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 			context2.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
 			context2.setWelcomeFiles(new String[]{"index.html"});
 
-
 			boolean skypeEnabled = JiveGlobals.getBooleanProperty("skype.enabled", true);
 
 			if (skypeEnabled)
 			{
+				Log.info("OfSkype Plugin - Scanning for skype accounts");
+
 				executor = Executors.newCachedThreadPool();
 
 				executor.submit(new Callable<Boolean>()
 				{
 					public Boolean call() throws Exception
 					{
+						startSipService(pluginDirectory.getAbsolutePath());
+
 						List<String> properties = JiveGlobals.getPropertyNames();
 
 						for (String propertyName : properties)
 						{
-							String propertyValue = JiveGlobals.getProperty(propertyName);
-
-							if (propertyName.indexOf("skype.profile.") == 0)
-							{
-								try {
-									JSONObject json = new JSONObject(propertyValue);
-
-									if (json != null)
-									{
-										String username = json.getString("username");
-										String password = json.getString("password");
-										String domain = username.split("@")[1];
-
-										SkypeClient skypeClient = new SkypeClient(username, password, domain, username);
-										skypeClient.doLogin();
-										skypeClient.makeMeAvailable("Online");
-										skypeClient.setNote("WireLynk Ready");
-										skypeClient.getMyLinks();
-									}
-								}
-								catch (Exception e) {
-									Log.error("OfSkype error handling profile " + propertyName + " = " + propertyValue, e);
-								}
-							}
+							startClient(propertyName, JiveGlobals.getProperty(propertyName));
 						}
 
 						return true;
@@ -149,8 +138,23 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
         PropertyEventDispatcher.removeListener(this);
 
         try {
-        	ClusterManager.removeListener(this);
 
+			for (SkypeClient client : clients.values())
+			{
+				client.close();
+			}
+
+			for (CallSession callSession : callSessions.values())
+			{
+				callSession.mediaStream.stop();
+				callSession.mediaStream.close();
+			}
+
+			callSessions.clear();
+
+			if (sipService != null) sipService.stop();
+
+			executor.shutdown();
         } catch (Exception e) {
 
         }
@@ -178,6 +182,96 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 		}
 
 		return ourIpAddress;
+	}
+
+	private void startSipService(String pluginDirectoryPath)
+	{
+		Log.info("OfSkype Plugin - Starting SIP client service");
+		Properties properties = new Properties();
+
+		String logDir = pluginDirectoryPath + File.separator + ".." + File.separator + ".." + File.separator + "logs" + File.separator;
+		String port = JiveGlobals.getProperty("skype.sip.port", "5030");
+		String ipAddress = JiveGlobals.getProperty("skype.sip.hostname", getIpAddress());
+
+		properties.setProperty("com.voxbone.kelpie.hostname", ipAddress);
+		properties.setProperty("com.voxbone.kelpie.ip", ipAddress);
+		properties.setProperty("com.voxbone.kelpie.sip_port", port);
+
+		properties.setProperty("javax.sip.IP_ADDRESS", ipAddress);
+		properties.setProperty("javax.sip.STACK_NAME", "Openfire Skype SIP");
+
+		properties.setProperty("gov.nist.javax.sip.TRACE_LEVEL", "99");
+		properties.setProperty("gov.nist.javax.sip.SERVER_LOG", logDir + "sip_server.log");
+		properties.setProperty("gov.nist.javax.sip.DEBUG_LOG", logDir + "sip_debug.log");
+
+		sipService = new SipService(properties);
+
+		Log.info("OfSkype Plugin - Initialized SIP stack at " + ipAddress + ":" + port);
+	}
+
+	private void startClient(String propertyName, String propertyValue)
+	{
+		int pos = propertyName.indexOf("skype.password.");
+
+		if (pos == 0)
+		{
+			try {
+				String username = propertyName.substring(pos + 15);
+
+				Log.info("OfSkype Plugin - Starting skype account " + username);
+
+				String password = propertyValue;
+				String[] user = username.split("@");
+				String domain = user[1];
+				String userid = user[0];
+
+				if (clients.containsKey(propertyName))
+				{
+					SkypeClient client = clients.remove(propertyName);
+
+					if (client.registerProcessing != null)
+					{
+						client.registerProcessing.unregister();
+					}
+					client.close();
+					client = null;
+				}
+
+				SkypeClient skypeClient = new SkypeClient(username, password, domain, username);
+				skypeClient.doLogin();
+				skypeClient.makeMeAvailable("Online");
+				skypeClient.setNote("Ready");
+				skypeClient.getMyLinks();
+
+				SipAccount sipAccount = SipAccountDAO.getAccountByUser(JID.escapeNode(username));
+
+				if (sipAccount == null) sipAccount = SipAccountDAO.getAccountByUser(userid);
+
+				if (sipAccount != null)
+				{
+					Log.info("OfSkype Plugin - Starting sip account " + sipAccount.getSipUsername());
+
+					ProxyCredentials sip = new ProxyCredentials();
+					sip.setName(skypeClient.myName);
+					sip.setXmppUserName(sipAccount.getUsername());
+					sip.setUserName(sipAccount.getSipUsername());
+					sip.setAuthUserName(sipAccount.getAuthUsername());
+					sip.setUserDisplay(skypeClient.myName);
+					sip.setPassword(sipAccount.getPassword().toCharArray());
+					sip.setHost(sipAccount.getServer());
+					sip.setProxy(sipAccount.getOutboundproxy());
+					sip.setRealm(sipAccount.getServer());
+
+					skypeClient.myConferenceNumber = sipAccount.getVoiceMailNumber();
+					skypeClient.registerProcessing = new RegisterProcessing(sipAccount.getServer(), sipAccount.getServer(), sip);
+				}
+
+				clients.put(propertyName, skypeClient);
+			}
+			catch (Exception e) {
+				Log.error("OfSkype error handling profile " + propertyName + " = " + propertyValue, e);
+			}
+		}
 	}
 
 //-------------------------------------------------------
@@ -224,14 +318,27 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 //
 //-------------------------------------------------------
 
-    public void propertySet(String property, Map params)
+    public void propertySet(final String property, final Map params)
     {
+		executor.submit(new Callable<Boolean>()
+		{
+			public Boolean call() throws Exception
+			{
+				startClient(property, (String)params.get("value"));
 
+				return true;
+			}
+		});
     }
 
     public void propertyDeleted(String property, Map<String, Object> params)
     {
-
+		if (clients.containsKey(property))
+		{
+			SkypeClient client = clients.remove(property);
+			client.close();
+			client = null;
+		}
     }
 
     public void xmlPropertySet(String property, Map<String, Object> params)
@@ -243,4 +350,23 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
     {
 
     }
+
+//-------------------------------------------------------
+//
+//
+//
+//-------------------------------------------------------
+
+	public void makeCall(String sipUrl, String sdp, JSONObject json)
+	{
+		Log.info("OfSkype Plugin - makeCall " + sipUrl + "\n" + sdp + "\n" + json);
+
+		String key = "skype.password." + sipUrl;
+
+		if (clients.containsKey(key))
+		{
+			SkypeClient client = clients.get(property);
+		}
+	}
+
 }

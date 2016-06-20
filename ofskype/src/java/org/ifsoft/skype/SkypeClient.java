@@ -45,6 +45,12 @@ import com.microsoft.aad.adal4j.AuthenticationResult;
 
 import org.ifsoft.lync.ucwa.*;
 
+import javax.sip.*;
+import javax.sip.message.*;
+import org.ifsoft.sip.*;
+
+
+
 public class SkypeClient {
 
     private static final Logger Log = LoggerFactory.getLogger(SkypeClient.class);
@@ -69,11 +75,19 @@ public class SkypeClient {
 	public String myMobilePhoneNumber;
 	public String myOtherPhoneNumber;
     public String myName;
-    public String privateWire;
     public String myAvatar;
+    public String myAvailability = "";
+    public String myConferenceNumber = null;
+    public String myNote = "";
     public String from = null;
     public String to = null;
     public String recordingPath = null;
+    public String clientId = null;
+    public String domain;
+    public String oAuthToken = null;
+    public RegisterProcessing registerProcessing = null;
+    public Response response = null;
+    public ServerTransaction serverTransaction = null;
 
     public boolean privateCall = false;
     public boolean incomingCall = false;
@@ -90,10 +104,8 @@ public class SkypeClient {
     private Pattern oauthPathHeaderPattern;
    	private Thread pollingThread = null;
     private String host;
-    private String oAuthToken;
     private String password;
     private String user;
-    private String domain;
     private String oAuthGenerationUrl;
     private Date invalidateSubscriptionsTime;
     private boolean pollingRunning;
@@ -117,7 +129,6 @@ public class SkypeClient {
     private String myNotePath;
     private String myPhotoPath;
     private String myPhonesPath;
-    private String myAvailability;
     private boolean cache;
 
     private String stopPhoneAudioHref = null;
@@ -180,7 +191,7 @@ public class SkypeClient {
 
     private void getOnlineToken()
     {
-		String clientId = JiveGlobals.getProperty("skype.clientid", "ff8474ef-2f73-4d6a-b2ab-a6d7d8364ab2");
+		clientId = JiveGlobals.getProperty("skype.clientid." + domain, "ff8474ef-2f73-4d6a-b2ab-a6d7d8364ab2");
         Log.info("getOnlineToken " + clientId);
 
         String authority = "https://login.microsoftonline.com/common/oauth2/authorize";
@@ -375,7 +386,7 @@ public class SkypeClient {
 
 			if (myPhotoPath != null)
 			{
-				//myAvatar = pushAvatar(jid.toString(), myPhotoPath, myName);
+				myAvatar = pushAvatar(sipUrl, myPhotoPath, myName);
 			}
 
 			getMePhones();
@@ -453,6 +464,8 @@ public class SkypeClient {
 		{
 			if (myNotePath == null) myNotePath = mePath + "/note";
 
+			myNote = note;
+
 			try
 			{
 				JSONObject reqBody = new JSONObject();
@@ -529,130 +542,6 @@ public class SkypeClient {
 		return contacts;
     }
 
-
-	public JSONArray cacheFetchContacts()
-	{
-		Log.info("fetchContacts " + jid);
-
-		String defaultPassword 	= 	JiveGlobals.getProperty("skype.default.password", "Welcome123");
-		String ucwaDefaultDomain = 	JiveGlobals.getProperty("ucwa.default.domain",  getDomain());
-
-		JSONArray contacts = new JSONArray();
-		String username = jid.getNode();
-		User user = null;
-		UserManager userManager = XMPPServer.getInstance().getUserManager();
-
-		try {
-			user = userManager.getUser(username);
-
-		} catch (UserNotFoundException e) {
-
-			try {
-				user = userManager.createUser(username, defaultPassword, username, null);
-
-			} catch (UnsupportedOperationException uoe) {
-				return contacts;
-			} catch (Exception e1) {
-				Log.error("fetchContacts ", e1);
-				return contacts;
-			}
-		}
-
-		String userEmail = user.getEmail();
-
-		this.myOtherPhoneNumber = user.getProperties().get("skype.phone.other") != null ? user.getProperties().get("skype.phone.other") : (userEmail != null && userEmail.indexOf(";fsu=") > -1 ? userEmail : "");
-		this.myWorkPhoneNumber = user.getProperties().get("skype.phone.work") != null ? user.getProperties().get("skype.phone.work") : (userEmail != null && userEmail.indexOf(";fsu=") > -1 ? "tel:" + extractTel(userEmail) : "");
-
-		this.myAvatar = user.getProperties().get("skype.photo");
-		this.myName = user.getName();
-
-		int j = 0;
-
-		for (RosterItem item : user.getRoster().getRosterItems())
-		{
-			String itemUsername = item.getJid().getNode();
-			User itemUser = null;
-
-			try {
-				itemUser = userManager.getUser(itemUsername);
-
-
-			} catch (UserNotFoundException e) {
-
-				try {
-					itemUser = userManager.createUser(itemUsername, defaultPassword, itemUsername, null);
-
-				} catch (UnsupportedOperationException uoe) {
-					continue;
-				} catch (Exception e1) {
-					continue;
-				}
-			}
-
-			JSONObject itemJSON = new JSONObject();
-			itemJSON.put("uri", "sip:" + itemUsername + "@" + ucwaDefaultDomain);
-			itemJSON.put("name", item.getNickname());
-			itemJSON.put("otherPhoneNumber", itemUser.getProperties().get("skype.phone.other")  != null  ? itemUser.getProperties().get("skype.phone.other"): itemUser.getEmail());
-			itemJSON.put("workPhoneNumber", itemUser.getProperties().get("skype.phone.work")  != null  ? itemUser.getProperties().get("skype.phone.work"): null);
-			itemJSON.put("sourceNetwork", itemUser.getProperties().get("skype.network"));
-			itemJSON.put("relationship", getRelationship(item));
-
-			contacts.put(j++, itemJSON);
-		}
-
-		return contacts;
-	}
-
-	private String getRelationship(RosterItem rosterItem)
-	{
-		List<String> groups = rosterItem.getGroups();
-        Collection<Group> sharedGroups = rosterItem.getSharedGroups();
-
-		String relationship = "Workgroup";
-
-		if (groups.isEmpty() && sharedGroups.isEmpty())
-		{
-			relationship = "Colleagues";
-
-		} else {
-
-			for (String group : groups)
-			{
-				if (group.equals("Colleagues")) relationship = "Colleagues";
-			}
-
-			for (Group grp : sharedGroups)
-			{
-				if (grp.getName().equals("Colleagues")) relationship = "Colleagues";
-			}
-		}
-		return relationship;
-	}
-
-    public String fetchContactPrivacyRelationship(JSONObject contact)
-    {
-		String contactPrivacyRelationshipUrl = contact.getJSONObject("_links").getJSONObject("contactPrivacyRelationship").getString("href");
-
-		String contactPrivacyRelationship = null;
-
-		try {
-			MethodExecutionResult contactsResult = getRequest(contactPrivacyRelationshipUrl);
-			contactPrivacyRelationship = contactsResult.getJson().getString("relationshipLevel");
-		}
-		catch(Exception e)
-		{
-			Log.error("fetchContactPrivacyRelationship error", e);
-		}
-
-		return contactPrivacyRelationship;
-    }
-
-    public String cacheFetchContactPrivacyRelationship(JSONObject contact)
-    {
-		String relationship = contact.getString("relationship");
-		this.privacyRelationship = relationship;
-		return relationship;
-    }
 
     public JSONArray searchContacts(String query, int limit)
     {
@@ -740,7 +629,7 @@ public class SkypeClient {
 
 				//Log.debug("pushAvatar photo\n" + base64String);
 
-				if (jid.toString().equals(contactJid) == false)	// contacts
+				if (sipUrl.equals(contactJid) == false)	// contacts
 				{
 					buddies.put(contactJid, new LyncBuddy(this, jid, new JID(contactJid), "", "", contactName, base64String));
 
@@ -1076,10 +965,65 @@ public class SkypeClient {
 								}
 							}
 
+/*
+{
+	"_embedded":{
+		"audioVideoInvitation":{
+			"threadId":"AdHImvRmKGPHFoIBQcWiHS0dvcF87Q==",
+			"_links":{
+				"audioVideo":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/conversations/b65b47e0-8178-47a8-8f48-8868245f1b1a/audioVideo"},
+				"mediaOffer":{"href":"data:multipart/alternative;charset=utf-8;boundary=d38d183e-6415-438f-8ff5-4ed634919226,--d38d183e-6415-438f-8ff5-4ed634919226%0d%0aContent-Type%3a+application%2fsdp%0d%0aContent-ID%3a+%3c32149ef6638b65004752a1465a8bc569%40olajide.net%3e%0d%0aContent-Disposition%3a+session%3b+handling%3doptional%3b+ms-proxy-2007fallback%0d%0a%0d%0av%3d0%0d%0ao%3d-+0+0+IN+IP4+131.253.141.166%0d%0as%3dsession%0d%0ac%3dIN+IP4+131.253.141.166%0d%0ab%3dCT%3a99980%0d%0at%3d0+0%0d%0am%3daudio+55441+RTP%2fAVP+117+104+114+9+112+111+0+103+8+116+115+97+13+118+101%0d%0aa%3dcandidate%3aBJG5XDfUp7LbhulOKzU0MdyDFaXqTEkyPo9FoVQxwxY+1+DhULez4ppG6UIm8QTT2eNA+UDP+0.830+192.168.1.253+50004+%0d%0aa%3dcandidate%3aBJG5XDfUp7LbhulOKzU0MdyDFaXqTEkyPo9FoVQxwxY+2+DhULez4ppG6UIm8QTT2eNA+UDP+0.830+192.168.1.253+50005+%0d%0aa%3dcandidate%3asRUsqXqQt9zOvke99XYbA4GhshUxhXPllH9d%2fFZYnLQ+1+zM3NryK01WlFKEj8lAJgvQ+UDP+0.410+131.253.141.166+55441+%0d%0aa%3dcandidate%3asRUsqXqQt9zOvke99XYbA4GhshUxhXPllH9d%2fFZYnLQ+2+zM3NryK01WlFKEj8lAJgvQ+UDP+0.410+131.253.141.166+52487+%0d%0aa%3dcandidate%3aQExbZsVtU%2bqCArBf8Zj0hnc0BmhzTLuzA2UFGHBO0Xo+1+lCoYgy%2bfbgHH0l0ZGgziiw+UDP+0.550+146.198.59.239+50006+%0d%0aa%3dcandidate%3aQExbZsVtU%2bqCArBf8Zj0hnc0BmhzTLuzA2UFGHBO0Xo+2+lCoYgy%2bfbgHH0l0ZGgziiw+UDP+0.550+146.198.59.239+50007+%0d%0aa%3dcryptoscale%3a1+client+AES_CM_128_HMAC_SHA1_80+inline%3algCqKXxbxZbNm5y6BN76dUfRBW3Z4UI53IwDLj7C%7c2%5e31%7c1%3a1%0d%0aa%3dcrypto%3a2+AES_CM_128_HMAC_SHA1_80+inline%3al66PA6e3xsp7M%2fCaclNPb3wejr5sKhr2ZLzDfyno%7c2%5e31%7c1%3a1%0d%0aa%3dcrypto%3a3+AES_CM_128_HMAC_SHA1_80+inline%3aBl5qaZ1TJtBuTACwDszIaFAnKJ%2f5JYF6zkmNgTph%7c2%5e31%0d%0aa%3dmaxptime%3a200%0d%0aa%3drtcp%3a52487%0d%0aa%3drtpmap%3a117+G722%2f8000%2f2%0d%0aa%3drtpmap%3a104+SILK%2f16000%0d%0aa%3dfmtp%3a104+useinbandfec%3d1%3b+usedtx%3d0%0d%0aa%3drtpmap%3a114+x-msrta%2f16000%0d%0aa%3dfmtp%3a114+bitrate%3d29000%0d%0aa%3drtpmap%3a9+G722%2f8000%0d%0aa%3drtpmap%3a112+G7221%2f16000%0d%0aa%3dfmtp%3a112+bitrate%3d24000%0d%0aa%3drtpmap%3a111+SIREN%2f16000%0d%0aa%3dfmtp%3a111+bitrate%3d16000%0d%0aa%3drtpmap%3a0+PCMU%2f8000%0d%0aa%3drtpmap%3a103+SILK%2f8000%0d%0aa%3dfmtp%3a103+useinbandfec%3d1%3b+usedtx%3d0%0d%0aa%3drtpmap%3a8+PCMA%2f8000%0d%0aa%3drtpmap%3a116+AAL2-G726-32%2f8000%0d%0aa%3drtpmap%3a115+x-msrta%2f8000%0d%0aa%3dfmtp%3a115+bitrate%3d11800%0d%0aa%3drtpmap%3a97+RED%2f8000%0d%0aa%3drtpmap%3a13+CN%2f8000%0d%0aa%3drtpmap%3a118+CN%2f16000%0d%0aa%3drtpmap%3a101+telephone-event%2f8000%0d%0aa%3dfmtp%3a101+0-16%0d%0aa%3dptime%3a20%0d%0a%0d%0a--d38d183e-6415-438f-8ff5-4ed634919226%0d%0aContent-Type%3a+application%2fsdp%0d%0aContent-ID%3a+%3c16dc9d71101116c17454be00d1d3a843%40olajide.net%3e%0d%0aContent-Disposition%3a+session%3b+handling%3doptional%0d%0a%0d%0av%3d0%0d%0ao%3d-+0+1+IN+IP4+131.253.141.158%0d%0as%3dsession%0d%0ac%3dIN+IP4+131.253.141.158%0d%0ab%3dCT%3a99980%0d%0at%3d0+0%0d%0aa%3dx-devicecaps%3aaudio%3asend%2crecv%3bvideo%3asend%2crecv%0d%0am%3daudio+59224+RTP%2fAVP+117+104+114+9+112+111+0+103+8+116+115+97+13+118+101%0d%0aa%3dx-ssrc-range%3a4170446592-4170446592%0d%0aa%3drtcp-fb%3a*+x-message+app+send%3adsh+recv%3adsh%0d%0aa%3drtcp-rsize%0d%0aa%3dlabel%3amain-audio%0d%0aa%3dx-source%3amain-audio%0d%0aa%3dice-ufrag%3aqTWN%0d%0aa%3dice-pwd%3a2o2rsADDtO3pvvcdWePDtHhn%0d%0aa%3dcandidate%3a1+1+UDP+2130706431+192.168.1.253+50016+typ+host+%0d%0aa%3dcandidate%3a1+2+UDP+2130705918+192.168.1.253+50017+typ+host+%0d%0aa%3dcandidate%3a2+1+TCP-PASS+174456319+131.253.141.198+54367+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dcandidate%3a2+2+TCP-PASS+174455806+131.253.141.198+54367+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dcandidate%3a3+1+UDP+184548351+131.253.141.158+59224+typ+relay+raddr+146.198.59.239+rport+50002+%0d%0aa%3dcandidate%3a3+2+UDP+184547838+131.253.141.158+53988+typ+relay+raddr+146.198.59.239+rport+50003+%0d%0aa%3dx-candidate-ipv6%3a4+1+UDP+184547839+2a01%3a111%3a202b%3aa%3a%3a24+52280+typ+relay+raddr+146.198.59.239+rport+50002+%0d%0aa%3dx-candidate-ipv6%3a4+2+UDP+184547326+2a01%3a111%3a202b%3aa%3a%3a24+57150+typ+relay+raddr+146.198.59.239+rport+50003+%0d%0aa%3dcandidate%3a5+1+UDP+1694234623+146.198.59.239+50002+typ+srflx+raddr+192.168.1.253+rport+50002+%0d%0aa%3dcandidate%3a5+2+UDP+1694234110+146.198.59.239+50003+typ+srflx+raddr+192.168.1.253+rport+50003+%0d%0aa%3dcandidate%3a6+1+TCP-ACT+174847487+131.253.141.198+54367+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dcandidate%3a6+2+TCP-ACT+174846974+131.253.141.198+54367+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dx-candidate-ipv6%3a7+1+TCP-PASS+174453759+2a01%3a111%3a202b%3aa%3a%3a4c+59744+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dx-candidate-ipv6%3a7+2+TCP-PASS+174453246+2a01%3a111%3a202b%3aa%3a%3a4c+59744+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dx-candidate-ipv6%3a8+1+TCP-ACT+174846463+2a01%3a111%3a202b%3aa%3a%3a4c+59744+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dx-candidate-ipv6%3a8+2+TCP-ACT+174845950+2a01%3a111%3a202b%3aa%3a%3a4c+59744+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dcandidate%3a9+1+TCP-ACT+1684795391+131.253.141.254+50019+typ+srflx+raddr+192.168.1.253+rport+50019+%0d%0aa%3dcandidate%3a9+2+TCP-ACT+1684794878+131.253.141.254+50019+typ+srflx+raddr+192.168.1.253+rport+50019+%0d%0aa%3dcryptoscale%3a1+client+AES_CM_128_HMAC_SHA1_80+inline%3algCqKXxbxZbNm5y6BN76dUfRBW3Z4UI53IwDLj7C%7c2%5e31%7c1%3a1%0d%0aa%3dcrypto%3a2+AES_CM_128_HMAC_SHA1_80+inline%3al66PA6e3xsp7M%2fCaclNPb3wejr5sKhr2ZLzDfyno%7c2%5e31%7c1%3a1%0d%0aa%3dcrypto%3a3+AES_CM_128_HMAC_SHA1_80+inline%3aBl5qaZ1TJtBuTACwDszIaFAnKJ%2f5JYF6zkmNgTph%7c2%5e31%0d%0aa%3dmaxptime%3a200%0d%0aa%3drtcp%3a53988%0d%0aa%3drtpmap%3a117+G722%2f8000%2f2%0d%0aa%3drtpmap%3a104+SILK%2f16000%0d%0aa%3dfmtp%3a104+useinbandfec%3d1%3b+usedtx%3d0%0d%0aa%3drtpmap%3a114+x-msrta%2f16000%0d%0aa%3dfmtp%3a114+bitrate%3d29000%0d%0aa%3drtpmap%3a9+G722%2f8000%0d%0aa%3drtpmap%3a112+G7221%2f16000%0d%0aa%3dfmtp%3a112+bitrate%3d24000%0d%0aa%3drtpmap%3a111+SIREN%2f16000%0d%0aa%3dfmtp%3a111+bitrate%3d16000%0d%0aa%3drtpmap%3a0+PCMU%2f8000%0d%0aa%3drtpmap%3a103+SILK%2f8000%0d%0aa%3dfmtp%3a103+useinbandfec%3d1%3b+usedtx%3d0%0d%0aa%3drtpmap%3a8+PCMA%2f8000%0d%0aa%3drtpmap%3a116+AAL2-G726-32%2f8000%0d%0aa%3drtpmap%3a115+x-msrta%2f8000%0d%0aa%3dfmtp%3a115+bitrate%3d11800%0d%0aa%3drtpmap%3a97+RED%2f8000%0d%0aa%3drtpmap%3a13+CN%2f8000%0d%0aa%3drtpmap%3a118+CN%2f16000%0d%0aa%3drtpmap%3a101+telephone-event%2f8000%0d%0aa%3dfmtp%3a101+0-16%0d%0aa%3drtcp-mux%0d%0aa%3dptime%3a20%0d%0a%0d%0a--d38d183e-6415-438f-8ff5-4ed634919226--%0d%0a"},
+				"reportMediaDiagnostics":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/callMediaDiagnostics?callId=fc86b78dd87947949c7831d88abbb311&fromUri=sip%3adele%40olajide.net&mediaType=Audio&toUri=sip%3adele%40traderlynk.com"},
+				"sendProvisionalAnswer":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/audioVideoInvitations/5bc132f55a2941059141aa0625584ffe/sendProvisionalAnswer"},
+				"decline":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/audioVideoInvitations/5bc132f55a2941059141aa0625584ffe/decline"},
+				"self":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/audioVideoInvitations/5bc132f55a2941059141aa0625584ffe"},
+				"acceptWithAnswer":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/audioVideoInvitations/5bc132f55a2941059141aa0625584ffe/acceptWithAnswer"},
+				"to":{"href":"/ucwa/oauth/v1/applications/10672188129/people/dele@traderlynk.com"},
+				"conversation":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/conversations/b65b47e0-8178-47a8-8f48-8868245f1b1a"}
+			},
+			"_embedded":{
+				"from":{
+					"_links":{
+						"contact":{"href":"/ucwa/oauth/v1/applications/10672188129/people/dele@olajide.net"},
+						"contactPresence":{"href":"/ucwa/oauth/v1/applications/10672188129/people/dele@olajide.net/presence"},
+						"self":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/conversations/b65b47e0-8178-47a8-8f48-8868245f1b1a/participants/dele@olajide.net"},
+						"conversation":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/conversations/b65b47e0-8178-47a8-8f48-8868245f1b1a"}
+					},
+					"sourceNetwork":"Federated",
+					"name":"Dele Olajide",
+					"rel":"participant",
+					"anonymous":false,
+					"uri":"sip:dele@olajide.net",
+					"local":false
+				}
+			},
+			"importance":"Normal",
+			"subject":"",
+			"bandwidthControlId":"fc86b78dd87947949c7831d88abbb311",
+			"privateLine":false,
+			"rel":"audioVideoInvitation",
+			"state":"Connecting",
+			"direction":"Incoming"
+		}
+	},
+	"link":{
+		"rel":"audioVideoInvitation",
+		"href":"/ucwa/oauth/v1/applications/10672188129/communication/audioVideoInvitations/5bc132f55a2941059141aa0625584ffe"
+	},
+	"type":"started"
+}
+*/
 							if("audioVideoInvitation".equals(link.getString("rel")))
 							{
 								JSONObject audioVideoInvitation = event.getJSONObject("_embedded").getJSONObject("audioVideoInvitation");
 								JSONObject audioVideoInvitationLinks = audioVideoInvitation.getJSONObject("_links");
+
+								String acceptWithAnswerHref = null;
+
+								if (audioVideoInvitationLinks.has("acceptWithAnswer"))
+								{
+									acceptWithAnswerHref = audioVideoInvitationLinks.getJSONObject("acceptWithAnswer").getString("href");
+								}
 
 								if (audioVideoInvitationLinks.has("mediaOffer"))
 								{
@@ -1097,15 +1041,18 @@ public class SkypeClient {
 										for (int z=0; z<multiparts.length; z++)
 										{
 											String sdp = URLDecoder.decode(multiparts[z], "UTF-8");
-											Log.info("SDP \n" + sdp);
+
+											if (sdp.indexOf("ms-proxy-2007fallback") == -1)
+											{
+												Log.info("SDP \n" + sdp);
+
+												OfSkypePlugin.self.makeCall(sipUrl, sdp, audioVideoInvitation);
+												break;
+											}
 										}
 									}
 								}
 
-								if (audioVideoInvitationLinks.has("acceptWithAnswer"))
-								{
-									String acceptWithAnswerHref = audioVideoInvitationLinks.getJSONObject("acceptWithAnswer").getString("href");
-								}
 							}
 
 							if("phoneAudioInvitation".equals(link.getString("rel")))
