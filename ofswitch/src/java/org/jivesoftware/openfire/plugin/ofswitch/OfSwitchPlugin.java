@@ -444,9 +444,19 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 			{
 				final String source = headers.get("Caller-Caller-ID-Number");
 				final String destination = headers.get("Caller-Destination-Number");
-				final int duration = (int)((Long.parseLong(headers.get("Caller-Channel-Hangup-Time")) - Long.parseLong( headers.get("Caller-Channel-Answered-Time"))) / 1000000);
+
+				int tempDuration = 0;
+				long tempStartTimestamp =0;
+
+				try {
+					tempDuration = (int)((Long.parseLong(headers.get("Caller-Channel-Hangup-Time")) - Long.parseLong( headers.get("Caller-Channel-Answered-Time"))) / 1000000);
+					tempStartTimestamp = Long.parseLong(headers.get("Caller-Profile-Created-Time")) / 1000;
+				} catch (Exception ex) {}
+
+				final int duration = tempDuration;
+				final long startTimestamp = tempStartTimestamp;
+
 				final String direction = headers.get("Caller-Direction");
-				final long startTimestamp = Long.parseLong(headers.get("Caller-Profile-Created-Time")) /1000;
 
 				ExecutorService executorWriteRecord = Executors.newCachedThreadPool();
 
@@ -488,7 +498,10 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 					if (sipAccount != null)
 					{
 						IQ iq = new IQ(IQ.Type.set);
-						iq.setFrom(sipAccount.getUsername() + "@sipark." + server.getServerInfo().getXMPPDomain());
+
+						String node = sipAccount.getUsername();
+						if (node.indexOf("@") > -1) node = JID.escapeNode(sipAccount.getUsername());
+						iq.setFrom(node + "@sipark." + server.getServerInfo().getXMPPDomain());
 						iq.setTo("sipark." + server.getServerInfo().getXMPPDomain());
 
 						Element child = iq.setChildElement("spark", "http://www.jivesoftware.com/protocol/sipark");
