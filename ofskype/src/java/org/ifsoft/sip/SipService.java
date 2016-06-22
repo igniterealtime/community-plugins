@@ -140,9 +140,14 @@ public class SipService
 		return lp.getIPAddress();
 	}
 
+	public void stop()
+	{
+
+	}
+
 	public void registerWithAccount(ProxyCredentials sipAccount)
 	{
-		Log.info(String.format("VoiceBridge adding SIP registration: %s with user %s host %s", sipAccount.getXmppUserName(), sipAccount.getUserName(), sipAccount.getHost()));
+		Log.info(String.format("SipService adding SIP registration: %s with user %s host %s", sipAccount.getXmppUserName(), sipAccount.getUserName(), sipAccount.getHost()));
 
 		String server = JiveGlobals.getProperty("freeswitch.server.hostname", "127.0.0.1");
 		new RegisterProcessing(localip, server, sipAccount);
@@ -178,7 +183,7 @@ public class SipService
 				sipAccount.setProxy(outboundproxy);
 				sipAccount.setRealm(server);
 
-				Log.info(String.format("VoiceBridge adding SIP registration: %s with user %s host %s", sipAccount.getXmppUserName(), sipAccount.getUserName(), sipAccount.getHost()));
+				Log.info(String.format("SipService adding SIP registration: %s with user %s host %s", sipAccount.getXmppUserName(), sipAccount.getUserName(), sipAccount.getHost()));
 				new RegisterProcessing(localip, server, sipAccount);
 			}
 

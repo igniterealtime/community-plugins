@@ -146,8 +146,8 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 
 			for (CallSession callSession : callSessions.values())
 			{
-				callSession.mediaStream.stop();
-				callSession.mediaStream.close();
+				callSession.sendBye();
+				callSession.sendBye();
 			}
 
 			callSessions.clear();
@@ -361,11 +361,20 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 	{
 		Log.info("OfSkype Plugin - makeCall " + sipUrl + "\n" + sdp + "\n" + json);
 
+		JSONObject audioVideoInvitationLinks = json.getJSONObject("_links");
+
+		String acceptWithAnswerHref = null;
+
+		if (audioVideoInvitationLinks.has("acceptWithAnswer"))
+		{
+			acceptWithAnswerHref = audioVideoInvitationLinks.getJSONObject("acceptWithAnswer").getString("href");
+		}
+
 		String key = "skype.password." + sipUrl;
 
 		if (clients.containsKey(key))
 		{
-			SkypeClient client = clients.get(property);
+			SkypeClient client = clients.get(key);
 		}
 	}
 

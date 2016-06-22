@@ -49,6 +49,7 @@ import javax.sip.*;
 import javax.sip.message.*;
 import org.ifsoft.sip.*;
 
+import org.jivesoftware.openfire.plugin.ofskype.OfSkypePlugin;
 
 
 public class SkypeClient {
@@ -1042,10 +1043,9 @@ public class SkypeClient {
 										{
 											String sdp = URLDecoder.decode(multiparts[z], "UTF-8");
 
-											if (sdp.indexOf("ms-proxy-2007fallback") == -1)
+											if (sdp.indexOf("ms-proxy-2007fallback") == -1 && sdp.indexOf("handling=optional") > -1)
 											{
-												Log.info("SDP \n" + sdp);
-
+												sdp = sdp.substring(sdp.indexOf("v=0"));
 												OfSkypePlugin.self.makeCall(sipUrl, sdp, audioVideoInvitation);
 												break;
 											}
