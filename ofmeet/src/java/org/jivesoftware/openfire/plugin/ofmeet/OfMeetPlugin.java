@@ -746,6 +746,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 			try {
 				String roomName = requestJSON.getString("room");
+				String recordFlag = requestJSON.getString("record");
 
 				Videobridge videobridge = jitsiPlugin.component.getVideobridge();
 
@@ -755,9 +756,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 					if (room != null && !"".equals(room) && roomName.equals(room))
 					{
-						if (JiveGlobals.getProperty("ofmeet.autorecord.enabled", "false").equals("true") && !conference.isRecording())
+						if (recordFlag != null)
 						{
-							conference.setRecording(true);
+							if (conference.isRecording() && "false".equals(recordFlag)) conference.setRecording(false);
+							if (!conference.isRecording() && "true".equals(recordFlag)) conference.setRecording(true);
 						}
 
 						String confId = conference.getID();
@@ -795,6 +797,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				}
 
 			} catch (Exception e1) {
+				Log.error("getConferenceId", e1);
 				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, requestJSON.toString() + " " + e1));
 				return;
 			}

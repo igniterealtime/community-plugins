@@ -1238,8 +1238,8 @@ Strophe.addConnectionPlugin('ofmuc', {
     {
     	var that = this;
     	
-	if (!this.recordingToken)
-	{		
+    	if (!that.isRecording)
+    	{
 		$.prompt('<h2>Enter recording token</h2><input id="recordingToken" type="text" placeholder="token" autofocus>',
 		{
 			title: "Meeting Recording",
@@ -1256,43 +1256,34 @@ Strophe.addConnectionPlugin('ofmuc', {
 
 				    if (token.value) {
 					that.recordingToken = Util.escapeHtml(token.value);
-					that.toggleRecording();
+					
+					if (config.recordingKey && config.recordingKey == that.recordingToken)
+					{				
+						that.doRecording();
+					}
 				    }	
 				}
 			}
-		});		
-
-		return;
-	}
-
-    	this.doRecording();    
+		});
+	
+	} else that.doRecording();
     },
     
     doRecording: function()
     {
-    	var that = this;    
-	var req = $iq({type: 'set', to: "ofmeet-call-control." + config.hosts.domain});
-	
-	req.c('record',	{xmlns: 'urn:xmpp:rayo:record:1'});
-	req.c('hint', 	{name: 'JvbToken', value: this.recordingToken}).up();
-	req.c('hint', 	{name: 'JvbState', value: this.isRecording ? "false" : "true"}).up();
-	req.c('hint', 	{name: 'JvbRoomName', value: this.roomJid}).up();
-	    
-	this.connection.sendIQ(req,
+    	var that = this;   
+    	
+	that.recordConference(Strophe.getNodeFromJid(that.connection.emuc.myroomjid), !that.isRecording, function(json)
+	{		
+		console.log('doRecording response', json);	
+		that.isRecording = !that.isRecording;
+		Toolbar.setRecordingButtonState(that.isRecording);			
 
-		function (result)
-		{
-		    console.info('toggleRecording result ', result);
-		    that.isRecording = !that.isRecording;
-		    Toolbar.setRecordingButtonState(that.isRecording);		    
-		},
-		function (error)
-		{
-		    console.info('toggleRecording error ', error);
-		    Toolbar.setRecordingButtonState(false);
-		    that.isRecording = false;		    
-		}
-	);    
+	}, function(err) {
+		console.error('doRecording', err);	
+		Toolbar.setRecordingButtonState(false);
+		that.isRecording = false;			
+	});
     },
     
     openLinkDialog: function()
@@ -1625,10 +1616,15 @@ Strophe.addConnectionPlugin('ofmuc', {
     {
 	this.sendJsonRequest({action: "get_user_properties"}, callback, errorback);	
     },
-    
+
     getConferenceId: function(room, callback, errorback)
     {
 	this.sendJsonRequest({room: room, action: "get_conference_id"}, callback, errorback);	
+    },
+    
+    recordConference: function(room, recordFlag, callback, errorback)
+    {
+	this.sendJsonRequest({room: room, record: recordFlag ? "true" : "false", action: "get_conference_id"}, callback, errorback);	
     },
 
     sendJsonRequest: function(request, callback, errorback)

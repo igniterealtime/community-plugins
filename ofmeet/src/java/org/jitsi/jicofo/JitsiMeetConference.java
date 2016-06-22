@@ -25,16 +25,21 @@ import org.jitsi.protocol.xmpp.util.*;
 import org.jitsi.service.neomedia.*;
 import org.jitsi.util.*;
 import org.jitsi.videobridge.log.*;
+import org.jitsi.videobridge.*;
+import org.jitsi.videobridge.osgi.*;
+import org.jitsi.videobridge.openfire.PluginImpl;
+
 import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.filter.*;
 import org.jivesoftware.smack.packet.*;
 import org.jivesoftware.smack.packet.Message;
-import org.jitsi.videobridge.osgi.*;
+
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.zip.*;
+import org.jivesoftware.util.JiveGlobals;
 
 
 /**
@@ -577,6 +582,23 @@ public class JitsiMeetConference
                                         conferenceId,
                                         roomName));
                         }
+
+						Videobridge videobridge = PluginImpl.component.getVideobridge();
+						Conference conference = videobridge.getConference(conferenceId, null);
+
+						if (conference != null)
+						{
+							String confName = roomName.split("@")[0];
+							conference.setName(confName);	// BAO
+							logger.info("Conference mapping beteeen bridge and room  " + confName + " " + conferenceId);
+
+							if (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.media.record", "false").equals("true") && JiveGlobals.getProperty("ofmeet.autorecord.enabled", "false").equals("true") && !conference.isRecording())
+							{
+								conference.setRecording(true);
+								logger.info("Auto recording set for  " + confName + " " + conferenceId);
+							}
+						}
+
                     }
                 }
                 return peerChannels;

@@ -167,13 +167,7 @@ public class Config extends HttpServlet
 
 			ServletOutputStream out = response.getOutputStream();
 
-			String recordingKey = null;
-
-			if (JiveGlobals.getProperty("ofmeet.autorecord.enabled", "false").equals("true"))
-			{
-				recordingKey = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.secret", "secret");
-			}
-
+			String recordingKey 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.secret", "secret");
 			String resolution 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.resolution", "360");
 			String audioMixer			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.audio.mixer", "false");
 			String audioBandwidth 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.audio.bandwidth", "128");
@@ -287,7 +281,7 @@ public class Config extends HttpServlet
 			out.println("    enableSimulcast: " + enableSimulcast + ",");
 			out.println("    enableRtpStats: " + enableRtpStats + ",");
 			out.println("    openSctp: " + openSctp + ",");
-			if (recordingKey == null) out.println("    enableRecording: " + recordVideo + ",");
+			out.println("    enableRecording: " + recordVideo + ",");
 			if (recordingKey != null) out.println("    recordingKey: '" + recordingKey + "',");
 			out.println("    clientNode: 'http://igniterealtime.org/ofmeet',");
 			out.println("    focusUserJid: '" + focusUserJid + "',");
