@@ -20,6 +20,7 @@ import org.jivesoftware.util.*;
 
 import java.text.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 import javax.sip.*;
 import javax.sip.address.*;
@@ -28,6 +29,8 @@ import javax.sip.message.*;
 
 import org.slf4j.*;
 import org.slf4j.Logger;
+
+import org.jivesoftware.openfire.plugin.ofskype.OfSkypePlugin;
 
 /**
  * Functions useful for building SIP messages
@@ -50,6 +53,8 @@ public class SipService
 	private static String remoteip;
 	private static String agentName;
 	private static String clientVersion;
+
+	public static ConcurrentHashMap<String, CallSession> callSessions = new ConcurrentHashMap<String, CallSession>();
 
 	public SipService(Properties properties)
 	{
@@ -83,8 +88,8 @@ public class SipService
 
 		try
 		{
-			ListeningPoint udp = sipStack.createListeningPoint("0.0.0.0", localport, "udp");
-            ListeningPoint tcp = sipStack.createListeningPoint("0.0.0.0", localport, "tcp");
+			ListeningPoint udp = sipStack.createListeningPoint(OfSkypePlugin.self.getIpAddress(), localport, "udp");
+            ListeningPoint tcp = sipStack.createListeningPoint(OfSkypePlugin.self.getIpAddress(), localport, "tcp");
 
 			sipProvider = sipStack.createSipProvider(tcp);
             sipProvider.addListeningPoint(udp);
@@ -367,9 +372,9 @@ public class SipService
 			ListeningPoint lp = sipProvider.getListeningPoint();
 			localip = lp.getIPAddress();
 
-			requestURI = addressFactory.createURI(cs.jabberRemote);
+			requestURI = addressFactory.createURI(cs.to);
 			toHeader = headerFactory.createToHeader(addressFactory.createAddress(requestURI), null);
-			fromURI = addressFactory.createURI(cs.jabberLocal);
+			fromURI = addressFactory.createURI(cs.from);
 			fromHeader = headerFactory.createFromHeader(addressFactory.createAddress(fromURI), null);
 
 			int tag = (int) (Math.random() * 100000);
@@ -399,24 +404,16 @@ public class SipService
 			UserAgentHeader userAgent = (UserAgentHeader) headerFactory.createHeader(UserAgentHeader.NAME, agentName);
 			request.setHeader(userAgent);
 
-
 			//t.setApplicationData(new ResponseInfo(listener, transaction));
+
 
 			try {
 
-				String mediationServer = null;
+				String sipServer = JiveGlobals.getProperty("freeswitch.sip.hostname", OfSkypePlugin.self.getIpAddress());
 
-				if (JiveGlobals.getBooleanProperty("wirelynk.voicebridge.enabled",  false))
+				if (sipServer != null)
 				{
-					mediationServer = JiveGlobals.getProperty("wirelynk.voicebridge.server", null);
-
-				} else {
-					mediationServer = JiveGlobals.getProperty("ucwa.mediation.server", null);
-				}
-
-				if (mediationServer != null)
-				{
-					SipURI routeURI = (SipURI) addressFactory.createURI("sip:" + mediationServer + ";lr");
+					SipURI routeURI = (SipURI) addressFactory.createURI("sip:" + sipServer + ";lr");
 					RouteHeader routeHeader = headerFactory.createRouteHeader(addressFactory.createAddress(routeURI));
 					request.addHeader(routeHeader);
 				}
@@ -426,7 +423,6 @@ public class SipService
 
 				Log.error("Creating registration route error " + e);
 			}
-
 			ClientTransaction t = sipProvider.getNewClientTransaction(request);
 
 

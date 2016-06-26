@@ -44,6 +44,6 @@
 		client = null;		
         }
         // Done, so redirect
-        response.sendRedirect("ofmeet-summary.jsp?deletesuccess=true");
+        response.sendRedirect("skype-summary.jsp?deletesuccess=true");
         return;
 %>

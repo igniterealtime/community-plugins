@@ -7,14 +7,11 @@ import org.xmpp.packet.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
+
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.URLDecoder;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,6 +44,11 @@ import org.ifsoft.lync.ucwa.*;
 
 import javax.sip.*;
 import javax.sip.message.*;
+import javax.sdp.SdpFactory;
+import javax.sdp.SessionDescription;
+import javax.sdp.MediaDescription;
+import javax.sdp.Attribute;
+
 import org.ifsoft.sip.*;
 
 import org.jivesoftware.openfire.plugin.ofskype.OfSkypePlugin;
@@ -435,6 +437,90 @@ public class SkypeClient {
 		}
 	}
 
+	public void acceptWithAnswer(String url, String sdp)
+	{
+		try
+		{
+			sdp = sdp.replace("t=0 0", "b=CT:99980\nt=0 0\na=x-devicecaps:audio:send,recv;video:send,recv");
+			SessionDescription sd =  SdpFactory.getInstance().createSessionDescription(sdp);
+
+			MediaDescription md = ((MediaDescription) sd.getMediaDescriptions(false).get(0));
+			Vector<Attribute> attributes = (Vector<Attribute>) md.getAttributes(false);
+			String ssrc = null;
+			Vector<Attribute> deletes = new Vector<Attribute>();
+			boolean rtcpMux = false;
+
+			try {
+
+				for (Attribute attrib : attributes)
+				{
+					if (attrib.getName().equals("rtcp-mux")) rtcpMux = true;
+				}
+
+				for (Attribute attrib : attributes)
+				{
+					Log.info("acceptWithAnswer attribute " + attrib.getName() + "=" + attrib.getValue());
+
+					if (attrib.getName().equals("crypto"))
+					{
+						attrib.setValue(attrib.getValue() + "|2^31|1:1");
+					}
+
+					if (attrib.getName().equals("ssrc"))
+					{
+						String value = attrib.getValue();
+						ssrc = value.substring(0, value.indexOf(" "));
+						//deletes.add(attrib);
+					}
+
+					if (rtcpMux && attrib.getName().equals("rtcp"))
+					{
+						deletes.add(attrib);
+					}
+
+					if (attrib.getName().equals("candidate"))
+					{
+						attrib.setValue(attrib.getValue().replace(" generation 0","").replace("udp","UDP"));
+					}
+
+					if (attrib.getName().equals("msid-semantic")) deletes.add(attrib);
+				}
+
+				for (Attribute attrib : deletes)
+				{
+					attributes.remove(attrib);
+				}
+
+				attributes.add(SdpFactory.getInstance().createAttribute("x-ssrc-range", ssrc + "-" + ssrc));
+				attributes.add(SdpFactory.getInstance().createAttribute("rtcp-fb", "* x-message app send:dsh recv:dsh"));
+				attributes.add(SdpFactory.getInstance().createAttribute("rtcp-rsize", null));
+				attributes.add(SdpFactory.getInstance().createAttribute("label", "main-audio"));
+				attributes.add(SdpFactory.getInstance().createAttribute("x-source", "main-audio"));
+
+			} catch (Exception ec) {
+				Log.error("acceptWithAnswer error", ec);
+			}
+
+			String sessionContext = "ofskype-" + System.currentTimeMillis();
+			url = url.indexOf("http") == 0 ? url : host + url;
+			HttpMethod request = new PostMethod(url + "?sessionContext=" + sessionContext);
+			PostMethod postRequest = (PostMethod)request;
+
+			postRequest.setRequestEntity(new StringRequestEntity(sd.toString(), "application/sdp", "UTF-8"));
+			request.setRequestHeader("Authorization", "Bearer " + oAuthToken);
+
+			MethodExecutionResult result = executeMethod(request);
+
+       		int responseCode =  result.getResponseCode();
+        	String body = result.getBody();
+
+			Log.info("acceptWithAnswer " + responseCode + ":" + body + "\n" + sd);
+		}
+		catch(Exception ex)
+		{
+			Log.error("acceptWithAnswer error", ex);
+		}
+	}
 
 	public void setPresence(String availability)
 	{
@@ -685,8 +771,11 @@ public class SkypeClient {
 						MethodExecutionResult groupsResult = getRequest(groupsPath);
 						JSONObject _embedded = groupsResult.getJson().getJSONObject("_embedded");
 
-						JSONObject pinnedGroup = _embedded.getJSONObject("pinnedGroup");
-						getGroupContacts(pinnedGroup.getString("name"), pinnedGroup.getJSONObject("_links").getJSONObject("groupContacts").getString("href"));
+						if (_embedded.has("pinnedGroup"))
+						{
+							JSONObject pinnedGroup = _embedded.getJSONObject("pinnedGroup");
+							getGroupContacts(pinnedGroup.getString("name"), pinnedGroup.getJSONObject("_links").getJSONObject("groupContacts").getString("href"));
+						}
 
 						JSONObject defaultGroup = _embedded.getJSONObject("defaultGroup");
 						getGroupContacts(defaultGroup.getString("name"), defaultGroup.getJSONObject("_links").getJSONObject("groupContacts").getString("href"));
@@ -695,14 +784,20 @@ public class SkypeClient {
 
 						for(int i = 0; i < distributionGroup.length(); i++)
 						{
-							getGroupContacts(distributionGroup.getJSONObject(i).getString("name"), distributionGroup.getJSONObject(i).getJSONObject("_links").getJSONObject("groupContacts").getString("href"));
+							if (distributionGroup.getJSONObject(i).getJSONObject("_links").has("groupContacts"))
+							{
+								getGroupContacts(distributionGroup.getJSONObject(i).getString("name"), distributionGroup.getJSONObject(i).getJSONObject("_links").getJSONObject("groupContacts").getString("href"));
+							}
 						}
 
 						JSONArray group = _embedded.getJSONArray("group");
 
 						for(int i = 0; i < group.length(); i++)
 						{
-							getGroupContacts(group.getJSONObject(i).getString("name"), group.getJSONObject(i).getJSONObject("_links").getJSONObject("groupContacts").getString("href"));
+							if (group.getJSONObject(i).getJSONObject("_links").has("groupContacts"))
+							{
+								getGroupContacts(group.getJSONObject(i).getString("name"), group.getJSONObject(i).getJSONObject("_links").getJSONObject("groupContacts").getString("href"));
+							}
 						}
                     }
                     catch(Exception e)
@@ -855,7 +950,7 @@ public class SkypeClient {
 						try {
 							JSONObject reqBody = new JSONObject();
 							reqBody.put("duration", getSubscriptionDuration());
-							reqBody.put("Uris", contacts);
+							reqBody.put("uris", contacts);
 							postRequest(presenceSubscriptionsPath, reqBody);
 						}
 						catch(Exception e)
@@ -1236,7 +1331,7 @@ public class SkypeClient {
 										String addMessagingUri = messagingLinks.getJSONObject("addMessaging").getString("href");
 
 										Log.info("Adding messaging modality " + addMessagingUri);
-										postRequest(addMessagingUri, null);
+										//postRequest(addMessagingUri, null);
 									}
 
 								}
@@ -1739,6 +1834,7 @@ public class SkypeClient {
                     Log.error(message);
                 }
             } else {
+        		Log.error("executeMethodString " + request.getURI().toString() + " " + request);
                 String message = (new StringBuilder("Got unexpected result from server. Response received with responseCode: ")).append(responseCode).append(" and response data '").append(result.getBody()).append("'.").toString();
                 Log.error(message);
             }

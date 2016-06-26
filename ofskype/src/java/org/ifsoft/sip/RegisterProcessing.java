@@ -38,7 +38,6 @@ public class RegisterProcessing implements SipListener
 
     private String registrar;
     private String address;
-    private ProxyCredentials proxyCredentials;
     private VideoBridgeSipListener.SipServerCallback sipServerCallback;
     private String sipCallId;
 
@@ -50,6 +49,9 @@ public class RegisterProcessing implements SipListener
     private AddressFactory addressFactory = SipService.getAddressFactory();
     private MessageFactory messageFactory = SipService.getMessageFactory();
     private SipProvider sipProvider = SipService.getSipProvider();
+
+    public ProxyCredentials proxyCredentials;
+
 
     public RegisterProcessing(String address, String registrar, ProxyCredentials proxyCredentials)
     {

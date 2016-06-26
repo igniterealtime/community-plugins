@@ -1,19 +1,3 @@
-/**
- *    Copyright 2012 Voxbone SA/NV
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
 package org.ifsoft.sip;
 
 
@@ -40,566 +24,73 @@ import org.slf4j.Logger;
 
 import org.xmpp.packet.*;
 
+import org.ifsoft.skype.SkypeClient;
+
+import net.sf.json.*;
 
 /**
  *
- * Represents a call, contains the information for the Jingle as well as the sip side of the call
+ * Represents a call, contains the information for the sip side of the call
  *
  */
 public class CallSession
 {
     private static final Logger Log = LoggerFactory.getLogger(CallSession.class);
 
-	private static LinkedList<Payload> supported = new LinkedList<Payload>();
-
-	public static Payload PAYLOAD_SPEEX = new Payload(99, "speex", 16000, 22000);
-	public static Payload PAYLOAD_SPEEX2 = new Payload(98, "speex", 8000, 11000);
-	public static Payload PAYLOAD_PCMU = new Payload(0, "PCMU", 8000, 64000);
-	public static Payload PAYLOAD_PCMA = new Payload(8, "PCMA", 8000, 64000);
-	public static Payload PAYLOAD_G723 = new Payload(4, "G723", 8000, 6300);
-	public static VPayload PAYLOAD_H263 = new VPayload(34, "H263", 90000, 512000, 320, 200, 15);
-	public static VPayload PAYLOAD_H264 = new VPayload(97, "H264", 90000, 512000, 640, 480, 15);
-	public static VPayload PAYLOAD_H264SVC = new VPayload(96, "H264-SVC", 90000, 512000, 640, 480, 15);
-
-
-	static
-	{
-		supported.add(PAYLOAD_SPEEX);
-		supported.add(PAYLOAD_SPEEX2);
-		supported.add(PAYLOAD_PCMU);
-		supported.add(PAYLOAD_PCMA);
-		supported.add(PAYLOAD_G723);
-		supported.add(PAYLOAD_H264);
-		supported.add(PAYLOAD_H263);
-		supported.add(PAYLOAD_H264SVC);
-	}
-
-	public static class Payload
-	{
-		int id;
-		String name;
-		int clockRate;
-		int bitRate;
-
-		public Payload(int id, String name, int clockRate, int bitRate)
-		{
-			this.id = id;
-			this.name = name;
-			this.clockRate = clockRate;
-			this.bitRate = bitRate;
-		}
-	}
-
-	public static class VPayload extends Payload
-	{
-		int width;
-		int height;
-		int framerate;
-
-		public VPayload(int id, String name, int clockRate, int bitRate, int width, int height, int framerate)
-		{
-			super(id, name, clockRate, bitRate);
-			this.width = width;
-			this.height = height;
-			this.framerate = framerate;
-		}
-	}
-
-	String jabberSessionId;
-	String jabberInitiator;
-	String candidateUser;
-	String candidateVUser;
-
-	boolean sentTransport = false;
-	boolean sentVTransport = false;
 	boolean callAccepted = false;
 
 	Dialog sipDialog;
 	ServerTransaction inviteTransaction;
 	ClientTransaction inviteOutTransaction;
 
-
-	LinkedList<Payload> offerPayloads = new LinkedList<Payload>();
-	LinkedList<Payload> answerPayloads = new LinkedList<Payload>();
-
-	LinkedList<VPayload> offerVPayloads = new LinkedList<VPayload>();
-	LinkedList<VPayload> answerVPayloads = new LinkedList<VPayload>();
-
 	private static int nextInternalCallId = 0;
 	public String internalCallId;
-	//public MediaStream mediaStream;
-	//public StreamConnector connector;
-	public String jabberRemote;
-	public String jabberLocal;
+	public String to;
+	public String from;
+	public SkypeClient skypeClient;
 
-	//private PluginImpl.FocusAgent focusAgent;
 	private String callId;
-	private String from;
-	private String to;
+	private String offerSDP;
+	private String answerSDP;
+	private JSONObject json;
 
-/*
-	public CallSession(MediaStream mediaStream, String host, PluginImpl.FocusAgent focusAgent, String callId, String from, String to)
+
+	public CallSession(String offerSDP, String callId, String from, String to, SkypeClient skypeClient, JSONObject json)
 	{
-		Log.info("CallSession creation " + host);
+		Log.info("CallSession creation " + callId);
 
-		this.mediaStream = mediaStream;
-		this.focusAgent = focusAgent;
+		this.offerSDP = offerSDP;
 		this.callId = callId;
 		this.from = from;
 		this.to = to;
+		this.skypeClient = skypeClient;
+		this.json = json;
 
 		internalCallId = "CS" + String.format("%08x", nextInternalCallId++);
-
-		offerPayloads.add(PAYLOAD_PCMU);
-		answerPayloads.add(PAYLOAD_PCMU);
-
-		try {
-			InetAddress bindAddr = InetAddress.getByName(host);
-			connector = new DefaultStreamConnector(bindAddr);
-        	connector.getDataSocket();
-        	connector.getControlSocket();
-
-			mediaStream.setDirection(MediaDirection.RECVONLY);
-			mediaStream.setConnector(connector);
-			mediaStream.start();
-
-		} catch (Exception e) {
-			Log.error("CallSession failure", e);
-		}
 	}
-*/
+
 
 	public void sendBye()
 	{
 		Log.info("sendBye");
-
-		try
-		{
-			//mediaStream.stop();
-/*
-			if (focusAgent == null)
-			{
-				PluginImpl.self.inviteEvent(false, callId, from, to);
-
-			} else {
-				focusAgent.inviteEvent(false, callId, from, to);
-			}
-*/
-		}
-		finally
-		{
-			//mediaStream.close();
-		}
 	}
 
-	private boolean isSupportedPayload(Payload payload)
-	{
-		for (Payload p : supported)
-		{
-			if (p.name.equalsIgnoreCase(payload.name) && payload.clockRate == p.clockRate)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public Payload getByName(String name, int clockRate)
-	{
-		for (Payload p : supported)
-		{
-			if (p.name.equalsIgnoreCase(name) && p.clockRate == clockRate)
-			{
-				return p;
-			}
-		}
-		return null;
-	}
-
-	public Payload getByName(String name)
-	{
-		for (Payload p : supported)
-		{
-			if (p instanceof VPayload)
-			{
-				VPayload vp = (VPayload) p;
-				if (p.name.equalsIgnoreCase(name))
-				{
-					return vp;
-				}
-			}
-		}
-		return null;
-	}
-
-	public Payload getById(int id)
-	{
-		for (Payload p : supported)
-		{
-			if (p.id == id)
-			{
-				return p;
-			}
-		}
-		return null;
-	}
-/*
-	public void parseInitiate(Packet p, boolean jingle)
-	{
-		if(!jingle)
-		{
-			StreamElement session = p.getFirstElement(new NSI("session", "http://www.google.com/session"));
-
-			jabberSessionId = session.getID();
-			jabberRemote = p.getFrom();
-			jabberLocal = p.getTo();
-			jabberInitiator = session.getAttributeValue("initiator");
-
-			parseSession(session, true);
-		}
-		else
-		{
-			StreamElement session = p.getFirstElement("jingle");
-
-			jabberSessionId = session.getAttributeValue("sid");
-			jabberRemote = p.getFrom();
-			jabberLocal = p.getTo();
-			jabberInitiator = session.getAttributeValue("initiator");
-
-			parseJingleSession(session, true);
-		}
-	}
-
-	public void parseAccept(Packet p, boolean jingle)
-	{
-		if(jingle)
-		{
-			StreamElement session = p.getFirstElement("jingle");
-			parseJingleSession(session, false);
-		}
-		else
-		{
-			StreamElement session = p.getFirstElement(new NSI("session", "http://www.google.com/session"));
-			parseSession(session, false);
-		}
-
-	}
-
-
-	private void parseJingleSession(StreamElement session, boolean offer)
-	{
-		// StreamElement content = session.getFirstElement("content");
-		for(Object contObj : session.listElements("content"))
-		{
-			// loop content
-			StreamElement content = (StreamElement) contObj;
-			for(Object descObj : content.listElements("description"))
-			{
-				StreamElement desc = (StreamElement) descObj;
-				boolean video = false;
-
-				// Parse Video Description
-				if(	desc.getAttributeValue("media") != null
-					&& desc.getAttributeValue("media").equals("video") )
-				{
-					video = true;
-					Log.info("[[" + internalCallId + "]] Video call detected, enabling video rtp stream");
-					if (vRelay == null)
-					{
-						try
-						{
-							vRelay = new RtpRelay(this, true);
-						}
-						catch (IOException e)
-						{
-							Log.error("Can't setup video rtp relay", e);
-						}
-					}
-
-					for (Object opt : desc.listElements("payload-type"))
-					{
-						StreamElement pt = (StreamElement) opt;
-						try
-						{
-							int id = Integer.parseInt(pt.getAttributeValue("id"));
-							String name = pt.getAttributeValue("name");
-							Log.info("[[" + internalCallId + "]] found payload: " + name );
-
-							int framerate = 0;
-							int width = 0;
-							int height = 0;
-
-							for (Object vparamObj : desc.listElements("parameter"))
-							{
-								StreamElement vparams = (StreamElement) vparamObj;
-
-								if (vparams.getAttributeValue("framerate") != null) {
-									framerate = Integer.parseInt(vparams.getAttributeValue("framerate"));
-								}
-								if (vparams.getAttributeValue("width") != null) {
-									width = Integer.parseInt(vparams.getAttributeValue("width"));
-								}
-								if (vparams.getAttributeValue("height") != null) {
-									height = Integer.parseInt(vparams.getAttributeValue("height"));
-								}
-
-							}
-
-								// add video payload
-								Payload p = getByName(name);
-								if (p != null && p instanceof VPayload)
-								{
-									VPayload tmp = (VPayload) p;
-									VPayload vp = null;
-									// save the rtp map id, but load in our offical config....
-									if (framerate != 0 && width != 0 && height != 0) {
-										vp = new VPayload(id, name, tmp.clockRate, tmp.bitRate, width, height, framerate);
-									} else {
-										vp = new VPayload(id, tmp.name, tmp.clockRate, tmp.bitRate, tmp.width, tmp.height, tmp.framerate);
-									}
-
-									if (offer)
-									{
-										offerVPayloads.add(vp);
-									}
-									else
-									{
-										answerVPayloads.add(vp);
-									}
-								}
-
-						}
-						catch (NumberFormatException e)
-						{
-							// ignore tags we don't understand (but write full log, in case we need to investigate)
-							Log.warn("[[" + internalCallId + "]] failed to parse tag in session : ", e);
-							Log.info("[[" + internalCallId + "]] NumberFormatException -> session contents : " + session.toString());
-							Log.info("[[" + internalCallId + "]] NumberFormatException -> description item contents : " + pt.toString());
-						}
-					}
-
-				// Parse Audio Description
-				} else if (	desc.getAttributeValue("media") != null
-						&& desc.getAttributeValue("media").equals("audio") )
-					{
-						Log.info("[[" + internalCallId + "]] Audio call detected");
-						for (Object opt : desc.listElements("payload-type"))
-						{
-							StreamElement pt = (StreamElement) opt;
-							try
-							{
-								int id = Integer.parseInt(pt.getAttributeValue("id"));
-								String name = pt.getAttributeValue("name");
-								Log.info("[[" + internalCallId + "]] found payload: " + name );
-
-								int clockrate = 0;
-								if (pt.getAttributeValue("clockrate") != null) {
-									clockrate = Integer.parseInt(pt.getAttributeValue("clockrate"));
-								}
-
-								int bitrate = 0;
-								if (pt.getAttributeValue("bitrate") != null)
-								{
-									bitrate = Integer.parseInt(pt.getAttributeValue("bitrate"));
-								}
-
-									// add audio payload
-									Payload payload = new Payload(id, name, clockrate, bitrate);
-
-									if (isSupportedPayload(payload))
-									{
-										if (offer)
-										{
-											offerPayloads.add(payload);
-										}
-										else
-										{
-											answerPayloads.add(payload);
-										}
-									}
-
-							}
-							catch (NumberFormatException e)
-							{
-								// ignore tags we don't understand (but write full log, in case we need to investigate)
-								Log.warn("[[" + internalCallId + "]] failed to parse tag in session : ", e);
-								Log.info("[[" + internalCallId + "]] NumberFormatException -> session contents : " + session.toString());
-								Log.info("[[" + internalCallId + "]] NumberFormatException -> description item contents : " + pt.toString());
-							}
-						}
-
-					}
-
-
-
-			}
-		}
-
-
-
-
-	}
-
-	private void parseSession(StreamElement session, boolean offer)
-	{
-		StreamElement description = session.getFirstElement("description");
-
-		if (description.getNamespaceURI().equals("http://www.google.com/session/video"))
-		{
-			Log.info("[[" + internalCallId + "]] Video call detected, enabling video rtp stream");
-			if (vRelay == null)
-			{
-				try
-				{
-					vRelay = new RtpRelay(this, true);
-				}
-				catch (IOException e)
-				{
-					Log.error("Can't setup video rtp relay", e);
-				}
-			}
-		}
-		for (Object opt : description.listElements())
-		{
-			StreamElement pt = (StreamElement) opt;
-
-			if (pt.getNamespaceURI().equals("http://www.google.com/session/video") && pt.getLocalName().equals("payload-type"))
-			{
-				try
-				{
-					int id = Integer.parseInt(pt.getAttributeValue("id"));
-					String name = pt.getAttributeValue("name");
-
-					// int width = Integer.parseInt(pt.getAttributeValue("width"));
-					// int height = Integer.parseInt(pt.getAttributeValue("height"));
-					//int framerate = Integer.parseInt(pt.getAttributeValue("framerate"));
-
-					Payload p = getByName(name);
-					if (p != null && p instanceof VPayload)
-					{
-						VPayload tmp = (VPayload) p;
-						// save the rtp map id, but load in our offical config....
-						VPayload vp = new VPayload(id, tmp.name, tmp.clockRate, tmp.bitRate, tmp.width, tmp.height, tmp.framerate);
-
-						if (offer)
-						{
-							offerVPayloads.add(vp);
-						}
-						else
-						{
-							answerVPayloads.add(vp);
-						}
-					}
-				}
-				catch (NumberFormatException e)
-				{
-					// ignore tags we don't understand (but write full log, in case we need to investigate)
-					Log.warn("[[" + internalCallId + "]] failed to parse tag in session : ", e);
-					Log.info("[[" + internalCallId + "]] NumberFormatException -> session contents : " + session.toString());
-					Log.info("[[" + internalCallId + "]] NumberFormatException -> description item contents : " + pt.toString());
-				}
-			}
-			else if(pt.getNamespaceURI().equals("http://www.google.com/session/phone") && pt.getLocalName().equals("payload-type"))
-			{
-				try
-				{
-					int id = Integer.parseInt(pt.getAttributeValue("id"));
-					String name = pt.getAttributeValue("name");
-
-					int clockrate = 0;
-					if (pt.getAttributeValue("clockrate") != null) {
-						clockrate = Integer.parseInt(pt.getAttributeValue("clockrate"));
-					}
-
-					int bitrate = 0;
-					if (pt.getAttributeValue("bitrate") != null)
-					{
-						bitrate = Integer.parseInt(pt.getAttributeValue("bitrate"));
-					}
-
-					Payload payload = new Payload(id, name, clockrate, bitrate);
-
-					if (isSupportedPayload(payload))
-					{
-						if (offer)
-						{
-							offerPayloads.add(payload);
-						}
-						else
-						{
-							answerPayloads.add(payload);
-						}
-					}
-				}
-				catch (NumberFormatException e)
-				{
-					// ignore tags we don't understand (but write full log, in case we need to investigate)
-					Log.warn("[[" + internalCallId + "]] failed to parse tag in session : ", e);
-					Log.info("[[" + internalCallId + "]] NumberFormatException -> session contents : " + session.toString());
-					Log.info("[[" + internalCallId + "]] NumberFormatException -> description item contents : " + pt.toString());
-				}
-			}
-		}
-	}
-*/
 	public SessionDescription buildSDP(boolean offer)
 	{
 		SdpFactory sdpFactory = SdpFactory.getInstance();
 		try
 		{
-			SessionDescription sd = sdpFactory.createSessionDescription();
-			sd.setVersion(sdpFactory.createVersion(0));
-			long ntpts = SdpFactory.getNtpTime(new Date());
-			sd.setOrigin(sdpFactory.createOrigin("JabberGW", ntpts, ntpts, "IN", "IP4", SipService.getLocalIP()));
-
-			sd.setSessionName(sdpFactory.createSessionName("Jabber Call"));
-			Vector<Time> times = new Vector<Time>();
-			times.add(sdpFactory.createTime());
-			sd.setTimeDescriptions(times);
-			sd.setConnection(sdpFactory.createConnection(SipService.getLocalIP()));
-
-			int [] formats;
-
-			Vector<Attribute> attributes = new Vector<Attribute>();
-
-			attributes.add(sdpFactory.createAttribute("a", "sendrecv"));
-			attributes.add(sdpFactory.createAttribute("a", "rtcp-mux"));
+			SessionDescription sd = null;
 
 			if (offer)
 			{
-				formats = new int[offerPayloads.size() + 1];
-				int i = 0;
-				for (Payload p : offerPayloads)
-				{
-					formats[i++] = p.id;
-					attributes.add(sdpFactory.createAttribute("rtpmap", Integer.toString(p.id) + " " + p.name + "/" + p.clockRate));
-				}
+				sd = sdpFactory.createSessionDescription(offerSDP);
 			}
 			else
 			{
-				formats = new int[answerPayloads.size() + 1];
-				int i = 0;
-				for (Payload p : answerPayloads)
-				{
-					formats[i++] = p.id;
-					attributes.add(sdpFactory.createAttribute("rtpmap", Integer.toString(p.id) + " " + p.name + "/" + p.clockRate));
-				}
+				sd = sdpFactory.createSessionDescription(answerSDP);
 			}
 
-			formats[formats.length - 1] = 101;
-
-			attributes.add(sdpFactory.createAttribute("rtpmap", "101 telephone-event/8000"));
-			attributes.add(sdpFactory.createAttribute("fmtp", "101 0-15"));
-
-
-			MediaDescription md = null; //sdpFactory.createMediaDescription("audio", connector.getDataSocket().getLocalPort(), 1, "RTP/AVP", formats);
-			md.setAttributes(attributes);
-
-			Vector<MediaDescription> mds = new Vector<MediaDescription>();
-			mds.add(md);
-
-
-			sd.setMediaDescriptions(mds);
 			Log.info("buildSDP " + sd);
 			return sd;
 		}
@@ -610,189 +101,31 @@ public class CallSession
 		return null;
 	}
 
+
 	public void parseSDP(String sdp, boolean offer)
 	{
-		Log.info("parseSDP " + sdp);
-		SdpFactory sdpFactory = SdpFactory.getInstance();
-/*
+		Log.info("parseSDP \n" + sdp);
+
 		try
 		{
-			SessionDescription sd = sdpFactory.createSessionDescription(sdp);
-			@SuppressWarnings("unchecked")
-			Vector<MediaDescription> mdesc = (Vector<MediaDescription>) sd.getMediaDescriptions(false);
-
-			for (MediaDescription md : mdesc)
+			if (offer)
 			{
-				javax.sdp.Media media = md.getMedia();
 
-				if (media.getMediaType().equals("video") && media.getMediaPort() == 0 && vRelay != null )
+			} else {	// answer
+
+				JSONObject audioVideoInvitationLinks = json.getJSONObject("_links");
+
+				if (audioVideoInvitationLinks.has("acceptWithAnswer"))
 				{
-					Log.info("[[" + internalCallId + "]] Video mapping conflict!! (SDP VIDEO PORT = 0)");
-					// Issue: An video capable XMPP contact video calling a non-video capable SIP endpoint
-					// Options: remote error (current), proper terminate session, or update candidates for XMPP side
+					String acceptWithAnswerHref = audioVideoInvitationLinks.getJSONObject("acceptWithAnswer").getString("href");
+					skypeClient.acceptWithAnswer(acceptWithAnswerHref, sdp);
 				}
-
-				if (media.getMediaType().equals("video") && media.getMediaPort() != 0 )
-				{
-					Log.info("[[" + internalCallId + "]] Video sdp detected! starting video rtp stream...");
-
-					if (vRelay == null)
-					{
-						try
-						{
-							vRelay = new RtpRelay(this, true);
-						}
-						catch (IOException e)
-						{
-							Log.error("unable to create video relay!", e);
-						}
-					}
-
-					int  remotePort = media.getMediaPort();
-					String remoteParty = null;
-					if (md.getConnection() != null)
-					{
-						remoteParty = md.getConnection().getAddress();
-					}
-					else
-					{
-						remoteParty = sd.getConnection().getAddress();
-					}
-
-					vRelay.setSipDest(remoteParty, remotePort);
-
-					@SuppressWarnings("unchecked")
-					Vector<Attribute> attributes = (Vector<Attribute>) md.getAttributes(false);
-					for (Attribute attrib : attributes)
-					{
-						if (attrib.getName().equals("rtpmap"))
-						{
-							Log.info("[[" + internalCallId + "]] Got attribute value " + attrib.getValue());
-							String fields[] = attrib.getValue().split(" ", 2);
-							int codec = Integer.parseInt(fields[0]);
-							String name = fields[1].split("/")[0];
-							int clockRate = Integer.parseInt(fields[1].split("/")[1]);
-							Log.info("[[" + internalCallId + "]] Payload " + codec + " rate " + clockRate + " is mapped to " + name);
-
-							if (codec >= 96)
-							{
-								Payload bitRatePayload = getByName(name, clockRate);
-								if (bitRatePayload != null && bitRatePayload instanceof VPayload)
-								{
-									VPayload tmp = (VPayload) bitRatePayload;
-									VPayload p = new VPayload(codec, tmp.name, clockRate, tmp.bitRate, tmp.width, tmp.height, tmp.framerate);
-
-									if (offer)
-									{
-										offerVPayloads.add(p);
-									}
-									else
-									{
-										answerVPayloads.add(p);
-									}
-								}
-							}
-						}
-					}
-				}
-				else
-				{
-					int remotePort = media.getMediaPort();
-					String remoteParty = null;
-					if (md.getConnection() != null)
-					{
-						remoteParty = md.getConnection().getAddress();
-					}
-					else
-					{
-						remoteParty = sd.getConnection().getAddress();
-					}
-
-					InetAddress remoteAddr = InetAddress.getByName(remoteParty);
-
-					Log.info("CallSession parseSDP " + remoteAddr + " " + remoteParty + " " + remotePort);
-
-					MediaService mediaService = LibJitsi.getMediaService();
-
-					mediaStream.setTarget(new MediaStreamTarget(new InetSocketAddress(remoteAddr, remotePort),new InetSocketAddress(remoteAddr, remotePort + 1)));
-
-					//mediaStream.addDynamicRTPPayloadType((byte)111, mediaService.getFormatFactory().createMediaFormat("opus", 48000, 2));
-					mediaStream.addDynamicRTPPayloadType((byte)0, mediaService.getFormatFactory().createMediaFormat("PCMU", 8000, 1));
-
-					mediaStream.setFormat(mediaService.getFormatFactory().createMediaFormat("PCMU", 8000, 1));
-					mediaStream.setDirection(MediaDirection.SENDRECV);
-
-					@SuppressWarnings("unchecked")
-					Vector<String> codecs = (Vector<String>) media.getMediaFormats(false);
-					for (String codec : codecs)
-					{
-						int id = Integer.parseInt(codec);
-						Log.info("[[" + internalCallId + "]] Got a codec " + id);
-						//if (id < 97)
-						//{
-							Payload p = getById(id);
-							if (p != null)
-							{
-								if (offer)
-								{
-									offerPayloads.add(p);
-								}
-								else
-								{
-									answerPayloads.add(p);
-								}
-							}
-						//}
-					}
-
-					@SuppressWarnings("unchecked")
-					Vector<Attribute> attributes = (Vector<Attribute>) md.getAttributes(false);
-					for (Attribute attrib : attributes)
-					{
-						if (attrib.getName().equals("rtpmap"))
-						{
-							Log.info("[[" + internalCallId + "]] Got attribute value " + attrib.getValue());
-							String fields[] = attrib.getValue().split(" ", 2);
-							int codec = Integer.parseInt(fields[0]);
-							String name = fields[1].split("/")[0];
-							int clockRate = Integer.parseInt(fields[1].split("/")[1]);
-							Log.info("[[" + internalCallId + "]] Payload " + codec + " rate " + clockRate + " is mapped to " + name);
-
-							//if (codec >= 96)
-							//{
-								Payload bitRatePayload = getByName(name, clockRate);
-								if (bitRatePayload != null)
-								{
-									Payload p = new Payload(codec, name, clockRate, bitRatePayload.bitRate);
-
-									if (offer)
-									{
-										offerPayloads.add(p);
-									}
-									else
-									{
-										answerPayloads.add(p);
-									}
-								}
-							//}
-						}
-					}
-				}
-			}
-
-			if (focusAgent == null)
-			{
-				PluginImpl.self.inviteEvent(true, callId, from, to);
-
-			} else {
-				focusAgent.inviteEvent(true, callId, from, to);
 			}
 		}
 		catch (Exception e)
 		{
-			Log.error("Unable to parse SDP!", e);
+			Log.error("parseSDP error", e);
 		}
-*/
 	}
 
 	public void parseInvite(Message message, Dialog d, ServerTransaction trans)

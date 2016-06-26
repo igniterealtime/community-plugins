@@ -64,7 +64,7 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
     private boolean freeswitchPluginAvailable;
     public static OfSkypePlugin self;
     private ExecutorService executor;
-	public HashMap<String, SkypeClient> clients = new HashMap<String, SkypeClient>();
+	public ConcurrentHashMap<String, SkypeClient> clients = new ConcurrentHashMap<String, SkypeClient>();
 	public ConcurrentHashMap<String, CallSession> callSessions = new ConcurrentHashMap<String, CallSession>();
 	public SipService sipService = null;
 
@@ -359,22 +359,37 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 
 	public void makeCall(String sipUrl, String sdp, JSONObject json)
 	{
+		sdp = sdp.replace("RTP/AVP", "RTP/SAVP");
+
 		Log.info("OfSkype Plugin - makeCall " + sipUrl + "\n" + sdp + "\n" + json);
 
-		JSONObject audioVideoInvitationLinks = json.getJSONObject("_links");
+		try {
+			String key = "skype.password." + sipUrl;
 
-		String acceptWithAnswerHref = null;
+			if (clients.containsKey(key))
+			{
+				SkypeClient client = clients.get(key);
 
-		if (audioVideoInvitationLinks.has("acceptWithAnswer"))
-		{
-			acceptWithAnswerHref = audioVideoInvitationLinks.getJSONObject("acceptWithAnswer").getString("href");
-		}
+				Log.info("OfSkype Plugin - makeCall sendInvite " + client.myName);
 
-		String key = "skype.password." + sipUrl;
+				String callId = "ofskype-call-" + System.currentTimeMillis();
+				String sip = json.getJSONObject("_embedded").getJSONObject("from").getString("uri");
+				ProxyCredentials sipAccount = client.registerProcessing.proxyCredentials;
+				SipService.sipAccount = sipAccount;
+				String from = "sip:" + sipAccount.getUserName() + "@" + sipAccount.getRealm();
+				String to = "sip:" + client.myConferenceNumber + "@" + sipAccount.getRealm();
 
-		if (clients.containsKey(key))
-		{
-			SkypeClient client = clients.get(key);
+				CallSession callSession = new CallSession(sdp, callId, from, to, client, json);
+
+				callSessions.put(callId, callSession);
+				SipService.callSessions.put(sipAccount.getUserName() + client.myConferenceNumber, callSession);
+
+				SipService.sendInvite(callSession);
+
+			} else Log.warn("OfSkype Plugin - makeCall - cant find client for " + key);
+
+		} catch (Exception e) {
+			Log.error("OfSkype Plugin - makeCall", e);
 		}
 	}
 

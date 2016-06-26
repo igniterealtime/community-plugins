@@ -849,7 +849,7 @@ public class VideoBridgeSipListener implements SipListener
 				}
 				else if (status >= 400)
 				{
-					Log.info("[[SIP]] Subscribe failed");
+					Log.error("[[SIP]] Subscribe failed");
 					FromHeader fh = (FromHeader) resp.getHeader("From");
 					String dest = ((SipURI) fh.getAddress().getURI()).getUser();
 
@@ -883,44 +883,36 @@ public class VideoBridgeSipListener implements SipListener
 						return;
 					}
 
-					CallSession cs = (CallSession) d.getApplicationData();
-					if (cs == null)
+					ClientTransaction ct = evt.getClientTransaction();
+
+					if (ct == null)
 					{
-						Log.error("[[SIP]] CallSession is null");
-
-						ClientTransaction ct = evt.getClientTransaction();
-						if (ct == null)
-						{
-							Log.error("[[SIP]] Client transaction null!!!!");
-							return;
-						}
-						else if (ct.getApplicationData() == null)
-						{
-							Log.error("[[SIP]] Client transaction application data null!!!!");
-							return;
-						}
-
-						Log.debug("[[SIP]] Found CallSession in transaction, re-pairing");
-						d.setApplicationData(ct.getApplicationData());
-						cs = (CallSession) ct.getApplicationData();
-						cs.sipDialog = d;
+						Log.error("[[SIP]] Client transaction null!!!!");
+						return;
 					}
-
-					d.sendAck(d.createAck(d.getLocalSeqNumber()));
 
 					FromHeader fh = (FromHeader) resp.getHeader("From");
 					String dest = ((SipURI) fh.getAddress().getURI()).getUser();
 
-					//JID destination = UriMappings.toJID(dest);
-					//Session sess = SessionManager.findCreateSession(host, destination);
+					ToHeader th = (ToHeader) resp.getHeader("To");
+					String source = ((SipURI) th.getAddress().getURI()).getUser();
 
-					if(!cs.callAccepted)
+					Log.info("[[SIP]] INVITE Response " + source + " " + dest + "\n" + new String(resp.getRawContent()));
+
+					if (SipService.callSessions.containsKey(dest + source))
 					{
-						// RFC3261 says that all 200 OK to an invite get passed to UAC, even re-trans, so we need to filter
-						cs.parseSDP(new String(resp.getRawContent()), false);
-						//sess.sendAccept(cs);
-						cs.callAccepted = true;
-					}
+						CallSession cs = SipService.callSessions.get(dest + source);
+
+						if(!cs.callAccepted)
+						{
+							// RFC3261 says that all 200 OK to an invite get passed to UAC, even re-trans, so we need to filter
+							cs.parseSDP(new String(resp.getRawContent()), false);
+							cs.callAccepted = true;
+						}
+
+						d.sendAck(d.createAck(d.getLocalSeqNumber()));
+
+					} else Log.error("[[SIP]] can't find call session object " + dest + source);
 
 				}
 				else if (status == Response.PROXY_AUTHENTICATION_REQUIRED || status == Response.UNAUTHORIZED)
@@ -941,7 +933,7 @@ public class VideoBridgeSipListener implements SipListener
 				}
 				else if (status >= 400)
 				{
-					Log.info("[[SIP]] Invite failed, ending call");
+					Log.error("[[SIP]] Invite failed, ending call");
 
 					Dialog d = evt.getDialog();
 					if (d == null)
