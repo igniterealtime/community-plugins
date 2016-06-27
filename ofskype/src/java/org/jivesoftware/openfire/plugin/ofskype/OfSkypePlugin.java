@@ -55,6 +55,13 @@ import net.sf.json.*;
 import org.ifsoft.skype.SkypeClient;
 import org.ifsoft.sip.*;
 
+import javax.sip.*;
+import javax.sip.message.*;
+import javax.sdp.SdpFactory;
+import javax.sdp.SessionDescription;
+import javax.sdp.MediaDescription;
+import javax.sdp.Attribute;
+
 
 public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEventListener  {
 
@@ -359,16 +366,79 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 
 	public void makeCall(String sipUrl, String sdp, JSONObject json)
 	{
-		sdp = sdp.replace("RTP/AVP", "RTP/SAVP");
-
 		Log.info("OfSkype Plugin - makeCall " + sipUrl + "\n" + sdp + "\n" + json);
 
+		sdp = sdp.replace("RTP/AVP", "UDP/TLS/RTP/SAVPF");
+
 		try {
+			SessionDescription sd =  SdpFactory.getInstance().createSessionDescription(sdp);
+
+			MediaDescription md = ((MediaDescription) sd.getMediaDescriptions(false).get(0));
+			Vector<Attribute> attributes = (Vector<Attribute>) md.getAttributes(false);
+			String ssrc = null;
+			Vector<Attribute> deletes = new Vector<Attribute>();
+			boolean rtcpMux = false;
+			String[] ssrcs = null;
+
+			try {
+
+				for (Attribute attrib : attributes)
+				{
+					if (attrib.getName().equals("rtcp-mux")) rtcpMux = true;
+				}
+
+				for (Attribute attrib : attributes)
+				{
+					Log.info("makeCall attribute " + attrib.getName() + "=" + attrib.getValue());
+
+					if (attrib.getName().equals("crypto"))
+					{
+						String crypto = attrib.getValue();
+						attrib.setValue(crypto.substring(0, crypto.indexOf("|")));
+						if (crypto.indexOf("1:1") > -1) deletes.add(attrib);
+					}
+
+					if (attrib.getName().equals("x-ssrc-range"))
+					{
+						ssrcs = attrib.getValue().split("-");
+						deletes.add(attrib);
+					}
+
+					if (attrib.getName().equals("candidate"))
+					{
+						attrib.setValue(attrib.getValue().replace("TCP-PASS","TCP").replace("TCP-ACT","TCP"));
+					}
+
+					if (attrib.getName().equals("cryptoscale")) deletes.add(attrib);
+					if (attrib.getName().equals("x-candidate-ipv6")) deletes.add(attrib);
+					if (attrib.getName().equals("rtcp-fb")) deletes.add(attrib);
+				}
+
+				for (Attribute attrib : deletes)
+				{
+					attributes.remove(attrib);
+				}
+
+				if (ssrcs != null)
+				{
+					attributes.add(SdpFactory.getInstance().createAttribute("ssrc", ssrcs[0] + " cname:CYWnkHxGZPAENJW9"));
+					attributes.add(SdpFactory.getInstance().createAttribute("ssrc", ssrcs[0] + " msid:YOGW0gxEFBdOm7AsbjxMDJwlLTKNkBId a0"));
+					attributes.add(SdpFactory.getInstance().createAttribute("ssrc", ssrcs[0] + " mslabel:YOGW0gxEFBdOm7AsbjxMDJwlLTKNkBId"));
+					attributes.add(SdpFactory.getInstance().createAttribute("ssrc", ssrcs[0] + " label:YOGW0gxEFBdOm7AsbjxMDJwlLTKNkBIda0"));
+				}
+
+
+			} catch (Exception ec) {
+				Log.error("acceptWithAnswer error", ec);
+			}
+
+
 			String key = "skype.password." + sipUrl;
 
 			if (clients.containsKey(key))
 			{
 				SkypeClient client = clients.get(key);
+				String newSDP = sd.toString();
 
 				Log.info("OfSkype Plugin - makeCall sendInvite " + client.myName);
 
@@ -379,7 +449,7 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 				String from = "sip:" + sipAccount.getUserName() + "@" + sipAccount.getRealm();
 				String to = "sip:" + client.myConferenceNumber + "@" + sipAccount.getRealm();
 
-				CallSession callSession = new CallSession(sdp, callId, from, to, client, json);
+				CallSession callSession = new CallSession(newSDP, callId, from, to, client, json);
 
 				callSessions.put(callId, callSession);
 				SipService.callSessions.put(sipAccount.getUserName() + client.myConferenceNumber, callSession);

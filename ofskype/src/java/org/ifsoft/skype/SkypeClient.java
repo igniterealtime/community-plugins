@@ -441,6 +441,7 @@ public class SkypeClient {
 	{
 		try
 		{
+			sdp = sdp.replace("UDP/TLS/RTP/SAVPF", "RTP/SAVP");
 			sdp = sdp.replace("t=0 0", "b=CT:99980\nt=0 0\na=x-devicecaps:audio:send,recv;video:send,recv");
 			SessionDescription sd =  SdpFactory.getInstance().createSessionDescription(sdp);
 
@@ -463,7 +464,7 @@ public class SkypeClient {
 
 					if (attrib.getName().equals("crypto"))
 					{
-						attrib.setValue(attrib.getValue() + "|2^31|1:1");
+						attrib.setValue(attrib.getValue() + "|2^31");
 					}
 
 					if (attrib.getName().equals("ssrc"))
@@ -480,7 +481,7 @@ public class SkypeClient {
 
 					if (attrib.getName().equals("candidate"))
 					{
-						attrib.setValue(attrib.getValue().replace(" generation 0","").replace("udp","UDP"));
+						//attrib.setValue(attrib.getValue().replace(" generation 0","").replace("udp","UDP"));
 					}
 
 					if (attrib.getName().equals("msid-semantic")) deletes.add(attrib);
@@ -492,10 +493,10 @@ public class SkypeClient {
 				}
 
 				attributes.add(SdpFactory.getInstance().createAttribute("x-ssrc-range", ssrc + "-" + ssrc));
-				attributes.add(SdpFactory.getInstance().createAttribute("rtcp-fb", "* x-message app send:dsh recv:dsh"));
-				attributes.add(SdpFactory.getInstance().createAttribute("rtcp-rsize", null));
-				attributes.add(SdpFactory.getInstance().createAttribute("label", "main-audio"));
-				attributes.add(SdpFactory.getInstance().createAttribute("x-source", "main-audio"));
+				//attributes.add(SdpFactory.getInstance().createAttribute("rtcp-fb", "* x-message app send:dsh recv:dsh"));
+				//attributes.add(SdpFactory.getInstance().createAttribute("rtcp-rsize", null));
+				//attributes.add(SdpFactory.getInstance().createAttribute("label", "main-audio"));
+				//attributes.add(SdpFactory.getInstance().createAttribute("x-source", "main-audio"));
 
 			} catch (Exception ec) {
 				Log.error("acceptWithAnswer error", ec);
