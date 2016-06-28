@@ -37,6 +37,8 @@ import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.SessionManager;
 import org.jivesoftware.openfire.sip.sipaccount.*;
+import org.jivesoftware.openfire.handler.IQHandler;
+import org.jivesoftware.openfire.IQHandlerInfo;
 import org.jivesoftware.database.DbConnectionManager;
 
 import org.slf4j.Logger;
@@ -74,6 +76,7 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 	public ConcurrentHashMap<String, SkypeClient> clients = new ConcurrentHashMap<String, SkypeClient>();
 	public ConcurrentHashMap<String, CallSession> callSessions = new ConcurrentHashMap<String, CallSession>();
 	public SipService sipService = null;
+    private OfSkypeIQHandler ofskypeIQHandler = null;
 
     public String getName() {
         return "ofskype";
@@ -127,12 +130,17 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 
 						for (String propertyName : properties)
 						{
-							startClient(propertyName, JiveGlobals.getProperty(propertyName));
+							startClient(propertyName, JiveGlobals.getProperty(propertyName), null);
 						}
 
 						return true;
 					}
 				});
+
+				Log.info("OfSkype Plugin - Initialize IQ handler ");
+
+				ofskypeIQHandler = new OfSkypeIQHandler();
+				server.getIQRouter().addHandler(ofskypeIQHandler);
 			}
 
 		} catch (Exception e) {
@@ -143,6 +151,9 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
     public void destroyPlugin() {
 
         PropertyEventDispatcher.removeListener(this);
+
+		server.getIQRouter().removeHandler(ofskypeIQHandler);
+		ofskypeIQHandler = null;
 
         try {
 
@@ -216,8 +227,22 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 		Log.info("OfSkype Plugin - Initialized SIP stack at " + ipAddress + ":" + port);
 	}
 
-	private void startClient(String propertyName, String propertyValue)
+	private String startClient(String propertyName, String propertyValue, JSONObject requestJSON)
 	{
+		String response = null;
+		String presence = "Online";
+		String note = "Ready";
+		boolean contacts = false;
+		boolean groups = false;
+
+		if (requestJSON != null)
+		{
+			presence = requestJSON.getString("presence");
+			note = requestJSON.getString("note");
+			contacts = "true".equals(requestJSON.getString("contacts"));
+			groups = "true".equals(requestJSON.getString("groups"));
+		}
+
 		int pos = propertyName.indexOf("skype.password.");
 
 		if (pos == 0)
@@ -245,10 +270,12 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 				}
 
 				SkypeClient skypeClient = new SkypeClient(username, password, domain, username);
+				skypeClient.setClientId(new JID(JID.escapeNode(username) + "@" + server.getServerInfo().getXMPPDomain()), true);
 				skypeClient.doLogin();
-				skypeClient.makeMeAvailable("Online");
-				skypeClient.setNote("Ready");
+				skypeClient.makeMeAvailable(presence);
+				skypeClient.setNote(note);
 				skypeClient.getMyLinks();
+
 
 				SipAccount sipAccount = SipAccountDAO.getAccountByUser(JID.escapeNode(username));
 
@@ -277,8 +304,12 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 			}
 			catch (Exception e) {
 				Log.error("OfSkype error handling profile " + propertyName + " = " + propertyValue, e);
+				response = e.toString();
 			}
-		}
+
+		} else response = "skype.password. prefix missing";
+
+		return response;
 	}
 
 //-------------------------------------------------------
@@ -331,8 +362,7 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 		{
 			public Boolean call() throws Exception
 			{
-				startClient(property, (String)params.get("value"));
-
+				startClient(property, (String)params.get("value"), null);
 				return true;
 			}
 		});
@@ -442,7 +472,7 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 
 				Log.info("OfSkype Plugin - makeCall sendInvite " + client.myName);
 
-				String callId = "ofskype-call-" + System.currentTimeMillis();
+				String callId = json.getJSONObject("_links").getJSONObject("conversation").getString("href");
 				String sip = json.getJSONObject("_embedded").getJSONObject("from").getString("uri");
 				ProxyCredentials sipAccount = client.registerProcessing.proxyCredentials;
 				SipService.sipAccount = sipAccount;
@@ -462,5 +492,106 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 			Log.error("OfSkype Plugin - makeCall", e);
 		}
 	}
+	//-------------------------------------------------------
+	//
+	//		custom IQ handler for JSON request/response
+	//
+	//-------------------------------------------------------
 
+    public class OfSkypeIQHandler extends IQHandler
+    {
+        public OfSkypeIQHandler()
+        {
+			super("Openfire Skype IQ Handler");
+		}
+
+        @Override public IQ handleIQ(IQ iq)
+        {
+			IQ reply = IQ.createResultIQ(iq);
+
+			try {
+				Log.info("Openfire Skype handleIQ \n" + iq.toString());
+				final Element element = iq.getChildElement();
+				JID from = iq.getFrom();
+
+				JSONObject requestJSON = new JSONObject(element.getText());
+				String action = requestJSON.getString("action");
+
+				if ("start_skype_user".equals(action)) startSkypeUser(iq.getFrom().getNode(), reply, requestJSON);
+				if ("stop_skype_user".equals(action)) stopSkypeUser(iq.getFrom().getNode(), reply, requestJSON);
+
+				return reply;
+
+			} catch(Exception e) {
+				Log.error("Openfire Skype handleIQ", e);
+				reply.setError(new PacketError(PacketError.Condition.internal_server_error, PacketError.Type.modify, e.toString()));
+				return reply;
+			}
+		}
+
+        @Override public IQHandlerInfo getInfo()
+        {
+			return new IQHandlerInfo("request", "http://igniterealtime.org/protocol/ofskype");
+		}
+
+		private void startSkypeUser(String username, IQ reply, JSONObject requestJSON)
+		{
+			Element childElement = reply.setChildElement("response", "http://igniterealtime.org/protocol/ofskype");
+
+			try {
+				String password = requestJSON.getString("password");
+				String sipuri = requestJSON.getString("sipuri");
+
+				String property = "skype.password." + sipuri;
+				String response = startClient(property, password, requestJSON);
+
+				if (response != null)
+				{
+					reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, "User " + username + " " + " " + response));
+				}
+
+			} catch (Exception e) {
+				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, "User " + username + " " + " " + e));
+			}
+		}
+
+		private void stopSkypeUser(String username, IQ reply, JSONObject requestJSON)
+		{
+			Element childElement = reply.setChildElement("response", "http://igniterealtime.org/protocol/ofskype");
+
+			try {
+				String sipuri = requestJSON.getString("sipuri");
+				String property = "skype.password." + sipuri;
+
+				if (clients.containsKey(property))
+				{
+					SkypeClient client = clients.remove(property);
+					client.close();
+					client = null;
+
+				} else {
+					reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, "User " + username + " skype session not found"));
+				}
+
+			} catch (Exception e1) {
+				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, requestJSON.toString() + " " + e1));
+			}
+		}
+
+		private String removeNull(String s)
+		{
+			if (s == null)
+			{
+				return "";
+			}
+
+			return s.trim();
+		}
+	}
+
+	//-------------------------------------------------------
+	//
+	//
+	//
+	//-------------------------------------------------------
 }

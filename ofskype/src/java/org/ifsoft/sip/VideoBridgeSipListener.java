@@ -906,11 +906,9 @@ public class VideoBridgeSipListener implements SipListener
 						if(!cs.callAccepted)
 						{
 							// RFC3261 says that all 200 OK to an invite get passed to UAC, even re-trans, so we need to filter
-							cs.parseSDP(new String(resp.getRawContent()), false);
+							cs.parseSDP(d, new String(resp.getRawContent()), false);
 							cs.callAccepted = true;
 						}
-
-						d.sendAck(d.createAck(d.getLocalSeqNumber()));
 
 					} else Log.error("[[SIP]] can't find call session object " + dest + source);
 

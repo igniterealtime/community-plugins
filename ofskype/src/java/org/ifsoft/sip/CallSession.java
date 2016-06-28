@@ -102,8 +102,10 @@ public class CallSession
 	}
 
 
-	public void parseSDP(String sdp, boolean offer)
+	public void parseSDP(Dialog d, String sdp, boolean offer)
 	{
+		sipDialog = d;
+
 		Log.info("parseSDP \n" + sdp);
 
 		try
@@ -128,11 +130,28 @@ public class CallSession
 		}
 	}
 
+	public void performAck()
+	{
+		if (sipDialog != null)
+		{
+			try
+			{
+				Log.info("performAck");
+				sipDialog.sendAck(sipDialog.createAck(sipDialog.getLocalSeqNumber()));
+				sipDialog = null;
+			}
+			catch (Exception e)
+			{
+				Log.error("performAck error", e);
+			}
+		}
+	}
+
 	public void parseInvite(Message message, Dialog d, ServerTransaction trans)
 	{
 		sipDialog = d;
 		inviteTransaction = trans;
-		parseSDP(new String(message.getRawContent()), true);
+		parseSDP(d, new String(message.getRawContent()), true);
 	}
 
 }

@@ -675,14 +675,14 @@ public class SkypeClient {
 							String contactJid = uri.substring(4).toLowerCase();
 							String name = contact.getString("name");
 
-							//Log.info("found contact " + name);
+							Log.info("found contact " + name);
 
 							contactList.put(i, uri);
 
 							//if (cache == false)
 							//{
 								String photoURL = contact.getJSONObject("_links").getJSONObject("contactPhoto").getString("href");
-								//pushAvatar(contactJid, photoURL, name);
+								pushAvatar(contactJid, photoURL, name);
 							//}
 						}
 
@@ -715,11 +715,11 @@ public class SkypeClient {
             try {
 				base64String = fetchAvatar(photoURL);
 
-				//Log.debug("pushAvatar photo\n" + base64String);
+				Log.info("pushAvatar photo\n" + base64String);
 
 				if (sipUrl.equals(contactJid) == false)	// contacts
 				{
-					buddies.put(contactJid, new LyncBuddy(this, jid, new JID(contactJid), "", "", contactName, base64String));
+					//buddies.put(contactJid, new LyncBuddy(this, jid, new JID(contactJid), "", "", contactName, base64String));
 
 				} else {										// me
 
@@ -821,7 +821,7 @@ public class SkypeClient {
 		try {
 			MethodExecutionResult response = getRequest(href);
 			JSONObject jsonObject = response.getJson();
-			//Log.info("getGroupContacts " + groupName + "\n" + jsonObject);
+			Log.info("getGroupContacts " + groupName + "\n" + jsonObject);
 
 			JSONArray contacts = jsonObject.getJSONObject("_embedded").getJSONArray("contact");
 
@@ -846,7 +846,7 @@ public class SkypeClient {
 				String srcNetwork = contact.getString("sourceNetwork");
 				boolean isInternal = srcNetwork.contains("SameEnterprise");
 
-				//Log.info("getGroupContacts, found contact " + groupName + " " + displayName + " " + sip + " " + workPhoneNumber);
+				Log.info("getGroupContacts, found contact " + groupName + " " + displayName + " " + sip + " " + workPhoneNumber);
 
 				if (buddies.containsKey(sip))
 				{
@@ -1062,65 +1062,10 @@ public class SkypeClient {
 								}
 							}
 
-/*
-{
-	"_embedded":{
-		"audioVideoInvitation":{
-			"threadId":"AdHImvRmKGPHFoIBQcWiHS0dvcF87Q==",
-			"_links":{
-				"audioVideo":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/conversations/b65b47e0-8178-47a8-8f48-8868245f1b1a/audioVideo"},
-				"mediaOffer":{"href":"data:multipart/alternative;charset=utf-8;boundary=d38d183e-6415-438f-8ff5-4ed634919226,--d38d183e-6415-438f-8ff5-4ed634919226%0d%0aContent-Type%3a+application%2fsdp%0d%0aContent-ID%3a+%3c32149ef6638b65004752a1465a8bc569%40olajide.net%3e%0d%0aContent-Disposition%3a+session%3b+handling%3doptional%3b+ms-proxy-2007fallback%0d%0a%0d%0av%3d0%0d%0ao%3d-+0+0+IN+IP4+131.253.141.166%0d%0as%3dsession%0d%0ac%3dIN+IP4+131.253.141.166%0d%0ab%3dCT%3a99980%0d%0at%3d0+0%0d%0am%3daudio+55441+RTP%2fAVP+117+104+114+9+112+111+0+103+8+116+115+97+13+118+101%0d%0aa%3dcandidate%3aBJG5XDfUp7LbhulOKzU0MdyDFaXqTEkyPo9FoVQxwxY+1+DhULez4ppG6UIm8QTT2eNA+UDP+0.830+192.168.1.253+50004+%0d%0aa%3dcandidate%3aBJG5XDfUp7LbhulOKzU0MdyDFaXqTEkyPo9FoVQxwxY+2+DhULez4ppG6UIm8QTT2eNA+UDP+0.830+192.168.1.253+50005+%0d%0aa%3dcandidate%3asRUsqXqQt9zOvke99XYbA4GhshUxhXPllH9d%2fFZYnLQ+1+zM3NryK01WlFKEj8lAJgvQ+UDP+0.410+131.253.141.166+55441+%0d%0aa%3dcandidate%3asRUsqXqQt9zOvke99XYbA4GhshUxhXPllH9d%2fFZYnLQ+2+zM3NryK01WlFKEj8lAJgvQ+UDP+0.410+131.253.141.166+52487+%0d%0aa%3dcandidate%3aQExbZsVtU%2bqCArBf8Zj0hnc0BmhzTLuzA2UFGHBO0Xo+1+lCoYgy%2bfbgHH0l0ZGgziiw+UDP+0.550+146.198.59.239+50006+%0d%0aa%3dcandidate%3aQExbZsVtU%2bqCArBf8Zj0hnc0BmhzTLuzA2UFGHBO0Xo+2+lCoYgy%2bfbgHH0l0ZGgziiw+UDP+0.550+146.198.59.239+50007+%0d%0aa%3dcryptoscale%3a1+client+AES_CM_128_HMAC_SHA1_80+inline%3algCqKXxbxZbNm5y6BN76dUfRBW3Z4UI53IwDLj7C%7c2%5e31%7c1%3a1%0d%0aa%3dcrypto%3a2+AES_CM_128_HMAC_SHA1_80+inline%3al66PA6e3xsp7M%2fCaclNPb3wejr5sKhr2ZLzDfyno%7c2%5e31%7c1%3a1%0d%0aa%3dcrypto%3a3+AES_CM_128_HMAC_SHA1_80+inline%3aBl5qaZ1TJtBuTACwDszIaFAnKJ%2f5JYF6zkmNgTph%7c2%5e31%0d%0aa%3dmaxptime%3a200%0d%0aa%3drtcp%3a52487%0d%0aa%3drtpmap%3a117+G722%2f8000%2f2%0d%0aa%3drtpmap%3a104+SILK%2f16000%0d%0aa%3dfmtp%3a104+useinbandfec%3d1%3b+usedtx%3d0%0d%0aa%3drtpmap%3a114+x-msrta%2f16000%0d%0aa%3dfmtp%3a114+bitrate%3d29000%0d%0aa%3drtpmap%3a9+G722%2f8000%0d%0aa%3drtpmap%3a112+G7221%2f16000%0d%0aa%3dfmtp%3a112+bitrate%3d24000%0d%0aa%3drtpmap%3a111+SIREN%2f16000%0d%0aa%3dfmtp%3a111+bitrate%3d16000%0d%0aa%3drtpmap%3a0+PCMU%2f8000%0d%0aa%3drtpmap%3a103+SILK%2f8000%0d%0aa%3dfmtp%3a103+useinbandfec%3d1%3b+usedtx%3d0%0d%0aa%3drtpmap%3a8+PCMA%2f8000%0d%0aa%3drtpmap%3a116+AAL2-G726-32%2f8000%0d%0aa%3drtpmap%3a115+x-msrta%2f8000%0d%0aa%3dfmtp%3a115+bitrate%3d11800%0d%0aa%3drtpmap%3a97+RED%2f8000%0d%0aa%3drtpmap%3a13+CN%2f8000%0d%0aa%3drtpmap%3a118+CN%2f16000%0d%0aa%3drtpmap%3a101+telephone-event%2f8000%0d%0aa%3dfmtp%3a101+0-16%0d%0aa%3dptime%3a20%0d%0a%0d%0a--d38d183e-6415-438f-8ff5-4ed634919226%0d%0aContent-Type%3a+application%2fsdp%0d%0aContent-ID%3a+%3c16dc9d71101116c17454be00d1d3a843%40olajide.net%3e%0d%0aContent-Disposition%3a+session%3b+handling%3doptional%0d%0a%0d%0av%3d0%0d%0ao%3d-+0+1+IN+IP4+131.253.141.158%0d%0as%3dsession%0d%0ac%3dIN+IP4+131.253.141.158%0d%0ab%3dCT%3a99980%0d%0at%3d0+0%0d%0aa%3dx-devicecaps%3aaudio%3asend%2crecv%3bvideo%3asend%2crecv%0d%0am%3daudio+59224+RTP%2fAVP+117+104+114+9+112+111+0+103+8+116+115+97+13+118+101%0d%0aa%3dx-ssrc-range%3a4170446592-4170446592%0d%0aa%3drtcp-fb%3a*+x-message+app+send%3adsh+recv%3adsh%0d%0aa%3drtcp-rsize%0d%0aa%3dlabel%3amain-audio%0d%0aa%3dx-source%3amain-audio%0d%0aa%3dice-ufrag%3aqTWN%0d%0aa%3dice-pwd%3a2o2rsADDtO3pvvcdWePDtHhn%0d%0aa%3dcandidate%3a1+1+UDP+2130706431+192.168.1.253+50016+typ+host+%0d%0aa%3dcandidate%3a1+2+UDP+2130705918+192.168.1.253+50017+typ+host+%0d%0aa%3dcandidate%3a2+1+TCP-PASS+174456319+131.253.141.198+54367+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dcandidate%3a2+2+TCP-PASS+174455806+131.253.141.198+54367+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dcandidate%3a3+1+UDP+184548351+131.253.141.158+59224+typ+relay+raddr+146.198.59.239+rport+50002+%0d%0aa%3dcandidate%3a3+2+UDP+184547838+131.253.141.158+53988+typ+relay+raddr+146.198.59.239+rport+50003+%0d%0aa%3dx-candidate-ipv6%3a4+1+UDP+184547839+2a01%3a111%3a202b%3aa%3a%3a24+52280+typ+relay+raddr+146.198.59.239+rport+50002+%0d%0aa%3dx-candidate-ipv6%3a4+2+UDP+184547326+2a01%3a111%3a202b%3aa%3a%3a24+57150+typ+relay+raddr+146.198.59.239+rport+50003+%0d%0aa%3dcandidate%3a5+1+UDP+1694234623+146.198.59.239+50002+typ+srflx+raddr+192.168.1.253+rport+50002+%0d%0aa%3dcandidate%3a5+2+UDP+1694234110+146.198.59.239+50003+typ+srflx+raddr+192.168.1.253+rport+50003+%0d%0aa%3dcandidate%3a6+1+TCP-ACT+174847487+131.253.141.198+54367+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dcandidate%3a6+2+TCP-ACT+174846974+131.253.141.198+54367+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dx-candidate-ipv6%3a7+1+TCP-PASS+174453759+2a01%3a111%3a202b%3aa%3a%3a4c+59744+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dx-candidate-ipv6%3a7+2+TCP-PASS+174453246+2a01%3a111%3a202b%3aa%3a%3a4c+59744+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dx-candidate-ipv6%3a8+1+TCP-ACT+174846463+2a01%3a111%3a202b%3aa%3a%3a4c+59744+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dx-candidate-ipv6%3a8+2+TCP-ACT+174845950+2a01%3a111%3a202b%3aa%3a%3a4c+59744+typ+relay+raddr+131.253.141.254+rport+50019+%0d%0aa%3dcandidate%3a9+1+TCP-ACT+1684795391+131.253.141.254+50019+typ+srflx+raddr+192.168.1.253+rport+50019+%0d%0aa%3dcandidate%3a9+2+TCP-ACT+1684794878+131.253.141.254+50019+typ+srflx+raddr+192.168.1.253+rport+50019+%0d%0aa%3dcryptoscale%3a1+client+AES_CM_128_HMAC_SHA1_80+inline%3algCqKXxbxZbNm5y6BN76dUfRBW3Z4UI53IwDLj7C%7c2%5e31%7c1%3a1%0d%0aa%3dcrypto%3a2+AES_CM_128_HMAC_SHA1_80+inline%3al66PA6e3xsp7M%2fCaclNPb3wejr5sKhr2ZLzDfyno%7c2%5e31%7c1%3a1%0d%0aa%3dcrypto%3a3+AES_CM_128_HMAC_SHA1_80+inline%3aBl5qaZ1TJtBuTACwDszIaFAnKJ%2f5JYF6zkmNgTph%7c2%5e31%0d%0aa%3dmaxptime%3a200%0d%0aa%3drtcp%3a53988%0d%0aa%3drtpmap%3a117+G722%2f8000%2f2%0d%0aa%3drtpmap%3a104+SILK%2f16000%0d%0aa%3dfmtp%3a104+useinbandfec%3d1%3b+usedtx%3d0%0d%0aa%3drtpmap%3a114+x-msrta%2f16000%0d%0aa%3dfmtp%3a114+bitrate%3d29000%0d%0aa%3drtpmap%3a9+G722%2f8000%0d%0aa%3drtpmap%3a112+G7221%2f16000%0d%0aa%3dfmtp%3a112+bitrate%3d24000%0d%0aa%3drtpmap%3a111+SIREN%2f16000%0d%0aa%3dfmtp%3a111+bitrate%3d16000%0d%0aa%3drtpmap%3a0+PCMU%2f8000%0d%0aa%3drtpmap%3a103+SILK%2f8000%0d%0aa%3dfmtp%3a103+useinbandfec%3d1%3b+usedtx%3d0%0d%0aa%3drtpmap%3a8+PCMA%2f8000%0d%0aa%3drtpmap%3a116+AAL2-G726-32%2f8000%0d%0aa%3drtpmap%3a115+x-msrta%2f8000%0d%0aa%3dfmtp%3a115+bitrate%3d11800%0d%0aa%3drtpmap%3a97+RED%2f8000%0d%0aa%3drtpmap%3a13+CN%2f8000%0d%0aa%3drtpmap%3a118+CN%2f16000%0d%0aa%3drtpmap%3a101+telephone-event%2f8000%0d%0aa%3dfmtp%3a101+0-16%0d%0aa%3drtcp-mux%0d%0aa%3dptime%3a20%0d%0a%0d%0a--d38d183e-6415-438f-8ff5-4ed634919226--%0d%0a"},
-				"reportMediaDiagnostics":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/callMediaDiagnostics?callId=fc86b78dd87947949c7831d88abbb311&fromUri=sip%3adele%40olajide.net&mediaType=Audio&toUri=sip%3adele%40traderlynk.com"},
-				"sendProvisionalAnswer":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/audioVideoInvitations/5bc132f55a2941059141aa0625584ffe/sendProvisionalAnswer"},
-				"decline":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/audioVideoInvitations/5bc132f55a2941059141aa0625584ffe/decline"},
-				"self":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/audioVideoInvitations/5bc132f55a2941059141aa0625584ffe"},
-				"acceptWithAnswer":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/audioVideoInvitations/5bc132f55a2941059141aa0625584ffe/acceptWithAnswer"},
-				"to":{"href":"/ucwa/oauth/v1/applications/10672188129/people/dele@traderlynk.com"},
-				"conversation":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/conversations/b65b47e0-8178-47a8-8f48-8868245f1b1a"}
-			},
-			"_embedded":{
-				"from":{
-					"_links":{
-						"contact":{"href":"/ucwa/oauth/v1/applications/10672188129/people/dele@olajide.net"},
-						"contactPresence":{"href":"/ucwa/oauth/v1/applications/10672188129/people/dele@olajide.net/presence"},
-						"self":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/conversations/b65b47e0-8178-47a8-8f48-8868245f1b1a/participants/dele@olajide.net"},
-						"conversation":{"href":"/ucwa/oauth/v1/applications/10672188129/communication/conversations/b65b47e0-8178-47a8-8f48-8868245f1b1a"}
-					},
-					"sourceNetwork":"Federated",
-					"name":"Dele Olajide",
-					"rel":"participant",
-					"anonymous":false,
-					"uri":"sip:dele@olajide.net",
-					"local":false
-				}
-			},
-			"importance":"Normal",
-			"subject":"",
-			"bandwidthControlId":"fc86b78dd87947949c7831d88abbb311",
-			"privateLine":false,
-			"rel":"audioVideoInvitation",
-			"state":"Connecting",
-			"direction":"Incoming"
-		}
-	},
-	"link":{
-		"rel":"audioVideoInvitation",
-		"href":"/ucwa/oauth/v1/applications/10672188129/communication/audioVideoInvitations/5bc132f55a2941059141aa0625584ffe"
-	},
-	"type":"started"
-}
-*/
 							if("audioVideoInvitation".equals(link.getString("rel")))
 							{
 								JSONObject audioVideoInvitation = event.getJSONObject("_embedded").getJSONObject("audioVideoInvitation");
 								JSONObject audioVideoInvitationLinks = audioVideoInvitation.getJSONObject("_links");
-
-								String acceptWithAnswerHref = null;
-
-								if (audioVideoInvitationLinks.has("acceptWithAnswer"))
-								{
-									acceptWithAnswerHref = audioVideoInvitationLinks.getJSONObject("acceptWithAnswer").getString("href");
-								}
 
 								if (audioVideoInvitationLinks.has("mediaOffer"))
 								{
@@ -1379,6 +1324,18 @@ public class SkypeClient {
 											postRequest(addParticipantUri, reqBody);
 										}
 									}
+
+									if ("Connected".equals(state))
+									{
+										String conversationHref = conversation.getJSONObject("self").getString("href");
+
+										if (OfSkypePlugin.self.callSessions.containsKey(conversationHref))
+										{
+											CallSession callSession = OfSkypePlugin.self.callSessions.get(conversationHref);
+											callSession.performAck();
+										}
+									}
+
 								}
 							}
 						}
