@@ -13,7 +13,8 @@ $(document).ready(function()
 		    displayName     : user.Display,
 		    uri             : 'sip:'+user.User+'@'+user.Realm,
 		    wsServers       : user.WSServer,
-		    stunServers     : user.ICEServers,
+		    stunServers     : user.STUNServers,
+		    turnServers     : user.TURNServers,		    
 		    // usePreloadedRoute : true,
 		    registerExpires : 30,
 		    traceSip        : true,
@@ -812,17 +813,54 @@ $(document).ready(function()
 	var setUpUser = function(server) 
 	{	
 		user = {
-		    "User" : config.sip.authusername,
-		    "Pass" : config.sip.password,
-		    "Realm"   : config.sip.server,
-		    "Display" : config.sip.displayname,
-		    "ICEServers" : config.iceServer && config.iceServers.iceServers ? config.iceServers.iceServers : null,
-		    "WSServer"  : "wss://" + server + "/sip/proxy?url=ws://" + config.sip.server + ":5066"
+		    "User" 		: config.sip.authusername,
+		    "Pass" 		: config.sip.password,
+		    "Realm"   		: config.sip.server,
+		    "Display" 		: config.sip.displayname,
+		    "TURNServers" 	: getTurnServers(),
+		    "STUNServers" 	: getStunServers(),			    
+		    "WSServer"  	: "wss://" + server + "/sip/proxy?url=ws://" + config.sip.server + ":5066"
 		};
 
 		console.log("authentication: ok using config", config);
 		doIt();	
 	}
+	
+	var getTurnServers = function()
+	{
+		var turnServers = [];
+		
+		if (config.iceServers && config.iceServers.iceServers)
+		{
+			for (var i=0; i<config.iceServers.iceServers.length; i++)
+			{
+				if (config.iceServers.iceServers[i].url.indexOf("turn:") > -1 || config.iceServers.iceServers[i].url.indexOf("turns:") > -1)
+				{
+					turnServers.push({urls: config.iceServers.iceServers[i].url, username: config.iceServers.iceServers[i].username, password: config.iceServers.iceServers[i].credential})
+				}
+			}
+		}
+		
+		return turnServers;
+	}
+	
+	var getStunServers = function()
+	{
+		var stunServers = [];
+		
+		if (config.iceServers && config.iceServers.iceServers)
+		{
+			for (var i=0; i<config.iceServers.iceServers.length; i++)
+			{
+				if (config.iceServers.iceServers[i].url.indexOf("stun:") > -1 || config.iceServers.iceServers[i].url.indexOf("stuns:") > -1)
+				{
+					stunServers.push(config.iceServers.iceServers[i].url)
+				}
+			}
+		}		
+		
+		return stunServers;	
+	}	
 
 	if (config && config.sip)
 	{

@@ -36,12 +36,6 @@ public class JitsiMeetGlobalConfig
         = Logger.getLogger(JitsiMeetGlobalConfig.class);
 
     /**
-     * The name of configuration property that enables the {@link LipSyncHack}.
-     */
-    private final static String ENABLE_LIPSYNC_CONFIG_PNAME
-        = "org.jitsi.jicofo.ENABLE_LIPSYNC";
-
-    /**
      * The name of configuration property that sets {@link #maxSSRCsPerUser}.
      */
     private final static String MAX_SSRC_PER_USER_CONFIG_PNAME
@@ -56,18 +50,13 @@ public class JitsiMeetGlobalConfig
      * The name of the config property which specifies how long we're going to
      * wait for Jibri to start recording from the time it accepted START request
      */
-    private static final String PENDING_TIMEOUT_PROP_NAME
+    private static final String JIBRI_PENDING_TIMEOUT_PROP_NAME
         = "org.jitsi.jicofo.jibri.PENDING_TIMEOUT";
 
     /**
-     * The default value for {@link #PENDING_TIMEOUT_PROP_NAME}.
+     * The default value for {@link #JIBRI_PENDING_TIMEOUT_PROP_NAME}.
      */
-    private static final int DEFAULT_PENDING_TIMEOUT = 30;
-
-    /**
-     * If set to <tt>true</tt> enables {@link LipSyncHack}.
-     */
-    private boolean isLipSyncEnabled;
+    private static final int JIBRI_DEFAULT_PENDING_TIMEOUT = 90;
 
     /**
      * Tells how many seconds we're going to wait for the Jibri to start
@@ -143,7 +132,8 @@ public class JitsiMeetGlobalConfig
 
         jibriPendingTimeout
             = configService.getInt(
-                    PENDING_TIMEOUT_PROP_NAME, DEFAULT_PENDING_TIMEOUT);
+                    JIBRI_PENDING_TIMEOUT_PROP_NAME,
+                    JIBRI_DEFAULT_PENDING_TIMEOUT);
 
         if (jibriPendingTimeout > 0)
         {
@@ -155,12 +145,6 @@ public class JitsiMeetGlobalConfig
         {
             logger.warn("Jibri PENDING timeouts are disabled");
         }
-
-        isLipSyncEnabled
-            = configService.getBoolean(ENABLE_LIPSYNC_CONFIG_PNAME, false);
-
-        if (isLipSyncEnabled)
-            logger.info("Lip-sync hack is enabled !");
     }
 
     /**
@@ -184,14 +168,6 @@ public class JitsiMeetGlobalConfig
     public int getMaxSSRCsPerUser()
     {
         return maxSSRCsPerUser;
-    }
-
-    /**
-     * Returns <tt>true</tt> if {@link LipSyncHack} should be enabled.
-     */
-    public boolean isLipSyncEnabled()
-    {
-        return isLipSyncEnabled;
     }
 
     /**

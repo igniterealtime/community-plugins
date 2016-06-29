@@ -518,7 +518,7 @@ public class XmppProtocolProvider
             {
                 featureList.add(features.next().getVar());
             }
-
+            
             return featureList;
         }
         catch (XMPPException e)
@@ -609,8 +609,9 @@ public class XmppProtocolProvider
             connection.sendPacket(packet);
 
             //FIXME: retry allocation on timeout
-            Packet response  = packetCollector.nextResult(SmackConfiguration.getPacketReplyTimeout());
- 			//Packet response = packetCollector.nextResult(60000);	// BAO
+            Packet response
+                = packetCollector.nextResult(
+                        SmackConfiguration.getPacketReplyTimeout());
 
             packetCollector.cancel();
 

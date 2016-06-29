@@ -157,13 +157,13 @@ public class AuthBundleActivator
     {
         Server server = super.initializeServer(bundleContext);
 
-        if (authAuthority instanceof ShibbolethAuthAuthority)		// BAO
+        if (authAuthority instanceof ShibbolethAuthAuthority)
         {
             // AJP
             Ajp13SocketConnector ajp13SocketConnector
                 = new Ajp13SocketConnector();
 
-            //ajp13SocketConnector.setPort(8009);
+            //ajp13SocketConnector.setPort(8009);					// BAO
             //server.addConnector(ajp13SocketConnector);
         }
 
