@@ -130,7 +130,10 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 
 						for (String propertyName : properties)
 						{
-							startClient(propertyName, JiveGlobals.getProperty(propertyName), null);
+							if (propertyName.indexOf("skype.password.") == 0)
+							{
+								startClient(propertyName, JiveGlobals.getProperty(propertyName), null);
+							}
 						}
 
 						return true;
@@ -237,10 +240,10 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 
 		if (requestJSON != null)
 		{
-			presence = requestJSON.getString("presence");
-			note = requestJSON.getString("note");
-			contacts = "true".equals(requestJSON.getString("contacts"));
-			groups = "true".equals(requestJSON.getString("groups"));
+			if (requestJSON.has("presence")) 	presence = requestJSON.getString("presence");
+			if (requestJSON.has("note")) 		note = requestJSON.getString("note");
+			if (requestJSON.has("contacts")) 	contacts = "true".equals(requestJSON.getString("contacts"));
+			if (requestJSON.has("groups")) 		groups = "true".equals(requestJSON.getString("groups"));
 		}
 
 		int pos = propertyName.indexOf("skype.password.");
@@ -256,6 +259,7 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 				String[] user = username.split("@");
 				String domain = user[1];
 				String userid = user[0];
+				String userName = (user[0] + "_" + user[1]).replaceAll("\\.", "_");
 
 				if (clients.containsKey(propertyName))
 				{
@@ -270,7 +274,7 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 				}
 
 				SkypeClient skypeClient = new SkypeClient(username, password, domain, username);
-				skypeClient.setClientId(new JID(JID.escapeNode(username) + "@" + server.getServerInfo().getXMPPDomain()), true);
+				skypeClient.setClientId(new JID(JID.escapeNode(userName) + "@" + server.getServerInfo().getXMPPDomain()));
 				skypeClient.doLogin();
 				skypeClient.makeMeAvailable(presence);
 				skypeClient.setNote(note);
@@ -362,7 +366,10 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 		{
 			public Boolean call() throws Exception
 			{
-				startClient(property, (String)params.get("value"), null);
+				if (property.indexOf("skype.password.") == 0)
+				{
+					startClient(property, (String)params.get("value"), null);
+				}
 				return true;
 			}
 		});
@@ -398,7 +405,7 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 	{
 		Log.info("OfSkype Plugin - makeCall " + sipUrl + "\n" + sdp + "\n" + json);
 
-		sdp = sdp.replace("RTP/AVP", "UDP/TLS/RTP/SAVPF");
+		sdp = sdp.replace("RTP/AVP", "RTP/SAVP");
 
 		try {
 			SessionDescription sd =  SdpFactory.getInstance().createSessionDescription(sdp);
@@ -517,6 +524,8 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 				JSONObject requestJSON = new JSONObject(element.getText());
 				String action = requestJSON.getString("action");
 
+				Log.info("Openfire Skype handleIQ action " + action);
+
 				if ("start_skype_user".equals(action)) startSkypeUser(iq.getFrom().getNode(), reply, requestJSON);
 				if ("stop_skype_user".equals(action)) stopSkypeUser(iq.getFrom().getNode(), reply, requestJSON);
 
@@ -542,6 +551,8 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 				String password = requestJSON.getString("password");
 				String sipuri = requestJSON.getString("sipuri");
 
+				Log.info("Openfire Skype startSkypeUser " + sipuri);
+
 				String property = "skype.password." + sipuri;
 				String response = startClient(property, password, requestJSON);
 
@@ -562,6 +573,8 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 			try {
 				String sipuri = requestJSON.getString("sipuri");
 				String property = "skype.password." + sipuri;
+
+				Log.info("Openfire Skype stopSkypeUser " + sipuri);
 
 				if (clients.containsKey(property))
 				{
