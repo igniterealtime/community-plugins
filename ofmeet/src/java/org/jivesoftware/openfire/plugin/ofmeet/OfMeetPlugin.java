@@ -55,7 +55,7 @@ import org.jivesoftware.openfire.handler.IQHandler;
 import org.jivesoftware.openfire.IQHandlerInfo;
 import org.jivesoftware.openfire.roster.RosterManager;
 import org.jivesoftware.openfire.net.SASLAuthentication;
-import org.jivesoftware.openfire.plugin.ofmeet.jetty.OfMeetLoginService;
+import org.jivesoftware.openfire.plugin.ofmeet.jetty.*;
 import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslProvider;
 import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslServer;
 
@@ -523,6 +523,23 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	public void sessionDestroyed(Session session)
 	{
 		Log.debug("OfMeet Plugin -  sessionDestroyed "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
+
+		boolean skypeAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("ofskype") != null;
+
+		if (OfMeetAzure.skypeids.containsKey(session.getAddress().getNode()))
+		{
+			String sipuri = OfMeetAzure.skypeids.remove(session.getAddress().getNode());
+
+			IQ iq = new IQ(IQ.Type.set);
+			iq.setFrom(session.getAddress());
+			iq.setTo(XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+
+			Element child = iq.setChildElement("request", "http://igniterealtime.org/protocol/ofskype");
+			child.setText("{'action':'stop_skype_user', 'sipuri':'" + sipuri + "'}");
+			XMPPServer.getInstance().getIQRouter().route(iq);
+
+			Log.info("OfMeet Plugin - closing skype session " + sipuri);
+		}
 	}
 
 	//-------------------------------------------------------
