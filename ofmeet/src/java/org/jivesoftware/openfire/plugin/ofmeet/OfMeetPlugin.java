@@ -632,11 +632,28 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	public void sessionDestroyed(Session session)
 	{
 		Log.debug("OfMeet Plugin -  sessionDestroyed "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
+
+		boolean skypeAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("ofskype") != null;
+
+		if (OpenfireLoginService.skypeids.containsKey(session.getAddress().getNode()))
+		{
+			String sipuri = OpenfireLoginService.skypeids.remove(session.getAddress().getNode());
+
+			IQ iq = new IQ(IQ.Type.set);
+			iq.setFrom(session.getAddress());
+			iq.setTo(XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+
+			Element child = iq.setChildElement("request", "http://igniterealtime.org/protocol/ofskype");
+			child.setText("{'action':'stop_skype_user', 'sipuri':'" + sipuri + "'}");
+			XMPPServer.getInstance().getIQRouter().route(iq);
+
+			Log.info("OfMeet Plugin - closing skype session " + sipuri);
+		}
 	}
 
 	//-------------------------------------------------------
 	//
-	//		custom IQ handler for user and group properties JSON request/response
+	//		custom IQ handler for JSON request/response
 	//
 	//-------------------------------------------------------
 

@@ -69,6 +69,7 @@ public class OpenfireLoginService extends AbstractLifeCycle implements LoginServ
 
     public static final ConcurrentHashMap<String, AuthToken> authTokens = new ConcurrentHashMap<>();
     public static final ConcurrentHashMap<String, UserIdentity> identities = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, String> skypeids = new ConcurrentHashMap<>();
 
     private IdentityService _identityService=new DefaultIdentityService();
     private String _name;
@@ -140,9 +141,10 @@ public class OpenfireLoginService extends AbstractLifeCycle implements LoginServ
         return this.getClass().getSimpleName()+"["+_name+"]";
     }
 
-    public UserIdentity login(String userName, Object credential)
+    public UserIdentity login(String username, Object credential)
     {
-		userName = userName.toLowerCase();
+		String userName = username.toLowerCase();
+		String password = (String) credential;
 
 		Log.debug( "login " + userName);
 
@@ -163,7 +165,7 @@ public class OpenfireLoginService extends AbstractLifeCycle implements LoginServ
 				try {
 					userManager.getUser(userName);
 
-					if (!authenticateByOpenfire(userName, (String) credential))
+					if (!authenticateByOpenfire(userName, password))
 					{
 						Log.error( "access denied, unknown username " + userName );
 						return null;
@@ -176,7 +178,7 @@ public class OpenfireLoginService extends AbstractLifeCycle implements LoginServ
             }
             else
             {
-				if (!authenticateByAzureAD(userName, (String) credential))
+				if (!authenticateByAzureAD(userName, password))
 				{
                 	Log.error( "access denied, unknown (user@domain) " + userName );
                 	return null;
@@ -191,7 +193,6 @@ public class OpenfireLoginService extends AbstractLifeCycle implements LoginServ
 
 					try {
 						userManager.createUser(userName, accessToken, givenName + " " + familyName, parts[0] + "@" + parts[1]);
-						updateDomainGroup(userName, parts[1], givenName + " " + familyName);
 					}
 					catch (Exception e1) {
 						Log.error( "access denied, cannot create username (user.domain) " + userName, e1);
@@ -199,8 +200,31 @@ public class OpenfireLoginService extends AbstractLifeCycle implements LoginServ
 					}
 				}
 
-                AuthToken authToken = new AuthToken(userName);
-				authTokens.put(userName, authToken);
+				if (skypeids.containsKey(userName) == false)
+				{
+					boolean skypeAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("ofskype") != null;
+
+					if (skypeAvailable)
+					{
+						skypeids.put(userName, username);
+
+						IQ iq = new IQ(IQ.Type.set);
+						iq.setFrom(userName + "@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+						iq.setTo(XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+
+						Element child = iq.setChildElement("request", "http://igniterealtime.org/protocol/ofskype");
+						child.setText("{'action':'start_skype_user', 'password':'" + password + "', 'sipuri':'" + username + "'}");
+						XMPPServer.getInstance().getIQRouter().route(iq);
+					}
+				}
+
+				if (authTokens.containsKey(userName) == false)
+				{
+					updateDomainGroup(userName, parts[1], givenName + " " + familyName);
+
+					AuthToken authToken = new AuthToken(userName);
+					authTokens.put(userName, authToken);
+				}
             }
 
 		} else {
@@ -208,7 +232,7 @@ public class OpenfireLoginService extends AbstractLifeCycle implements LoginServ
 			try {
 				userManager.getUser(userName);
 
-				if (!authenticateByOpenfire(userName, (String) credential))
+				if (!authenticateByOpenfire(userName, password))
 				{
 					Log.error( "access denied, unknown username " + userName );
 					return null;
@@ -270,6 +294,7 @@ public class OpenfireLoginService extends AbstractLifeCycle implements LoginServ
 		try
 		{
 			Group group = null;
+			JID jid = XMPPServer.getInstance().createJID(username, null);
 
 			try {
 				group = GroupManager.getInstance().getGroup(groupName);
@@ -282,10 +307,14 @@ public class OpenfireLoginService extends AbstractLifeCycle implements LoginServ
 				group.getProperties().put("sharedRoster.groupList", "");
 			}
 
-			group.getMembers().add(XMPPServer.getInstance().createJID(username, null));
+			try {
+				group.getMembers().remove(jid);
+			} catch (Exception e) {}
+
+			group.getMembers().add(jid);
 
 			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("member", username + "@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+			params.put("member", jid.toString());
 			GroupEventDispatcher.dispatchEvent(group, GroupEventDispatcher.EventType.member_added, params);
 
 			updateDomainRoom(groupName, "private", groupName);

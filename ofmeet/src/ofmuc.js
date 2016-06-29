@@ -418,11 +418,11 @@ Strophe.addConnectionPlugin('ofmuc', {
 						}, 60000);
 												
 					} else {
-						console.err('getConferenceId, no recording folder', json);	
+						console.error('getConferenceId, no recording folder', json);	
 					}
 				}, function(err) {
 
-					console.err('getConferenceId', err);	
+					console.error('getConferenceId', err);	
 				});				
 			}			
 		});
