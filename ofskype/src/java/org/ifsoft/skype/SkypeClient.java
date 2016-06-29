@@ -22,7 +22,10 @@ import org.apache.commons.httpclient.params.HttpClientParams;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.group.*;
 import org.jivesoftware.openfire.user.*;
-import org.jivesoftware.openfire.roster.*;
+import org.jivesoftware.openfire.roster.Roster;
+import org.jivesoftware.openfire.roster.RosterItem;
+import org.jivesoftware.openfire.roster.RosterManager;
+import org.jivesoftware.openfire.vcard.VCardManager;
 
 import org.jivesoftware.community.http.HttpClientManager;
 import org.jivesoftware.community.http.impl.HttpClientManagerImpl;
@@ -132,7 +135,6 @@ public class SkypeClient {
     private String myNotePath;
     private String myPhotoPath;
     private String myPhonesPath;
-    private boolean cache;
 
     private String stopPhoneAudioHref = null;
     private String holdPhoneAudioHref = null;
@@ -161,10 +163,9 @@ public class SkypeClient {
 		return domain;
 	}
 
-    public void setClientId(JID jid, boolean cache)  throws Exception
+    public void setClientId(JID jid)  throws Exception
     {
 		this.jid = jid;
-		this.cache = cache;
     }
 
     public void doLogin() throws Exception
@@ -678,12 +679,8 @@ public class SkypeClient {
 							Log.info("found contact " + name);
 
 							contactList.put(i, uri);
-
-							//if (cache == false)
-							//{
-								String photoURL = contact.getJSONObject("_links").getJSONObject("contactPhoto").getString("href");
-								pushAvatar(contactJid, photoURL, name);
-							//}
+							String photoURL = contact.getJSONObject("_links").getJSONObject("contactPhoto").getString("href");
+							pushAvatar(contactJid, photoURL, name);
 						}
 
 						subscribePresence(contactList);
@@ -707,7 +704,7 @@ public class SkypeClient {
 
 	private String pushAvatar(String contactJid, String photoURL, String contactName)
 	{
-		//Log.info("pushAvatar " + contactJid + " " + photoURL);
+		Log.info("pushAvatar " + contactJid + " " + photoURL);
 		String base64String = null;
 
 		if (photoURL != null)
@@ -720,6 +717,38 @@ public class SkypeClient {
 				if (sipUrl.equals(contactJid) == false)	// contacts
 				{
 					//buddies.put(contactJid, new LyncBuddy(this, jid, new JID(contactJid), "", "", contactName, base64String));
+					String fromUser = jid.getNode();
+					Roster roster = XMPPServer.getInstance().getRosterManager().getRoster(fromUser);
+					ArrayList<String> groups = new ArrayList<String>();
+
+					if (roster != null)
+					{
+						JID toUserJid = new JID(contactJid);
+						RosterItem gwitem = null;
+
+						if (roster.isRosterItem(toUserJid) == false)
+						{
+							Log.info( "pushAvatar create friendship " + fromUser + " " + toUserJid + " " + contactName);
+							gwitem = roster.createRosterItem(toUserJid, true, true);
+
+						} else {
+							Log.info( "pushAvatar update friendship " + fromUser + " " + toUserJid + " " + contactName);
+							gwitem = roster.getRosterItem(toUserJid);
+						}
+
+						if (gwitem != null)
+						{
+							gwitem.setSubStatus(RosterItem.SUB_BOTH);
+							gwitem.setAskStatus(RosterItem.ASK_NONE);
+							gwitem.setNickname(contactName);
+							gwitem.setGroups((List<String>)groups);
+							roster.updateRosterItem(gwitem);
+							roster.broadcast(gwitem, true);
+
+						} else Log.warn("pushAvatar cannot create friendship  " + fromUser + " " + toUserJid + " " + contactName);
+
+					} else Log.warn("pushAvatar cannot find roster for user  " + fromUser);
+
 
 				} else {										// me
 
@@ -847,6 +876,38 @@ public class SkypeClient {
 				boolean isInternal = srcNetwork.contains("SameEnterprise");
 
 				Log.info("getGroupContacts, found contact " + groupName + " " + displayName + " " + sip + " " + workPhoneNumber);
+
+				String fromUser = jid.getNode();
+				Roster roster = XMPPServer.getInstance().getRosterManager().getRoster(fromUser);
+
+				if (roster != null)
+				{
+					JID toUserJid = new JID(sip);
+					RosterItem gwitem = null;
+
+					if (roster.isRosterItem(toUserJid) == false)
+					{
+						Log.info( "getGroupContacts create friendship " + fromUser + " " + toUserJid + " " + displayName);
+						gwitem = roster.createRosterItem(toUserJid, true, true);
+
+					} else {
+						Log.info( "getGroupContacts update friendship " + fromUser + " " + toUserJid + " " + displayName);
+						gwitem = roster.getRosterItem(toUserJid);
+					}
+
+					if (gwitem != null)
+					{
+						List<String> groups = gwitem.getGroups();
+						groups.add(groupName);
+						gwitem.setNickname(displayName);
+						gwitem.setGroups(groups);
+						roster.updateRosterItem(gwitem);
+						roster.broadcast(gwitem, true);
+
+					} else Log.warn("getGroupContacts cannot find friendship  " + fromUser + " " + toUserJid + " " + displayName);
+
+				} else Log.warn("getGroupContacts cannot find roster for user  " + fromUser);
+
 
 				if (buddies.containsKey(sip))
 				{
