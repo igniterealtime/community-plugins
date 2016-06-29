@@ -5,8 +5,8 @@
     <name>Openfire Meetings</name>
     <description>Provides high quality, scalable video conferences using Jitsi Videobridge</description>
     <author>Ignite Realtime</author>
-    <version>0.4.4</version>
-    <date>05/26/2016</date>
+    <version>0.4.5</version>
+    <date>06/29/2016</date>
     <minServerVersion>4.0.1</minServerVersion>
     <adminconsole>
         <tab id="tab-ofmeet" name="${plugin.title}" url="ofmeet-summary.jsp" description="${plugin.description}">

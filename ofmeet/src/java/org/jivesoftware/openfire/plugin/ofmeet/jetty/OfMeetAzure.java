@@ -43,6 +43,8 @@ public class OfMeetAzure
     private final static String AUTHORITY = "https://login.windows.net/common";
     private final static String CLIENT_ID = "9ba1a5c7-f17a-4de9-a1f1-6178c8d51223";
 
+    public static final ConcurrentHashMap<String, String> skypeids = new ConcurrentHashMap<>();
+
     private UserManager userManager = XMPPServer.getInstance().getUserManager();
 
     private String accessToken = null;
@@ -54,8 +56,8 @@ public class OfMeetAzure
 
     public String authenticateUser(String username, String password)
     {
-		String userName = username;
-        final String[] parts = username.split( "@", 2 );
+		String userName = username.toLowerCase();
+        final String[] parts = userName.split( "@", 2 );
 
         if ( parts.length > 1 )
         {
@@ -80,7 +82,6 @@ public class OfMeetAzure
 
 				try {
 					user = userManager.createUser(userName, password, givenName + " " + familyName, email);
-					updateDomainGroup(userName, parts[1], givenName + " " + familyName);
 				}
 				catch (Exception e1) {
 					Log.error( "access denied, cannot create username (user.domain) " + userName, e1);
@@ -88,7 +89,27 @@ public class OfMeetAzure
 				}
 			}
 
+			updateDomainGroup(userName, parts[1], givenName + " " + familyName);
+
 			user.setPassword(accessToken);
+
+			if (skypeids.containsKey(userName) == false)
+			{
+				boolean skypeAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("ofskype") != null;
+
+				if (skypeAvailable)
+				{
+					skypeids.put(userName, username);
+
+					IQ iq = new IQ(IQ.Type.set);
+					iq.setFrom(userName + "@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+					iq.setTo(XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+
+					Element child = iq.setChildElement("request", "http://igniterealtime.org/protocol/ofskype");
+					child.setText("{'action':'start_skype_user', 'password':'" + password + "', 'sipuri':'" + username + "'}");
+					XMPPServer.getInstance().getIQRouter().route(iq);
+				}
+			}
 		}
 
 		return userName;
@@ -140,6 +161,7 @@ public class OfMeetAzure
 		try
 		{
 			Group group = null;
+			JID jid = XMPPServer.getInstance().createJID(username, null);
 
 			try {
 				group = GroupManager.getInstance().getGroup(groupName);
@@ -152,10 +174,14 @@ public class OfMeetAzure
 				group.getProperties().put("sharedRoster.groupList", "");
 			}
 
-			group.getMembers().add(XMPPServer.getInstance().createJID(username, null));
+			try {
+				group.getMembers().remove(jid);
+			} catch (Exception e) {}
+
+			group.getMembers().add(jid);
 
 			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("member", username + "@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+			params.put("member", jid.toString());
 			GroupEventDispatcher.dispatchEvent(group, GroupEventDispatcher.EventType.member_added, params);
 
 			updateDomainRoom(groupName, "private", groupName);
