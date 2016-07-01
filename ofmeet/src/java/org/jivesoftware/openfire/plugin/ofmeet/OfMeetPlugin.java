@@ -679,6 +679,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				if ("get_user_properties".equals(action)) getUserProperties(iq.getFrom().getNode(), reply, requestJSON);
 				if ("set_user_properties".equals(action)) setUserProperties(iq.getFrom().getNode(), reply, requestJSON);
 				if ("get_user_groups".equals(action)) getUserGroups(iq.getFrom().getNode(), reply, requestJSON);
+				if ("get_group".equals(action)) getGroup(iq.getFrom().getNode(), reply, requestJSON);
 				if ("get_conference_id".equals(action)) getConferenceId(iq.getFrom().getNode(), reply, requestJSON);
 
 				return reply;
@@ -846,6 +847,21 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			} catch (UserNotFoundException e) {
 				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, "User not found"));
 				return;
+
+			} catch (Exception e1) {
+				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, requestJSON.toString() + " " + e1));
+				return;
+			}
+		}
+
+		private void getGroup(String defaultUsername, IQ reply, JSONObject requestJSON)
+		{
+			Element childElement = reply.setChildElement("response", "http://igniterealtime.org/protocol/ofmeet");
+
+			try {
+
+				JSONObject groupJSON = getJsonFromGroupXml(requestJSON.getString("groupname"));
+				childElement.setText(groupJSON.toString());
 
 			} catch (Exception e1) {
 				reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, requestJSON.toString() + " " + e1));
