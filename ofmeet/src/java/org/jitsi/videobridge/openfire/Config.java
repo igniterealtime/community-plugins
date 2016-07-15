@@ -340,6 +340,7 @@ public class Config extends HttpServlet
 			String activeSpkrAvatarSize		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.active.speaker.avatarsize", "100");
 
 			String initationPoweredBy		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.invitation.poweredby", "true");
+			String videoLayoutFit			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.video.layout.fit", "both");
 			String toolbarButtons			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.toolbar.buttons", "'authentication', 'microphone', 'camera', 'desktop','recording', 'security', 'invite', 'chat', 'etherpad', 'sharedvideo','fullscreen', 'sip', 'dialpad', 'settings', 'hangup', 'filmstrip','contacts'");
 
 			out.println("var interfaceConfig = {");
@@ -360,6 +361,7 @@ public class Config extends HttpServlet
 			out.println("    APP_NAME: '" + applicationName + "',");
 
 			out.println("    INVITATION_POWERED_BY: " + initationPoweredBy + ",");
+			out.println("    VIDEO_LAYOUT_FIT: '" + videoLayoutFit + "',");
 			out.println("    TOOLBAR_BUTTONS: [" + toolbarButtons + "],");
 			out.println("    filmStripOnly: false,");
 			out.println("    RANDOM_AVATAR_URL_PREFIX: false,");

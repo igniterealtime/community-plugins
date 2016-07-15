@@ -197,7 +197,7 @@ public class PluginImpl
 		System.setProperty("net.java.sip.communicator.SC_CACHE_DIR_LOCATION", pluginDirectory.getAbsolutePath());
 		System.setProperty("net.java.sip.communicator.SC_LOG_DIR_LOCATION", pluginDirectory.getAbsolutePath());
 
-		System.setProperty("org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext.checkReplay", JiveGlobals.getProperty(CHECKREPLAY_PROPERTY_NAME, "false"));
+		//System.setProperty("org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext.checkReplay", JiveGlobals.getProperty(CHECKREPLAY_PROPERTY_NAME, "false"));
 
 		System.setProperty("org.jitsi.videobridge.ENABLE_MEDIA_RECORDING", enableRecording);
 		System.setProperty("org.jitsi.videobridge.MEDIA_RECORDING_PATH", recordingPath);
@@ -206,6 +206,8 @@ public class PluginImpl
 		System.setProperty("org.jitsi.videobridge.NAT_HARVESTER_PUBLIC_ADDRESS", publicAddress);
 
 		System.setProperty("org.jitsi.videobridge.defaultOptions", "2");	// allow videobridge access without focus
+		System.setProperty("org.jitsi.videobridge.rtcp.strategy", "org.jitsi.impl.neomedia.rtcp.termination.strategies.BasicRTCPTerminationStrategy");
+
 
         PropertyEventDispatcher.addListener(this);
 
@@ -238,7 +240,7 @@ public class PluginImpl
 
         System.setProperty(Videobridge.REST_API_PNAME, "false");
         System.setProperty(Videobridge.XMPP_API_PNAME, "true");
-        System.setProperty("org.jitsi.videobridge.ENABLE_STATISTICS", "true");
+        System.setProperty("org.jitsi.videobridge.ENABLE_STATISTICS", "false");
 
 		Log.info("initializePlugin set jicofo properties...");
 

@@ -1,7 +1,7 @@
 @charset "UTF-8";
-#nowebrtc,
-.right-panel {
-    display: none
+.context-menu-icon:before,
+.fa {
+    -moz-osx-font-smoothing: grayscale
 }
 #videospace,
 .right-panel,
@@ -10,14 +10,19 @@ html,
 textarea {
     overflow: hidden
 }
-.button,
-.toolbar_span>span {
-    text-align: center;
-    cursor: pointer
+#nowebrtc,
+.right-panel {
+    display: none
 }
-.context-menu-icon:before,
-.fa {
-    -moz-osx-font-smoothing: grayscale
+#etherpad,
+#presentation,
+.bottomToolbarButton,
+.bottomToolbar_span>span,
+.button,
+.overlay_content,
+.toolbar_span>span,
+.videocontainer {
+    text-align: center
 }
 #contacts>li,
 .context-menu-list,
@@ -25,6 +30,13 @@ textarea {
 ul.loginmenu li,
 ul.popupmenu li {
     list-style-type: none
+}
+@font-face {
+    font-family: open_sanslight;
+    src: url(../fonts/OpenSans-Light-webfont.eot);
+    src: url(../fonts/OpenSans-Light-webfont.eot?#iefix) format('embedded-opentype'), url(../fonts/OpenSans-Light-webfont.woff) format('woff'), url(../fonts/OpenSans-Light-webfont.ttf) format('truetype'), url(../fonts/OpenSans-Light-webfont.svg#open_sanslight) format('svg');
+    font-weight: 400;
+    font-style: normal
 }
 @font-face {
     font-family: jitsi;
@@ -199,7 +211,7 @@ button.toast-close-button {
 }
 #toast-container {
     position: fixed;
-    z-index: 999999
+    z-index: 1012
 }
 #toast-container * {
     -moz-box-sizing: border-box;
@@ -208,7 +220,7 @@ button.toast-close-button {
 }
 #toast-container>div {
     margin: 0 0 6px;
-    padding: 15px 15px 15px 50px;
+    padding: 15px;
     width: 300px;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
@@ -223,30 +235,28 @@ button.toast-close-button {
     -ms-filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=80);
     filter: alpha(opacity=80)
 }
+#toast-container>:hover,
+.toast-close-button:focus,
+.toast-close-button:hover {
+    opacity: 1;
+    -ms-filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=100);
+    cursor: pointer
+}
 #toast-container>:hover {
     -moz-box-shadow: 0 0 12px #000;
     -webkit-box-shadow: 0 0 12px #000;
     box-shadow: 0 0 12px #000;
-    opacity: 1;
-    -ms-filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=100);
-    filter: alpha(opacity=100);
-    cursor: pointer
+    filter: alpha(opacity=100)
 }
-#toast-container>.toast-info {
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGwSURBVEhLtZa9SgNBEMc9sUxxRcoUKSzSWIhXpFMhhYWFhaBg4yPYiWCXZxBLERsLRS3EQkEfwCKdjWJAwSKCgoKCcudv4O5YLrt7EzgXhiU3/4+b2ckmwVjJSpKkQ6wAi4gwhT+z3wRBcEz0yjSseUTrcRyfsHsXmD0AmbHOC9Ii8VImnuXBPglHpQ5wwSVM7sNnTG7Za4JwDdCjxyAiH3nyA2mtaTJufiDZ5dCaqlItILh1NHatfN5skvjx9Z38m69CgzuXmZgVrPIGE763Jx9qKsRozWYw6xOHdER+nn2KkO+Bb+UV5CBN6WC6QtBgbRVozrahAbmm6HtUsgtPC19tFdxXZYBOfkbmFJ1VaHA1VAHjd0pp70oTZzvR+EVrx2Ygfdsq6eu55BHYR8hlcki+n+kERUFG8BrA0BwjeAv2M8WLQBtcy+SD6fNsmnB3AlBLrgTtVW1c2QN4bVWLATaIS60J2Du5y1TiJgjSBvFVZgTmwCU+dAZFoPxGEEs8nyHC9Bwe2GvEJv2WXZb0vjdyFT4Cxk3e/kIqlOGoVLwwPevpYHT+00T+hWwXDf4AJAOUqWcDhbwAAAAASUVORK5CYII=)!important
-}
-#toast-container>.toast-error {
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAHOSURBVEhLrZa/SgNBEMZzh0WKCClSCKaIYOED+AAKeQQLG8HWztLCImBrYadgIdY+gIKNYkBFSwu7CAoqCgkkoGBI/E28PdbLZmeDLgzZzcx83/zZ2SSXC1j9fr+I1Hq93g2yxH4iwM1vkoBWAdxCmpzTxfkN2RcyZNaHFIkSo10+8kgxkXIURV5HGxTmFuc75B2RfQkpxHG8aAgaAFa0tAHqYFfQ7Iwe2yhODk8+J4C7yAoRTWI3w/4klGRgR4lO7Rpn9+gvMyWp+uxFh8+H+ARlgN1nJuJuQAYvNkEnwGFck18Er4q3egEc/oO+mhLdKgRyhdNFiacC0rlOCbhNVz4H9FnAYgDBvU3QIioZlJFLJtsoHYRDfiZoUyIxqCtRpVlANq0EU4dApjrtgezPFad5S19Wgjkc0hNVnuF4HjVA6C7QrSIbylB+oZe3aHgBsqlNqKYH48jXyJKMuAbiyVJ8KzaB3eRc0pg9VwQ4niFryI68qiOi3AbjwdsfnAtk0bCjTLJKr6mrD9g8iq/S/B81hguOMlQTnVyG40wAcjnmgsCNESDrjme7wfftP4P7SP4N3CJZdvzoNyGq2c/HWOXJGsvVg+RA/k2MC/wN6I2YA2Pt8GkAAAAASUVORK5CYII=)!important
-}
-#toast-container>.toast-success {
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADsSURBVEhLY2AYBfQMgf///3P8+/evAIgvA/FsIF+BavYDDWMBGroaSMMBiE8VC7AZDrIFaMFnii3AZTjUgsUUWUDA8OdAH6iQbQEhw4HyGsPEcKBXBIC4ARhex4G4BsjmweU1soIFaGg/WtoFZRIZdEvIMhxkCCjXIVsATV6gFGACs4Rsw0EGgIIH3QJYJgHSARQZDrWAB+jawzgs+Q2UO49D7jnRSRGoEFRILcdmEMWGI0cm0JJ2QpYA1RDvcmzJEWhABhD/pqrL0S0CWuABKgnRki9lLseS7g2AlqwHWQSKH4oKLrILpRGhEQCw2LiRUIa4lwAAAABJRU5ErkJggg==)!important
-}
-#toast-container>.toast-warning {
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGYSURBVEhL5ZSvTsNQFMbXZGICMYGYmJhAQIJAICYQPAACiSDB8AiICQQJT4CqQEwgJvYASAQCiZiYmJhAIBATCARJy+9rTsldd8sKu1M0+dLb057v6/lbq/2rK0mS/TRNj9cWNAKPYIJII7gIxCcQ51cvqID+GIEX8ASG4B1bK5gIZFeQfoJdEXOfgX4QAQg7kH2A65yQ87lyxb27sggkAzAuFhbbg1K2kgCkB1bVwyIR9m2L7PRPIhDUIXgGtyKw575yz3lTNs6X4JXnjV+LKM/m3MydnTbtOKIjtz6VhCBq4vSm3ncdrD2lk0VgUXSVKjVDJXJzijW1RQdsU7F77He8u68koNZTz8Oz5yGa6J3H3lZ0xYgXBK2QymlWWA+RWnYhskLBv2vmE+hBMCtbA7KX5drWyRT/2JsqZ2IvfB9Y4bWDNMFbJRFmC9E74SoS0CqulwjkC0+5bpcV1CZ8NMej4pjy0U+doDQsGyo1hzVJttIjhQ7GnBtRFN1UarUlH8F3xict+HY07rEzoUGPlWcjRFRr4/gChZgc3ZL2d8oAAAAASUVORK5CYII=)!important
+#toast-container .toast-error,
+#toast-container .toast-info,
+#toast-container .toast-success,
+#toast-container .toast-warning {
+    padding: 10px!important
 }
 #toast-container.toast-bottom-full-width>div,
 #toast-container.toast-top-full-width>div {
-    width: 96%;
+    width: 100%;
     margin: auto
 }
 .toast {
@@ -266,7 +276,7 @@ button.toast-close-button {
 }
 @media all and (max-width: 240px) {
     #toast-container>div {
-        padding: 8px 8px 8px 50px;
+        padding: 8px;
         width: 11em
     }
     #toast-container .toast-close-button {
@@ -276,7 +286,7 @@ button.toast-close-button {
 }
 @media all and (min-width: 241px) and (max-width: 480px) {
     #toast-container>div {
-        padding: 8px 8px 8px 50px;
+        padding: 8px;
         width: 18em
     }
     #toast-container .toast-close-button {
@@ -286,7 +296,7 @@ button.toast-close-button {
 }
 @media all and (min-width: 481px) and (max-width: 768px) {
     #toast-container>div {
-        padding: 15px 15px 15px 50px;
+        padding: 15px;
         width: 25em
     }
 }
@@ -299,9 +309,18 @@ html {
     margin: 0;
     height: 100%;
     color: #424242;
-    font-family: 'Helvetica Neue', Helvetica, sans-serif;
+    font-size: 14px;
     font-weight: 400;
     background: #000
+}
+body,
+button,
+html,
+input,
+keygen,
+select,
+textarea {
+    font-family: open_sanslight, 'Helvetica Neue', Helvetica, sans-serif!important
 }
 .right-panel {
     position: absolute;
@@ -320,6 +339,14 @@ html {
     position: relative;
     display: inline-block
 }
+.jitsipopover,
+.popover {
+    max-width: 300px;
+    color: #333
+}
+#header_container {
+    z-index: 1014
+}
 #toolbar a.button:last-child::after {
     content: none
 }
@@ -329,9 +356,10 @@ html {
     padding-top: 10px;
     width: 38px;
     height: 28px;
+    cursor: pointer;
     text-shadow: 0 1px 0 rgba(255, 255, 255, .3), 0 -1px 0 rgba(0, 0, 0, .6);
     z-index: 1;
-    font-size: 1.22em!important;
+    font-size: 1.44em!important;
     vertical-align: middle
 }
 .button[disabled] {
@@ -341,7 +369,8 @@ html {
     display: inline-block;
     position: absolute;
     font-size: 7pt;
-    color: #fff
+    color: #fff;
+    cursor: pointer
 }
 #toolbar,
 button {
@@ -358,9 +387,9 @@ button {
 #chatBottomButton.glowing,
 #contactListButton.glowing,
 #toolbar_button_chat.active {
-    -webkit-text-shadow: -1px 0 10px #0cf, 0 1px 10px #0cf, 1px 0 10px #0cf, 0 -1px 10px #0cf;
-    -moz-text-shadow: 1px 0 10px #0cf, 0 1px 10px #0cf, 1px 0 10px #0cf, 0 -1px 10px #0cf;
-    text-shadow: -1px 0 10px #0cf, 0 1px 10px #0cf, 1px 0 10px #0cf, 0 -1px 10px #0cf
+    -webkit-text-shadow: -1px 0 10px #21B9FC, 0 1px 10px #21B9FC, 1px 0 10px #21B9FC, 0 -1px 10px #21B9FC;
+    -moz-text-shadow: 1px 0 10px #21B9FC, 0 1px 10px #21B9FC, 1px 0 10px #21B9FC, 0 -1px 10px #21B9FC;
+    text-shadow: -1px 0 10px #21B9FC, 0 1px 10px #21B9FC, 1px 0 10px #21B9FC, 0 -1px 10px #21B9FC
 }
 #toolbar_button_hangup {
     color: red;
@@ -380,7 +409,7 @@ button {
     text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000
 }
 #contactListButton.active #numberOfParticipants {
-    color: #0cf
+    color: #21B9FC
 }
 #toolbar {
     display: inline-block;
@@ -524,13 +553,8 @@ div.feedbackButton:hover {
     background: rgba(0, 0, 0, .5);
     z-index: 6
 }
-.bottomToolbarButton,
-.bottomToolbar_span>span {
-    display: inline-block;
-    cursor: pointer;
-    text-align: center
-}
 .bottomToolbarButton {
+    display: inline-block;
     position: relative;
     color: #FFF;
     top: 0;
@@ -538,6 +562,7 @@ div.feedbackButton:hover {
     margin: 2px;
     width: 25px;
     height: 20px;
+    cursor: pointer;
     font-size: 10pt;
     text-shadow: 0 1px 0 rgba(255, 255, 255, .3), 0 -1px 0 rgba(0, 0, 0, .7);
     z-index: 1
@@ -546,9 +571,11 @@ div.feedbackButton:hover {
     background-color: #0cf
 }
 .bottomToolbar_span>span {
+    display: inline-block;
     position: absolute;
     font-size: 7pt;
-    color: #fff
+    color: #fff;
+    cursor: pointer
 }
 .glow {
     text-shadow: 0 0 30px #06a5df, 0 0 10px #06a5df, 0 0 5px #06a5df, 0 0 3px #06a5df
@@ -584,11 +611,6 @@ div.feedbackButton:hover {
     text-decoration: none;
     z-index: 100
 }
-#remoteVideos,
-#videospace {
-    display: block;
-    position: absolute
-}
 #toast-container.notification-bottom-right {
     bottom: 140px;
     right: 5px
@@ -604,18 +626,22 @@ div.feedbackButton:hover {
     width: 220px;
     padding: 10px 10px 10px 50px
 }
+.overlay,
+.overlay_container {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: 1013
+}
 .toast-close-button {
     right: -7px;
     top: -19px
 }
 .connected {
-    color: #228b22;
+    color: #21B9FC;
     font-size: 12px
 }
-.disconnected {
-    color: #8b0000;
-    font-size: 12px
-}
+.disconnected,
 .lastN {
     color: #a3a3a3;
     font-size: 12px
@@ -623,15 +649,64 @@ div.feedbackButton:hover {
 .toast-close-button:focus,
 .toast-close-button:hover {
     text-decoration: none;
-    cursor: pointer;
     color: #fff;
-    opacity: 1;
-    -ms-filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=100);
     filter: alpha(opacity=100)
+}
+.overlay {
+    left: 0;
+    top: 0;
+    background: #21B9FC;
+    opacity: .75;
+    display: block
+}
+.overlay_transparent {
+    background: rgba(22, 185, 252, .9)
+}
+.overlay_content {
+    color: #fff;
+    font-weight: 400;
+    font-size: 20px;
+    width: 400px;
+    height: 250px;
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    margin-top: -125px;
+    margin-left: -200px
+}
+.overlay_avatar,
+.overlay_icon,
+.overlay_text {
+    position: relative;
+    z-index: 1013
+}
+.overlay_avatar {
+    width: 200px;
+    height: 200px;
+    border-radius: 100px;
+    float: left;
+    margin-left: 100px
+}
+.overlay_text {
+    width: 400px;
+    margin-top: 50px;
+    float: left
+}
+.overlay_text_small {
+    font-size: 18px
+}
+.overlay_icon {
+    float: none;
+    font-size: 100px
+}
+#remoteVideos,
+#videospace {
+    display: block;
+    position: absolute;
+    left: 0
 }
 #videospace {
     top: 0;
-    left: 0;
     right: 0
 }
 #remoteVideos {
@@ -639,7 +714,6 @@ div.feedbackButton:hover {
     height: 196px;
     padding: 18px;
     bottom: 0;
-    left: 0;
     right: 20px;
     width: auto;
     border: 1px solid transparent;
@@ -655,8 +729,7 @@ div.feedbackButton:hover {
 .videocontainer {
     position: relative;
     margin-left: auto;
-    margin-right: auto;
-    text-align: center
+    margin-right: auto
 }
 #remoteVideos .videocontainer {
     display: none;
@@ -731,10 +804,6 @@ div.feedbackButton:hover {
     z-index: 1;
     width: 100%;
     height: 100%
-}
-#etherpad,
-#presentation {
-    text-align: center
 }
 #etherpad {
     z-index: 0
@@ -872,7 +941,7 @@ div.feedbackButton:hover {
     right: 0;
     z-index: 3
 }
-.videocontainer>span.dominantspeakerindicator {
+.videocontainer>span.indicator {
     bottom: 0;
     left: 0;
     width: 25px;
@@ -880,7 +949,7 @@ div.feedbackButton:hover {
     z-index: 3;
     text-align: center;
     border-radius: 50%;
-    background: #0cf;
+    background: #21B9FC;
     margin: 5px;
     display: inline-block;
     position: absolute;
@@ -888,7 +957,7 @@ div.feedbackButton:hover {
     font-size: 11pt;
     border: 0
 }
-#speakerindicatoricon {
+#indicatoricon {
     padding-top: 5px
 }
 #reloadPresentation {
@@ -981,9 +1050,9 @@ div.feedbackButton:hover {
     z-index: 1;
     height: 100%;
     background-color: #000;
+    background-repeat: no-repeat;
     background-position: center;
-    width: 100%;
-    background-repeat: no-repeat
+    width: 100%
 }
 .sharedVideoAvatar {
     height: 100%;
@@ -1001,7 +1070,7 @@ div.feedbackButton:hover {
     display: none;
     position: absolute;
     background: rgba(0, 0, 0, .5);
-    z-index: 10000
+    z-index: 1011
 }
 .videoMessageFilter {
     -webkit-filter: grayscale(.5) opacity(.8);
@@ -1016,7 +1085,7 @@ div.feedbackButton:hover {
     position: absolute;
     width: 100%;
     top: 50%;
-    z-index: 10000;
+    z-index: 1011;
     font-weight: 600;
     font-size: 14px;
     text-align: center;
@@ -3338,8 +3407,12 @@ ul.popupmenu:hover {
     bottom: -35;
     left: 0
 }
+.recordingSpinner {
+    display: none;
+    vertical-align: text-bottom
+}
 ul.loginmenu {
-    font-family: 'Helvetica Neue', Helvetica, sans-serif;
+    font-family: inherit;
     display: none;
     position: absolute;
     margin: 0;
@@ -3385,22 +3458,17 @@ a.disabled {
     top: -30px;
     left: 0
 }
-.jitsipopover,
 .popover {
+    position: absolute;
     top: 0;
-    z-index: 1010;
-    color: #333;
-    background-clip: padding-box;
-    position: absolute
-}
-.popover {
     left: 0;
+    z-index: 1015;
     display: none;
-    max-width: 300px;
     min-width: 100px;
     padding: 1px;
     text-align: left;
     background-color: #fff;
+    background-clip: padding-box;
     border: 1px solid #ccc;
     border: 1px solid rgba(0, 0, 0, .2);
     border-radius: 6px;
@@ -3514,13 +3582,16 @@ a.disabled {
     border-left-color: #fff
 }
 .jitsipopover {
+    position: absolute;
+    top: 0;
     left: 0;
+    z-index: 1010;
     display: none;
-    max-width: 300px;
     min-width: 100px;
     padding: 1px;
     text-align: left;
     background-color: #fff;
+    background-clip: padding-box;
     border: 1px solid #ccc;
     border: 1px solid rgba(0, 0, 0, .2);
     border-radius: 6px;
@@ -3578,10 +3649,10 @@ a.disabled {
     color: #ffa800
 }
 .jitsipopover_blue {
-    color: #06a5df
+    color: #21B9FC
 }
 .jitsipopover_showmore {
-    background-color: #06a5df;
+    background-color: #21B9FC;
     color: #fff;
     cursor: pointer;
     border-radius: 3px;
@@ -3611,9 +3682,12 @@ a.disabled {
     text-align: left;
     padding: 7px 10px;
     margin: 2px;
-    color: #0cf;
+    color: #21B9FC;
     font-size: 11pt;
     border-bottom: 1px solid #676767
+}
+#contactlist>div.title>span {
+    margin-left: 5px
 }
 #contactlist>ul#contacts {
     position: absolute;
@@ -3628,13 +3702,6 @@ a.disabled {
     font-size: 10pt;
     padding: 7px 10px;
     margin: 2px
-}
-#header_text,
-#nickname,
-#reload_roomname,
-.feature_icon,
-.feedback {
-    text-align: center
 }
 #contacts>li>p {
     display: inline-block;
@@ -3717,6 +3784,7 @@ a.disabled {
 }
 #nickname {
     position: absolute;
+    text-align: center;
     color: #9d9d9d;
     font-size: 18px;
     top: 100px;
@@ -3823,6 +3891,12 @@ a.disabled {
 .smileyContainer:hover {
     background: #3e3e3e
 }
+#enter_room_field,
+#enter_room_form {
+    -webkit-appearance: none;
+    background-color: #FFF;
+    box-shadow: none
+}
 #usermsg::-webkit-input-placeholder {
     line-height: 30px
 }
@@ -3860,9 +3934,11 @@ a:active {
 }
 #disable_welcome+label,
 #disable_welcome:checked+label {
-    font-family: Helvetica;
     font-size: 16px;
     color: #acacac;
+    font-weight: 500;
+    z-index: 2;
+    background-repeat: no-repeat;
     -webkit-user-select: none;
     -moz-user-select: none
 }
@@ -3877,64 +3953,48 @@ a:active {
     height: 31px;
     display: block
 }
-#enter_room_field,
-#enter_room_form {
-    -webkit-appearance: none;
-    height: 55px;
-    background-color: #FFF;
-    box-shadow: none;
-    float: left
-}
 #disable_welcome+label {
     background-image: url(../images/welcome_page/disable-welcome.png);
-    cursor: pointer;
-    background-repeat: no-repeat;
-    font-weight: 500;
-    z-index: 2
+    cursor: pointer
 }
 #disable_welcome:checked+label {
     background-image: url(../images/welcome_page/disable-welcome-selected.png);
-    cursor: pointer;
-    background-repeat: no-repeat;
-    font-weight: 500;
-    z-index: 2
-}
-#enter_room_button,
-#header_text,
-.feature_description,
-.feature_icon {
-    font-family: Helvetica;
-    color: #fff
+    cursor: pointer
 }
 #enter_room_form {
     border-radius: 1px;
     border: none;
     -moz-border-radius: 1px;
-    -webkit-border-radius: 1px
+    -webkit-border-radius: 1px;
+    height: 55px;
+    float: left
 }
 #domain_name {
     float: left;
-    padding: 20px 0 10px 20px;
+    height: 55px;
+    line-height: 55px;
     font-size: 18px;
     font-weight: 500;
-    font-family: Helvetica
+    padding-left: 20px
 }
 #enter_room_field {
     font-size: 15px;
-    padding: 15px 0 10px 10px;
     border: none;
     width: 228px;
+    height: 55px;
+    line-height: 55px;
     font-weight: 500;
-    font-family: Helvetica;
+    float: left;
     position: relative;
     z-index: 2
 }
 #enter_room_button {
     width: 73px;
     height: 45px;
-    background-color: #16a8fe;
+    background-color: #21B9FC;
     moz-border-radius: 1px;
     -webkit-border-radius: 1px;
+    color: #fff;
     font-weight: 600;
     border: none;
     margin-top: 5px;
@@ -3974,7 +4034,9 @@ a:active {
 #header_text {
     width: 885px;
     height: 100px;
+    color: #fff;
     font-size: 24px;
+    text-align: center;
     margin: 0 auto
 }
 #features {
@@ -3998,12 +4060,15 @@ a:active {
     background-repeat: no-repeat;
     width: 169px;
     height: 169px;
+    color: #fff;
     font-size: 22px;
+    text-align: center;
     display: table-cell;
     padding: 50px 26px 0 20px
 }
 .feature_description {
     width: 190px;
+    color: #fff;
     font-size: 16px;
     padding-top: 30px;
     line-height: 22px;
@@ -4017,12 +4082,13 @@ a:active {
     z-index: 3;
     float: left;
     cursor: pointer;
+    text-align: center;
     display: none
 }
 #settingsmenu {
     display: none;
     background: #000;
-    color: #0cf;
+    color: #21B9FC;
     overflow-y: auto
 }
 #settingsmenu input,
@@ -4035,6 +4101,16 @@ select {
     border: none;
     box-shadow: none;
     color: #a7a7a7
+}
+#settingsmenu>div.title {
+    text-align: left;
+    padding: 7px 10px;
+    margin: 2px;
+    font-size: 11pt;
+    border-bottom: 1px solid #676767
+}
+#settingsmenu>div.title>span {
+    margin-left: 5px
 }
 #settingsmenu .arrow-up,
 .feedback {
@@ -4060,9 +4136,6 @@ select {
     left: 38%;
     border-radius: 25px;
     position: relative
-}
-#settingsmenu .icon-settings {
-    padding: 34px
 }
 #followMeOptions,
 #startMutedOptions {
@@ -4098,6 +4171,7 @@ select {
 .feedback {
     width: 450px;
     display: block;
+    text-align: center;
     font-size: 22px
 }
 .feedbackTitle {
@@ -4283,4 +4357,22 @@ select {
 }
 .context-menu-accesskey {
     text-decoration: underline
+}
+#keyboard-shortcuts {
+    display: none;
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    overflow: hidden;
+    padding: 20px;
+    z-index: 1;
+    border-radius: 15px;
+    background-attachment: scroll;
+    background-size: auto auto;
+    color: rgba(255, 255, 255, .8);
+    background-color: rgba(0, 0, 0, .8)
+}
+#keyboard-shortcuts .item-action {
+    color: #209EFF;
+    font-size: 14pt
 }
