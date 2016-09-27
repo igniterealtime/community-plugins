@@ -34,8 +34,8 @@ ul.popupmenu li {
 }
 @font-face {
     font-family: jitsi;
-    src: url(../fonts/jitsi.eot?94d075);
-    src: url(../fonts/jitsi.eot?#iefix94d075) format("embedded-opentype"), url(../fonts/jitsi.woff?94d075) format("woff"), url(../fonts/jitsi.ttf?94d075) format("truetype"), url(../fonts/jitsi.svg?94d075#jitsi) format("svg");
+    src: url(/ofmeet/fonts/jitsi.eot);
+    src: url(/ofmeet/fonts/jitsi.eot) format("embedded-opentype"), url(/ofmeet/fonts/jitsi.woff) format("woff"), url(/ofmeet/fonts/jitsi.ttf) format("truetype"), url(/ofmeet/fonts/jitsi.svg) format("svg");
     font-weight: 400;
     font-style: normal
 }
@@ -167,8 +167,8 @@ ul.popupmenu li {
 
 @font-face {
     font-family: FontAwesome;
-    src: url(../fonts/fontawesome-webfont.eot?v=4.4.0);
-    src: url(../fonts/fontawesome-webfont.eot?#iefix&v=4.4.0) format("embedded-opentype"), url(../fonts/fontawesome-webfont.woff2?v=4.4.0) format("woff2"), url(../fonts/fontawesome-webfont.woff?v=4.4.0) format("woff"), url(../fonts/fontawesome-webfont.ttf?v=4.4.0) format("truetype"), url(../fonts/fontawesome-webfont.svg?v=4.4.0#fontawesomeregular) format("svg");
+    src: url(/ofmeet/fonts/fontawesome-webfont.eot);
+    src: url(/ofmeet/fonts/fontawesome-webfont.eot) format("embedded-opentype"), url(/ofmeet/fonts/fontawesome-webfont.woff) format("woff2"), url(/ofmeet/fonts/fontawesome-webfont.woff) format("woff"), url(/ofmeet/fonts/fontawesome-webfont.ttf) format("truetype"), url(/ofmeet/fonts/fontawesome-webfont.svg) format("svg");
     font-weight: 400;
     font-style: normal
 }
@@ -4615,8 +4615,8 @@ a.button>#avatar {
     font-family: context-menu-icons;
     font-style: normal;
     font-weight: 400;
-    src: url(font/context-menu-icons.eot?2qmzf);
-    src: url(font/context-menu-icons.eot?2qmzf#iefix) format("embedded-opentype"), url(font/context-menu-icons.woff2?2qmzf) format("woff2"), url(font/context-menu-icons.woff?2qmzf) format("woff"), url(font/context-menu-icons.ttf?2qmzf) format("truetype")
+    src: url(font/context-menu-icons.eot);
+    src: url(font/context-menu-icons.eot) format("embedded-opentype"), url(font/context-menu-icons.woff2) format("woff2"), url(font/context-menu-icons.woff) format("woff"), url(font/context-menu-icons.ttf) format("truetype")
 }
 .context-menu-icon:before {
     position: absolute;
