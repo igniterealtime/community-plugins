@@ -83,9 +83,14 @@ import org.dom4j.*;
 
 import org.jitsi.videobridge.*;
 
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 
-public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener  {
+public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, Job  {
 
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
 	private PluginImpl jitsiPlugin;
@@ -96,6 +101,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private ComponentManager componentManager;
     private OfMeetIQHandler ofmeetIQHandler = null;
 
+    public Scheduler scheduler = null;
+
     public static OfMeetPlugin self;
 
 	public String sipRegisterStatus = "";
@@ -104,7 +111,13 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         return "ofmeet";
     }
 
-    public String getDescription() {
+	public OfMeetPlugin()
+	{
+
+	}
+
+    public String getDescription()
+    {
         return "OfMeet Plugin";
     }
 
@@ -196,6 +209,16 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         	SessionEventDispatcher.addListener(this);
 
+			Log.info("OfMeet Plugin - Initialize Quartz Scheduler");
+
+			try {
+				scheduler = StdSchedulerFactory.getDefaultScheduler();
+				scheduler.start();
+
+			} catch (SchedulerException se) {
+				Log.error("Quartz Scheduler", se);
+			}
+
 		} catch (Exception e) {
 			Log.error("Could NOT start open fire meetings", e);
 		}
@@ -219,6 +242,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 			SASLAuthentication.removeSupportedMechanism( OfMeetSaslServer.MECHANISM_NAME );
 			Security.removeProvider( OfMeetSaslProvider.NAME );
+
+			if (scheduler != null) scheduler.shutdown(true);
 
         } catch (Exception e) {
 
@@ -477,7 +502,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	public String replaceTokens(String text, Map<String, String> replacements)
 	{
 		Pattern pattern = Pattern.compile("\\[(.+?)\\]");
-		Matcher matcher = pattern.matcher(text);
+		java.util.regex.Matcher matcher = pattern.matcher(text);
 		StringBuffer buffer = new StringBuffer();
 
 		while (matcher.find())
@@ -809,4 +834,46 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	//
 	//-------------------------------------------------------
 
+    @Override public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
+    {
+        Log.info( "Quartz Execute Job....");
+        try {
+
+        }
+        catch (Throwable e) {
+            Log.error("Failed to execute quartz job...", e);
+        }
+    }
+
+    public void scheduleMeeting(String job, String group, String trigger, String schedule)
+    {
+        Log.info( "scheduleMeeting " + job + " " + group + " " + trigger + " " + schedule);
+		//String schedule = JiveGlobals.getProperty("ofmeet.schedule", "0 0 0/12 * * ?");
+
+		if (scheduler != null)
+		{
+			try {
+				JobDetail jobDetail = newJob(OfMeetPlugin.class).withIdentity(job, group).build();
+				CronTrigger conTrigger = newTrigger().withIdentity(trigger, group).withSchedule(cronSchedule(schedule)).build();
+				scheduler.scheduleJob(jobDetail, conTrigger);
+			}
+			catch (Throwable e) {
+				Log.error("Failed to execute quartz job...", e);
+			}
+		}
+	}
+
+    public void unScheduleMeeting(String job, String group)
+    {
+       	Log.info( "unScheduleMeeting " + job + " " + group);
+
+		if (scheduler != null)
+		{
+			try {
+				scheduler.deleteJob(JobKey.jobKey(job, group));			}
+			catch (Throwable e) {
+				Log.error("Failed to execute quartz job...", e);
+			}
+		}
+	}
 }

@@ -1,0 +1,58 @@
+Buildfile: C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build.xml
+
+clean:
+   [delete] Deleting directory C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build
+   [delete] Deleting: C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\lib\plugin-rawpropertyeditor.jar
+
+init:
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\classes
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\jar
+
+compile:
+    [javac] C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build.xml:29: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 1 source file to C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\classes
+    [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
+    [javac] 1 warning
+
+lib:
+      [jar] Building jar: C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\lib\plugin-rawpropertyeditor.jar
+
+compile-jsps:
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\jspc\java
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\jspc\classes
+     [java] SLF4J: Class path contains multiple SLF4J bindings.
+     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins-dele/openfire_4_0_2/target/openfire/lib/slf4j-log4j12.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins-dele/openfire_4_0_2/build/lib/ant/slf4j-simple.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+     [java] SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+     [java] SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+     [java] log4j:WARN No appenders could be found for logger (org.eclipse.jetty.util.log).
+     [java] log4j:WARN Please initialize the log4j system properly.
+    [javac] C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build.xml:60: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 2 source files to C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\jspc\classes
+    [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
+    [javac] C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\jspc\java\org\jivesoftware\openfire\plugin\rawpropertyeditor\User_002dpropertiesplugin_jsp.java:132: warning: [deprecation] replace(String,String,String) in StringUtils has been deprecated
+    [javac] 								String propnameES = StringUtils.replace(StringUtils.escapeHTMLTags(propname), "'", "''");
+    [javac] 								                               ^
+    [javac] C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\jspc\java\org\jivesoftware\openfire\plugin\rawpropertyeditor\User_002dpropertiesplugin_jsp.java:133: warning: [deprecation] replace(String,String,String) in StringUtils has been deprecated
+    [javac] 								String propvalueES = StringUtils.replace(StringUtils.escapeHTMLTags(propvalue), "'", "''");
+    [javac] 								                                ^
+    [javac] C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\jspc\java\org\jivesoftware\openfire\plugin\rawpropertyeditor\group_002dpropertiesplugin_jsp.java:139: warning: [deprecation] replace(String,String,String) in StringUtils has been deprecated
+    [javac] 								String propnameES = StringUtils.replace(StringUtils.escapeHTMLTags(propname), "'", "''");
+    [javac] 								                               ^
+    [javac] C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\jspc\java\org\jivesoftware\openfire\plugin\rawpropertyeditor\group_002dpropertiesplugin_jsp.java:140: warning: [deprecation] replace(String,String,String) in StringUtils has been deprecated
+    [javac] 								String propvalueES = StringUtils.replace(StringUtils.escapeHTMLTags(propvalue), "'", "''");
+    [javac] 								                                ^
+    [javac] 5 warnings
+      [jar] Building jar: C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\lib\plugin-rawpropertyeditor-jspc.jar
+     [copy] Copying 1 file to C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\src\web\WEB-INF
+
+jar:
+     [copy] Copying 11 files to C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\jar
+     [copy] Copied 9 empty directories to 5 empty directories under C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\jar
+     [copy] Copying 2 files to C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\jar\lib
+     [copy] Copying 8 files to C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build\jar
+      [jar] Building jar: C:\Projects\ignite\community-plugins-dele\openfire_4_0_2\target\openfire\plugins\rawpropertyeditor.jar
+   [delete] Deleting directory C:\Projects\ignite\community-plugins-dele\rawpropertyeditor\build
+
+BUILD SUCCESSFUL
+Total time: 4 seconds

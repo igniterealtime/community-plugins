@@ -139,20 +139,14 @@ public class LipSyncHack implements OperationSetJingle
             return false;
         }
 
-        Boolean isVideoMuted = streamsOwner.isVideoMuted();
-        if (isVideoMuted == null)
-        {
-            logger.warn("No 'videomuted' presence extension for " + ownerJid);
-        }
-
         boolean supportsLipSync = participant.hasLipSyncSupport();
 
         // FIXME switch to debug level after some more testing
         logger.info(String.format(
-                "Lips-sync From %s to %s, lip-sync: %s, video muted: %s",
-                ownerJid, participantJid, supportsLipSync, isVideoMuted));
+                "Lips-sync From %s to %s, lip-sync: %s",
+                ownerJid, participantJid, supportsLipSync));
 
-        return supportsLipSync && Boolean.FALSE.equals(isVideoMuted);
+        return supportsLipSync;
     }
 
     private void doMerge(String          participant,
@@ -323,9 +317,11 @@ public class LipSyncHack implements OperationSetJingle
      * {@inheritDoc}
      */
     @Override
-    public void terminateSession(JingleSession session, Reason reason)
+    public void terminateSession(JingleSession    session,
+                                 Reason           reason,
+                                 String           msg)
     {
-        jingleImpl.terminateSession(session, reason);
+        jingleImpl.terminateSession(session, reason, msg);
     }
 
     /**

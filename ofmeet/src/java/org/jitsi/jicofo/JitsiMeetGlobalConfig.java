@@ -36,15 +36,33 @@ public class JitsiMeetGlobalConfig
         = Logger.getLogger(JitsiMeetGlobalConfig.class);
 
     /**
+     * The name of configuration property that disable auto owner role granting.
+     */
+    private final static String DISABLE_AUTO_OWNER_PNAME
+        = "org.jitsi.jicofo.DISABLE_AUTO_OWNER";
+
+    /**
      * The name of configuration property that sets {@link #maxSSRCsPerUser}.
      */
     private final static String MAX_SSRC_PER_USER_CONFIG_PNAME
         = "org.jitsi.jicofo.MAX_SSRC_PER_USER";
 
     /**
+     * The name of configuration property that sets
+     * {@link #singleParticipantTimeout}.
+     */
+    private final static String SINGLE_PARTICIPANT_TIMEOUT_CONFIG_PNAME
+        = "org.jitsi.jicofo.SINGLE_PARTICIPANT_TIMEOUT";
+
+    /**
      * The default value for {@link #maxSSRCsPerUser}.
      */
     private final static int DEFAULT_MAX_SSRC_PER_USER = 20;
+
+    /**
+     * The default value for {@link #singleParticipantTimeout}.
+     */
+    private final static long DEFAULT_SINGLE_PARTICIPANT_TIMEOUT = 20000;
 
     /**
      * The name of the config property which specifies how long we're going to
@@ -59,6 +77,13 @@ public class JitsiMeetGlobalConfig
     private static final int JIBRI_DEFAULT_PENDING_TIMEOUT = 90;
 
     /**
+     * Flag indicates whether auto owner feature is active. First participant to
+     * join the room will become conference owner. When the owner leaves the
+     * room next participant be selected as new owner.
+     */
+    private boolean autoOwner = true;
+
+    /**
      * Tells how many seconds we're going to wait for the Jibri to start
      * recording. If set to <tt>-1</tt> it means that these timeouts are
      * disabled in the current session.
@@ -70,6 +95,16 @@ public class JitsiMeetGlobalConfig
      * conference participant.
      */
     private int maxSSRCsPerUser;
+
+    /**
+     * Tells how long participant's media session will be kept alive once it
+     * remains the only person in the room - which means that nobody is
+     * receiving his/her media. This participant could be timed out immediately
+     * as well, but we don't want to reallocate channels when the other peer is
+     * only reloading his/her page. The value is amount of time measured in
+     * milliseconds.
+     */
+    private long singleParticipantTimeout;
 
     /**
      * OSGi service registration instance.
@@ -126,6 +161,14 @@ public class JitsiMeetGlobalConfig
      */
     private void init(ConfigurationService configService)
     {
+        if (FocusBundleActivator.getConfigService()
+                .getBoolean(DISABLE_AUTO_OWNER_PNAME, false))
+        {
+            autoOwner = false;
+        }
+
+        logger.info("Automatically grant 'owner' role: " + autoOwner);
+
         this.maxSSRCsPerUser
             = configService.getInt(
                     MAX_SSRC_PER_USER_CONFIG_PNAME, DEFAULT_MAX_SSRC_PER_USER);
@@ -145,6 +188,15 @@ public class JitsiMeetGlobalConfig
         {
             logger.warn("Jibri PENDING timeouts are disabled");
         }
+
+        singleParticipantTimeout
+            = configService.getLong(
+                    SINGLE_PARTICIPANT_TIMEOUT_CONFIG_PNAME,
+                    DEFAULT_SINGLE_PARTICIPANT_TIMEOUT);
+
+        logger.info(
+                "Lonely participants will be \"terminated\" after "
+                    + singleParticipantTimeout +" milliseconds");
     }
 
     /**
@@ -171,6 +223,16 @@ public class JitsiMeetGlobalConfig
     }
 
     /**
+     * Gets the value for "single participant timeout".
+     * @return the value in milliseconds.
+     * @see #singleParticipantTimeout
+     */
+    public long getSingleParticipantTimeout()
+    {
+        return singleParticipantTimeout;
+    }
+
+    /**
      * Tells how many seconds we're going to wait for the Jibri to start
      * recording. If set to <tt>-1</tt> it means that these timeouts are
      * disabled in the current session.
@@ -181,5 +243,18 @@ public class JitsiMeetGlobalConfig
     public int getJibriPendingTimeout()
     {
         return jibriPendingTimeout;
+    }
+
+    /**
+     * Indicates whether auto owner feature is active. First participant to join
+     * the room will become conference owner. When the owner leaves the room
+     * next participant will be selected as the new owner.
+     *
+     * @return <tt>true</tt> if the auto-owner feature is enabled or
+     * <tt>false</tt> otherwise.
+     */
+    public boolean isAutoOwnerEnabled()
+    {
+        return this.autoOwner;
     }
 }

@@ -2125,29 +2125,15 @@ Strophe.addConnectionPlugin('ofmeet',
 	{
 		console.log("ofmeet plugin: openAppsDialog", this.sipEnabled, window.xmppRoomJid);	
 		
-		if (this.sipEnabled)
-		{	
-			$("#siphone").css({display: "none"});	
-			$("#siphone" ).html('&nbsp;');
-			this.sipEnabled = false;
-			
-			$("#contactlist").css({display: "block"});			
-			APP.UI.toggleContactList();				
-		} else {
-			APP.UI.toggleContactList();
-			$("#contactlist").css({display: "none"});
-						
+		if (!this.sipEnabled)
+		{							
 			$("#siphone" ).html('<iframe style="height: 100%;width:100%" src="phone/index.html?room=' + Strophe.getNodeFromJid(window.xmppRoomJid) + '" id="sipPhoneDiv"></iframe>');			
 			$("#siphone").css({display: "block"});			
-			
-			setTimeout(function()
-			{
-				var videoWidth = $("#videospace").width() - 100;			
-				$("#videospace").width(videoWidth);
-			}, 500);
-				
+
 			this.sipEnabled = true;			
 		}
+		
+		APP.UI.toggleSidePanel("siphone");		
 	
 	},
 
@@ -2168,8 +2154,8 @@ Strophe.addConnectionPlugin('ofmeet',
 				if (config.sip)
 				{
 					var room = Strophe.getNodeFromJid(jid);
-					$( "#toolbar" ).prepend('<a class="button icon-telephone" data-container="body" data-toggle="popover" data-placement="bottom" content="SIP Phone" onclick="Strophe._connectionPlugins.ofmeet.sipPhone();"></a>');			
-					$( "#videoconference_page" ).append('<div id="siphone" class="right-panel" style="display:none;height: 100%;width: 100%;max-width:300px"></div>');
+					$( "#extendedToolbar" ).prepend('<a class="button icon-telephone" data-container="body" data-toggle="popover" data-placement="bottom" content="SIP Phone" onclick="Strophe._connectionPlugins.ofmeet.sipPhone();"></a>');			
+					$( "#sideToolbarContainer" ).append('<div id="siphone" class="sideToolbarContainer__inner" style="display:none;height: 100%;width: 100%;max-width:300px"></div>');
 				}
 
 				__that.roomJid = bare_jid;

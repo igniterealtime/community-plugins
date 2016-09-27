@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+<!--
+Automatically created by Apache Tomcat JspC.
+-->
+<web-app>
+
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.rawpropertyeditor.group_002dpropertiesplugin_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.rawpropertyeditor.group_002dpropertiesplugin_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.rawpropertyeditor.User_002dpropertiesplugin_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.rawpropertyeditor.User_002dpropertiesplugin_jsp</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.rawpropertyeditor.group_002dpropertiesplugin_jsp</servlet-name>
+        <url-pattern>/group-propertiesplugin.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.rawpropertyeditor.User_002dpropertiesplugin_jsp</servlet-name>
+        <url-pattern>/User-propertiesplugin.jsp</url-pattern>
+    </servlet-mapping>
+
+</web-app>
+

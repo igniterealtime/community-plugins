@@ -28,6 +28,7 @@ import org.jitsi.protocol.xmpp.util.*;
 import org.jivesoftware.smack.packet.*;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Class provides template implementation of {@link OperationSetJingle}.
@@ -47,7 +48,8 @@ public abstract class AbstractOperationSetJingle
     /**
      * The list of active Jingle sessions.
      */
-    protected final Map<String, JingleSession> sessions = new HashMap<>();
+    protected final Map<String, JingleSession> sessions
+        = new ConcurrentHashMap<>();
 
     /**
      * Implementing classes should return our JID here.
@@ -543,7 +545,7 @@ public abstract class AbstractOperationSetJingle
         {
             if (session.getRequestHandler() == requestHandler)
             {
-                terminateSession(session, Reason.GONE);
+                terminateSession(session, Reason.GONE, null);
             }
         }
     }
@@ -555,9 +557,12 @@ public abstract class AbstractOperationSetJingle
      * @param session the <tt>JingleSession</tt> to terminate.
      * @param reason one of {@link Reason} enum that indicates why the session
      *               is being ended or <tt>null</tt> to omit.
+     * {@inheritDoc}
      */
     @Override
-    public void terminateSession(JingleSession session, Reason reason)
+    public void terminateSession(JingleSession    session,
+                                 Reason           reason,
+                                 String           message)
     {
         logger.info("Terminate session: " + session.getAddress());
 
@@ -569,7 +574,8 @@ public abstract class AbstractOperationSetJingle
                     getOurJID(),
                     session.getAddress(),
                     session.getSessionID(),
-                    reason, null);
+                    reason,
+                    message);
 
         getConnection().sendPacket(terminate);
 

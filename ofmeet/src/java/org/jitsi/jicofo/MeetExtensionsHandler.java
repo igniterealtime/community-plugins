@@ -466,9 +466,20 @@ public class MeetExtensionsHandler
             return;
         }
 
-        ChatRoomMemberRole role = conference.getRoleForMucJid(from);
+        if (conference.isFocusMember(from))
+            return; // Not interested in local presence
 
-        if (role != null && role.compareTo(ChatRoomMemberRole.MODERATOR) < 0)
+        ChatRoomMemberRole role = conference.getRoleForMucJid(from);
+        if (role == null)
+        {
+            // FIXME this is printed every time new user joins the room, because
+            // PacketListener is fired before MUC knows the user is in the room.
+            // This might be a problem if it would be the only presence ever
+            // received from such participant although very unlikely with
+            // the current client code.
+            logger.warn("Failed to get user's role for: " + from);
+        }
+        else if (role.compareTo(ChatRoomMemberRole.MODERATOR) < 0)
         {
             StartMutedPacketExtension ext
                 = (StartMutedPacketExtension)

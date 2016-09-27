@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin>
+    <class>org.jivesoftware.openfire.plugin.RawPropertyEditor</class>
+    <name>rawpropertyeditor</name>
+    <description>Raw Property Editor</description>
+    <author>Liam Gregory</author>
+    <version>0.0.1</version>
+    <date>01/01/2016</date>
+   
+    <minServerVersion>3.10.3</minServerVersion>
+    <adminconsole>
+       
+    
+  
+
+        <!-- Users/Groups -->
+    <tab id="tab-users" >
+
+        <!-- Users -->
+        <sidebar id="sidebar-users" >
+
+            <!-- User Summary -->
+            <item id="user-summary" >
+
+                <!-- User Options -->
+                <sidebar id="sidebar-users-options" >
+
+                    <item id="User-propertiesplugin" name="Edit User Properties" url="User-propertiesplugin.jsp" description="View, change and edit user properties"/>
+                </sidebar>
+            </item>
+        </sidebar>
+
+          <sidebar id="sidebar-groups" >
+
+            <item id="group-summary" >
+
+                <sidebar id="sidebar-group-options">
+
+                         <item id="group-propertiesplugin" name="Edit Group Properties"  url="group-propertiesplugin.jsp" description="View, change and edit group properties"/>
+                    
+                   
+                </sidebar>
+            </item>
+        </sidebar>
+            </tab>
+
+
+
+</adminconsole>
+
+</plugin>

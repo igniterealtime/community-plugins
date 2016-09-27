@@ -680,13 +680,13 @@
 
 	    <tr>
 		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="disablesimulcast" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.disable.simulcast", "false")) ? "checked" : "") %>>
+			<input type="radio" value="true" name="disablesimulcast" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.disable.simulcast", "false")) ? "checked" : "") %>>
 			<b><fmt:message key="config.page.configuration.disablesimulcast.disabled" /></b> - <fmt:message key="config.page.configuration.disablesimulcast.disabled_description" />
 		    </td>
 	    </tr>   
 	    <tr>
 		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="disablesimulcast" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.disable.simulcast", "false")) ? "checked" : "") %>>
+			<input type="radio" value="false" name="disablesimulcast" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.disable.simulcast", "false")) ? "checked" : "") %>>
 			<b><fmt:message key="config.page.configuration.disablesimulcast.enabled" /></b> - <fmt:message key="config.page.configuration.disablesimulcast.enabled_description" />
 		    </td>
 	    </tr>	    

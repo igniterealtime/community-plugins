@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="rawpropertyeditor" default="jar" basedir = "..">
+	<description>Property Editor Build</description>
+
+	<property name="openfire.home" 	value="./openfire_4_0_2/target/openfire" />
+	<property name="lib.ant.dir" 	value="./openfire_4_0_2/build/lib/ant" />	
+	<property name="rawpropertyeditor.dir" 	value="rawpropertyeditor" />
+	
+
+	<path id="build.classpath">
+		<fileset dir="${rawpropertyeditor.dir}/lib" includes="*.jar"/>
+		<fileset dir="${openfire.home}/lib" includes="*.jar"/>
+	</path>
+
+	<target name="init">
+		<!-- create our directories -->
+		<mkdir dir="${rawpropertyeditor.dir}/build/classes"/>
+		<mkdir dir="${rawpropertyeditor.dir}/build/jar"/>					
+	</target>
+	
+	<target name="clean">
+        <delete dir="${rawpropertyeditor.dir}/build"/>        
+        <delete file="${rawpropertyeditor.dir}/lib/plugin-rawpropertyeditor-jspc.jar"/>
+        <delete file="${rawpropertyeditor.dir}/lib/plugin-rawpropertyeditor.jar"/>
+        <delete file="${openfire.home}/plugins/rawpropertyeditor.jar"/>  
+	</target>
+	
+	<target name="compile" depends="init">
+		<javac source="1.7" target="1.7" debug="true" deprecation="false" srcdir="${rawpropertyeditor.dir}/src" destdir="${rawpropertyeditor.dir}/build/classes">
+			<classpath refid="build.classpath"/>
+		</javac>
+	</target>
+
+	<target name="lib" depends="clean, compile">
+		<jar destfile="${rawpropertyeditor.dir}/lib/plugin-rawpropertyeditor.jar">
+			<fileset dir="${rawpropertyeditor.dir}/build/classes">
+				<include name="**" />
+			</fileset>
+		</jar>
+	</target>	
+
+	<target name="compile-jsps">
+		<mkdir dir="${rawpropertyeditor.dir}/build/jspc/java"/>
+		<mkdir dir="${rawpropertyeditor.dir}/build/jspc/classes"/>
+
+		<java classname="org.apache.jasper.JspC" fork="true">
+		    <classpath>
+			<pathelement location="${java.home}/../lib/tools.jar"/>		
+			<fileset dir="${rawpropertyeditor.dir}/lib" includes="*.jar"/>
+			<fileset dir="${openfire.home}/lib" includes="*.jar"/>			
+			<fileset dir="${lib.ant.dir}" includes="*.jar" />
+			<fileset dir="${ant.home}/lib" includes="ant.jar" />
+		    </classpath>
+		    <arg line="-uriroot '${rawpropertyeditor.dir}/src/web'"/>
+		    <arg line="-d '${rawpropertyeditor.dir}/build/jspc/java'"/>
+		    <arg line="-p org.jivesoftware.openfire.plugin.rawpropertyeditor"/>
+		    <arg line="-webxml '${rawpropertyeditor.dir}/build/jspc/web.xml'"/>
+		</java>	
+
+		<javac source="1.7" target="1.7" debug="true" deprecation="true" srcdir="${rawpropertyeditor.dir}/build/jspc/java" destdir="${rawpropertyeditor.dir}/build/jspc/classes">
+			<classpath refid="build.classpath"/>
+		</javac>
+		
+		<jar jarfile="${rawpropertyeditor.dir}/lib/plugin-rawpropertyeditor-jspc.jar">
+		    <fileset dir="${rawpropertyeditor.dir}/build/jspc/classes"
+			     includes="**/*.class"/>
+		</jar>	
+				
+		<copy todir="${rawpropertyeditor.dir}/src/web/WEB-INF"
+		      file="${rawpropertyeditor.dir}/build/jspc/web.xml"
+		      overwrite="${overwrite}"/>		
+				
+	  </target> 
+	  
+	<target name="jar" depends="lib, compile-jsps">
+		<copy todir="${rawpropertyeditor.dir}/build/jar" overwrite="true">
+			<fileset dir="${rawpropertyeditor.dir}/src">
+                        	<exclude name="java/**/*.java"/>         
+                        	<exclude name="conf/**"/>                          	
+			</fileset>
+		</copy>			
+		<copy todir="${rawpropertyeditor.dir}/build/jar/lib" overwrite="true">			
+			<fileset dir="${rawpropertyeditor.dir}/lib">				
+			</fileset>
+		</copy>			
+		<copy todir="${rawpropertyeditor.dir}/build/jar" overwrite="true">						
+			<fileset dir="${rawpropertyeditor.dir}">
+                        	<exclude name="build.*"/>		
+                        	<exclude name="build/**"/>	
+                        	<exclude name="src/**"/>                          	
+			</fileset>			
+		</copy>
+						
+		<jar destfile="${openfire.home}/plugins/rawpropertyeditor.jar">
+			<fileset dir="${rawpropertyeditor.dir}/build/jar">				
+			</fileset>			
+		</jar>
+		
+                <delete dir="${rawpropertyeditor.dir}/build"/>	              
+	</target>
+</project>
+

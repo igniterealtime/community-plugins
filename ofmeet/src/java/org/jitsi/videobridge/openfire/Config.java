@@ -178,7 +178,7 @@ public class Config extends HttpServlet
 			String channelLastN 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.channel.lastn", "-1");
 			String desktopShareSrcs		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.desktop.sharing.sources", "[\"screen\", \"window\"]");
 			String minChromeExtVer		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.min.chrome.ext.ver", "0.1");
-			String enableFirefoxSupport = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.firefox.support", "false");
+			String startBitrate			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.start.bitrate", "800");
 			String logStats 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.stats.logging", "false");
 			String focusUserJid 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@"+domain);
 			String iceServers 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.iceservers", "");
@@ -300,7 +300,7 @@ public class Config extends HttpServlet
 			out.println("    desktopSharingFirefoxExtId: 'jidesha@meet.jit.si',");
 
 			out.println("    hiddenDomain: 'recorder." + domain + "',");
-			out.println("    startBitrate: '800',");
+			out.println("    startBitrate: '" + startBitrate + "',");
 			out.println("    recordingType: 'colibri',");
 			out.println("    disableAudioLevels: false,");
 			out.println("    stereo: false,");
@@ -315,13 +315,17 @@ public class Config extends HttpServlet
 			if (userName != null) out.println("    id: '" + userName + "@" + domain + "',");
 			if (accessToken != null) out.println("    password: '" + accessToken + "',");
 			out.println("    userAvatar: '" + userAvatar + "',");
-			out.println("    enableFirefoxSupport: " + enableFirefoxSupport + ",");
+			out.println("    useRoomAsSharedDocumentName: false,");
 			out.println("    logStats: " + logStats + ",");
 			out.println("    conferences: " + conferences + ",");
 			if (globalConferenceId != null) out.println("    globalConferenceId: '" + globalConferenceId + "',");
 			out.println("    bosh: " + connectionUrl);
 			out.println("};	");
 
+
+			// UI Config
+
+			String defaultBackground		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.default.background", "#474747");
 			String canvasExtra				= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.canvas.extra", "104");
 			String canvasRadius				= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.canvas.radius", "7");
 			String shadowColor				= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.shadow.color", "#ffffff");
@@ -339,14 +343,18 @@ public class Config extends HttpServlet
 			String applicationName			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.application.name", "Openfire Meetings");
 			String activeSpkrAvatarSize		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.active.speaker.avatarsize", "100");
 
+			String showContactListAvatars	= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.show.contactlist.avatars", "false");
 			String initationPoweredBy		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.invitation.poweredby", "true");
 			String videoLayoutFit			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.video.layout.fit", "both");
 			String toolbarButtons			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.toolbar.buttons", "'authentication', 'microphone', 'camera', 'desktop','recording', 'security', 'invite', 'chat', 'etherpad', 'sharedvideo','fullscreen', 'sip', 'dialpad', 'settings', 'hangup', 'filmstrip','contacts'");
+			String settingsSections			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.settings.sections", "'language', 'devices', 'moderator'");
+			String mainToolbarButtons		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.main.toolbar.buttons", "'microphone', 'camera', 'desktop', 'invite', 'hangup'");
 
 			out.println("var interfaceConfig = {");
 			out.println("    CANVAS_EXTRA: " + canvasExtra + ",");
     		out.println("	 CANVAS_RADIUS: " + canvasRadius + ",");
 			out.println("    SHADOW_COLOR: '" + shadowColor + "',");
+			out.println("    DEFAULT_BACKGROUND: '" + defaultBackground + "',");
 			out.println("    INITIAL_TOOLBAR_TIMEOUT: " + initialToolbarTimeout + ",");
 			out.println("    TOOLBAR_TIMEOUT: " + toolbarTimeout + ",");
 			out.println("    DEFAULT_REMOTE_DISPLAY_NAME: '" + defRemoteDisplName + "',");
@@ -361,12 +369,22 @@ public class Config extends HttpServlet
 			out.println("    APP_NAME: '" + applicationName + "',");
 
 			out.println("    INVITATION_POWERED_BY: " + initationPoweredBy + ",");
-			out.println("    VIDEO_LAYOUT_FIT: '" + videoLayoutFit + "',");
+			out.println("    MAIN_TOOLBAR_BUTTONS: [" + mainToolbarButtons + "],");
 			out.println("    TOOLBAR_BUTTONS: [" + toolbarButtons + "],");
+			out.println("    SETTINGS_SECTIONS: [" + settingsSections + "],");
+			out.println("    VIDEO_LAYOUT_FIT: '" + videoLayoutFit + "',");
+			out.println("    SHOW_CONTACTLIST_AVATARS: " + showContactListAvatars + ",");
 			out.println("    filmStripOnly: false,");
-			out.println("    RANDOM_AVATAR_URL_PREFIX: false,");
-			out.println("    RANDOM_AVATAR_URL_SUFFIX: false,");
+			out.println("    RANDOM_AVATAR_URL_PREFIX: '',");
+			out.println("    RANDOM_AVATAR_URL_SUFFIX: '',");
 			out.println("    FILM_STRIP_MAX_HEIGHT: 120,");
+
+			out.println("    LOCAL_THUMBNAIL_RATIO_WIDTH: 16,");
+			out.println("    LOCAL_THUMBNAIL_RATIO_HEIGHT: 9,");
+			out.println("    REMOTE_THUMBNAIL_RATIO_WIDTH: 1,");
+			out.println("    REMOTE_THUMBNAIL_RATIO_HEIGHT: 1,");
+			out.println("    ENABLE_FEEDBACK_ANIMATION: false,");
+			out.println("    DISABLE_FOCUS_INDICATOR: false,");
 
 			out.println("    ACTIVE_SPEAKER_AVATAR_SIZE: " + activeSpkrAvatarSize);
 			out.println("}; ");
