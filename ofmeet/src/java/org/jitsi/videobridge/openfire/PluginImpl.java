@@ -24,6 +24,8 @@ import org.xmpp.component.*;
 import org.xmpp.component.ComponentManager;
 import org.xmpp.component.ComponentManagerFactory;
 
+import org.slf4j.bridge.SLF4JBridgeHandler;
+
 /**
  * Implements <tt>org.jivesoftware.openfire.container.Plugin</tt> to integrate
  * Jitsi Video Bridge into Openfire.
@@ -127,6 +129,8 @@ public class PluginImpl
             }
             componentManager = null;
             subdomain = null;
+
+        	SLF4JBridgeHandler.uninstall();
         }
     }
 
@@ -142,6 +146,10 @@ public class PluginImpl
     public void initializePlugin(ComponentManager componentManager, PluginManager manager, File pluginDirectory)
     {
 		this.componentManager = componentManager;
+
+        // Remove existing handlers attached to j.u.l root logger
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
 
 		Log.info("PluginImpl initializePlugin "+ pluginDirectory);
 
