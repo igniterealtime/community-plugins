@@ -8,7 +8,7 @@
 	
 
 	<path id="build.classpath">
-		<fileset dir="${ofmeet.dir}/lib" includes="*.jar"/>
+		<fileset dir="${ofmeet.dir}/lib" includes="**/*.jar"/>
 		<fileset dir="${openfire.home}/lib" includes="*.jar"/>
 	</path>
 
@@ -46,7 +46,7 @@
 		<java classname="org.apache.jasper.JspC" fork="true">
 		    <classpath>
 			<pathelement location="${java.home}/../lib/tools.jar"/>		
-			<fileset dir="${ofmeet.dir}/lib" includes="*.jar"/>
+			<fileset dir="${ofmeet.dir}/lib" includes="**/*.jar"/>
 			<fileset dir="${openfire.home}/lib" includes="*.jar"/>			
 			<fileset dir="${lib.ant.dir}" includes="*.jar" />
 			<fileset dir="${ant.home}/lib" includes="ant.jar" />

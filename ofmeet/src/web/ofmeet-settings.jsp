@@ -10,6 +10,9 @@
 <%@ page import="org.jivesoftware.util.*" %>
 <%@ page import="java.io.File" %>
 <%@ page import="java.net.InetAddress" %>
+<%@ page import="org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext" %>
+<%@ page import="org.jitsi.videobridge.HarvesterConfiguration" %>
+<%@ page import="org.jitsi.videobridge.Videobridge" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -76,13 +79,13 @@
         }
         
 	String checkReplay = request.getParameter("checkreplay"); 
-        JiveGlobals.setProperty(PluginImpl.CHECKREPLAY_PROPERTY_NAME, checkReplay);
+        JiveGlobals.setProperty(SRTPCryptoContext.CHECK_REPLAY_PNAME, checkReplay);
         
 	String localAddress = request.getParameter("localaddress"); 
-        JiveGlobals.setProperty(PluginImpl.NAT_HARVESTER_LOCAL_ADDRESS, localAddress);
+        JiveGlobals.setProperty(HarvesterConfiguration.NAT_HARVESTER_LOCAL_ADDRESS, localAddress);
 
 	String publicAddress = request.getParameter("publicaddress"); 
-        JiveGlobals.setProperty(PluginImpl.NAT_HARVESTER_PUBLIC_ADDRESS, publicAddress);
+        JiveGlobals.setProperty(HarvesterConfiguration.NAT_HARVESTER_PUBLIC_ADDRESS, publicAddress);
         
 	String securityenabled = request.getParameter("securityenabled"); 
         JiveGlobals.setProperty("ofmeet.security.enabled", securityenabled);	
@@ -91,7 +94,7 @@
         JiveGlobals.setProperty("ofmeet.autorecord.enabled", autorecordenabled);	
         
 	String enabled = request.getParameter("enabled"); 	
-        JiveGlobals.setProperty(PluginImpl.RECORD_PROPERTY_NAME, enabled);    
+        JiveGlobals.setProperty(Videobridge.ENABLE_MEDIA_RECORDING_PNAME, enabled);
         
 	String authusername = request.getParameter("authusername"); 
         JiveGlobals.setProperty("voicebridge.default.proxy.sipauthuser", authusername);	
@@ -136,10 +139,10 @@
         JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.allow.direct.sip", allowdirectsip);   
         
 	String recordsecret = request.getParameter("recordsecret"); 	
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.recording.secret", recordsecret);          
+        JiveGlobals.setProperty(Videobridge.MEDIA_RECORDING_TOKEN_PNAME, recordsecret);
 
 	String recordpath = request.getParameter("recordpath"); 
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.recording.path", recordpath);  
+        JiveGlobals.setProperty( Videobridge.MEDIA_RECORDING_PATH_PNAME, recordpath);
         
 	String adaptivelastn = request.getParameter("adaptivelastn"); 
         JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.adaptive.lastn", adaptivelastn); 
@@ -217,10 +220,10 @@
 	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.windows.sso", windowsSso);
 
 	String azureClientId = request.getParameter("azureClientId");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.azure.clientid", azureClientId);	
-	
-        
-    }
+	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.azure.clientid", azureClientId);
+
+	container.populateJitsiSystemPropertiesWithJivePropertyValues();
+	}
 
 %>
 <html>
@@ -500,7 +503,7 @@
                 </td>
 		<td>
                     <input name="localaddress" type="text" maxlength="20" size="15"
-                           value="<%=JiveGlobals.getProperty(PluginImpl.NAT_HARVESTER_LOCAL_ADDRESS, ourIpAddress)%>"/>
+                           value="<%=JiveGlobals.getProperty(HarvesterConfiguration.NAT_HARVESTER_LOCAL_ADDRESS, ourIpAddress)%>"/>
                 </td>
             </tr>
             <tr>
@@ -509,18 +512,18 @@
                 </td>
 		<td>
                     <input name="publicaddress" type="text" maxlength="20" size="15"
-                           value="<%=JiveGlobals.getProperty(PluginImpl.NAT_HARVESTER_PUBLIC_ADDRESS, ourIpAddress)%>"/>
+                           value="<%=JiveGlobals.getProperty(HarvesterConfiguration.NAT_HARVESTER_PUBLIC_ADDRESS, ourIpAddress)%>"/>
                 </td>
             </tr>            
 	    <tr>
 		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="checkreplay" <%= ("false".equals(JiveGlobals.getProperty(PluginImpl.CHECKREPLAY_PROPERTY_NAME, "false")) ? "checked" : "") %>>
+			<input type="radio" value="false" name="checkreplay" <%= ("false".equals(JiveGlobals.getProperty(SRTPCryptoContext.CHECK_REPLAY_PNAME, "false")) ? "checked" : "") %>>
 			<b><fmt:message key="config.page.configuration.checkreplay.disabled" /></b> - <fmt:message key="config.page.configuration.checkreplay.disabled_description" />
 		    </td>
 	    </tr>   
 	    <tr>
 		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="checkreplay" <%= ("true".equals(JiveGlobals.getProperty(PluginImpl.CHECKREPLAY_PROPERTY_NAME, "false")) ? "checked" : "") %>>
+			<input type="radio" value="true" name="checkreplay" <%= ("true".equals(JiveGlobals.getProperty(SRTPCryptoContext.CHECK_REPLAY_PNAME, "false")) ? "checked" : "") %>>
 			<b><fmt:message key="config.page.configuration.checkreplay.enabled" /></b> - <fmt:message key="config.page.configuration.checkreplay.enabled_description" />
 		    </td>
 	    </tr>   
@@ -603,13 +606,13 @@
             <tbody>             
 	    <tr>
 		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="enabled" <%= ("false".equals(JiveGlobals.getProperty(PluginImpl.RECORD_PROPERTY_NAME, "false")) ? "checked" : "") %>>
+			<input type="radio" value="false" name="enabled" <%= ("false".equals(JiveGlobals.getProperty( Videobridge.ENABLE_MEDIA_RECORDING_PNAME, "false")) ? "checked" : "") %>>
 			<b><fmt:message key="config.page.configuration.record.disabled" /></b> - <fmt:message key="config.page.configuration.record.disabled_description" />
 		    </td>
 	    </tr>   
 	    <tr>
 		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="enabled" <%= ("true".equals(JiveGlobals.getProperty(PluginImpl.RECORD_PROPERTY_NAME, "false")) ? "checked" : "") %>>
+			<input type="radio" value="true" name="enabled" <%= ("true".equals(JiveGlobals.getProperty( Videobridge.ENABLE_MEDIA_RECORDING_PNAME, "false")) ? "checked" : "") %>>
 			<b><fmt:message key="config.page.configuration.record.enabled" /></b> - <fmt:message key="config.page.configuration.record.enabled_description" />
 		    </td>
 	    </tr> 
@@ -618,7 +621,7 @@
 		    <fmt:message key="config.page.configuration.record.path"/>
 		</td>
 		<td><input type="text" size="60" maxlength="100" name="recordpath"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.path", container.pluginDirectory.getAbsolutePath() + File.separator + "recordings") %>">
+			   value="<%= JiveGlobals.getProperty(Videobridge.MEDIA_RECORDING_PATH_PNAME, container.pluginDirectory.getAbsolutePath() + File.separator + "recordings") %>">
 		</td>
 	    </tr>
 
@@ -627,7 +630,7 @@
 		    <fmt:message key="config.page.configuration.record.secret"/>
 		</td>
 		<td><input type="password" size="60" maxlength="100" name="recordsecret"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.secret", "secret") %>">
+			   value="<%= JiveGlobals.getProperty(Videobridge.MEDIA_RECORDING_TOKEN_PNAME, "secret") %>">
 		</td>
 	    </tr>
 	    <tr>

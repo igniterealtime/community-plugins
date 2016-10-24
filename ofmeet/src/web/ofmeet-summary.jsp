@@ -17,23 +17,24 @@
   - limitations under the License.
 --%>
 
-<%@ page import="org.jivesoftware.util.*,
-                 org.jitsi.videobridge.*,
-                 org.jitsi.videobridge.openfire.PluginImpl,
-                 java.util.*,
-                 java.net.URLEncoder"                 
+<%@ page import="org.jitsi.videobridge.Conference,
+                 org.jitsi.videobridge.Videobridge,
+                 org.jivesoftware.openfire.XMPPServer,
+                 org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin,
+                 org.jivesoftware.util.StringUtils"
     errorPage="error.jsp"
 %>
-<%@ page import="org.xmpp.packet.JID" %>
+<%@ page import="java.net.URLEncoder" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <jsp:useBean id="webManager" class="org.jivesoftware.util.WebManager"  />
 <% webManager.init(request, response, session, application, out ); %>
 
-<% 
-	Videobridge videobridge = PluginImpl.component.getVideobridge();
-    	int confCount = videobridge.getConferenceCount();
+<%
+    OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
+    Videobridge videobridge = container.getPlugin().getComponent().getVideobridge();
+    int confCount = videobridge.getConferenceCount();
 %>
 <html>
     <head>

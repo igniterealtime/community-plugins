@@ -19,77 +19,96 @@
 
 package org.jivesoftware.openfire.plugin.ofmeet;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.*;
-import java.text.*;
-import java.util.regex.*;
-import java.security.Security;
-
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
-import org.xmpp.packet.*;
-
-import org.jivesoftware.util.*;
-import org.jivesoftware.openfire.plugin.spark.*;
-import org.jivesoftware.openfire.container.Plugin;
-import org.jivesoftware.openfire.container.PluginManager;
-import org.jivesoftware.openfire.http.HttpBindManager;
-import org.jivesoftware.openfire.SessionManager;
-import org.jivesoftware.openfire.session.LocalClientSession;
+import org.dom4j.Element;
+import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
+import org.eclipse.jetty.plus.annotation.ContainerInitializer;
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.webapp.WebAppContext;
+import org.jitsi.impl.neomedia.rtcp.termination.strategies.BasicRTCPTerminationStrategy;
+import org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext;
+import org.jitsi.jicofo.FocusManager;
+import org.jitsi.jicofo.xmpp.FocusComponent;
+import org.jitsi.videobridge.Conference;
+import org.jitsi.videobridge.HarvesterConfiguration;
+import org.jitsi.videobridge.VideoChannel;
+import org.jitsi.videobridge.Videobridge;
+import org.jitsi.videobridge.openfire.PluginImpl;
+import org.jivesoftware.openfire.IQHandlerInfo;
+import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
-import org.jivesoftware.openfire.auth.AuthToken;
-import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.container.Plugin;
+import org.jivesoftware.openfire.container.PluginManager;
+import org.jivesoftware.openfire.event.SessionEventDispatcher;
+import org.jivesoftware.openfire.event.SessionEventListener;
+import org.jivesoftware.openfire.group.Group;
+import org.jivesoftware.openfire.group.GroupManager;
+import org.jivesoftware.openfire.group.GroupNotFoundException;
+import org.jivesoftware.openfire.handler.IQHandler;
+import org.jivesoftware.openfire.http.HttpBindManager;
+import org.jivesoftware.openfire.net.SASLAuthentication;
+import org.jivesoftware.openfire.plugin.ofmeet.jetty.OfMeetAzure;
+import org.jivesoftware.openfire.plugin.ofmeet.jetty.OfMeetLoginService;
+import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslProvider;
+import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslServer;
+import org.jivesoftware.openfire.plugin.spark.Bookmark;
+import org.jivesoftware.openfire.plugin.spark.BookmarkManager;
+import org.jivesoftware.openfire.roster.RosterManager;
+import org.jivesoftware.openfire.security.SecurityAuditManager;
+import org.jivesoftware.openfire.session.ClientSession;
+import org.jivesoftware.openfire.session.Session;
 import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
-import org.jivesoftware.openfire.muc.*;
-import org.jivesoftware.openfire.group.*;
-import org.jivesoftware.openfire.session.*;
-import org.jivesoftware.openfire.event.*;
-import org.jivesoftware.openfire.security.SecurityAuditManager;
-import org.jivesoftware.openfire.handler.IQHandler;
-import org.jivesoftware.openfire.IQHandlerInfo;
-import org.jivesoftware.openfire.roster.RosterManager;
-import org.jivesoftware.openfire.net.SASLAuthentication;
-import org.jivesoftware.openfire.plugin.ofmeet.jetty.*;
-import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslProvider;
-import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslServer;
-
-import org.xmpp.component.ComponentManager;
-import org.xmpp.component.ComponentManagerFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
-import org.eclipse.jetty.plus.annotation.ContainerInitializer;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.webapp.WebAppContext;
-
-import org.eclipse.jetty.util.security.*;
-import org.eclipse.jetty.security.*;
-import org.eclipse.jetty.security.authentication.*;
-
-import org.jitsi.videobridge.openfire.PluginImpl;
-
-import net.sf.json.*;
-import org.dom4j.*;
-
-import org.jitsi.videobridge.*;
-
+import org.jivesoftware.util.EmailService;
+import org.jivesoftware.util.JiveGlobals;
+import org.jivesoftware.util.TaskEngine;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xmpp.component.ComponentManager;
+import org.xmpp.component.ComponentManagerFactory;
+import org.xmpp.packet.IQ;
+import org.xmpp.packet.JID;
+import org.xmpp.packet.PacketError;
+
+import java.io.File;
+import java.net.InetAddress;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.Security;
+import java.util.*;
+import java.util.regex.Pattern;
+
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 
-
+/**
+ * Bundles various Jitsi components into one, standalone Openfire plugin.
+ *
+ * Changes from earlier version
+ * - jitsi-plugin made standard. Extensions moved here:
+ * -- Openfire properties to system settings (to configure jitsi)
+ * -- autorecord should become jitsi videobridge feature: https://github.com/jitsi/jitsi-videobridge/issues/344
+ * - jicofo moved from (modified) jitsiplugin and moved to this class
+ *
+ * Not done (yet?)
+ * - MAX/MIN_PORT_DEFAULT_VALUE: older OFMeet moved the range from 5000-6000 (jitsi's default) to 50000-60000.
+ * - BundleActivator jitsiActivator: removed / no longer needed?
+ */
 public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, Job  {
 
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
@@ -126,9 +145,15 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		return jitsiPlugin;
 	}
 
-    public void initializePlugin(final PluginManager manager, final File pluginDirectory)
+
+	private String jicofoSubdomain;
+	private FocusComponent jicofoComponent;
+
+	public void initializePlugin(final PluginManager manager, final File pluginDirectory)
     {
-        componentManager = ComponentManagerFactory.getComponentManager();
+		populateJitsiSystemPropertiesWithJivePropertyValues();
+
+		componentManager = ComponentManagerFactory.getComponentManager();
 		ContextHandlerCollection contexts = HttpBindManager.getInstance().getContexts();
 
 		this.manager = manager;
@@ -145,6 +170,32 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			}
 			catch (Exception e1) {
 				Log.error("Could NOT Initialize jitsi videobridge", e1);
+			}
+
+			try {
+				Log.info("OfMeet Plugin - Initialize jicofo component" );
+
+				Log.info("initializePlugin set jicofo properties...");
+
+				final String focusUserName = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@btg199251");
+				final String focusPassword = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.password", "focus-password-" + System.currentTimeMillis());
+
+				System.setProperty( FocusManager.HOSTNAME_PNAME, XMPPServer.getInstance().getServerInfo().getHostname() );
+				System.setProperty( FocusManager.XMPP_DOMAIN_PNAME, XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
+				System.setProperty( FocusManager.FOCUS_USER_DOMAIN_PNAME, XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
+				System.setProperty( FocusManager.FOCUS_USER_NAME_PNAME, focusUserName.split("@")[0]);
+				System.setProperty( FocusManager.FOCUS_USER_PASSWORD_PNAME, focusPassword);
+
+				jicofoSubdomain = "focus";
+				boolean focusAnonymous = "false".equals(JiveGlobals.getProperty("ofmeet.security.enabled", "true"));
+				jicofoComponent = new FocusComponent( XMPPServer.getInstance().getServerInfo().getHostname(), 0, XMPPServer.getInstance().getServerInfo().getXMPPDomain(), jicofoSubdomain, null, focusAnonymous, focusUserName);
+				componentManager.addComponent(jicofoSubdomain, jicofoComponent);
+				jicofoComponent.init();
+			}
+			catch (Exception e1) {
+				Log.error("Could NOT Initialize jicofo component", e1);
+				jicofoComponent = null;
+				jicofoSubdomain = null;
 			}
 
 			try {
@@ -227,7 +278,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		SASLAuthentication.addSupportedMechanism( OfMeetSaslServer.MECHANISM_NAME );
     }
 
-    public void destroyPlugin() {
+	public void destroyPlugin() {
         try {
 
         	SessionEventDispatcher.removeListener(this);
@@ -236,7 +287,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			ofmeetIQHandler = null;
 			jitsiPlugin.destroyPlugin();
 
-        	ClusterManager.removeListener(this);
+			ClusterManager.removeListener(this);
 
 			EmailListener.getInstance().stop();
 
@@ -245,12 +296,52 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 			if (scheduler != null) scheduler.shutdown(true);
 
-        } catch (Exception e) {
+			// Unload the Jicofo component.
+			componentManager.removeComponent(jicofoSubdomain);
+			jicofoComponent.dispose();
+			jicofoSubdomain = null;
+			jicofoComponent = null;
+
+		} catch (Exception e) {
 
         }
     }
 
-    private static final SecurityHandler basicAuth(String realm) {
+	/**
+	 * Jitsi takes most of its configuration through system properties. This method sets these
+	 * properties, using values defined in JiveGlobals.
+	 */
+	public void populateJitsiSystemPropertiesWithJivePropertyValues()
+	{
+		String ourIpAddress;
+		try
+		{
+			ourIpAddress = InetAddress.getByName( XMPPServer.getInstance().getServerInfo().getHostname() ).getHostAddress();
+		}
+		catch ( Exception e )
+		{
+			ourIpAddress = "127.0.0.1";
+		}
+
+		System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_LOCATION",  pluginDirectory.getAbsolutePath() );
+		System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_NAME",      "." );
+		System.setProperty( "net.java.sip.communicator.SC_CACHE_DIR_LOCATION", pluginDirectory.getAbsolutePath() );
+		System.setProperty( "net.java.sip.communicator.SC_LOG_DIR_LOCATION",   pluginDirectory.getAbsolutePath() );
+
+		System.setProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME,                 JiveGlobals.getProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME,                "false" ) );
+
+		System.setProperty( Videobridge.ENABLE_MEDIA_RECORDING_PNAME,       	  JiveGlobals.getProperty( Videobridge.ENABLE_MEDIA_RECORDING_PNAME,          "false" ) );
+		System.setProperty( Videobridge.MEDIA_RECORDING_PATH_PNAME,               JiveGlobals.getProperty( Videobridge.MEDIA_RECORDING_PATH_PNAME,        pluginDirectory.getAbsolutePath() + File.separator + "recordings" ) );
+		System.setProperty( Videobridge.MEDIA_RECORDING_TOKEN_PNAME,              JiveGlobals.getProperty( Videobridge.MEDIA_RECORDING_TOKEN_PNAME,      "secret" ) );
+
+		System.setProperty( HarvesterConfiguration.NAT_HARVESTER_LOCAL_ADDRESS,   JiveGlobals.getProperty( HarvesterConfiguration.NAT_HARVESTER_LOCAL_ADDRESS,  ourIpAddress ) );
+		System.setProperty( HarvesterConfiguration.NAT_HARVESTER_PUBLIC_ADDRESS,  JiveGlobals.getProperty( HarvesterConfiguration.NAT_HARVESTER_PUBLIC_ADDRESS, ourIpAddress ) );
+
+		System.setProperty( Videobridge.DEFAULT_OPTIONS_PROPERTY_NAME, "2" ); // allow videobridge access without focus
+		System.setProperty( VideoChannel.RTCP_TERMINATION_STRATEGY_PNAME,  BasicRTCPTerminationStrategy.class.getCanonicalName() );
+	}
+
+	private static final SecurityHandler basicAuth(String realm) {
 
     	final OfMeetLoginService loginService = new OfMeetLoginService();
         loginService.setName(realm);
@@ -619,7 +710,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			try {
 				String roomName = requestJSON.getString("room");
 
-				Videobridge videobridge = jitsiPlugin.component.getVideobridge();
+				Videobridge videobridge = jitsiPlugin.getComponent().getVideobridge();
 
 				for (Conference conference : videobridge.getConferences())
 				{

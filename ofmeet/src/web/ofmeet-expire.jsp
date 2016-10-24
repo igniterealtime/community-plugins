@@ -18,11 +18,11 @@
 --%>
 
 <%@ page import="org.jivesoftware.util.*,
-                 org.jitsi.videobridge.*,
-                 org.jitsi.videobridge.openfire.PluginImpl,
-                 java.net.URLEncoder"
+                 org.jitsi.videobridge.*"
     errorPage="error.jsp"
 %>
+<%@ page import="org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin" %>
+<%@ page import="org.jivesoftware.openfire.XMPPServer" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -30,16 +30,17 @@
 <% webManager.init(request, response, session, application, out ); %>
 
 <% 
-    	String confid = ParamUtils.getParameter(request,"confid");
-    	String focus = ParamUtils.getParameter(request,"focus");
-    	
-	Videobridge videobridge = PluginImpl.component.getVideobridge();
+	String confid = ParamUtils.getParameter(request,"confid");
+	String focus = ParamUtils.getParameter(request,"focus");
+
+	OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
+	Videobridge videobridge = container.getPlugin().getComponent().getVideobridge();
 	Conference conference = videobridge.getConference(confid, focus);
 	
-        if (conference != null) {
+	if (conference != null) {
 		conference.expire();
-        }
-        // Done, so redirect
-        response.sendRedirect("ofmeet-summary.jsp?deletesuccess=true");
-        return;
+	}
+	// Done, so redirect
+	response.sendRedirect("ofmeet-summary.jsp?deletesuccess=true");
+	return;
 %>
