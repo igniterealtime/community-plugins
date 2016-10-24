@@ -151,13 +151,14 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 	public void initializePlugin(final PluginManager manager, final File pluginDirectory)
     {
-		populateJitsiSystemPropertiesWithJivePropertyValues();
 
 		componentManager = ComponentManagerFactory.getComponentManager();
 		ContextHandlerCollection contexts = HttpBindManager.getInstance().getContexts();
 
 		this.manager = manager;
 		this.pluginDirectory = pluginDirectory;
+
+		populateJitsiSystemPropertiesWithJivePropertyValues();
 		self = this;
 
 		try {
