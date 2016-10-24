@@ -80,12 +80,13 @@
                         	<exclude name="java/**"/>                        	
 			</fileset>
 		</copy>			
-		<copy todir="${ofmeet.dir}/build/jar/lib" overwrite="true">			
+		<copy todir="${ofmeet.dir}/build/jar/lib" overwrite="true" flatten="true">
 			<fileset dir="${ofmeet.dir}/lib">				
 			</fileset>
 		</copy>			
 		<copy todir="${ofmeet.dir}/build/jar" overwrite="true">						
 			<fileset dir="${ofmeet.dir}">
+				<exclude name="lib/**"/>
                         	<exclude name="build.*"/>		
                         	<exclude name="build/**"/>	
                         	<exclude name="src/**"/>                        	
@@ -102,7 +103,7 @@
 			</fileset>			
 		</jar>
 		
-                <delete dir="${ofmeet.dir}/build"/>	 		
+                <delete dir="${ofmeet.dir}/build"/>
 			              
 	</target>
 </project>
