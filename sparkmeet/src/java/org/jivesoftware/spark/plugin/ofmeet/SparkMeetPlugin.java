@@ -261,7 +261,7 @@ public class SparkMeetPlugin implements Plugin, ChatRoomListener
         // Find the root path of the class that will be our plugin lib folder.
         try
         {
-			String nativeLibsJarPath = Spark.getSparkUserHome() + File.separator + "plugins" + File.separator + "sparkmeet" + File.separator + "lib";
+			String nativeLibsJarPath = Spark.getSparkUserHome() + File.separator + "plugins" + File.separator + "sparkmeet" + File.separator + "lib" + File.separator + "electron" + File.separator + "electron" + File.separator + "releases" + File.separator + "download" + File.separator + "v1.4.5";
             File nativeLibFolder = new File(nativeLibsJarPath, "native");
 
  			electronHomePath = nativeLibsJarPath + File.separator + "native";
