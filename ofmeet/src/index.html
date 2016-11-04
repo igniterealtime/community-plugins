@@ -9,7 +9,10 @@
     <meta itemprop="name" content="Jitsi Meet"/>
     <meta itemprop="description" content="Join a WebRTC video conference powered by the Jitsi Videobridge"/>
     <meta itemprop="image" content="/ofmeet/images/jitsilogo.png"/>
-    <script src="libs/jquery-2.1.1.min.js"></script>
+
+	<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+    <script src="libs/jquery-2.1.1.js"></script>
     <script src="/ofmeet/config"></script><!-- BAO -->
     <script src="simulcast.js?v=7"></script><!-- simulcast handling -->
     <script src="libs/strophe/strophe.jingle.adapter.js?v=3"></script><!-- strophe.jingle bundles -->
@@ -71,6 +74,9 @@
     <script src="phone.js?v=1"></script>
     <script src="lz-string.js?v=1"></script>
     <script src="avatar.js?v=4"></script><!-- avatars -->
+
+	<script>if (window.module) module = window.module;</script>
+
     <link rel="stylesheet" href="css/font.css?v=6"/>
     <link rel="stylesheet" href="css/toastr.css?v=1">
     <link rel="stylesheet" type="text/css" media="screen" href="css/main.css?v=30"/>
