@@ -2,7 +2,7 @@
 
     <property name="plug.dir" value="${basedir}"/>
     <property name="plug.lib.dir" value="${plug.dir}/build/lib"/>
-    <property name="plug.lib.dist.dir" value="${plug.lib.dir}/dist"/>
+    <property name="plug.dist.dir" value="${plug.dir}/build/dist"/>
 
     <property name="spark.home" value="${basedir}/../../.."/>
     <property name="spark.target" value="${basedir}/../../../target"/>
@@ -57,8 +57,16 @@
         <copy todir="${target.dir}">
             <fileset file="${plug.dir}/plugin.xml"/>
         </copy>
-
+        
         <jar basedir="${classes.dir}" file="${jar.file}" update="false"/>
+        
+    </target>
+    
+    <target name="win32" depends="jar" description="Makes a plugin jar for Windows32">
+
+        <copy todir="${target.lib.dir}">
+            <fileset file="${plug.dist.dir}/electron-v1.4.5-win32-ia32.zip"/>
+        </copy>
 
         <zip zipfile="${spark.build}/plugins/sparkmeet.jar" basedir="${target.dir}"/>
 
@@ -66,6 +74,65 @@
             <fileset file="${spark.build}/plugins/sparkmeet.jar"/>
         </copy>
     </target>
+
+    <target name="win" depends="jar" description="Makes a plugin jar for Windows">
+
+        <copy todir="${target.lib.dir}">
+            <fileset file="${plug.dist.dir}/electron-v1.4.5-win32-ia32.zip"/>
+            <fileset file="${plug.dist.dir}/electron-v1.4.5-win32-x64.zip"/>            
+        </copy>
+
+        <zip zipfile="${spark.build}/plugins/sparkmeet.jar" basedir="${target.dir}"/>
+
+        <copy todir="${spark.home}/src/commercial">
+            <fileset file="${spark.build}/plugins/sparkmeet.jar"/>
+        </copy>
+    </target>    
+    
+    <target name="linux" depends="jar" description="Makes a plugin jar for Linux">
+
+        <copy todir="${target.lib.dir}">
+            <fileset file="${plug.dist.dir}/electron-v1.4.5-linux-ia32.zip"/>
+            <fileset file="${plug.dist.dir}/electron-v1.4.5-linux-x64.zip"/>            
+        </copy>
+
+        <zip zipfile="${spark.build}/plugins/sparkmeet.jar" basedir="${target.dir}"/>
+
+        <copy todir="${spark.home}/src/commercial">
+            <fileset file="${spark.build}/plugins/sparkmeet.jar"/>
+        </copy>
+    </target>      
+    
+    <target name="osx" depends="jar" description="Makes a plugin jar for OSX">
+
+        <copy todir="${target.lib.dir}">
+            <fileset file="${plug.dist.dir}/electron-v1.4.5-darwin-x64.zip"/>
+        </copy>
+
+        <zip zipfile="${spark.build}/plugins/sparkmeet.jar" basedir="${target.dir}"/>
+
+        <copy todir="${spark.home}/src/commercial">
+            <fileset file="${spark.build}/plugins/sparkmeet.jar"/>
+        </copy>
+    </target>    
+    
+    <target name="all" depends="jar" description="Makes a plugin jar for Windows,Linux and OSX">
+
+        <copy todir="${target.lib.dir}">
+            <fileset file="${plug.dist.dir}/electron-v1.4.5-darwin-x64.zip"/>
+            <fileset file="${plug.dist.dir}/electron-v1.4.5-linux-ia32.zip"/>
+            <fileset file="${plug.dist.dir}/electron-v1.4.5-linux-x64.zip"/>  
+            <fileset file="${plug.dist.dir}/electron-v1.4.5-win32-ia32.zip"/>
+            <fileset file="${plug.dist.dir}/electron-v1.4.5-win32-x64.zip"/>             
+        </copy>
+
+        <zip zipfile="${spark.build}/plugins/sparkmeet.jar" basedir="${target.dir}"/>
+
+        <copy todir="${spark.home}/src/commercial">
+            <fileset file="${spark.build}/plugins/sparkmeet.jar"/>
+        </copy>
+    </target>     
+    
 
     <!-- resources =================================================================================== -->
     <target name="resources">

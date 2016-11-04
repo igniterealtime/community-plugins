@@ -44,7 +44,7 @@ public class ChatRoomDecorator
 
 	private final String url;
 
-	public ChatRoomDecorator(final ChatRoom room, final String url, final String server, final String port)
+	public ChatRoomDecorator(final ChatRoom room, final String url, final String server, final String port, final SparkMeetPlugin plugin)
 	{
 		this.room = room;
 		this.url = url;
@@ -79,7 +79,7 @@ public class ChatRoomDecorator
 							sendInvite(room.getRoomname(), newUrl, Message.Type.chat);
 						}
 
-						BareBonesBrowserLaunch.openURL(server, port, newRoomId);
+						plugin.openURL(newRoomId);
 					}
 			});
 			room.getEditorBar().add(ofmeetButton);
