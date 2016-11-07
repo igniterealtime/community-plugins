@@ -35,8 +35,12 @@ import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.jitsi.impl.neomedia.rtcp.termination.strategies.BasicRTCPTerminationStrategy;
 import org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext;
+import org.jitsi.impl.osgi.framework.OSGiLauncher;
 import org.jitsi.jicofo.FocusManager;
+import org.jitsi.jicofo.osgi.JicofoBundleConfig;
 import org.jitsi.jicofo.xmpp.FocusComponent;
+import org.jitsi.meet.OSGi;
+import org.jitsi.meet.OSGiBundleConfig;
 import org.jitsi.videobridge.Conference;
 import org.jitsi.videobridge.HarvesterConfiguration;
 import org.jitsi.videobridge.VideoChannel;
@@ -126,7 +130,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 	public String sipRegisterStatus = "";
 
-    public String getName() {
+	public String getName() {
         return "ofmeet";
     }
 
@@ -148,6 +152,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 	private String jicofoSubdomain;
 	private FocusComponent jicofoComponent;
+	private OSGiLauncher jicofoLauncher;
 
 	public void initializePlugin(final PluginManager manager, final File pluginDirectory)
     {
@@ -189,9 +194,19 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 				jicofoSubdomain = "focus";
 				boolean focusAnonymous = "false".equals(JiveGlobals.getProperty("ofmeet.security.enabled", "true"));
+
+				// The static OSGi instance will have a bundle config set (which is done in the videobridge plugin. We
+				// can't re-initialze that, without breaking the videobridge code. Instead, we'll manually track a
+				// launcher for the jicofo OSGi bundle.
+				final OSGiBundleConfig jicofoConfig = new JicofoBundleConfig();
+				jicofoLauncher = new OSGiLauncher( jicofoConfig.getBundles() );
+
 				jicofoComponent = new FocusComponent( XMPPServer.getInstance().getServerInfo().getHostname(), 0, XMPPServer.getInstance().getServerInfo().getXMPPDomain(), jicofoSubdomain, null, focusAnonymous, focusUserName);
+
+				// Instead of #init, manually start the OSGi launcher! #jicofoComponent.init();
+				jicofoLauncher.start( jicofoComponent );
+
 				componentManager.addComponent(jicofoSubdomain, jicofoComponent);
-				jicofoComponent.init();
 			}
 			catch (Exception e1) {
 				Log.error("Could NOT Initialize jicofo component", e1);
@@ -299,7 +314,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 			// Unload the Jicofo component.
 			componentManager.removeComponent(jicofoSubdomain);
-			jicofoComponent.dispose();
+			// Instead of jicofoComponent.dispose(), manually stop the OSGi launcher that we're tracking.
+			jicofoLauncher.stop( jicofoComponent );
+			jicofoLauncher = null;
 			jicofoSubdomain = null;
 			jicofoComponent = null;
 
