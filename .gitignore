@@ -1,0 +1,9 @@
+.idea/
+.ant*
+**/*.iml
+out/
+build.txt
+
+ofmeet/build/
+ofmeet/clones/
+target/

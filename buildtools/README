@@ -1,0 +1,5 @@
+The buildtools in this directory are:
+- Apache Ant (extracted ZIP distributable, minus the 'manual' directory).
+- Apache Maven Ant Tasks library (as obtained from the public Maven repository, manually added the appicable LICENSE file).
+- Eclipse JGit Ant Tasks (as obtained from https://repo.eclipse.org/content/repositories/jgit-releases/org/eclipse/jgit/org.eclipse.jgit.ant, manually added the applicable LICENSE file)
+
