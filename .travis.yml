@@ -3,9 +3,12 @@ language: java
 jdk:
   - oraclejdk8
 env:
-  - ENVTARGET=ofmeet
-  - ENVTARGET=ofsocial
-  - ENVTARGET=ofturn  
-script: 
-  - ant -f $ENVTARGET/build.xml jar
+  global:
+    - M2_HOME=/usr/local/maven
+  matrix:
+    - ENVTARGET=ofmeet
+    - ENVTARGET=ofsocial
+    - ENVTARGET=ofturn
+script:
+  - buildtools/apache-ant-1.9.7/bin/ant -f $ENVTARGET/build.xml -lib buildtools/maven-ant-tasks-2.1.3/ jar
 
