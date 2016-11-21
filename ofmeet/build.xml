@@ -234,6 +234,7 @@
 		</copy>
 		<copy todir="${ofmeet.dir}/build/jar" overwrite="true">
 			<fileset dir="${ofmeet.dir}">
+				<exclude name="clones/**"/>
 				<exclude name="lib/**"/>
 				<exclude name="build.*"/>
 				<exclude name="build/**"/>
