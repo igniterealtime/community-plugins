@@ -23,7 +23,6 @@
 
     // Get handle on the plugin
     OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
-    PluginImpl plugin = container.getPlugin();
 
     String ourIpAddress = "127.0.0.1";  
     String ourHostname = XMPPServer.getInstance().getServerInfo().getHostname();
@@ -485,7 +484,7 @@
                 </td>
  		<td>
                     <input name="minport" type="text" maxlength="5" size="5"
-                           value="<%=plugin.getMinPort()%>"/>
+                           value="<%=System.getProperty( PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, "5000" ) %>"/>
                 </td>
             </tr>
             <tr>
@@ -494,7 +493,7 @@
                 </td>
     		<td>
                     <input name="maxport" type="text" maxlength="5" size="5"
-                           value="<%=plugin.getMaxPort()%>"/>
+                           value="<%=System.getProperty( PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME, "6000" ) %>"/>
                 </td>
             </tr>
             <tr>

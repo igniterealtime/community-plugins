@@ -368,7 +368,7 @@ public class EmailListener {
 				meetingJSON.put("title", meetingTitle);
 				meetingJSON.put("room", bookmark.getValue());
 
-				OfMeetPlugin.self.processMeeting(meetingJSON, username, bookmark.getProperty("url"));
+				MeetingPlanner.processMeeting(meetingJSON, username, bookmark.getProperty("url"));
 
 				Collection<ClientSession> sessions = SessionManager.getInstance().getSessions(username);
 
@@ -738,7 +738,7 @@ public class EmailListener {
     /**
      * Sets the name of the fastpath prefix.
      *
-     * @param folder the name of the fastpath prefix.
+     * @param prefix the name of the fastpath prefix.
      */
     public void setFastpathPrefix(String prefix) {
         JiveGlobals.setProperty("ofmeet.email.listener.fastpath.prefix", prefix);
@@ -961,7 +961,7 @@ public class EmailListener {
 		variables.put("audiourl", audiourl);
 		variables.put("workgroup", workgroupNodeName);
 
-		OfMeetPlugin.self.sendEmail(email, email, title, OfMeetPlugin.self.replaceTokens(template, variables), null);
+		MeetingPlanner.sendEmail(email, email, title, MeetingPlanner.replaceTokens(template, variables), null);
 	}
 
 	private void processWorkgroupRequest(String workgroupNodeName, Message message, User fromUser)

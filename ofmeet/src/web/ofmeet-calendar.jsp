@@ -47,7 +47,7 @@
 		if (updatedEvents != null)
 		{
 			bookmark.setProperty("calendar", updatedEvents);
-			OfMeetPlugin.self.processMeetingPlanner();
+            MeetingPlanner.processMeetingPlanner();
 		}
 
 		int i = 0;

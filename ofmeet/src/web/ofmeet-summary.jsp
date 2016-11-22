@@ -33,7 +33,7 @@
 
 <%
     OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
-    Videobridge videobridge = container.getPlugin().getComponent().getVideobridge();
+    Videobridge videobridge = container.getVideobridge();
     int confCount = videobridge.getConferenceCount();
 %>
 <html>

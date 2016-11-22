@@ -199,7 +199,7 @@ public class ConfigServlet extends HttpServlet
             if ("on".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.global.intercom", "off")))
             {
                 final OfMeetPlugin ofmeet = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin( "ofmeet" );
-                Videobridge videobridge = ofmeet.getPlugin().getComponent().getVideobridge();
+                Videobridge videobridge = ofmeet.getVideobridge();
 
                 if (globalConferenceId == null || videobridge.getConference(globalConferenceId, null) == null)
                 {
