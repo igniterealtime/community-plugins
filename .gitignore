@@ -6,4 +6,5 @@ build.txt
 
 ofmeet/build/
 ofmeet/clones/
+ofmeet/src/web/WEB-INF/web.xml
 target/
