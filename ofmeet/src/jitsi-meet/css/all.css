@@ -34,8 +34,8 @@ ul.popupmenu li {
 }
 @font-face {
     font-family: jitsi;
-    src: url(/ofmeet/fonts/jitsi.eot);
-    src: url(/ofmeet/fonts/jitsi.eot) format("embedded-opentype"), url(/ofmeet/fonts/jitsi.woff) format("woff"), url(/ofmeet/fonts/jitsi.ttf) format("truetype"), url(/ofmeet/fonts/jitsi.svg) format("svg");
+    src: url(../fonts/jitsi.eot);
+    src: url(../fonts/jitsi.eot) format("embedded-opentype"), url(../fonts/jitsi.woff) format("woff"), url(../fonts/jitsi.ttf) format("truetype"), url(../fonts/jitsi.svg) format("svg");
     font-weight: 400;
     font-style: normal
 }
@@ -167,8 +167,8 @@ ul.popupmenu li {
 
 @font-face {
     font-family: FontAwesome;
-    src: url(/ofmeet/fonts/fontawesome-webfont.eot);
-    src: url(/ofmeet/fonts/fontawesome-webfont.eot) format("embedded-opentype"), url(/ofmeet/fonts/fontawesome-webfont.woff) format("woff2"), url(/ofmeet/fonts/fontawesome-webfont.woff) format("woff"), url(/ofmeet/fonts/fontawesome-webfont.ttf) format("truetype"), url(/ofmeet/fonts/fontawesome-webfont.svg) format("svg");
+    src: url(fonts/fontawesome-webfont.eot);
+    src: url(fonts/fontawesome-webfont.eot) format("embedded-opentype"), url(fonts/fontawesome-webfont.woff) format("woff2"), url(fonts/fontawesome-webfont.woff) format("woff"), url(fonts/fontawesome-webfont.ttf) format("truetype"), url(fonts/fontawesome-webfont.svg) format("svg");
     font-weight: 400;
     font-style: normal
 }

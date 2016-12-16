@@ -217,23 +217,23 @@ public class ConfigServlet extends HttpServlet
             out.println("        bridge: 'videobridge." + domain + "',");
             out.println("        focus: 'focus." + domain + "',");
             out.println("    },");
-            out.println("    getroomnode: function (path)");
-            out.println("    {");
-            out.println("		var name = 'r';");
-            out.println("		var roomnode = null;");
-
-            out.println("		var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);");
-
-            out.println("		if (!results)");
-            out.println("			roomnode = null; ");
-            out.println("		else 	roomnode = results[1] || undefined;	");
-
-            out.println("		if (!roomnode) {");
-            out.println("			roomnode = Math.random().toString(36).substr(2, 20);");
-            out.println("			window.history.pushState('VideoChat', 'Room: ' + roomnode, path + '?r=' + roomnode);");
-            out.println("		}");
-            out.println("		return roomnode.toLowerCase();    ");
-            out.println("    },	");
+//            out.println("    getroomnode: function (path)");
+//            out.println("    {");
+//            out.println("		var name = 'r';");
+//            out.println("		var roomnode = null;");
+//
+//            out.println("		var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);");
+//
+//            out.println("		if (!results)");
+//            out.println("			roomnode = null; ");
+//            out.println("		else 	roomnode = results[1] || undefined;	");
+//
+//            out.println("		if (!roomnode) {");
+//            out.println("			roomnode = Math.random().toString(36).substr(2, 20);");
+//            out.println("			window.history.pushState('VideoChat', 'Room: ' + roomnode, path + '/' + roomnode);");
+//            out.println("		}");
+//            out.println("		return roomnode.toLowerCase();    ");
+//            out.println("    },	");
 
             if (sipAccount != null)
             {
@@ -281,7 +281,7 @@ public class ConfigServlet extends HttpServlet
             out.println("    openSctp: " + openSctp + ",");
             if (recordingKey == null) out.println("    enableRecording: " + recordVideo + ",");
             if (recordingKey != null) out.println("    recordingKey: '" + recordingKey + "',");
-            out.println("    clientNode: 'http://igniterealtime.org/ofmeet',");
+            out.println("    clientNode: 'http://igniterealtime.org/ofmeet/jitsi-meet/',");
             out.println("    focusUserJid: '" + focusUserJid + "',");
             out.println("    defaultSipNumber: '" + defaultSipNumber + "',");
             out.println("    desktopSharing: '" + desktopSharing + "',");

@@ -22,7 +22,7 @@ import org.jitsi.meet.OSGiBundleConfig;
  */
 public class JitsiJicofoWrapper
 {
-    private static final Logger Log = LoggerFactory.getLogger(JitsiPluginWrapper.class );
+    private static final Logger Log = LoggerFactory.getLogger( JitsiJicofoWrapper.class );
 
     private String jicofoSubdomain = "focus";
 

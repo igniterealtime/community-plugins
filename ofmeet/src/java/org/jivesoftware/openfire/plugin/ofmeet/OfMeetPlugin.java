@@ -24,14 +24,10 @@ import org.apache.tomcat.SimpleInstanceManager;
 import org.dom4j.Element;
 import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
 import org.eclipse.jetty.plus.annotation.ContainerInitializer;
-import org.eclipse.jetty.rewrite.handler.RewriteHandler;
-import org.eclipse.jetty.rewrite.handler.RewriteRegexRule;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.jitsi.impl.neomedia.rtcp.termination.strategies.BasicRTCPTerminationStrategy;
@@ -60,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
 
+import javax.servlet.DispatcherType;
 import java.io.File;
 import java.net.InetAddress;
 import java.nio.charset.Charset;
@@ -140,33 +137,26 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         try {
 			ClusterManager.addListener(this);
 
-			// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
 
-			final List<ContainerInitializer> initializers = new ArrayList<>();
-			initializers.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-
-			Log.info("OfMeet Plugin - Initialize webservice");
-            ContextHandlerCollection contexts = HttpBindManager.getInstance().getContexts();
-
-			WebAppContext context2 = new WebAppContext(contexts, pluginDirectory.getPath(), "/ofmeet");
-			context2.setClassLoader(this.getClass().getClassLoader());
+            Log.info("OfMeet Plugin - Initialize webservice");
+			final WebAppContext context = new WebAppContext( HttpBindManager.getInstance().getContexts(), pluginDirectory.getPath(), "/ofmeet" );
+			context.setClassLoader( this.getClass().getClassLoader() );
 
 			// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
+            final List<ContainerInitializer> initializers = new ArrayList<>();
+            initializers.add( new ContainerInitializer( new JettyJasperInitializer(), null ) );
+			context.setAttribute("org.eclipse.jetty.containerInitializers", initializers);
+			context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
 
-			final List<ContainerInitializer> initializers2 = new ArrayList<>();
-			initializers2.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-			context2.setAttribute("org.eclipse.jetty.containerInitializers", initializers2);
-			context2.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+			// Many URLs under /jitsi-meet/ should be handled by the index.html file. The URL path identifies the room name.
+			context.addFilter( JitsiMeetRedirectFilter.class, "/jitsi-meet/*", EnumSet.of( DispatcherType.REQUEST ) );
 
-			context2.setWelcomeFiles(new String[]{"index.html"});
-
-			String securityEnabled = JiveGlobals.getProperty("ofmeet.security.enabled", "true");
-
-			if ("true".equals(securityEnabled))
+            if ( JiveGlobals.getBooleanProperty("ofmeet.security.enabled", true ) )
 			{
 				Log.info("OfMeet Plugin - Initialize security");
-				context2.setSecurityHandler(basicAuth("ofmeet"));
+				context.setSecurityHandler(basicAuth("ofmeet"));
 			}
+
 
 			Log.info("OfMeet Plugin - Initialize email listener");
 
