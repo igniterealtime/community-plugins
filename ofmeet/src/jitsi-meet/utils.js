@@ -9,7 +9,7 @@
 /**
  * Builds and returns the room name.
  */
-function getRoomName () {
+function getRoomName () { // eslint-disable-line no-unused-vars
     var path = window.location.pathname;
     var roomName;
 
@@ -25,7 +25,6 @@ function getRoomName () {
          * part of the (non-empty) URL path, that matches the regular
          * expression pattern used for rewrite rules in NGINX: [a-zA-Z0-9=\?]+
          */
-        // GDK
         if (path.length > 1) {
             var regex = /\/([a-zA-Z0-9=\?]+)$/g;
             var match = regex.exec(path);
@@ -45,6 +44,7 @@ function getRoomName () {
  * @param dontParse if false or undefined some transformations
  * (for parsing the value as JSON) are going to be executed
  */
+// eslint-disable-next-line no-unused-vars
 function getConfigParamsFromUrl(source, dontParse) {
     var paramStr = (source === "search")? location.search : location.hash;
     if (!paramStr)

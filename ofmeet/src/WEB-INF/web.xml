@@ -21,6 +21,6 @@
 
 	<servlet-mapping>
 		<servlet-name>config</servlet-name>
-		<url-pattern>/config</url-pattern>
+		<url-pattern>/jitsi-meet/config.js</url-pattern>
 	</servlet-mapping>		 
 </web-app>
