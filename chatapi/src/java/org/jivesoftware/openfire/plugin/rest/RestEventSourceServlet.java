@@ -50,22 +50,33 @@ public class RestEventSourceServlet extends EventSourceServlet
 	public static final ConcurrentHashMap<String, ArrayList<RestEventSource>> 	eventSources 	= new ConcurrentHashMap<String, ArrayList<RestEventSource>>();
 	public static final ConcurrentHashMap<String, Map<String, MultiUserChat>> 	groupchats 		= new ConcurrentHashMap<String, Map<String, MultiUserChat>>();
 	public static final ConcurrentHashMap<String, Map<String, Chat>> 			chats 			= new ConcurrentHashMap<String, Map<String, Chat>>();
-	public static final ConcurrentHashMap<String, XMPPConnection> 				connections 	= new ConcurrentHashMap<String, XMPPConnection>();
+	public static final ConcurrentHashMap<String, SmackConnection> 				connections 	= new ConcurrentHashMap<String, SmackConnection>();
 
-	public static void emitEventAll(String event)
+	public static void emitDataAll(String event)
 	{
 		for (ArrayList<RestEventSource> arrayList : eventSources.values()) {
 			for (RestEventSource res : arrayList) {
-				res.emitEvent(event);
+				res.emitData(event);
 			}
 		}
 	}
 
-	public static void emitEvent(String target, String event)
+	public static void emitEvent(String event, String target, String data)
 	{
-		for (RestEventSource res : eventSources.get(target)) {
-			res.emitEvent(event);
-		}
+		try {
+			for (RestEventSource res : eventSources.get(target)) {
+				res.emitEvent(event, data);
+			}
+		} catch (Exception e) {}
+	}
+
+	public static void emitData(String target, String event)
+	{
+		try {
+			for (RestEventSource res : eventSources.get(target)) {
+				res.emitData(event);
+			}
+		} catch (Exception e) {}
 	}
 
 	public static boolean joinRoom(String source, String mGroupChatName, String mNickName)
@@ -77,7 +88,7 @@ public class RestEventSourceServlet extends EventSourceServlet
 
 			if (mMultiUserChat == null)
 			{
-				mMultiUserChat = new MultiUserChat(connections.get(source), mGroupChatName);
+				mMultiUserChat = new MultiUserChat(connections.get(source).getConnection(), mGroupChatName);
 				groupchats.get(source).put(mGroupChatName, mMultiUserChat);
 			}
 
@@ -118,7 +129,21 @@ public class RestEventSourceServlet extends EventSourceServlet
 		}
 	}
 
-	public static boolean sendChatMessage(String source, String message, String to) throws XMPPException
+	public static boolean sendXmppMessage(String source, String message)
+	{
+		Log.info("sendXmppMessage " + source + " " + "\n" + message);
+
+		try {
+			connections.get(source).getConnection().sendPacket(message);
+			return true;
+
+		} catch (Exception e) {
+			Log.error("joinRoom", e);
+			return false;
+		}
+	}
+
+	public static boolean sendChatMessage(String source, String message, String to)
 	{
 		Log.info("sendChatMessage " + source + " " + to + "\n" + message);
 
@@ -129,7 +154,7 @@ public class RestEventSourceServlet extends EventSourceServlet
 
 			if (chat == null)
 			{
-				chat = connections.get(source).getChatManager().createChat(to, null);
+				chat = connections.get(source).getConnection().getChatManager().createChat(to, null);
 				chats.get(source).put(to, chat);
 			}
 
@@ -142,23 +167,40 @@ public class RestEventSourceServlet extends EventSourceServlet
 		}
 	}
 
+	public static synchronized void setConnection(Principal principal, SmackConnection connection)
+	{
+		String source = principal.toString();
+
+		if (connections.containsKey(source) == false)
+		{
+			connections.put(source, connection);
+			connection.init();
+		}
+	}
+
 	@Override protected EventSource newEventSource(final HttpServletRequest req)
 	{
-		String source = req.getUserPrincipal().toString();		// get authenticated user
+		Principal principal = req.getUserPrincipal();
+		String source = principal.toString();		// get authenticated user
 		RestEventSource eventSource = null;
 
 		Log.info("newEventSource " + source);
 
-		if (source != null) {
-			if (eventSources.containsKey(source)) {
+		if (source != null)
+		{
+			RestEventSourceServlet.setConnection(principal, new SmackConnection(principal));
+
+			if (eventSources.containsKey(source))
+			{
 				if (eventSources.get(source).size() > JiveGlobals.getIntProperty("chatapi.eventsource.amount", 5)) {
 					eventSources.get(source).remove(0);
 				}
-				eventSource = new RestEventSource(req.getUserPrincipal());
+				eventSource = new RestEventSource(source);
 				eventSources.get(source).add(eventSource);
+
 			} else {
 				ArrayList<RestEventSource> arrayList = new ArrayList<RestEventSource>();
-				eventSource = new RestEventSource(req.getUserPrincipal());
+				eventSource = new RestEventSource(source);
 				arrayList.add(eventSource);
 				eventSources.put(source, arrayList);
 
@@ -167,74 +209,55 @@ public class RestEventSourceServlet extends EventSourceServlet
 		return eventSource;
 	}
 
-	public class RestEventSource implements org.eclipse.jetty.servlets.EventSource, MessageListener, ChatManagerListener, PacketListener {
-		public Emitter emitter;
+	public class SmackConnection implements MessageListener, ChatManagerListener, PacketListener
+	{
 		private String source;
 		private String token;
-		public boolean isClosed = true;
 		private XMPPConnection connection;
 		private ChatManager chatManager;
-		private PacketFilter filter;
 
-		public RestEventSource(Principal principal) {
+		public SmackConnection(Principal principal)
+		{
 			this.source = principal.toString();
 			this.token = TokenManager.getInstance().retrieveToken(principal);
 		}
 
-		public void onOpen(Emitter emitter) throws IOException
+		public void init()
 		{
-			Log.info("onOpen " + source + " " + token);
-
-			this.emitter = emitter;
-			this.isClosed = false;
-
-			if (token != null)
-			{
-				try {
-
-					ConnectionConfiguration config = new ConnectionConfiguration("localhost", 0);
-					connection = new XMPPConnection(config);
-
-					connections.put(source, connection);
-					groupchats.put(source, new HashMap<String, MultiUserChat>());
-
-					connection.connect();
-					connection.login(source, token, source + "-" + System.currentTimeMillis());
-
-					Presence p = new Presence(Presence.Type.available);
-					connection.sendPacket(p);
-
-					chatManager = connection.getChatManager();
-					chatManager.addChatListener(this);
-
-					filter = new MessageTypeFilter(Message.Type.groupchat);
-					connection.addPacketListener(this, filter);
-
-				} catch (Exception e) {
-					Log.error("onOpen", e);
-				}
-			}
-		}
-
-		public void emitEvent(String event) {
-			Log.info("emitEvent " + event);
+			Log.info("SmackConnection: init " + source + " " + token);
 
 			try {
-				if (!isClosed) {
-					Log.info("emitEvent " + event);
-					emitter.data(event);
-				}
+				ConnectionConfiguration config = new ConnectionConfiguration("localhost", 0);
+				connection = new XMPPConnection(config);
+				connection.connect();
+				connection.login(source, token, source + "-" + System.currentTimeMillis());
+
+				chatManager = connection.getChatManager();
+				chatManager.addChatListener(this);
+
+				PacketFilter filter = new MessageTypeFilter(Message.Type.groupchat);
+				connection.addPacketListener(this, filter);
+
+				groupchats.put(source, new HashMap<String, MultiUserChat>());
+
+				Presence p = new Presence(Presence.Type.available);
+				connection.sendPacket(p);
 
 			} catch (Exception e) {
-				Log.error("emitEvent", e);
+				Log.error("onOpen", e);
 			}
 		}
 
-		public void onClose() {
-			Log.info("onClose ");
-			isClosed = true;
+		public XMPPConnection getConnection()
+		{
+			return connection;
+		}
 
-			if (connection != null) {
+		public void close() {
+			Log.info("SmackConnection: close " + source + " " + token);
+
+			if (connection != null)
+			{
 				chatManager.removeChatListener(this);
 				connection.removePacketListener(this);
 				connection.disconnect();
@@ -247,7 +270,7 @@ public class RestEventSourceServlet extends EventSourceServlet
 
 			if (message.getType() == Message.Type.chat)
 			{
-				emitEvent("{\"type\": \"" + message.getType() + "\", \"to\":\"" + message.getTo() + "\", \"from\":\"" + message.getFrom() + "\", \"body\": \"" + message.getBody() + "\"}");
+				RestEventSourceServlet.emitData(source, "{\"type\": \"" + message.getType() + "\", \"to\":\"" + message.getTo() + "\", \"from\":\"" + message.getFrom() + "\", \"body\": \"" + message.getBody() + "\"}");
 			}
 		}
 
@@ -259,7 +282,7 @@ public class RestEventSourceServlet extends EventSourceServlet
 
 			if (message.getType() == Message.Type.groupchat)
 			{
-				emitEvent("{\"type\": \"" + message.getType() + "\", \"to\":\"" + message.getTo() + "\", \"from\":\"" + message.getFrom() + "\", \"body\": \"" + message.getBody() + "\"}");
+				RestEventSourceServlet.emitData(source, "{\"type\": \"" + message.getType() + "\", \"to\":\"" + message.getTo() + "\", \"from\":\"" + message.getFrom() + "\", \"body\": \"" + message.getBody() + "\"}");
 			}
 		}
 
@@ -271,6 +294,70 @@ public class RestEventSourceServlet extends EventSourceServlet
 			if (chats.get(source).containsKey(chat.getParticipant()) == false) chats.get(source).put(chat.getParticipant(), chat);
 
 			chat.addMessageListener(this);
+		}
+	}
+
+	public class RestEventSource implements org.eclipse.jetty.servlets.EventSource
+	{
+		public Emitter emitter;
+		public boolean isClosed = true;
+		private String source;
+
+		public RestEventSource(String source)
+		{
+			this.source = source;
+		}
+
+		public void onOpen(Emitter emitter) throws IOException
+		{
+			Log.info("RestEventSource: onOpen " + source);
+
+			this.emitter = emitter;
+			this.isClosed = false;
+		}
+
+		public void emitData(String event)
+		{
+			try {
+				if (!isClosed) {
+					Log.info("RestEventSource: emitData \n" + event);
+					emitter.data(event);
+				}
+
+			} catch (Exception e) {
+				Log.error("emitData", e);
+			}
+		}
+
+		public void emitEvent(String event, String data)
+		{
+			try {
+				if (!isClosed) {
+					Log.info("RestEventSource: emitEvent " + event + "\n" + data);
+					emitter.event(event, data);
+				}
+
+			} catch (Exception e) {
+				Log.error("emitData", e);
+			}
+		}
+
+		public void onClose()
+		{
+			Log.info("RestEventSource: onClose ");
+			isClosed = true;
+
+			boolean allClosed = true;
+
+			for (RestEventSource res : eventSources.get(source))
+			{
+				if (!res.isClosed) allClosed = false;
+			}
+
+			if (allClosed)
+			{
+				if (connections.containsKey(source)) connections.remove(source).close();
+			}
 		}
 	}
 }

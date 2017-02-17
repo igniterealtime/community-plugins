@@ -33,6 +33,7 @@ import org.jivesoftware.openfire.auth.AuthToken;
 import org.jivesoftware.openfire.auth.AuthFactory;
 
 import org.jivesoftware.openfire.plugin.ofmeet.jetty.OfMeetLoginService;
+import org.jivesoftware.openfire.plugin.rest.RestEventSourceServlet;
 
 import java.util.Locale;
 import java.util.concurrent.*;
@@ -203,7 +204,7 @@ public class XMPPConnection extends Connection
 			}
 
 			session = SessionManager.getInstance().createClientSession( smackConnection, (Locale) null );
-			smackConnection.setRouter( new SessionPacketRouter( session ) );
+			smackConnection.setRouter( new SessionPacketRouter( session ), username );
 			session.setAuthToken(authToken, resource);
 
 			authenticated = true;
@@ -245,7 +246,7 @@ public class XMPPConnection extends Connection
 		AuthToken authToken = new AuthToken(this.user, true);
 
 		session = SessionManager.getInstance().createClientSession( smackConnection, (Locale) null );
-		smackConnection.setRouter( new SessionPacketRouter( session ) );
+		smackConnection.setRouter( new SessionPacketRouter( session ), userId );
 		session.setAuthToken(authToken, this.user);
 
 
@@ -367,6 +368,16 @@ public class XMPPConnection extends Connection
     }
 
     public void sendPacket(Packet packet)
+    {
+		try {
+    		sendPacket(packet.toXML());
+
+		} catch (Exception e) {
+			Log.error("XMPPConnection sendPacket error", e);
+		}
+    }
+
+    public void sendPacket(String packet)
     {
         if(!isConnected())
             throw new IllegalStateException("Not connected to server.");
@@ -565,12 +576,21 @@ public class XMPPConnection extends Connection
 			done = false;
 		}
 
+    	public void sendPacket(String data)
+    	{
+			try {
+				Log.info("OpenfirePacketWriter sendPacket " + data );
+				smackConnection.getRouter().route(DocumentHelper.parseText(data).getRootElement());
+			} catch ( Exception e ) {
+				Log.error( "An error occurred while attempting to route the packet : ", e );
+			}
+		}
 
     	public void sendPacket(Packet packet)
     	{
 			try {
 				String data = packet.toXML();
-				Log.debug("OpenfirePacketWriter sendPacket " + data );
+				Log.info("OpenfirePacketWriter sendPacket " + data );
 				smackConnection.getRouter().route(DocumentHelper.parseText(data).getRootElement());
 
             	connection.firePacketInterceptors(packet);
@@ -774,6 +794,7 @@ public class XMPPConnection extends Connection
 		private boolean isSecure = false;
 		private OpenfirePacketReader reader;
 		private OpenfirePacketWriter writer;
+		private String username;
 
 		public SmackConnection(String hostName, OpenfirePacketWriter writer,  OpenfirePacketReader reader)
 		{
@@ -803,9 +824,15 @@ public class XMPPConnection extends Connection
 			return router;
 		}
 
-		public void setRouter(SessionPacketRouter router)
+		public void setRouter(SessionPacketRouter router, String username)
 		{
 			this.router = router;
+			this.username = username;
+		}
+
+		public void setUsername(String username)
+		{
+			this.username = username;
 		}
 
 		public void closeVirtualConnection()
@@ -841,7 +868,9 @@ public class XMPPConnection extends Connection
 
 		public void deliverRawText(String text)
 		{
-			Log.debug("SmackConnection - deliverRawText\n" + text);
+			Log.info("SmackConnection - deliverRawText\n" + text);
+
+			RestEventSourceServlet.emitEvent("chatapi.xmpp", username, text);
 
 			try {
 				StringReader stringReader = new StringReader(text);

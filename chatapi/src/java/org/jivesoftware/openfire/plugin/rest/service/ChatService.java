@@ -32,6 +32,8 @@ import org.jivesoftware.openfire.plugin.rest.controller.MUCRoomController;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 
+import org.jivesoftware.openfire.plugin.rest.entity.RosterEntities;
+import org.jivesoftware.openfire.plugin.rest.entity.RosterItemEntity;
 import org.jivesoftware.openfire.plugin.rest.entity.UserEntities;
 import org.jivesoftware.openfire.plugin.rest.entity.MessageEntity;
 import org.jivesoftware.openfire.plugin.rest.entity.MUCChannelType;
@@ -39,9 +41,12 @@ import org.jivesoftware.openfire.plugin.rest.entity.MUCRoomEntities;
 import org.jivesoftware.openfire.plugin.rest.entity.MUCRoomEntity;
 import org.jivesoftware.openfire.plugin.rest.entity.OccupantEntities;
 import org.jivesoftware.openfire.plugin.rest.entity.ParticipantEntities;
-
-
 import org.jivesoftware.openfire.plugin.rest.RestEventSourceServlet;
+
+import org.jivesoftware.openfire.user.UserAlreadyExistsException;
+import org.jivesoftware.openfire.SharedGroupException;
+import org.jivesoftware.openfire.user.UserNotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +72,40 @@ public class ChatService {
 	}
 
     /**
+     *		XMPP Messages
+     */
+	//-------------------------------------------------------
+	//
+	//	POST xmpp messags
+	//
+	//-------------------------------------------------------
+
+	@POST
+	@Path("/xmpp")
+	public Response postXmppMessage(String xmpp) throws ServiceException
+	{
+		Log.info("postXmppMessage \n" + xmpp);
+
+		String endUser = httpRequest.getUserPrincipal().getName();
+
+		if (endUser == null)
+		{
+			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+		try {
+			if (!RestEventSourceServlet.sendXmppMessage(endUser, xmpp))
+			{
+				throw new ServiceException("Exception", "send xmpp failed", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+			}
+
+		} catch (Exception e) {
+			throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+
+		return Response.status(Response.Status.OK).build();
+	}
+
+    /**
      *		Chat Messages
      */
 	//-------------------------------------------------------
@@ -79,7 +118,7 @@ public class ChatService {
 	@Path("/messages")
 	public Response postMessage(MessageEntity messageEntity) throws ServiceException
 	{
-		Log.info("postMessage " + messageEntity.getBody());
+		Log.info("postMessage \n" + messageEntity.getBody());
 
 		String endUser = httpRequest.getUserPrincipal().getName();
 
@@ -95,7 +134,7 @@ public class ChatService {
 			}
 
 			// echo back to sender
-			RestEventSourceServlet.emitEvent(endUser, "{\"type\": \"" + Message.Type.chat + "\", \"to\":\"" + messageEntity.getTo() + "\", \"from\":\"" + makeJid(endUser) + "\", \"body\": \"" + messageEntity.getBody() + "\"}");
+			RestEventSourceServlet.emitData(endUser, "{\"type\": \"" + Message.Type.chat + "\", \"to\":\"" + messageEntity.getTo() + "\", \"from\":\"" + makeJid(endUser) + "\", \"body\": \"" + messageEntity.getBody() + "\"}");
 
 
 		} catch (Exception e) {
@@ -192,11 +231,11 @@ public class ChatService {
 		}
 	}
     /**
-     *		Chat Users
+     *		Chat Users/Contacts
      */
 	//-------------------------------------------------------
 	//
-	//	Search for users to chat with
+	//	Search for users or contacts to chat with
 	//
 	//-------------------------------------------------------
 
@@ -207,6 +246,90 @@ public class ChatService {
 	{
 		return userService.getUsersBySearch(search);
 	}
+
+	@GET
+	@Path("/contacts")
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public RosterEntities getUserRoster() throws ServiceException
+	{
+		Log.info("getUserRoster");
+
+		String endUser = httpRequest.getUserPrincipal().getName();
+
+		if (endUser == null)
+		{
+			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+
+		return userService.getRosterEntities(endUser);
+	}
+
+	@POST
+	@Path("/contacts")
+	public Response createRoster(RosterItemEntity rosterItemEntity) throws ServiceException
+	{
+		Log.info("createRoster");
+
+		String endUser = httpRequest.getUserPrincipal().getName();
+
+		if (endUser == null)
+		{
+			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+		try {
+			userService.addRosterItem(endUser, rosterItemEntity);
+
+		} catch (Exception e) {
+			Log.error("getConversations", e);
+			throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+		return Response.status(Response.Status.CREATED).build();
+	}
+
+	@PUT
+	@Path("/contacts/{rosterJid}")
+	public Response updateRoster(@PathParam("rosterJid") String rosterJid, RosterItemEntity rosterItemEntity) throws ServiceException
+	{
+		Log.info("updateRoster " + rosterJid);
+
+		String endUser = httpRequest.getUserPrincipal().getName();
+
+		if (endUser == null)
+		{
+			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+		try {
+			userService.updateRosterItem(endUser, rosterJid, rosterItemEntity);
+
+		} catch (Exception e) {
+			Log.error("getConversations", e);
+			throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+		return Response.status(Response.Status.CREATED).build();
+	}
+
+	@DELETE
+	@Path("/contacts/{rosterJid}")
+	public Response deleteRoster(@PathParam("rosterJid") String rosterJid) throws ServiceException
+	{
+		Log.info("deleteRoster " + rosterJid);
+
+		String endUser = httpRequest.getUserPrincipal().getName();
+
+		if (endUser == null)
+		{
+			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+		try {
+			userService.deleteRosterItem(endUser, rosterJid);
+
+		} catch (Exception e) {
+			Log.error("getConversations", e);
+			throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+		return Response.status(Response.Status.CREATED).build();
+	}
+
 
    /**
      *		Chat Rooms
