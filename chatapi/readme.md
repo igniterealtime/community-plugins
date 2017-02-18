@@ -8,25 +8,25 @@ I have built a Chat API plugin by extending the REST API plugin with SSE and Jet
 In summary, the plugin now runs on the HTTP-BIND (7070/7443) port instead of the admin (9090/9091) port. It authenticates you as an Openfire user once and reuses the authentication for REST,  SSE and XMPP bosh/websockets. It supports everything you can do with the REST API plus Bookmarks and SIP Accounts as an admin user. It then enables you as a normal user to handle presence, chat, groupchat, contacts and users with just a handful of REST requests and SSE events.
 
 #broadcast own presence
-POST /chat/presence
+POST /chat/presence<br/>
 #seach for domain users
-GET /chat/users
+GET /chat/users<br/>
 #retrieve,add,remove contacts
-GET /chat/contacts
-POST /chat/contacts/{contactJID}
-DELETE /chat/contacts/{contactJID}
+GET /chat/contacts<br/>
+POST /chat/contacts/{contactJID}<br/>
+DELETE /chat/contacts/{contactJID}<br/>
 #retrieve old messages and post new message
-GET /chat/messages
-POST /chat/messages/user@domain
+GET /chat/messages<br/>
+POST /chat/messages/user@domain<br/>
 #retrieve, join, post messages, invite and leave muc rooms
-GET /chat/rooms
-PUT /chat/rooms/{roomName}
-POST /chat/rooms/{roomName}
-POST /chat/rooms/{roomName}/{contactJID}
-DELETE /chat/rooms/{roomName}
+GET /chat/rooms<br/>
+PUT /chat/rooms/{roomName}<br/>
+POST /chat/rooms/{roomName}<br/>
+POST /chat/rooms/{roomName}/{contactJID}<br/>
+DELETE /chat/rooms/{roomName<br/>
 #create/update own user profile properties
-POST /chat/users/{propertyName}
+POST /chat/users/{propertyName}<br/>
 #delete own user profile properties
-DELETE /chat/users/{propertyName}
+DELETE /chat/users/{propertyName}<br/>
 #send a raw XMPP message to openfire
-POST /chat/xmpp
+POST /chat/xmpp<br/>
