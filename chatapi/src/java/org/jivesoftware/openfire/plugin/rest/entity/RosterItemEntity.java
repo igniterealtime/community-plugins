@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlType;
  * The Class RosterItemEntity.
  */
 @XmlRootElement(name = "rosterItem")
-@XmlType(propOrder = { "jid", "nickname", "subscriptionType", "groups" })
+@XmlType(propOrder = { "jid", "nickname", "subscriptionType", "groups", "show", "status" })
 public class RosterItemEntity {
 
 	/** The jid. */
@@ -25,6 +25,9 @@ public class RosterItemEntity {
 
 	/** The groups. */
 	private List<String> groups;
+
+	private String show;
+	private String status;
 
 	/**
 	 * Instantiates a new roster item entity.
@@ -128,5 +131,33 @@ public class RosterItemEntity {
 	 */
 	public void setGroups(List<String> groups) {
 		this.groups = groups;
+	}
+
+	/**
+	 * Gets the presence show.
+	 *
+	 * @return the presence show
+	 */
+	@XmlElement
+	public String getShow() {
+		return show;
+	}
+
+	public void setShow(String show) {
+		this.show = show;
+	}
+
+	/**
+	 * Gets the presence status.
+	 *
+	 * @return the status
+	 */
+	@XmlElement
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }

@@ -15,6 +15,7 @@ import org.jivesoftware.openfire.group.GroupManager;
 import org.jivesoftware.openfire.group.GroupJID;
 import org.jivesoftware.openfire.group.GroupNotFoundException;
 import org.xmpp.packet.JID;
+import org.xmpp.packet.Presence;
 
 /**
  * The Class UserUtils.
@@ -66,6 +67,29 @@ public class UserUtils {
 		}
 		userEntity.setProperties(userProperties);
 
+		Presence presence = XMPPServer.getInstance().getPresenceManager().getPresence(user);
+
+        if (presence == null) {
+        	userEntity.setShow("offline");
+        }
+        else if (presence.getShow() == null) {
+        	userEntity.setShow("available");
+        }
+        else if (presence.getShow().equals(org.xmpp.packet.Presence.Show.away)) {
+        	userEntity.setShow("away");
+        }
+        else if (presence.getShow().equals(org.xmpp.packet.Presence.Show.chat)) {
+        	userEntity.setShow("chat");
+        }
+        else if (presence.getShow().equals(org.xmpp.packet.Presence.Show.dnd)) {
+        	userEntity.setShow("dnd");
+        }
+        else if (presence.getShow().equals(org.xmpp.packet.Presence.Show.xa)) {
+        	userEntity.setShow("xa");
+        }
+
+        if (presence != null) userEntity.setStatus(presence.getStatus());
+
 		return userEntity;
 	}
 
@@ -81,8 +105,8 @@ public class UserUtils {
 			throw new UserAlreadyExistsException();
 		}
 	}
-	
-	
+
+
 	/**
 	 * Check and get jid.
 	 *
@@ -99,7 +123,7 @@ public class UserUtils {
 			return XMPPServer.getInstance().createJID(jid, null);
 		}
 	}
-	
+
 	/**
 	 * Checks if is valid bare jid.
 	 *

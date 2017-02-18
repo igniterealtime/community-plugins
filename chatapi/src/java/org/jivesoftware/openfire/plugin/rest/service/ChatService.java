@@ -35,7 +35,6 @@ import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.entity.RosterEntities;
 import org.jivesoftware.openfire.plugin.rest.entity.RosterItemEntity;
 import org.jivesoftware.openfire.plugin.rest.entity.UserEntities;
-import org.jivesoftware.openfire.plugin.rest.entity.MessageEntity;
 import org.jivesoftware.openfire.plugin.rest.entity.MUCChannelType;
 import org.jivesoftware.openfire.plugin.rest.entity.MUCRoomEntities;
 import org.jivesoftware.openfire.plugin.rest.entity.MUCRoomEntity;
@@ -43,7 +42,7 @@ import org.jivesoftware.openfire.plugin.rest.entity.OccupantEntities;
 import org.jivesoftware.openfire.plugin.rest.entity.ParticipantEntities;
 import org.jivesoftware.openfire.plugin.rest.RestEventSourceServlet;
 
-import org.jivesoftware.openfire.user.UserAlreadyExistsException;
+import org.jivesoftware.openfire.user.*;
 import org.jivesoftware.openfire.SharedGroupException;
 import org.jivesoftware.openfire.user.UserNotFoundException;
 
@@ -71,9 +70,6 @@ public class ChatService {
 		userService = UserServiceController.getInstance();
 	}
 
-    /**
-     *		XMPP Messages
-     */
 	//-------------------------------------------------------
 	//
 	//	POST xmpp messags
@@ -86,13 +82,9 @@ public class ChatService {
 	{
 		Log.info("postXmppMessage \n" + xmpp);
 
-		String endUser = httpRequest.getUserPrincipal().getName();
-
-		if (endUser == null)
-		{
-			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
-		}
 		try {
+			String endUser = getEndUser();
+
 			if (!RestEventSourceServlet.sendXmppMessage(endUser, xmpp))
 			{
 				throw new ServiceException("Exception", "send xmpp failed", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
@@ -106,35 +98,58 @@ public class ChatService {
 	}
 
     /**
-     *		Chat Messages
+     *		Chat Presence
      */
 	//-------------------------------------------------------
 	//
-	//	GET/POST chat messags
+	//	POST self presence
 	//
 	//-------------------------------------------------------
 
 	@POST
-	@Path("/messages")
-	public Response postMessage(MessageEntity messageEntity) throws ServiceException
+	@Path("/presence")
+	public Response postPresence(@QueryParam("show") String show, @QueryParam("status") String status) throws ServiceException
 	{
-		Log.info("postMessage \n" + messageEntity.getBody());
+		Log.info("postPresence " + show + " " + status);
 
-		String endUser = httpRequest.getUserPrincipal().getName();
-
-		if (endUser == null)
-		{
-			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
-		}
 		try {
+			String endUser = getEndUser();
+
+			if (!RestEventSourceServlet.postPresence(endUser, show, status))
+			{
+				throw new ServiceException("Exception", "send chat failed", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+			}
+
+		} catch (Exception e) {
+			throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+
+		return Response.status(Response.Status.OK).build();
+	}
+
+	//-------------------------------------------------------
+	//
+	//	POST chat message and GET chat history
+	//
+	//-------------------------------------------------------
+
+	@POST
+	@Path("/messages/{to}")
+	public Response postMessage(@PathParam("to") String to, String body) throws ServiceException
+	{
+		Log.info("postMessage " + to + "\n" + body);
+
+		try {
+			String endUser = getEndUser();
+
 			// sent to destination
-			if (!RestEventSourceServlet.sendChatMessage(endUser, messageEntity.getBody(), messageEntity.getTo()))
+			if (!RestEventSourceServlet.sendChatMessage(endUser, body, to))
 			{
 				throw new ServiceException("Exception", "send chat failed", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
 			}
 
 			// echo back to sender
-			RestEventSourceServlet.emitData(endUser, "{\"type\": \"" + Message.Type.chat + "\", \"to\":\"" + messageEntity.getTo() + "\", \"from\":\"" + makeJid(endUser) + "\", \"body\": \"" + messageEntity.getBody() + "\"}");
+			RestEventSourceServlet.emitData(endUser, "{\"type\": \"chat\", \"to\":\"" + to + "\", \"from\":\"" + makeJid(endUser) + "\", \"body\": \"" + body + "\"}");
 
 
 		} catch (Exception e) {
@@ -149,16 +164,11 @@ public class ChatService {
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public Conversations getConversations(@QueryParam("keywords") String keywords, @QueryParam("to") String to, @QueryParam("start") String start, @QueryParam("end") String end, @QueryParam("room") String room, @QueryParam("service") String service) throws ServiceException
 	{
-		String endUser = httpRequest.getUserPrincipal().getName();
-
-		Log.info("getConversations " + keywords + " " + endUser + " " + to  + " " + start + " " + end + " " + room + " " + service);
-
-		if (endUser == null)
-		{
-			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
-		}
+		Log.info("getConversations " + keywords + " " + " " + to  + " " + start + " " + end + " " + room + " " + service);
 
 		try {
+			String endUser = getEndUser();
+
 			ArchiveSearch search = new ArchiveSearch();
 			JID participant1JID = makeJid(endUser);
 			JID participant2JID = null;
@@ -230,38 +240,70 @@ public class ChatService {
 			throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
 		}
 	}
-    /**
-     *		Chat Users/Contacts
-     */
 	//-------------------------------------------------------
 	//
-	//	Search for users or contacts to chat with
+	//	Search for users. CRUD user profile (properties)
 	//
 	//-------------------------------------------------------
 
 	@GET
 	@Path("/users")
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-	public UserEntities getUsers(@QueryParam("search") String search) throws ServiceException
+	public UserEntities getUser(@QueryParam("search") String search) throws ServiceException
 	{
 		return userService.getUsersBySearch(search);
 	}
+
+	@POST
+	@Path("/users/{propertyName}")
+	public Response setUserProperty(@PathParam("propertyName") String propertyName, String propertyValue) throws ServiceException
+	{
+		try {
+			String endUser = getEndUser();
+			User user = server.getUserManager().getUser(getEndUser());
+			user.getProperties().put(propertyName, propertyValue);
+
+		} catch (Exception e) {
+			Log.error("setUserProperty", e);
+			throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+		return Response.status(Response.Status.OK).build();
+	}
+
+	@DELETE
+	@Path("/users/{propertyName}")
+	public Response deleteUserProperty(@PathParam("propertyName") String propertyName) throws ServiceException
+	{
+		try {
+			String endUser = getEndUser();
+			User user = server.getUserManager().getUser(getEndUser());
+			user.getProperties().remove(propertyName);
+
+		} catch (Exception e) {
+			Log.error("deleteUserProperty", e);
+			throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+		return Response.status(Response.Status.OK).build();
+	}
+
+	//-------------------------------------------------------
+	//
+	//	CRUD contacts
+	//
+	//-------------------------------------------------------
 
 	@GET
 	@Path("/contacts")
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 	public RosterEntities getUserRoster() throws ServiceException
 	{
-		Log.info("getUserRoster");
+		RosterEntities roster = RestEventSourceServlet.getRoster(getEndUser());
 
-		String endUser = httpRequest.getUserPrincipal().getName();
-
-		if (endUser == null)
+		if (roster == null)
 		{
-			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+			throw new ServiceException("Exception", "get roster failed", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
 		}
-
-		return userService.getRosterEntities(endUser);
+		return roster;
 	}
 
 	@POST
@@ -270,13 +312,8 @@ public class ChatService {
 	{
 		Log.info("createRoster");
 
-		String endUser = httpRequest.getUserPrincipal().getName();
-
-		if (endUser == null)
-		{
-			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
-		}
 		try {
+			String endUser = getEndUser();
 			userService.addRosterItem(endUser, rosterItemEntity);
 
 		} catch (Exception e) {
@@ -292,13 +329,8 @@ public class ChatService {
 	{
 		Log.info("updateRoster " + rosterJid);
 
-		String endUser = httpRequest.getUserPrincipal().getName();
-
-		if (endUser == null)
-		{
-			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
-		}
 		try {
+			String endUser = getEndUser();
 			userService.updateRosterItem(endUser, rosterJid, rosterItemEntity);
 
 		} catch (Exception e) {
@@ -314,13 +346,8 @@ public class ChatService {
 	{
 		Log.info("deleteRoster " + rosterJid);
 
-		String endUser = httpRequest.getUserPrincipal().getName();
-
-		if (endUser == null)
-		{
-			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
-		}
 		try {
+			String endUser = getEndUser();
 			userService.deleteRosterItem(endUser, rosterJid);
 
 		} catch (Exception e) {
@@ -331,9 +358,6 @@ public class ChatService {
 	}
 
 
-   /**
-     *		Chat Rooms
-     */
 	//-------------------------------------------------------
 	//
 	//	get, join, leave, post message chat rooms
@@ -378,13 +402,8 @@ public class ChatService {
 	{
 		Log.info("joinRoom " + service + " " + roomName);
 
-		String endUser = httpRequest.getUserPrincipal().getName();
-
-		if (endUser == null)
-		{
-			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
-		}
 		try {
+			String endUser = getEndUser();
 
 			if (!RestEventSourceServlet.joinRoom(endUser, roomName + "@" + service + "." + server.getServerInfo().getXMPPDomain(), endUser))
 			{
@@ -404,13 +423,8 @@ public class ChatService {
 	{
 		Log.info("leaveRoom " + service + " " + roomName);
 
-		String endUser = httpRequest.getUserPrincipal().getName();
-
-		if (endUser == null)
-		{
-			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
-		}
 		try {
+			String endUser = getEndUser();
 
 			if (!RestEventSourceServlet.leaveRoom(endUser, roomName + "@" + service + "." + server.getServerInfo().getXMPPDomain()))
 			{
@@ -426,21 +440,33 @@ public class ChatService {
 
 	@POST
 	@Path("/rooms/{roomName}")
-	public Response postToRoom(@DefaultValue("conference") @QueryParam("service") String service, @PathParam("roomName") String roomName, MessageEntity messageEntity) throws ServiceException
+	public Response postToRoom(@DefaultValue("conference") @QueryParam("service") String service, @PathParam("roomName") String roomName, String body) throws ServiceException
 	{
-		Log.info("postToRoom " + service + " " + roomName + " " + messageEntity.getBody());
-
-		String endUser = httpRequest.getUserPrincipal().getName();
-
-		if (endUser == null)
-		{
-			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
-		}
 		try {
+			String endUser = getEndUser();
 
-			if (!RestEventSourceServlet.sendRoomMessage(endUser, roomName + "@" + service + "." + server.getServerInfo().getXMPPDomain(), messageEntity.getBody()))
+			if (!RestEventSourceServlet.sendRoomMessage(endUser, roomName + "@" + service + "." + server.getServerInfo().getXMPPDomain(), body))
 			{
 				throw new ServiceException("Exception", "send message to room failed", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+			}
+
+		} catch (Exception e) {
+			throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+
+		return Response.status(Response.Status.OK).build();
+	}
+
+	@POST
+	@Path("/rooms/{roomName}/{invitedJid}")
+	public Response inviteToRoom(@DefaultValue("conference") @QueryParam("service") String service, @PathParam("roomName") String roomName, @PathParam("invitedJid") String invitedJid, String reason) throws ServiceException
+	{
+		try {
+			String endUser = getEndUser();
+
+			if (!RestEventSourceServlet.inviteToRoom(endUser, roomName + "@" + service + "." + server.getServerInfo().getXMPPDomain(), invitedJid, reason))
+			{
+				throw new ServiceException("Exception", "invite to room failed", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
 			}
 
 		} catch (Exception e) {
@@ -456,6 +482,19 @@ public class ChatService {
 	//
 	//-------------------------------------------------------
 
+	private String getEndUser() throws ServiceException
+	{
+		String endUser = httpRequest.getUserPrincipal().getName();
+
+		Log.info("getEndUser " + endUser);
+
+		if (endUser == null)
+		{
+			throw new ServiceException("Exception", "Access denied", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+		}
+
+		return endUser;
+	}
 
 	private JID makeJid(String participant1)
 	{

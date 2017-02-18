@@ -41,6 +41,8 @@ import org.jivesoftware.smackx.*;
 import org.jivesoftware.smack.packet.*;
 import org.jivesoftware.smack.filter.*;
 
+import org.jivesoftware.openfire.plugin.rest.entity.*;
+
 
 public class RestEventSourceServlet extends EventSourceServlet
 {
@@ -85,10 +87,12 @@ public class RestEventSourceServlet extends EventSourceServlet
 
 		try {
 			MultiUserChat mMultiUserChat = groupchats.get(source).get(mGroupChatName);
+			SmackConnection connection = connections.get(source);
 
 			if (mMultiUserChat == null)
 			{
 				mMultiUserChat = new MultiUserChat(connections.get(source).getConnection(), mGroupChatName);
+				mMultiUserChat.addInvitationRejectionListener(connection);
 				groupchats.get(source).put(mGroupChatName, mMultiUserChat);
 			}
 
@@ -106,11 +110,14 @@ public class RestEventSourceServlet extends EventSourceServlet
 		Log.info("leaveRoom " + source + " " + mGroupChatName);
 
 		try {
-			groupchats.get(source).get(mGroupChatName).leave();
+			MultiUserChat mMultiUserChat = groupchats.get(source).get(mGroupChatName);
+			SmackConnection connection = connections.get(source);
+			mMultiUserChat.removeInvitationRejectionListener(connection);
+			mMultiUserChat.leave();
 			return true;
 
 		} catch (Exception e) {
-			Log.error("joinRoom", e);
+			Log.error("leaveRoom", e);
 			return false;
 		}
 	}
@@ -124,7 +131,21 @@ public class RestEventSourceServlet extends EventSourceServlet
 			return true;
 
 		} catch (Exception e) {
-			Log.error("joinRoom", e);
+			Log.error("sendRoomMessage", e);
+			return false;
+		}
+	}
+
+	public static boolean inviteToRoom(String source, String mGroupChatName, String inviteJid, String reason)
+	{
+		Log.info("sendRoomMessage " + source + " " + mGroupChatName + " " + inviteJid + "\n" + reason);
+
+		try {
+			groupchats.get(source).get(mGroupChatName).invite(inviteJid, reason);
+			return true;
+
+		} catch (Exception e) {
+			Log.error("sendRoomMessage", e);
 			return false;
 		}
 	}
@@ -138,7 +159,48 @@ public class RestEventSourceServlet extends EventSourceServlet
 			return true;
 
 		} catch (Exception e) {
-			Log.error("joinRoom", e);
+			Log.error("sendXmppMessage", e);
+			return false;
+		}
+	}
+
+	public static boolean postPresence(String source, String show, String status)
+	{
+		Log.info("setPresence " + source + " " + show + " " + status);
+
+		try {
+			Presence p = new Presence(Presence.Type.available);
+
+			if ("offline".equals(show)) {
+				p = new Presence(Presence.Type.unavailable);
+			}
+			else if ("available".equals(show)) {
+				p = new Presence(Presence.Type.available);
+				p.setMode(Presence.Mode.available);
+			}
+			else if ("away".equals(show)) {
+				p = new Presence(Presence.Type.available);
+				p.setMode(Presence.Mode.away);
+			}
+			else if ("chat".equals(show)) {
+				p = new Presence(Presence.Type.available);
+				p.setMode(Presence.Mode.chat);
+			}
+			else if ("dnd".equals(show)) {
+				p = new Presence(Presence.Type.available);
+				p.setMode(Presence.Mode.dnd);
+			}
+			else if ("xa".equals(show)) {
+				p = new Presence(Presence.Type.available);
+				p.setMode(Presence.Mode.xa);
+			}
+
+			if (status != null) p.setStatus(status);
+			connections.get(source).getConnection().sendPacket(p);
+			return true;
+
+		} catch (Exception e) {
+			Log.error("setPresence", e);
 			return false;
 		}
 	}
@@ -162,9 +224,63 @@ public class RestEventSourceServlet extends EventSourceServlet
 			return true;
 
 		} catch (Exception e) {
-			Log.error("joinRoom", e);
+			Log.error("sendChatMessage", e);
 			return false;
 		}
+	}
+
+	public static RosterEntities getRoster(String source)
+	{
+		Log.info("getRoster " + source);
+
+		List<RosterItemEntity> rosterEntities = new ArrayList<RosterItemEntity>();
+
+		try {
+			Roster roster = connections.get(source).getRoster();
+			Collection<RosterEntry> entries = roster.getEntries();
+
+			for(RosterEntry entry : entries)
+			{
+				Presence presence = roster.getPresence(entry.getUser());
+
+				int entryStatus = 0;
+
+				if (entry.getType() != null)
+				{
+					if (entry.getType().equals(RosterPacket.ItemType.both)) entryStatus = 3;
+					if (entry.getType().equals(RosterPacket.ItemType.from)) entryStatus = 2;
+					if (entry.getType().equals(RosterPacket.ItemType.none)) entryStatus = 0;
+					if (entry.getType().equals(RosterPacket.ItemType.remove)) entryStatus = -1;
+					if (entry.getType().equals(RosterPacket.ItemType.to)) entryStatus = 1;
+				}
+
+				RosterItemEntity rosterItemEntity = new RosterItemEntity(entry.getUser(), entry.getName(), 	entryStatus);
+
+				List<String> groups = new ArrayList<String>();
+
+				for(RosterGroup group : entry.getGroups())
+				{
+					groups.add(group.getName());
+				}
+
+				rosterItemEntity.setGroups(groups);
+
+				String show = presence.getType().name();
+				if (presence.getMode() != null) show = presence.getMode().toString();
+
+				rosterItemEntity.setStatus(presence.getStatus());
+				rosterItemEntity.setShow(show);
+				rosterEntities.add(rosterItemEntity);
+
+				Log.info("Roster entry " + source + " " + entry.getUser() + " " + entry.getName() + " " + presence.getType().name() + " " + presence.getMode() + " " + presence.getStatus());
+			}
+
+		} catch (Exception e) {
+			Log.error("getRoster", e);
+			return null;
+		}
+
+		return new RosterEntities(rosterEntities);
 	}
 
 	public static synchronized void setConnection(Principal principal, SmackConnection connection)
@@ -209,12 +325,13 @@ public class RestEventSourceServlet extends EventSourceServlet
 		return eventSource;
 	}
 
-	public class SmackConnection implements MessageListener, ChatManagerListener, PacketListener
+	public class SmackConnection implements MessageListener, ChatManagerListener, PacketListener, InvitationRejectionListener, InvitationListener
 	{
 		private String source;
 		private String token;
 		private XMPPConnection connection;
 		private ChatManager chatManager;
+		private Roster roster;
 
 		public SmackConnection(Principal principal)
 		{
@@ -235,6 +352,8 @@ public class RestEventSourceServlet extends EventSourceServlet
 				chatManager = connection.getChatManager();
 				chatManager.addChatListener(this);
 
+				MultiUserChat.addInvitationListener(connection, this);
+
 				PacketFilter filter = new MessageTypeFilter(Message.Type.groupchat);
 				connection.addPacketListener(this, filter);
 
@@ -243,14 +362,34 @@ public class RestEventSourceServlet extends EventSourceServlet
 				Presence p = new Presence(Presence.Type.available);
 				connection.sendPacket(p);
 
+				roster = connection.getRoster();
+
+				roster.addRosterListener(new RosterListener()
+				{
+					public void entriesAdded(Collection<String> addresses) {}
+					public void entriesDeleted(Collection<String> addresses) {}
+					public void entriesUpdated(Collection<String> addresses) {}
+					public void rosterError(XMPPError error, Packet packet) {}
+
+					public void presenceChanged(Presence presence)
+					{
+						RestEventSourceServlet.emitEvent("chatapi.presence", source, "{\"type\": \"presence\", \"to\":\"" + presence.getTo() + "\", \"from\":\"" + presence.getFrom() + "\", \"status\":\"" + presence.getStatus() + "\", \"show\": \"" + presence.getMode() + "\"}");
+					}
+				});
+
 			} catch (Exception e) {
-				Log.error("onOpen", e);
+				Log.error("init", e);
 			}
 		}
 
 		public XMPPConnection getConnection()
 		{
 			return connection;
+		}
+
+		public Roster getRoster()
+		{
+			return roster;
 		}
 
 		public void close() {
@@ -264,13 +403,23 @@ public class RestEventSourceServlet extends EventSourceServlet
 			}
 		}
 
+		public void invitationDeclined(String invitee, String reason)
+		{
+			Log.info("invitationDeclined " + invitee + " " + reason);
+		}
+
+		public void invitationReceived(Connection conn, String room, String inviter, String reason, String password, Message message)
+		{
+			Log.info("invitationReceived " + room + " " + inviter + " " + reason);
+		}
+
 		public void processMessage(Chat chat, Message message)
 		{
 			Log.info("Received chat message: " + message.getBody());
 
 			if (message.getType() == Message.Type.chat)
 			{
-				RestEventSourceServlet.emitData(source, "{\"type\": \"" + message.getType() + "\", \"to\":\"" + message.getTo() + "\", \"from\":\"" + message.getFrom() + "\", \"body\": \"" + message.getBody() + "\"}");
+				RestEventSourceServlet.emitEvent("chatapi.chat", source, "{\"type\": \"" + message.getType() + "\", \"to\":\"" + message.getTo() + "\", \"from\":\"" + message.getFrom() + "\", \"body\": \"" + message.getBody() + "\"}");
 			}
 		}
 
@@ -282,7 +431,7 @@ public class RestEventSourceServlet extends EventSourceServlet
 
 			if (message.getType() == Message.Type.groupchat)
 			{
-				RestEventSourceServlet.emitData(source, "{\"type\": \"" + message.getType() + "\", \"to\":\"" + message.getTo() + "\", \"from\":\"" + message.getFrom() + "\", \"body\": \"" + message.getBody() + "\"}");
+				RestEventSourceServlet.emitEvent("chatapi.muc", source, "{\"type\": \"" + message.getType() + "\", \"to\":\"" + message.getTo() + "\", \"from\":\"" + message.getFrom() + "\", \"body\": \"" + message.getBody() + "\"}");
 			}
 		}
 
@@ -320,6 +469,9 @@ public class RestEventSourceServlet extends EventSourceServlet
 		{
 			try {
 				if (!isClosed) {
+					// TODO
+					// <message from="lobby@conference.btg199251" to="deleo@btg199251"><x xmlns="http://jabber.org/protocol/muc#user"><decline from="nigels@btg199251"><reason>No thank you</reason></decline></x></message>
+
 					Log.info("RestEventSource: emitData \n" + event);
 					emitter.data(event);
 				}

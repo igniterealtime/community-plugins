@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlType;
  * The Class UserEntity.
  */
 @XmlRootElement(name = "user")
-@XmlType(propOrder = { "username", "name", "email", "password", "properties" })
+@XmlType(propOrder = { "username", "name", "email", "password", "properties", "show", "status" })
 public class UserEntity {
 
 	/** The username. */
@@ -28,6 +28,9 @@ public class UserEntity {
 
 	/** The properties. */
 	private List<UserProperty> properties;
+
+	private String show;
+	private String status;
 
 	/**
 	 * Instantiates a new user entity.
@@ -112,6 +115,33 @@ public class UserEntity {
 		this.email = email;
 	}
 
+	/**
+	 * Gets the presence show.
+	 *
+	 * @return the presence show
+	 */
+	@XmlElement
+	public String getShow() {
+		return show;
+	}
+
+	public void setShow(String show) {
+		this.show = show;
+	}
+
+	/**
+	 * Gets the presence status.
+	 *
+	 * @return the status
+	 */
+	@XmlElement
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
 	/**
 	 * Gets the password.
 	 *

@@ -344,8 +344,7 @@ public class UserServiceController {
 
 		List<RosterItemEntity> rosterEntities = new ArrayList<RosterItemEntity>();
 		for (RosterItem rosterItem : roster.getRosterItems()) {
-			RosterItemEntity rosterItemEntity = new RosterItemEntity(rosterItem.getJid().toBareJID(),
-					rosterItem.getNickname(), rosterItem.getSubStatus().getValue());
+			RosterItemEntity rosterItemEntity = new RosterItemEntity(rosterItem.getJid().toBareJID(), rosterItem.getNickname(), rosterItem.getSubStatus().getValue());
 			rosterItemEntity.setGroups(rosterItem.getGroups());
 
 			rosterEntities.add(rosterItemEntity);
