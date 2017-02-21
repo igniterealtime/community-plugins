@@ -405,7 +405,7 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 	{
 		Log.info("OfSkype Plugin - makeCall " + sipUrl + "\n" + sdp + "\n" + json);
 
-		sdp = sdp.replace("RTP/AVP", "RTP/SAVP");
+		sdp = sdp.replace("RTP/AVP","RTP/SAVP");
 
 		try {
 			SessionDescription sd =  SdpFactory.getInstance().createSessionDescription(sdp);

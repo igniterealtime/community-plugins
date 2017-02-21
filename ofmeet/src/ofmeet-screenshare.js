@@ -172,8 +172,19 @@ function isDesktopSharingEnabled() {
             var userAgent = navigator.userAgent.toLowerCase();
             // We can assume that user agent is chrome, because it's enforced when 'ext' streaming method is set
             var ver = parseInt(userAgent.match(/chrome\/(\d+)\./)[1], 10);
-            console.log("Chrome version" + userAgent, ver);
-            _desktopSharingEnabled = ver >= 34;
+            var electron = userAgent.indexOf("electron") > -1; 
+            
+            if (electron) {
+		console.log("Electron version", userAgent); 
+		config.desktopSharing = "webrtc";
+            	obtainDesktopStream = obtainWebRTCScreen;
+            	_desktopSharingEnabled = true;
+            	
+            } else {
+		    console.log("Chrome version " + userAgent, ver);
+		    _desktopSharingEnabled = ver >= 34;
+	    }            
+
         } else {
             _desktopSharingEnabled = obtainDesktopStream === obtainWebRTCScreen;
         }

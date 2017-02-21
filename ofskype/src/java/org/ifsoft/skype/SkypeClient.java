@@ -476,7 +476,7 @@ public class SkypeClient {
 	{
 		try
 		{
-			sdp = sdp.replace("UDP/TLS/RTP/SAVPF", "RTP/SAVP");
+			//sdp = sdp.replace("UDP/TLS/RTP/SAVPF", "RTP/SAVP");
 			sdp = sdp.replace("t=0 0", "b=CT:99980\nt=0 0\na=x-devicecaps:audio:send,recv;video:send,recv");
 			SessionDescription sd =  SdpFactory.getInstance().createSessionDescription(sdp);
 

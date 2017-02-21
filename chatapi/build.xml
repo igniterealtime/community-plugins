@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="chatapi" default="jar" basedir = "..">
+	<description>Chat API Build</description>
+
+	<property name="openfire.home" 	value="./openfire_4_1_1/target/openfire" />
+	<property name="lib.ant.dir" 	value="./openfire_4_1_1/build/lib/ant" />	
+	<property name="chatapi.dir" 	value="chatapi" />
+	
+
+	<path id="build.classpath">
+		<fileset dir="${chatapi.dir}/lib" includes="*.jar"/>
+		<fileset dir="${openfire.home}/lib" includes="*.jar"/>
+	</path>
+
+	<target name="init">
+		<!-- create our directories -->
+		<mkdir dir="${chatapi.dir}/build/classes"/>
+		<mkdir dir="${chatapi.dir}/build/jar"/>					
+	</target>
+	
+	<target name="clean">
+		<delete dir="${chatapi.dir}/build"/>        
+		<delete file="${chatapi.dir}/lib/plugin-chatapi-jspc.jar"/>
+		<delete file="${chatapi.dir}/lib/plugin-chatapi.jar"/>
+		<delete file="${openfire.home}/plugins/chatapi.jar"/>        
+	</target>
+	
+	<target name="compile" depends="init">
+		<javac debug="true" deprecation="false" srcdir="${chatapi.dir}/src" destdir="${chatapi.dir}/build/classes">
+			<classpath refid="build.classpath"/>
+		</javac>
+	</target>
+
+	<target name="lib" depends="clean, compile">
+		<jar destfile="${chatapi.dir}/lib/plugin-chatapi.jar">
+			<fileset dir="${chatapi.dir}/build/classes">
+				<include name="**" />
+			</fileset>
+		</jar>
+	</target>	
+
+	<target name="compile-jsps">
+		<mkdir dir="${chatapi.dir}/build/jspc/java"/>
+		<mkdir dir="${chatapi.dir}/build/jspc/classes"/>
+
+		<java classname="org.apache.jasper.JspC" fork="true">
+		    <classpath>
+			<pathelement location="${java.home}/../lib/tools.jar"/>		
+			<fileset dir="${chatapi.dir}/lib" includes="*.jar"/>
+			<fileset dir="${openfire.home}/lib" includes="*.jar"/>			
+			<fileset dir="${lib.ant.dir}" includes="*.jar" />
+			<fileset dir="${ant.home}/lib" includes="ant.jar" />
+		    </classpath>
+		    <arg line="-uriroot '${chatapi.dir}/src/web'"/>
+		    <arg line="-d '${chatapi.dir}/build/jspc/java'"/>
+		    <arg line="-p org.jivesoftware.openfire.plugin.chatapi"/>
+		    <arg line="-webxml '${chatapi.dir}/build/jspc/web.xml'"/>
+		</java>	
+
+		<javac source="1.7" target="1.7" debug="true" deprecation="true" srcdir="${chatapi.dir}/build/jspc/java" destdir="${chatapi.dir}/build/jspc/classes">
+			<classpath refid="build.classpath"/>
+		</javac>
+		
+		<jar jarfile="${chatapi.dir}/lib/plugin-chatapi-jspc.jar">
+		    <fileset dir="${chatapi.dir}/build/jspc/classes"
+			     includes="**/*.class"/>
+		</jar>	
+				
+		<copy todir="${chatapi.dir}/src/web/WEB-INF"
+		      file="${chatapi.dir}/build/jspc/web.xml"
+		      overwrite="${overwrite}"/>		
+				
+	  </target> 	
+	
+	<target name="jar" depends="lib, compile-jsps">
+		<copy todir="${chatapi.dir}/build/jar" overwrite="true">
+			<fileset dir="${chatapi.dir}/src">
+                        	<exclude name="java/**/*.java"/>                      	
+                        	<exclude name="java/**"/>                        	
+			</fileset>
+		</copy>			
+		<copy todir="${chatapi.dir}/build/jar/lib" overwrite="true">			
+			<fileset dir="${chatapi.dir}/lib">				
+			</fileset>
+		</copy>			
+		<copy todir="${chatapi.dir}/build/jar" overwrite="true">						
+			<fileset dir="${chatapi.dir}">
+                        	<exclude name="build.*"/>		
+                        	<exclude name="build/**"/>	
+                        	<exclude name="src/**"/>                        	
+			</fileset>			
+		</copy>		
+		
+		<jar destfile="${openfire.home}/plugins/chatapi.jar">
+			<fileset dir="${chatapi.dir}/build/jar">				
+			</fileset>			
+		</jar>
+		
+                <delete dir="${chatapi.dir}/build"/>	 		
+			              
+	</target>
+
+</project>
+

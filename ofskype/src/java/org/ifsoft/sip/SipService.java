@@ -31,6 +31,7 @@ import org.slf4j.*;
 import org.slf4j.Logger;
 
 import org.jivesoftware.openfire.plugin.ofskype.OfSkypePlugin;
+import org.jivesoftware.util.*;
 
 /**
  * Functions useful for building SIP messages
@@ -88,8 +89,9 @@ public class SipService
 
 		try
 		{
-			ListeningPoint udp = sipStack.createListeningPoint(OfSkypePlugin.self.getIpAddress(), localport, "udp");
-            ListeningPoint tcp = sipStack.createListeningPoint(OfSkypePlugin.self.getIpAddress(), localport, "tcp");
+			String ipAddress = JiveGlobals.getProperty("skype.sip.hostname", OfSkypePlugin.self.getIpAddress());
+			ListeningPoint udp = sipStack.createListeningPoint(ipAddress, localport, "udp");
+            ListeningPoint tcp = sipStack.createListeningPoint(ipAddress, localport, "tcp");
 
 			sipProvider = sipStack.createSipProvider(tcp);
             sipProvider.addListeningPoint(udp);
@@ -154,7 +156,7 @@ public class SipService
 	{
 		Log.info(String.format("SipService adding SIP registration: %s with user %s host %s", sipAccount.getXmppUserName(), sipAccount.getUserName(), sipAccount.getHost()));
 
-		String server = JiveGlobals.getProperty("freeswitch.server.hostname", "127.0.0.1");
+		String server = JiveGlobals.getProperty("skype.sip.hostname", OfSkypePlugin.self.getIpAddress());
 		new RegisterProcessing(localip, server, sipAccount);
 	}
 
@@ -164,7 +166,7 @@ public class SipService
 
 		try {
 			String authusername = JiveGlobals.getProperty("voicebridge.default.proxy.sipauthuser", null);
-			String server = JiveGlobals.getProperty("freeswitch.server.hostname", "127.0.0.1");
+			String server = JiveGlobals.getProperty("skype.sip.hostname", OfSkypePlugin.self.getIpAddress());
 
 			if (authusername != null && authusername.equals("") == false)
 			{
