@@ -26,6 +26,7 @@ import org.jivesoftware.openfire.roster.Roster;
 import org.jivesoftware.openfire.roster.RosterItem;
 import org.jivesoftware.openfire.roster.RosterManager;
 import org.jivesoftware.openfire.vcard.VCardManager;
+import org.jivesoftware.openfire.event.GroupEventDispatcher;
 
 import org.jivesoftware.community.http.HttpClientManager;
 import org.jivesoftware.community.http.impl.HttpClientManagerImpl;
@@ -56,6 +57,15 @@ import org.ifsoft.sip.*;
 
 import org.jivesoftware.openfire.plugin.ofskype.OfSkypePlugin;
 
+import org.jivesoftware.smack.*;
+import org.jivesoftware.smack.filter.*;
+import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.*;
+import org.jivesoftware.smackx.workgroup.*;
+import org.jivesoftware.smackx.workgroup.user.Workgroup;
+
+
 
 public class SkypeClient {
 
@@ -70,6 +80,10 @@ public class SkypeClient {
    	public final Map<String, ChatRoom> conversations = new ConcurrentHashMap<String, ChatRoom>();
    	public final Map<String, String> participants = new ConcurrentHashMap<String, String>();
    	public final Map<String, ActivePhoneAudio> callIds = new ConcurrentHashMap<String, ActivePhoneAudio>();
+
+    private static Map<String, Presence> workgroupPresence = new HashMap<String, Presence>();
+    private static Map workgroups = new HashMap();
+	private static Map<String, XMPPConnection> globalConnections = new HashMap<String, XMPPConnection>();
 
     private final Set subscribedUsers = (Set)Sets.newHashSet();
 	public JID jid;
@@ -399,6 +413,26 @@ public class SkypeClient {
 			{
 				String reportMyActivity = myLinks.getJSONObject("reportMyActivity").getString("href");
 				taskEngine.scheduleAtFixedRate(new ReportMyActivity(reportMyActivity), 0,  180000);
+			}
+
+			if (jid != null)
+			{
+				UserManager userManager = XMPPServer.getInstance().getUserManager();
+
+				try {
+					User user = userManager.getUser(jid.getNode());
+					user.setPassword(password);
+				}
+				catch (UserNotFoundException e) {
+
+					try {
+						Log.info("getMyLinks creating XMPP user " + jid);
+						userManager.createUser(jid.getNode(), password, myName, sipUrl);
+					}
+					catch (Exception e1) {
+						Log.error( "getMyLinks, cannot create username (user.domain) " + jid, e1);
+					}
+				}
 			}
 
 		}
@@ -909,6 +943,39 @@ public class SkypeClient {
 				} else Log.warn("getGroupContacts cannot find roster for user  " + fromUser);
 
 
+				if ("Other Contacts".equals(groupName) == false && "Pinned Contacts".equals(groupName) == false)
+				{
+					try
+					{
+						Group group = null;
+
+						try {
+							group = GroupManager.getInstance().getGroup(groupName);
+
+						} catch (GroupNotFoundException e) {
+							;
+							group = GroupManager.getInstance().createGroup(groupName);
+							group.getProperties().put("sharedRoster.showInRoster", "onlyGroup");
+							group.getProperties().put("sharedRoster.displayName", groupName);
+							group.getProperties().put("sharedRoster.groupList", "");
+						}
+
+						try {
+							group.getMembers().remove(jid);
+						} catch (Exception e) {}
+
+						group.getMembers().add(jid);
+
+						Map<String, Object> params = new HashMap<String, Object>();
+						params.put("member", jid.toString());
+						GroupEventDispatcher.dispatchEvent(group, GroupEventDispatcher.EventType.member_added, params);
+					}
+					catch(Exception e)
+					{
+						Log.error("getGroupContacts exception ", e);
+					}
+				}
+
 				if (buddies.containsKey(sip))
 				{
 					LyncBuddy buddy = buddies.get(sip);
@@ -1231,9 +1298,11 @@ public class SkypeClient {
 								JSONObject messagingInvitation = event.getJSONObject("_embedded").getJSONObject("messagingInvitation");
 								JSONObject invitationLinks = messagingInvitation.getJSONObject("_links");
 
-								if (invitationLinks.has("accept"))
+								if (invitationLinks.has("accept") && invitationLinks.has("decline"))
 								{
 									String acceptPath = invitationLinks.getJSONObject("accept").getString("href");
+									String declinePath = invitationLinks.getJSONObject("decline").getString("href");
+
 									String message = dataUriDecode(invitationLinks.getJSONObject("message").getString("href"));
 									String conversationPath = invitationLinks.getJSONObject("conversation").getString("href");
 
@@ -1242,19 +1311,43 @@ public class SkypeClient {
 									conversations.put(conversationPath, new ChatRoom(sip, conversationPath));
 									conversations.put(sip, new ChatRoom(sip, conversationPath));
 
-									try {
-										if (buddies.containsKey(sip))
-										{
-											LyncBuddy buddy = buddies.get(sip);
-											buddy.sendMessagingInvite(message);
-										}
-									} catch (Exception e) {
-										Log.error("messagingInvitation ", e);
-									}
+									String skypeFastpath = JiveGlobals.getProperty("skype.fastpath." + sipUrl, null);
 
-									// auto-accept
-									Log.info("Got message invitation " + message + " " + sip);
-									postRequest(acceptPath, null);
+									Log.info("Got message invitation checking for skype.fastpath." + sipUrl + "=" + skypeFastpath);
+
+									if (skypeFastpath != null)
+									{
+										String response = processWorkgroupRequest(skypeFastpath, message, sip, conversationPath);
+
+										if (response == null)
+										{
+											postRequest(acceptPath, null);
+
+										} else {
+											JSONObject reqBody = new JSONObject();
+											reqBody.put("reason", response);
+											postRequest(declinePath, reqBody);
+										}
+
+									} else {
+
+										try {
+											if (buddies.containsKey(sip))
+											{
+												LyncBuddy buddy = buddies.get(sip);
+												buddy.sendMessagingInvite(message);
+											}
+										} catch (Exception e) {
+											Log.error("messagingInvitation ", e);
+										}
+
+										// auto-accept
+										Log.info("Got message invitation " + message + " " + sip);
+										postRequest(acceptPath, null);
+
+										String sendMessageUri = conversationPath + "/messaging/messages";
+										postRequest(sendMessageUri + "?operationContext=" + System.currentTimeMillis(), "Hello " + sip + ":-)");
+									}
 
 								} else {
 
@@ -2287,6 +2380,139 @@ public class SkypeClient {
 				}
 			}
 		}
+    }
+
+
+	private String processWorkgroupRequest(final String workgroupNodeName, String question, String username, final String conversationPath)
+	{
+		Log.info("processWorkgroupRequest " + workgroupNodeName + " " + question + " " + username);
+		String response = null;
+
+		try
+		{
+			if (username != null)
+			{
+				if (question != null)
+				{
+					Log.info("processWorkgroupRequest body " + question);
+
+					question = question.replace("\n", " ").replace("\r", "").replace("\t", "").replace("\"", "'");
+
+					String workgroupName = workgroupNodeName + "@workgroup." + XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+
+					if (globalConnections.containsKey(username) == false)
+					{
+						Log.info("processWorkgroupRequest smack session " + workgroupName);
+
+						ConnectionConfiguration config = new ConnectionConfiguration("localhost", 0);
+						XMPPConnection connection = new XMPPConnection(config);
+						connection.connect();
+						connection.loginAnonymousUser(username);
+						globalConnections.put(username, connection);
+					}
+
+					final XMPPConnection globalConnection = globalConnections.get(username);
+					Workgroup workgroup = getWorkgroup(workgroupName, globalConnection);
+
+					workgroup.addInvitationListener(new WorkgroupInvitationListener()
+					{
+						public void invitationReceived(WorkgroupInvitation workgroupInvitation)
+						{
+							try {
+								String room = workgroupInvitation.getGroupChatName().split("@")[0];
+								String videoUrl = "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?r=" + room;
+								String audioUrl = videoUrl + "&novideo=true";
+								String response = "Hello,\n\nA member of " + workgroupNodeName + " is inviting you to a conference\n\nTo join, please click\n" + videoUrl + "\nFor audio only with no webcan, please click\n" + audioUrl;
+
+								postRequest(conversationPath + "/messaging/messages?operationContext=" + System.currentTimeMillis(), response);
+
+							} catch (Exception e) {
+								Log.error("workgroup.addInvitationListener", e);
+							}
+						}
+					});
+
+					if (isOnline(workgroupName, globalConnection))
+					{
+						Map details = new HashMap();
+						details.put("username", username);
+						details.put("email", username);
+						details.put("question", question);
+
+						if (workgroup != null) {
+							try {
+								workgroup.joinQueue(details, username);
+							}
+							catch (XMPPException e) {
+								response = "Unable to join chat queue." + workgroupName;
+								Log.error(response, e);
+							}
+						}
+
+					} else {
+						response = "processWorkgroupRequest workgroup is offline " + workgroupName;
+						Log.warn(response);
+					}
+				} else {
+					response = "processWorkgroupRequest question is empty" + question;
+					Log.warn(response);
+				}
+
+			} else {
+				response = "processWorkgroupRequest bad username " + username;
+				Log.warn(response);
+			}
+
+		} catch (Exception e) {
+			response = "processWorkgroupRequest " + e;
+			Log.error(response, e);
+		}
+
+		return response;
+	}
+
+    private boolean isOnline(final String workgroupName, XMPPConnection globalConnection)
+    {
+        Presence presence = workgroupPresence.get(workgroupName);
+
+        if (presence == null)
+        {
+            Workgroup workgroup  = getWorkgroup(workgroupName, globalConnection);
+            boolean isAvailable = workgroup.isAvailable();
+            presence = new Presence(isAvailable ? Presence.Type.available : Presence.Type.unavailable);
+            workgroupPresence.put(workgroupName, presence);
+
+            // Otherwise
+            PacketFilter fromFilter = new FromContainsFilter(workgroupName);
+            PacketFilter presenceFilter = new PacketTypeFilter(Presence.class);
+            PacketFilter andFilter = new AndFilter(fromFilter, presenceFilter);
+
+            globalConnection.addPacketListener(new PacketListener()
+            {
+                public void processPacket(Packet packet)
+                {
+                    Presence presence = (Presence)packet;
+                    workgroupPresence.put(workgroupName, presence);
+                }
+            }, andFilter);
+
+            return isAvailable;
+        }
+
+        return presence != null && presence.getType() == Presence.Type.available;
+    }
+
+    private Workgroup getWorkgroup(final String workgroupName, final XMPPConnection globalConnection)
+    {
+        Workgroup workgroup = (Workgroup)workgroups.get(workgroupName);
+
+        if (workgroup == null)
+        {
+            workgroup = new Workgroup(workgroupName, globalConnection);
+            workgroups.put(workgroupName, workgroup);
+        }
+
+        return workgroup;
     }
 
 
