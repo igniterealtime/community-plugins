@@ -36,7 +36,8 @@
 
 	if (OfSwitchPlugin.self != null)
 	{
-		EslMessage resp = OfSwitchPlugin.self.sendFWCommand("sofia status profile internal reg");
+		String profile = JiveGlobals.getProperty("freeswitch.internal.profile", "internal");
+		EslMessage resp = OfSwitchPlugin.self.sendFWCommand("sofia status profile " + profile + " reg");
 		
 		if (resp != null)
 		{	

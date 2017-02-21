@@ -54,10 +54,13 @@ public class SipConnection
 	private boolean connected = false;
 	private WebSocketClient client = null;
 	private SIPSocket sipSocket = null;
+	private String subprotocol = "sip";
 
-	public SipConnection(URI uri, Map<String,String> httpHeaders, int connectTimeout)
+	public SipConnection(URI uri, String subprotocol, int connectTimeout)
 	{
-		Log.info("SipConnection " + uri);
+		Log.info("SipConnection " + uri + " " + subprotocol);
+
+		this.subprotocol = subprotocol;
 
 		SslContextFactory sec = new SslContextFactory();
 
@@ -77,8 +80,14 @@ public class SipConnection
         {
             client.start();
             ClientUpgradeRequest request = new ClientUpgradeRequest();
-            request.setSubProtocols("sip");
+
+            if ("sip".equals(subprotocol))
+            {
+				request.setSubProtocols(subprotocol);
+			}
+
             client.connect(sipSocket, uri, request);
+
             Log.info("Connecting to : " + uri);
         }
         catch (Exception e)
@@ -107,7 +116,15 @@ public class SipConnection
 	public void deliver(String text)
 	{
 		Log.info("SipConnection - deliver " + text);
-		if (sipSocket != null) sipSocket.deliver(text.replaceAll("SIP/2.0/WSS", "SIP/2.0/WS"));
+
+		String sendText = text;
+
+		if (sipSocket != null)
+		{
+			if ("sip".equals(subprotocol)) sendText = text.replaceAll("SIP/2.0/WSS", "SIP/2.0/WS");
+
+			sipSocket.deliver(sendText);
+		}
 	}
 
 	public void disconnect()

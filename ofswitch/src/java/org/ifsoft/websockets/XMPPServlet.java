@@ -52,7 +52,7 @@ public final class XMPPServlet extends WebSocketServlet
 			{
 				Log.info("WSocketCreator found protocol " + subprotocol);
 
-				if ("sip".equals(subprotocol))
+				if ("sip".equals(subprotocol) || "verto".equals(subprotocol))
 				{
 					return getSIPSocket(subprotocol, req, resp);
 				}
@@ -70,9 +70,7 @@ public final class XMPPServlet extends WebSocketServlet
 				String url = URLDecoder.decode( ParamUtils.getParameter(request, "url"), "UTF-8");
 
 				SIPWebSocket socket = null;
-				HashMap<String,String> httpHeaders = new HashMap<String,String>();
-				httpHeaders.put("Sec-WebSocket-Protocol", "sip");
-				SipConnection sipConnection = new SipConnection(URI.create(url), httpHeaders, 10000);
+				SipConnection sipConnection = new SipConnection(URI.create(url), subprotocol, 10000);
 
 				if (sipConnection != null)
 				{

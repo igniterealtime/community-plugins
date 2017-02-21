@@ -162,14 +162,13 @@ public class SparkMeetPlugin implements Plugin, ChatRoomListener
 
 		Log.warning("openUrl " + baseUrl);
 
-		String username = SparkManager.getSessionManager().getUsername();
-		String password = SparkManager.getSessionManager().getPassword();
-
-		String url = "https://" + username + ":" + password + "@" + baseUrl;
-
 		try {
+			String username = URLEncoder.encode(SparkManager.getSessionManager().getUsername(), "UTF-8");
+			String password = URLEncoder.encode(SparkManager.getSessionManager().getPassword(), "UTF-8");
 
-			electronThread = Spawn.startProcess(electronExePath + " --enable-media-stream --enable-usermedia-screen-capture " + url, new File(electronHomePath), new ProcessListener() {
+			String url = "https://" + username + ":" + password + "@" + baseUrl;
+
+			electronThread = Spawn.startProcess(electronExePath + " --ignore-certificate-errors --enable-media-stream --enable-usermedia-screen-capture " + url, new File(electronHomePath), new ProcessListener() {
 
 				public void onOutputLine(final String line) {
 					System.out.println(line);

@@ -283,7 +283,7 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 
 				SipAccount sipAccount = SipAccountDAO.getAccountByUser(JID.escapeNode(username));
 
-				if (sipAccount == null) sipAccount = SipAccountDAO.getAccountByUser(userid);
+				if (sipAccount == null) sipAccount = SipAccountDAO.getAccountByUser(userName);
 
 				if (sipAccount != null)
 				{
@@ -443,7 +443,8 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 
 					if (attrib.getName().equals("candidate"))
 					{
-						attrib.setValue(attrib.getValue().replace("TCP-PASS","TCP").replace("TCP-ACT","TCP"));
+						attrib.setValue(attrib.getValue().replace("UDP","udp").replace("TCP-PASS","tcp").replace("TCP-ACT","tcp") + " generation 0");
+						//if (attrib.getValue().indexOf("typ host") > -1) deletes.add(attrib);
 					}
 
 					if (attrib.getName().equals("cryptoscale")) deletes.add(attrib);
@@ -463,6 +464,8 @@ public class OfSkypePlugin implements Plugin, ClusterEventListener, PropertyEven
 					attributes.add(SdpFactory.getInstance().createAttribute("ssrc", ssrcs[0] + " mslabel:YOGW0gxEFBdOm7AsbjxMDJwlLTKNkBId"));
 					attributes.add(SdpFactory.getInstance().createAttribute("ssrc", ssrcs[0] + " label:YOGW0gxEFBdOm7AsbjxMDJwlLTKNkBIda0"));
 				}
+
+				attributes.add(SdpFactory.getInstance().createAttribute("sendrecv", null));
 
 
 			} catch (Exception ec) {

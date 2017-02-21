@@ -45,7 +45,8 @@
 
 		JiveGlobals.setProperty("freeswitch.server.hostname", request.getParameter("fsServer"));         
 		JiveGlobals.setProperty("freeswitch.server.password", request.getParameter("fsPassword"));    
-		JiveGlobals.setProperty("freeswitch.sip.hostname", request.getParameter("fsSipServer"));         
+		JiveGlobals.setProperty("freeswitch.sip.hostname", request.getParameter("fsSipServer"));      
+		JiveGlobals.setProperty("freeswitch.sip.gateway", request.getParameter("fsSipGateway"));  		
 		JiveGlobals.setProperty("freeswitch.sip.password", request.getParameter("fsSipPassword"));    
 		
 		JiveGlobals.setProperty("freeswitch.server.homepath", request.getParameter("fsHomePath"));         
@@ -135,7 +136,15 @@
 		<td><input type="password" size="50" maxlength="100" name="fsSipPassword"
 			   value="<%= JiveGlobals.getProperty("freeswitch.sip.password", "Welcome123") %>">
 		</td>
-	    </tr	    
+	    </tr
+	    <tr>
+		<td align="left" width="150">
+		    <fmt:message key="settings.freeswitch.sip.gateway"/>
+		</td>
+		<td><input type="text" size="50" maxlength="100" name="fsSipGateway"
+			   value="<%= JiveGlobals.getProperty("freeswitch.sip.gateway", ourIpAddress) %>">
+		</td>
+	    </tr>	    
   	    </tbody>
         </table>
    </p>  

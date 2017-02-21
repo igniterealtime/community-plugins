@@ -482,7 +482,7 @@ public class SkypeClient {
 
 					if (attrib.getName().equals("candidate"))
 					{
-						//attrib.setValue(attrib.getValue().replace(" generation 0","").replace("udp","UDP"));
+						attrib.setValue(attrib.getValue().replace(" generation 0","").replace("udp","UDP").replace("tcp","TCP-PASS"));
 					}
 
 					if (attrib.getName().equals("msid-semantic")) deletes.add(attrib);
@@ -494,6 +494,7 @@ public class SkypeClient {
 				}
 
 				attributes.add(SdpFactory.getInstance().createAttribute("x-ssrc-range", ssrc + "-" + ssrc));
+
 				//attributes.add(SdpFactory.getInstance().createAttribute("rtcp-fb", "* x-message app send:dsh recv:dsh"));
 				//attributes.add(SdpFactory.getInstance().createAttribute("rtcp-rsize", null));
 				//attributes.add(SdpFactory.getInstance().createAttribute("label", "main-audio"));

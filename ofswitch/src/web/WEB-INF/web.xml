@@ -25,6 +25,11 @@ Automatically created by Apache Tomcat JspC.
     </servlet>
 
     <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dgateways_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dgateways_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002doverview_jsp</servlet-name>
         <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002doverview_jsp</servlet-class>
     </servlet>
@@ -37,6 +42,11 @@ Automatically created by Apache Tomcat JspC.
     <servlet>
         <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dsettings_jsp</servlet-name>
         <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dsettings_jsp</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dverto_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dverto_jsp</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -55,6 +65,11 @@ Automatically created by Apache Tomcat JspC.
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dgateways_jsp</servlet-name>
+        <url-pattern>/freeswitch-gateways.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002doverview_jsp</servlet-name>
         <url-pattern>/freeswitch-overview.jsp</url-pattern>
     </servlet-mapping>
@@ -67,6 +82,11 @@ Automatically created by Apache Tomcat JspC.
     <servlet-mapping>
         <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dsettings_jsp</servlet-name>
         <url-pattern>/freeswitch-settings.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.ofswitch.freeswitch_002dverto_jsp</servlet-name>
+        <url-pattern>/freeswitch-verto.jsp</url-pattern>
     </servlet-mapping>
 
 </web-app>

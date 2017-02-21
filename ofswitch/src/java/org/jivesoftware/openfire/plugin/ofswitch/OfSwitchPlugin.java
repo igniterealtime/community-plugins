@@ -138,7 +138,7 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 			if (freeswitchEnabled)
 			{
 				String freeswitchServer = JiveGlobals.getProperty("freeswitch.server.hostname", "127.0.0.1");
-				String freeswitchPassword = JiveGlobals.getProperty("freeswitch.server.password", "Welcome123");
+				String freeswitchPassword = JiveGlobals.getProperty("freeswitch.server.password", "ClueCon");
 				boolean freeswitchInstalled = JiveGlobals.getBooleanProperty("freeswitch.installed", true);
 
 				freeSwitchHomePath = JiveGlobals.getProperty("freeswitch.server.homepath", freeSwitchHomePath);
