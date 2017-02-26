@@ -11,8 +11,8 @@
     <adminconsole>
         <tab id="tab-chatview" name="Chat API" url="rest-api.jsp" description="Enables chat/groupchat over a RESTFul API and Sever Sent Events (SSE)">
             <sidebar id="sidebar-chatview-settings" name="Settings">
-                <item id="rest-api" name="REST API" url="rest-api.jsp"
-                     description="Click to manage the service that enables chat/groupchat over a RESTFul API and Sever Sent Events (SSE)" />
+                <item id="rest-api" name="REST API" url="rest-api.jsp" description="Click to manage the service that enables chat/groupchat over a RESTFul API and Sever Sent Events (SSE)" />
+                <item id="swagger-ui" name="Sandbox" url="swagger-ui-sandbox.jsp" description="Swagger UI Sandbox to test REST API"/>                                      
             </sidebar>
         </tab>
     </adminconsole>

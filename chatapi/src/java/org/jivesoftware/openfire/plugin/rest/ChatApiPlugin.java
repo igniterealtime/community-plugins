@@ -52,6 +52,7 @@ import org.eclipse.jetty.plus.annotation.ContainerInitializer;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 import org.eclipse.jetty.util.security.*;
 import org.eclipse.jetty.security.*;
@@ -127,10 +128,15 @@ public class ChatApiPlugin implements Plugin, PropertyEventListener {
 
 		// start REST service on http-bind port
 		ContextHandlerCollection contexts = HttpBindManager.getInstance().getContexts();
-
 		ServletContextHandler context = new ServletContextHandler(contexts, "/rest", ServletContextHandler.SESSIONS);
 		context.setClassLoader(this.getClass().getClassLoader());
-		context.addServlet(new ServletHolder(new JerseyWrapper()), "/api/*");
+
+		ServletHolder restHolder = new ServletHolder(new JerseyWrapper());
+		context.addServlet(restHolder, "/api/*");
+
+		ServletHolder sseHolder = new ServletHolder(new RestEventSourceServlet());
+		sseHolder.setAsyncSupported(true);
+		context.addServlet(sseHolder, "/sse");
 
 		// Ensure the JSP engine is initialized correctly (in order to be
 		// able to cope with Tomcat/Jasper precompiled JSPs).
@@ -141,21 +147,17 @@ public class ChatApiPlugin implements Plugin, PropertyEventListener {
 		context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
 		context.setSecurityHandler(basicAuth("ofmeet"));
 
-
-		ServletContextHandler context2 = new ServletContextHandler(contexts, "/sse", ServletContextHandler.SESSIONS);
+		WebAppContext context2 = new WebAppContext(contexts, pluginDirectory.getPath(), "/apps");
 		context2.setClassLoader(this.getClass().getClassLoader());
 
-		ServletHolder sseHolder = new ServletHolder(new RestEventSourceServlet());
-		sseHolder.setAsyncSupported(true);
-		context2.addServlet(sseHolder, "/chat");
-
-		// Ensure the JSP engine is initialized correctly (in order to be
-		// able to cope with Tomcat/Jasper precompiled JSPs).
+		// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
 
 		final List<ContainerInitializer> initializers2 = new ArrayList<>();
 		initializers2.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-		context2.setAttribute("org.eclipse.jetty.containerInitializers", initializers);
+		context2.setAttribute("org.eclipse.jetty.containerInitializers", initializers2);
 		context2.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+
+		context2.setWelcomeFiles(new String[]{"index.jsp"});
 		context2.setSecurityHandler(basicAuth("ofmeet"));
 
 		Security.addProvider( new OfMeetSaslProvider() );

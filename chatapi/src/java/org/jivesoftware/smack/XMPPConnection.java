@@ -20,22 +20,35 @@
 
 package org.jivesoftware.smack;
 
-import org.jivesoftware.openfire.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.cert.Certificate;
+import java.net.InetSocketAddress;
+import javax.xml.XMLConstants;
+import java.io.StringReader;
+import java.util.Locale;
 
 import org.jivesoftware.openfire.session.LocalClientSession;
 import org.jivesoftware.openfire.net.VirtualConnection;
 import org.jivesoftware.openfire.auth.UnauthorizedException;
 import org.jivesoftware.openfire.auth.AuthToken;
 import org.jivesoftware.openfire.auth.AuthFactory;
+import org.jivesoftware.openfire.PacketDeliverer;
+import org.jivesoftware.openfire.nio.OfflinePacketDeliverer;
+
+import org.jivesoftware.openfire.*;
+import org.jivesoftware.openfire.multiplex.UnknownStanzaException;
+import org.jivesoftware.openfire.net.SASLAuthentication;
+import org.jivesoftware.openfire.net.SASLAuthentication.Status;
+import org.jivesoftware.openfire.session.ConnectionSettings;
+import org.jivesoftware.openfire.session.LocalClientSession;
+import org.jivesoftware.openfire.streammanagement.StreamManager;
 
 import org.jivesoftware.openfire.plugin.ofmeet.jetty.OfMeetLoginService;
 import org.jivesoftware.openfire.plugin.rest.RestEventSourceServlet;
 
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.*;
 
 import org.jivesoftware.smack.filter.PacketFilter;
@@ -48,6 +61,7 @@ import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
 import javax.security.auth.callback.*;
+import org.apache.commons.pool2.impl.GenericObjectPool;
 
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -55,6 +69,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmpp.packet.*;
 
 import org.dom4j.*;
+import org.dom4j.io.XMPPPacketReader;
 
 
 public class XMPPConnection extends Connection
@@ -206,6 +221,8 @@ public class XMPPConnection extends Connection
 			session = SessionManager.getInstance().createClientSession( smackConnection, (Locale) null );
 			smackConnection.setRouter( new SessionPacketRouter( session ), username );
 			session.setAuthToken(authToken, resource);
+
+			Log.warn("login - creating new session (smack) for " + username);
 
 			authenticated = true;
 			anonymous = false;
@@ -558,7 +575,7 @@ public class XMPPConnection extends Connection
         return null;
     }
 
-    private class OpenfirePacketWriter
+    public class OpenfirePacketWriter
     {
     	public XMPPConnection connection;
     	private Thread keepAliveThread;
@@ -580,7 +597,7 @@ public class XMPPConnection extends Connection
     	{
 			try {
 				Log.info("OpenfirePacketWriter sendPacket " + data );
-				smackConnection.getRouter().route(DocumentHelper.parseText(data).getRootElement());
+				smackConnection.sendPacket(data);
 			} catch ( Exception e ) {
 				Log.error( "An error occurred while attempting to route the packet : ", e );
 			}
@@ -591,7 +608,7 @@ public class XMPPConnection extends Connection
 			try {
 				String data = packet.toXML();
 				Log.info("OpenfirePacketWriter sendPacket " + data );
-				smackConnection.getRouter().route(DocumentHelper.parseText(data).getRootElement());
+				sendPacket(data);
 
             	connection.firePacketInterceptors(packet);
             	connection.firePacketSendingListeners(packet);
@@ -686,7 +703,7 @@ public class XMPPConnection extends Connection
 		}
 	}
 
-	private class OpenfirePacketReader
+	public class OpenfirePacketReader
 	{
     	public XMPPConnection connection;
     	private ExecutorService listenerExecutor;
@@ -748,7 +765,7 @@ public class XMPPConnection extends Connection
 			}
 
 			// Deliver the incoming packet to listeners.
-			listenerExecutor.submit(new ListenerNotification(packet));
+			//listenerExecutor.submit(new ListenerNotification(packet));
 		}
 
 		public void notifyReconnection()
@@ -782,145 +799,5 @@ public class XMPPConnection extends Connection
 				}
 			}
 		}
-	}
-
-
-	public class SmackConnection extends VirtualConnection
-	{
-		private SessionPacketRouter router;
-		private String remoteAddr;
-		private String hostName;
-		private LocalClientSession session;
-		private boolean isSecure = false;
-		private OpenfirePacketReader reader;
-		private OpenfirePacketWriter writer;
-		private String username;
-
-		public SmackConnection(String hostName, OpenfirePacketWriter writer,  OpenfirePacketReader reader)
-		{
-			this.remoteAddr = hostName;
-			this.hostName = hostName;
-			this.reader = reader;
-		}
-
-		public void setReader(OpenfirePacketReader reader) {
-			this.reader = reader;
-		}
-
-		public void setWriter(OpenfirePacketWriter writer) {
-			this.writer = writer;
-		}
-
-		public boolean isSecure() {
-			return isSecure;
-		}
-
-		public void setSecure(boolean isSecure) {
-			this.isSecure = isSecure;
-		}
-
-		public SessionPacketRouter getRouter()
-		{
-			return router;
-		}
-
-		public void setRouter(SessionPacketRouter router, String username)
-		{
-			this.router = router;
-			this.username = username;
-		}
-
-		public void setUsername(String username)
-		{
-			this.username = username;
-		}
-
-		public void closeVirtualConnection()
-		{
-			Log.info("SmackConnection - close ");
-
-			if (this.reader!= null) this.reader.shutdown();
-			if (this.writer!= null) this.writer.shutdown();
-			if (this.reader!= null) this.reader.cleanup();
-			if (this.writer!= null) this.writer.cleanup();
-		}
-
-		public byte[] getAddress() {
-			return remoteAddr.getBytes();
-		}
-
-		public String getHostAddress() {
-			return remoteAddr;
-		}
-
-		public String getHostName()  {
-			return ( hostName != null ) ? hostName : "0.0.0.0";
-		}
-
-		public void systemShutdown() {
-
-		}
-
-		public void deliver(org.xmpp.packet.Packet packet) throws UnauthorizedException
-		{
-			deliverRawText(packet.toXML());
-		}
-
-		public void deliverRawText(String text)
-		{
-			Log.info("SmackConnection - deliverRawText\n" + text);
-
-			RestEventSourceServlet.emitEvent("chatapi.xmpp", username, text);
-
-			try {
-				StringReader stringReader = new StringReader(text);
-
-				XmlPullParser parser = new MXParser();
-				parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-				parser.setInput(stringReader);
-
-            	int eventType = parser.getEventType();
-
-            	do {
-					if (eventType == XmlPullParser.START_TAG)
-					{
-						if (parser.getName().equals("message")) {
-							this.reader.processPacket(PacketParserUtils.parseMessage(parser));
-						}
-						else if (parser.getName().equals("iq")) {
-							this.reader.processPacket(PacketParserUtils.parseIQ(parser, reader.connection));
-						}
-						else if (parser.getName().equals("presence")) {
-							this.reader.processPacket(PacketParserUtils.parsePresence(parser));
-						}
-					}
-
-					else if (eventType == XmlPullParser.END_TAG) {
-
-					}
-
-                	eventType = parser.next();
-            	} while (eventType != XmlPullParser.END_DOCUMENT);
-			}
-
-			catch (Exception e) {
-				Log.error("deliverRawText error", e);
-			}
-		}
-
-        @Override
-        public org.jivesoftware.openfire.spi.ConnectionConfiguration getConfiguration()
-        {
-            // TODO Here we run into an issue with the ConnectionConfiguration introduced in Openfire 4:
-            //      it is not extensible in the sense that unforeseen connection types can be added.
-            //      For now, null is returned, as this object is likely to be unused (its lifecycle is
-            //      not managed by a ConnectionListener instance).
-            return null;
-        }
-
-        public Certificate[] getPeerCertificates() {
-			return null;
-		}
-
 	}
 }

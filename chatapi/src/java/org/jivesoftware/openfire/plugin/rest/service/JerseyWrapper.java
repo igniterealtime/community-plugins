@@ -23,10 +23,10 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
 public class JerseyWrapper extends ServletContainer {
 
 	/** The Constant CUSTOM_AUTH_PROPERTY_NAME */
-	private static final String CUSTOM_AUTH_PROPERTY_NAME = "belfry.restapi.customAuthFilter";
+	private static final String CUSTOM_AUTH_PROPERTY_NAME = "chatapi.restapi.customAuthFilter";
 
 	/** The Constant REST_AUTH_TYPE */
-	private static final String REST_AUTH_TYPE  = "belfry.restapi.httpAuth";
+	private static final String REST_AUTH_TYPE  = "chatapi.restapi.httpAuth";
 
 	/** The Constant AUTHFILTER. */
 	private static final String AUTHFILTER = "org.jivesoftware.openfire.plugin.rest.AuthFilter";

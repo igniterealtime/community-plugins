@@ -1,0 +1,171 @@
+Buildfile: C:\Projects\ignite\community-plugins\ofskype\build.xml
+
+clean:
+   [delete] Deleting: C:\Projects\ignite\community-plugins\ofskype\lib\plugin-ofskype-jspc.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins\ofskype\lib\plugin-ofskype.jar
+
+init:
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofskype\build\classes
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins\ofskype\build\jar
+
+compile:
+    [javac] C:\Projects\ignite\community-plugins\ofskype\build.xml:29: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 38 source files to C:\Projects\ignite\community-plugins\ofskype\build\classes
+    [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:60: error: package org.jivesoftware.smack does not exist
+    [javac] import org.jivesoftware.smack.*;
+    [javac] ^
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:61: error: package org.jivesoftware.smack.filter does not exist
+    [javac] import org.jivesoftware.smack.filter.*;
+    [javac] ^
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:62: error: package org.jivesoftware.smack.packet does not exist
+    [javac] import org.jivesoftware.smack.packet.Presence;
+    [javac]                                     ^
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:63: error: package org.jivesoftware.smack.packet does not exist
+    [javac] import org.jivesoftware.smack.packet.Packet;
+    [javac]                                     ^
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:64: error: package org.jivesoftware.smack.packet does not exist
+    [javac] import org.jivesoftware.smack.packet.*;
+    [javac] ^
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:65: error: package org.jivesoftware.smackx.workgroup does not exist
+    [javac] import org.jivesoftware.smackx.workgroup.*;
+    [javac] ^
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:66: error: package org.jivesoftware.smackx.workgroup.user does not exist
+    [javac] import org.jivesoftware.smackx.workgroup.user.Workgroup;
+    [javac]                                              ^
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:86: error: cannot find symbol
+    [javac] 	private static Map<String, XMPPConnection> globalConnections = new HashMap<String, XMPPConnection>();
+    [javac] 	                           ^
+    [javac]   symbol:   class XMPPConnection
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2475: error: cannot find symbol
+    [javac]     private boolean isOnline(final String workgroupName, XMPPConnection globalConnection)
+    [javac]                                                          ^
+    [javac]   symbol:   class XMPPConnection
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2506: error: cannot find symbol
+    [javac]     private Workgroup getWorkgroup(final String workgroupName, final XMPPConnection globalConnection)
+    [javac]                                                                      ^
+    [javac]   symbol:   class XMPPConnection
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2506: error: cannot find symbol
+    [javac]     private Workgroup getWorkgroup(final String workgroupName, final XMPPConnection globalConnection)
+    [javac]             ^
+    [javac]   symbol:   class Workgroup
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:86: error: cannot find symbol
+    [javac] 	private static Map<String, XMPPConnection> globalConnections = new HashMap<String, XMPPConnection>();
+    [javac] 	                                                                                   ^
+    [javac]   symbol:   class XMPPConnection
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2408: error: cannot find symbol
+    [javac] 						ConnectionConfiguration config = new ConnectionConfiguration("localhost", 0);
+    [javac] 						^
+    [javac]   symbol:   class ConnectionConfiguration
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2408: error: cannot find symbol
+    [javac] 						ConnectionConfiguration config = new ConnectionConfiguration("localhost", 0);
+    [javac] 						                                     ^
+    [javac]   symbol:   class ConnectionConfiguration
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2409: error: cannot find symbol
+    [javac] 						XMPPConnection connection = new XMPPConnection(config);
+    [javac] 						^
+    [javac]   symbol:   class XMPPConnection
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2409: error: cannot find symbol
+    [javac] 						XMPPConnection connection = new XMPPConnection(config);
+    [javac] 						                                ^
+    [javac]   symbol:   class XMPPConnection
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2415: error: cannot find symbol
+    [javac] 					final XMPPConnection globalConnection = globalConnections.get(username);
+    [javac] 					      ^
+    [javac]   symbol:   class XMPPConnection
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2416: error: cannot find symbol
+    [javac] 					Workgroup workgroup = getWorkgroup(workgroupName, globalConnection);
+    [javac] 					^
+    [javac]   symbol:   class Workgroup
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2418: error: cannot find symbol
+    [javac] 					workgroup.addInvitationListener(new WorkgroupInvitationListener()
+    [javac] 					                                    ^
+    [javac]   symbol:   class WorkgroupInvitationListener
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2447: error: cannot find symbol
+    [javac] 							catch (XMPPException e) {
+    [javac] 							       ^
+    [javac]   symbol:   class XMPPException
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2481: error: cannot find symbol
+    [javac]             Workgroup workgroup  = getWorkgroup(workgroupName, globalConnection);
+    [javac]             ^
+    [javac]   symbol:   class Workgroup
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2483: error: cannot find symbol
+    [javac]             presence = new Presence(isAvailable ? Presence.Type.available : Presence.Type.unavailable);
+    [javac]                                                                ^
+    [javac]   symbol:   variable available
+    [javac]   location: class Type
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2487: error: cannot find symbol
+    [javac]             PacketFilter fromFilter = new FromContainsFilter(workgroupName);
+    [javac]             ^
+    [javac]   symbol:   class PacketFilter
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2487: error: cannot find symbol
+    [javac]             PacketFilter fromFilter = new FromContainsFilter(workgroupName);
+    [javac]                                           ^
+    [javac]   symbol:   class FromContainsFilter
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2488: error: cannot find symbol
+    [javac]             PacketFilter presenceFilter = new PacketTypeFilter(Presence.class);
+    [javac]             ^
+    [javac]   symbol:   class PacketFilter
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2488: error: cannot find symbol
+    [javac]             PacketFilter presenceFilter = new PacketTypeFilter(Presence.class);
+    [javac]                                               ^
+    [javac]   symbol:   class PacketTypeFilter
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2489: error: cannot find symbol
+    [javac]             PacketFilter andFilter = new AndFilter(fromFilter, presenceFilter);
+    [javac]             ^
+    [javac]   symbol:   class PacketFilter
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2489: error: cannot find symbol
+    [javac]             PacketFilter andFilter = new AndFilter(fromFilter, presenceFilter);
+    [javac]                                          ^
+    [javac]   symbol:   class AndFilter
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2491: error: cannot find symbol
+    [javac]             globalConnection.addPacketListener(new PacketListener()
+    [javac]                                                    ^
+    [javac]   symbol:   class PacketListener
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2503: error: cannot find symbol
+    [javac]         return presence != null && presence.getType() == Presence.Type.available;
+    [javac]                                                                       ^
+    [javac]   symbol:   variable available
+    [javac]   location: class Type
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2508: error: cannot find symbol
+    [javac]         Workgroup workgroup = (Workgroup)workgroups.get(workgroupName);
+    [javac]         ^
+    [javac]   symbol:   class Workgroup
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2508: error: cannot find symbol
+    [javac]         Workgroup workgroup = (Workgroup)workgroups.get(workgroupName);
+    [javac]                                ^
+    [javac]   symbol:   class Workgroup
+    [javac]   location: class SkypeClient
+    [javac] C:\Projects\ignite\community-plugins\ofskype\src\java\org\ifsoft\skype\SkypeClient.java:2512: error: cannot find symbol
+    [javac]             workgroup = new Workgroup(workgroupName, globalConnection);
+    [javac]                             ^
+    [javac]   symbol:   class Workgroup
+    [javac]   location: class SkypeClient
+    [javac] Note: Some input files use or override a deprecated API.
+    [javac] Note: Recompile with -Xlint:deprecation for details.
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+    [javac] 33 errors
+    [javac] 1 warning

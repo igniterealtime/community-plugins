@@ -1,0 +1,51 @@
+Buildfile: C:\Projects\ignite\community-plugins\chatapi\build.xml
+
+clean:
+   [delete] Deleting: C:\Projects\ignite\community-plugins\chatapi\lib\plugin-chatapi-jspc.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins\chatapi\lib\plugin-chatapi.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins\openfire_4_1_1\target\openfire\plugins\chatapi.jar
+
+init:
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins\chatapi\build\classes
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins\chatapi\build\jar
+
+compile:
+    [javac] C:\Projects\ignite\community-plugins\chatapi\build.xml:29: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 117 source files to C:\Projects\ignite\community-plugins\chatapi\build\classes
+    [javac] Note: Some input files use or override a deprecated API.
+    [javac] Note: Recompile with -Xlint:deprecation for details.
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+
+lib:
+      [jar] Building jar: C:\Projects\ignite\community-plugins\chatapi\lib\plugin-chatapi.jar
+
+compile-jsps:
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins\chatapi\build\jspc\java
+    [mkdir] Created dir: C:\Projects\ignite\community-plugins\chatapi\build\jspc\classes
+     [java] SLF4J: Class path contains multiple SLF4J bindings.
+     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins/openfire_4_1_1/target/openfire/lib/slf4j-log4j12.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+     [java] SLF4J: Found binding in [jar:file:/C:/Projects/ignite/community-plugins/openfire_4_1_1/build/lib/ant/slf4j-simple.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+     [java] SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+     [java] SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+     [java] log4j:WARN No appenders could be found for logger (org.eclipse.jetty.util.log).
+     [java] log4j:WARN Please initialize the log4j system properly.
+     [java] log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
+    [javac] C:\Projects\ignite\community-plugins\chatapi\build.xml:60: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 2 source files to C:\Projects\ignite\community-plugins\chatapi\build\jspc\classes
+    [javac] warning: [options] bootstrap class path not set in conjunction with -source 1.7
+    [javac] Note: C:\Projects\ignite\community-plugins\chatapi\build\jspc\java\org\jivesoftware\openfire\plugin\chatapi\rest_002dapi_jsp.java uses unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+    [javac] 1 warning
+      [jar] Building jar: C:\Projects\ignite\community-plugins\chatapi\lib\plugin-chatapi-jspc.jar
+     [copy] Copying 1 file to C:\Projects\ignite\community-plugins\chatapi\src\web\WEB-INF
+
+jar:
+     [copy] Copying 70 files to C:\Projects\ignite\community-plugins\chatapi\build\jar
+     [copy] Copying 18 files to C:\Projects\ignite\community-plugins\chatapi\build\jar\lib
+     [copy] Copying 24 files to C:\Projects\ignite\community-plugins\chatapi\build\jar
+      [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_1_1\target\openfire\plugins\chatapi.jar
+   [delete] Deleting directory C:\Projects\ignite\community-plugins\chatapi\build
+
+BUILD SUCCESSFUL
+Total time: 8 seconds

@@ -14,9 +14,19 @@ Automatically created by Apache Tomcat JspC.
         <servlet-class>org.jivesoftware.openfire.plugin.chatapi.rest_002dapi_jsp</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>org.jivesoftware.openfire.plugin.chatapi.swagger_002dui_002dsandbox_jsp</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.chatapi.swagger_002dui_002dsandbox_jsp</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>org.jivesoftware.openfire.plugin.chatapi.rest_002dapi_jsp</servlet-name>
         <url-pattern>/rest-api.jsp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>org.jivesoftware.openfire.plugin.chatapi.swagger_002dui_002dsandbox_jsp</servlet-name>
+        <url-pattern>/swagger-ui-sandbox.jsp</url-pattern>
     </servlet-mapping>
 
 </web-app>

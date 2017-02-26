@@ -72,6 +72,11 @@ public class RestEventSourceServlet extends EventSourceServlet
 		} catch (Exception e) {}
 	}
 
+	public static void emitEvent(String target, String event)
+	{
+		emitData(target, event);
+	}
+
 	public static void emitData(String target, String event)
 	{
 		try {
@@ -160,6 +165,20 @@ public class RestEventSourceServlet extends EventSourceServlet
 
 		} catch (Exception e) {
 			Log.error("sendXmppMessage", e);
+			return false;
+		}
+	}
+
+	public static boolean closeXmpp(String source)
+	{
+		Log.info("closeXmpp " + source);
+
+		try {
+			connections.get(source).getConnection().disconnect();
+			return true;
+
+		} catch (Exception e) {
+			Log.error("closeXmpp", e);
 			return false;
 		}
 	}
@@ -479,6 +498,11 @@ public class RestEventSourceServlet extends EventSourceServlet
 			} catch (Exception e) {
 				Log.error("emitData", e);
 			}
+		}
+
+		public void emitEvent(String data)
+		{
+			emitData(data);
 		}
 
 		public void emitEvent(String event, String data)

@@ -1,0 +1,40 @@
+Buildfile: C:\Projects\ignite\Spark\src\plugins\meet\build\build.xml
+
+clean:
+   [delete] Deleting: C:\Projects\ignite\Spark\target\plugins\meet\lib\plugin-classes.jar
+   [delete] Deleting directory C:\Projects\ignite\Spark\target\plugins-dev\meet\classes
+   [delete] Deleting directory C:\Projects\ignite\Spark\target\plugins\meet
+
+compile:
+    [mkdir] Created dir: C:\Projects\ignite\Spark\target\plugins-dev\meet\classes
+    [javac] C:\Projects\ignite\Spark\src\plugins\meet\build\build.xml:38: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 9 source files to C:\Projects\ignite\Spark\target\plugins-dev\meet\classes
+    [javac] C:\Projects\ignite\Spark\src\plugins\meet\src\java\org\jivesoftware\spark\plugin\ofmeet\ChatRoomDecorator.java:37: warning: BASE64Decoder is internal proprietary API and may be removed in a future release
+    [javac] import sun.misc.BASE64Decoder;
+    [javac]                ^
+    [javac] C:\Projects\ignite\Spark\src\plugins\meet\src\java\org\jivesoftware\spark\plugin\ofmeet\ChatRoomDecorator.java:53: warning: BASE64Decoder is internal proprietary API and may be removed in a future release
+    [javac] 			BASE64Decoder decoder = new BASE64Decoder();
+    [javac] 			^
+    [javac] C:\Projects\ignite\Spark\src\plugins\meet\src\java\org\jivesoftware\spark\plugin\ofmeet\ChatRoomDecorator.java:53: warning: BASE64Decoder is internal proprietary API and may be removed in a future release
+    [javac] 			BASE64Decoder decoder = new BASE64Decoder();
+    [javac] 			                            ^
+    [javac] Note: C:\Projects\ignite\Spark\src\plugins\meet\src\java\org\jivesoftware\spark\plugin\ofmeet\ChatRoomDecorator.java uses or overrides a deprecated API.
+    [javac] Note: Recompile with -Xlint:deprecation for details.
+    [javac] 3 warnings
+
+resources:
+     [copy] Copying 4 files to C:\Projects\ignite\Spark\target\plugins-dev\meet\classes
+
+jar:
+    [mkdir] Created dir: C:\Projects\ignite\Spark\target\plugins\meet
+    [mkdir] Created dir: C:\Projects\ignite\Spark\target\plugins\meet\lib
+     [copy] Copying 1 file to C:\Projects\ignite\Spark\target\plugins\meet
+      [jar] Building jar: C:\Projects\ignite\Spark\target\plugins\meet\lib\plugin-classes.jar
+
+win:
+     [copy] Copying 2 files to C:\Projects\ignite\Spark\target\plugins\meet\lib
+      [zip] Building zip: C:\Projects\ignite\Spark\target\build\plugins\sparkmeet.jar
+     [copy] Copying 1 file to C:\Projects\ignite\Spark\src\commercial
+
+BUILD SUCCESSFUL
+Total time: 38 seconds
