@@ -2337,7 +2337,6 @@ div.oembedall-githubrepos {
   margin: 0 0 10px;
   padding: 8px 10px 0;
   font: 13.34px/1.4 helvetica,arial,freesans,clean,sans-serif;
-  /*background: url("http://github.com/images/icons/public.png") no-repeat scroll 6px 9px transparent;*/
   width: 452px;
   height: 96px;
   background-color: #fff;
@@ -2375,7 +2374,6 @@ div.oembedall-githubrepos p.oembedall-updated-at {
 }
 
 div.oembedall-githubrepos .oembedall-repo-stats {
-  /*background: url("http://github.com/images/modules/pagehead/actions_fade.png") no-repeat scroll 0 0 transparent;*/
   border: medium none;
   /*float: right;*/
   font-size: 11px;
@@ -2447,13 +2445,11 @@ div.oembedall-githubrepos div.oembedall-repo-stats p.oembedall-forks {
 }
 
 div.oembedall-githubrepos div.oembedall-repo-stats p.oembedall-watchers a {
-  /*background-image: url("http://github.com/images/modules/pagehead/repostat_watchers.png");*/
   padding: 2px 3px;
   width: 100%;
 }
 
 div.oembedall-githubrepos div.oembedall-repo-stats p.oembedall-forks a {
-  /*background-image: url("http://github.com/images/modules/pagehead/repostat_forks.png");*/
   padding: 2px 3px;
   width: 100%;
 }
@@ -2641,7 +2637,6 @@ div.oembedall-container {
 }
 
 .oembedall-stoqembed .oembedall-statsarrow {
-  background-image: url("http://cdn.sstatic.net/stackoverflow/img/sprites.png?v=3");
   background-repeat: no-repeat;
   overflow: hidden;
   background-position: 0 -435px;

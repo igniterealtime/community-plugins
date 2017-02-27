@@ -34,7 +34,7 @@ import org.jivesoftware.openfire.user.UserAlreadyExistsException;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
 import org.jivesoftware.database.DbConnectionManager;
-import org.xmpp.packet.JID;
+import org.xmpp.packet.*;
 import org.xmpp.packet.StreamError;
 
 /**
@@ -343,9 +343,42 @@ public class UserServiceController {
 		Roster roster = getUserRoster(username);
 
 		List<RosterItemEntity> rosterEntities = new ArrayList<RosterItemEntity>();
+
 		for (RosterItem rosterItem : roster.getRosterItems()) {
 			RosterItemEntity rosterItemEntity = new RosterItemEntity(rosterItem.getJid().toBareJID(), rosterItem.getNickname(), rosterItem.getSubStatus().getValue());
 			rosterItemEntity.setGroups(rosterItem.getGroups());
+
+			try {
+				User user = userManager.getUser(rosterItem.getJid().getNode());
+				Presence presence = server.getPresenceManager().getPresence(user);
+
+				UserEntity userEntity = new UserEntity(user.getUsername(), user.getName(), user.getEmail());
+
+				if (presence == null) {
+					userEntity.setShow("offline");
+				}
+				else if (presence.getShow() == null) {
+					userEntity.setShow("available");
+				}
+				else if (presence.getShow().equals(org.xmpp.packet.Presence.Show.away)) {
+					userEntity.setShow("away");
+				}
+				else if (presence.getShow().equals(org.xmpp.packet.Presence.Show.chat)) {
+					userEntity.setShow("chat");
+				}
+				else if (presence.getShow().equals(org.xmpp.packet.Presence.Show.dnd)) {
+					userEntity.setShow("dnd");
+				}
+				else if (presence.getShow().equals(org.xmpp.packet.Presence.Show.xa)) {
+					userEntity.setShow("xa");
+				}
+
+				if (presence != null) userEntity.setStatus(presence.getStatus());
+
+			} catch (UserNotFoundException e) {
+				// external user, send probe
+				server.getPresenceManager().probePresence(server.createJID(username, null), rosterItem.getJid());
+			}
 
 			rosterEntities.add(rosterItemEntity);
 		}

@@ -1764,15 +1764,18 @@ v(s,j,i,{DSTOffset:((new s(2E3,6,1)).getTimezoneOffset()-(new s(2E3,0,1)).getTim
                 };
             }
 
+
             if (resourceURL !== null && resourceURL !== undefined) {
                 //Check if shorten URL
+                
+/*                
                 for (var j = 0, l = shortURLList.length; j < l; j++) {
                     var regExp = new RegExp('://' + shortURLList[j] + '/', "i");
 
                     if (resourceURL.match(regExp) !== null) {
-                        //AJAX to http://api.longurl.org/v2/expand?url=http://bit.ly/JATvIs&format=json&callback=hhh
+                        //AJAX to //api.longurl.org/v2/expand?url=http://bit.ly/JATvIs&format=json&callback=hhh
                         var ajaxopts = $.extend({
-                            url: "http://api.longurl.org/v2/expand",
+                            url: "//api.longurl.org/v2/expand",
                             dataType: 'jsonp',
                             data: {
                                 url: resourceURL,
@@ -1808,6 +1811,8 @@ v(s,j,i,{DSTOffset:((new s(2E3,6,1)).getTimezoneOffset()-(new s(2E3,0,1)).getTim
                         return container;
                     }
                 }
+                
+*/                
                 provider = $.fn.oembed.getOEmbedProvider(resourceURL);
 
                 //remove fallback
@@ -2505,7 +2510,7 @@ v(s,j,i,{DSTOffset:((new s(2E3,6,1)).getTimezoneOffset()-(new s(2E3,0,1)).getTim
                 templateData: function (data) {
                     if (!data.username)
                         return false;
-                    return  '<div><img src="' + data.image + '" align="left" style="margin-right: 1em;" /><span class="oembedall-ljuser"><a href="http://' + data.username + '.livejournal.com/profile"><img src="http://www.livejournal.com/img/userinfo.gif" alt="[info]" width="17" height="17" /></a><a href="http://' + data.username + '.livejournal.com/">' + data.username + '</a></span><br />' + data.name + '</div>';
+                    return  '<div><img src="' + data.image + '" align="left" style="margin-right: 1em;" /><span class="oembedall-ljuser"><a href="http://' + data.username + '.livejournal.com/profile"><img src="http://www.livejournal.com/img/userinfo.gif" alt="[info]" width="17" height="17" /></a><a href="f' + data.username + '.livejournal.com/">' + data.username + '</a></span><br />' + data.name + '</div>';
                 }
             }),
         new $.fn.oembed.OEmbedProvider("circuitbee", "rich", ["circuitbee\\.com/circuit/view/.+"], "http://c.circuitbee.com/build/r/schematic-embed.html?id=$1",
@@ -2784,6 +2789,7 @@ module.exports = {
         
         var username = atob(SERVER_CONFIG.authorization.substring(6)).split(":")[0];
 	var password = atob(SERVER_CONFIG.authorization.substring(6)).split(":")[1]; 
+	
 	var jid = username + "@" + SERVER_CONFIG.domain;
 	
         console.log('config', username, jid);
@@ -2985,8 +2991,15 @@ module.exports.fetch = function (jid, id, type, source, cb) {
                     if (err) {
                         return cb(getGravatar(jid));
                     }
+                    
 
-                    var data = resp.pubsub.retrieve.item.avatarData;
+		    var data = "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";
+                    
+                    if (resp.pubsub && resp.pubsub.retrieve && resp.pubsub.retrieve.item)
+                    {
+                    	data = resp.pubsub.retrieve.item.avatarData;
+                    }
+                    
                     var uri = 'data:' + type + ';base64,' + data;
 
                     avatar = {
@@ -7229,7 +7242,7 @@ exports.body = function anonymous(locals) {
 exports.head = function anonymous(locals) {
     var buf = [];
     with (locals || {}) {
-        buf.push('<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/><meta name="apple-mobile-web-app-capable" content="yes"/><link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato:400,700"/><link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>');
+        buf.push('<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/><meta name="apple-mobile-web-app-capable" content="yes"/><link rel="stylesheet" type="text/css" href="fonts.css"/><link rel="stylesheet" type="text/css" href="font-awesome-4.7.0/css/font-awesome.min.css"/>');
     }
     return buf.join("");
 };
@@ -42145,7 +42158,6 @@ var StreamManagement = require('./sm');
 var WSConnection = require('./transports/websocket');
 var OldWSConnection = require('./transports/old-websocket');
 var BOSHConnection = require('./transports/bosh');
-var getHostMeta = require('hostmeta');
 var SASLFactory = require('saslmechanisms');
 
 
@@ -42549,37 +42561,6 @@ Client.prototype.nextId = function () {
     return uuid.v4();
 };
 
-Client.prototype.discoverBindings = function (server, cb) {
-    getHostMeta(server, function (err, data) {
-        if (err) {
-            return cb(err, []);
-        }
-
-        var results = {
-            websocket: [],
-            bosh: []
-        };
-        var links = data.links || [];
-
-        links.forEach(function (link) {
-            if (link.href && link.rel === 'urn:xmpp:alt-connections:websocket') {
-                results.websocket.push(link.href);
-            }
-            if (link.href && link.rel === 'urn:xmpp:altconnect:websocket') {
-                results.websocket.push(link.href);
-            }
-            if (link.href && link.rel === 'urn:xmpp:alt-connections:xbosh') {
-                results.bosh.push(link.href);
-            }
-            if (link.href && link.rel === 'urn:xmpp:altconnect:bosh') {
-                results.bosh.push(link.href);
-            }
-        });
-
-        cb(false, results);
-    });
-};
-
 Client.prototype.getCredentials = function () {
     var creds = this.config.credentials || {};
     var requestedJID = new JID(this.config.jid);
@@ -42636,42 +42617,10 @@ Client.prototype.connect = function (opts, transInfo) {
         }
     }
 
-    return self.discoverBindings(self.config.server, function (err, endpoints) {
-    	console.log("discoverBindings", self.config, endpoints);
-        if (err) {
-            console.error('Could not find https://' + self.config.server + '/.well-known/host-meta file to discover connection endpoints for the requested transports.');
-            return self.disconnect();
-        }
-
-        for (var t = 0, tlen = self.config.transports.length; t < tlen; t++) 
-        {
-            var transport = self.config.transports[t];
-            console.log('Checking for', transport);
-            
-            for (var i = 0, len = (endpoints[transport] || []).length; i < len; i++) {
-                var uri = endpoints[transport][i];
-
-            	console.log('Found ', uri);
-            
-                //if (uri.indexOf('wss://') === 0 || uri.indexOf('https://') === 0) {
-                    if (transport === 'websocket') {
-                        self.config.wsURL = uri;
-                    } else {
-                        self.config.boshURL = uri;
-                    }
-                    console.log('Using %s endpoint: %s', transport, uri);
-                    return self.connect(null, {
-                        name: transport,
-                        url: uri
-                    });
-                //} else {
-                //    console.warn('Discovered unencrypted %s endpoint (%s). Ignoring', transport, uri);
-                //}
-            }
-        }
-        console.error('No endpoints found for the requested transports.');
-        return self.disconnect();
-    });
+   return self.connect(null, {
+	name: "websocket",
+	url: self.config.wsURL
+   });
 };
 
 Client.prototype.disconnect = function () {
@@ -42748,7 +42697,7 @@ Client.prototype.sendIq = function (data, cb) {
     allowed[self.jid.domain] = true;
 
     respEvent = 'iq:id:' + data.id;
-    result = new BPromise(function (resolve, reject) {
+    result = new Promise(function (resolve, reject) {
         var handler = function (res) {
             // Only process result from the correct responder
             if (!allowed[res.from.full]) {
@@ -42773,19 +42722,40 @@ Client.prototype.sendIq = function (data, cb) {
     });
 
     this.send(iq);
-
-    return result.timeout(self.config.timeout * 1000 || 15000)
-        .catch(BPromise.TimeoutError, function () {
-            throw {
-                id: data.id,
-                type: 'error',
-                error: {
-                    condition: 'timeout'
-                }
-            };
-        })
-        .nodeify(cb);
+    return result.nodeify(cb);
 };
+
+Promise.prototype.finally = function (cb) 
+{
+	if (typeof cb !== 'function') return this;
+	
+	var p = this.then(function (ret) 
+	{
+		cb(null, ret)
+	}, cb)
+	
+	if (typeof p.done === 'function') {
+		p.done()
+	}
+
+	return this;		
+}
+
+Promise.prototype.nodeify = function (cb) 
+{
+	if (typeof cb !== 'function') return this;
+	
+	var p = this.then(function (ret) 
+	{
+		cb(null, ret)
+	}, cb)
+	
+	if (typeof p.done === 'function') {
+		p.done()
+	}
+
+	return this;		
+}
 
 Client.prototype.sendStreamError = function (data) {
     data = data || {};
@@ -43658,7 +43628,7 @@ var BPromise = require('bluebird');
 
 
 function checkConnection(client, timeout) {
-    return new BPromise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
         if (client.sm.started) {
             client.once('stream:management:ack', resolve);
             client.sm.request();
@@ -43671,7 +43641,7 @@ function checkConnection(client, timeout) {
                 }
             });
         }
-    }).timeout(timeout * 1000 || 15000);
+    }); //.timeout(timeout * 1000 || 15000);
 }
 
 
@@ -43777,7 +43747,7 @@ module.exports = function (client) {
         }).then(function (resp) {
             resp.mamQuery.results = mamResults;
             return resp;
-        }).finally(function () {
+        }).then(function () {			// finally
             self.off('mam:' + queryid);
         }).nodeify(cb);
     };
@@ -48135,6 +48105,7 @@ util.inherits(ConnectionError, Error);
 function retryRequest(opts, timeout, allowedRetries, retries) {
     retries = retries || 0;
 
+/*
     var req = request(opts).cancellable().timeout((timeout || 20) * 1000);
 
     return req.spread(function (req, body) {
@@ -48155,6 +48126,7 @@ function retryRequest(opts, timeout, allowedRetries, retries) {
             throw new ConnectionError('Dead Connection, exceeded retry limit');
         }
     });
+*/    
 }
 
 
@@ -48334,7 +48306,7 @@ BOSHConnection.prototype.request = function (bosh) {
         });
         self.emit('stream:error', serr, err);
         self.disconnect();
-    }).finally(function () {
+    }).then(function () {						// finally
         self.requests = _.filter(self.requests, function (item) {
             return item.id !== ticket.id;
         });
@@ -48611,16 +48583,14 @@ WSConnection.prototype.connect = function (opts) {
     });
     
     self.conn.addEventListener('chatapi.xmpp', function (wsMsg) {
-	//console.log("chatapi.xmpp", wsMsg.data);
+	console.log("chatapi.xmpp", wsMsg.data);
         self.emit('raw:incoming', wsMsg.data); //new Buffer(wsMsg.data, 'utf8').toString());
     });
     
     self.conn.send = function(data) {
-	//console.log("self.conn.send", data);    
-	self._xhr.open("POST", window.location.protocol + '//' + window.location.host + "/rest/api/restapi/v1/chat/xmpp");
-	self._xhr.setRequestHeader("authorization", SERVER_CONFIG.authorization);
-	//self._xhr.setRequestHeader("content-type", "application/xml");
-	//self._xhr.setRequestHeader("accept", "application/xml");	
+	console.log("self.conn.send", data);    
+	self._xhr.open("POST", window.location.protocol + '//' + window.location.host + "/rest/api/restapi/v1/chat/xmpp?t="+(new Date()).getTime());
+	self._xhr.setRequestHeader("authorization", SERVER_CONFIG.authorization);	
 	self._xhr.send(data)       
     }     
 };
@@ -49335,57 +49305,8 @@ function b64_enc (data) {
 },{}],372:[function(require,module,exports){
 module.exports=require(240)
 },{"buffer":55}],373:[function(require,module,exports){
-'use strict';
 
-var BPromise = require('bluebird');
-var request = BPromise.promisify(require('request'));
-
-var JXT = require('jxt').createRegistry();
-
-JXT.use(require('./lib/xrd'));
-
-
-module.exports = function (opts, cb) {
-    if (typeof opts === 'string') {
-        opts = {host: opts};
-    }
-
-    var config = {
-        ssl: true,
-        json: true,
-        xrd: true
-    };
-
-    for (var prop in opts) {
-        config[prop] = opts[prop];
-    }
-
-    var scheme = config.ssl ? 'https://' : 'http://';
-
-    var getJSON = new BPromise(function (resolve, reject) {
-        //request(scheme + config.host + '/.well-known/host-meta.json').spread(function (req, body) {
-        //    resolve(JSON.parse(body));
-        //}).catch(reject);
-        
-        resolve({links: [{href: SERVER_CONFIG.wss, rel: "urn:xmpp:alt-connections:websocket"}]});
-    });
-
-    var getXRD = new BPromise(function (resolve, reject) {
-        //request(scheme + config.host + '/.well-known/host-meta').spread(function (req, body) {
-        //    var xrd = JXT.parse(body);
-        //    resolve(xrd.toJSON());
-        //}).catch(reject);
-        
-        resolve({links: [{href: SERVER_CONFIG.wss, rel: "urn:xmpp:alt-connections:websocket"}]});
-    });
-
-
-    return new BPromise(function (resolve, reject) {
-        BPromise.some([getJSON, getXRD], 1).spread(resolve).catch(function () {
-            reject('no-host-meta');
-        });
-    }).nodeify(cb);
-};
+// NOTHING Here. Move along..............
 
 },{"./lib/xrd":374,"bluebird":51,"jxt":235,"request":375}],374:[function(require,module,exports){
 'use strict';
@@ -50812,10 +50733,14 @@ function StayDown(target, interval, max, callback) {
             for (var idx = 0; idx < mutations.length; idx++) {
                 var mut = mutations[idx];
                 for (var nidx = 0; nidx < mut.addedNodes.length; nidx++) {
-                    var imgs = mut.addedNodes[nidx].getElementsByTagName('img');
-                    for (var iidx = 0, ilen = imgs.length; iidx < ilen; iidx++) {
-                        imgs[iidx].addEventListener('load', onImageLoad);
-                    }
+                    
+                    if (typeof mut.addedNodes[nidx].getElementsByTagName == "function")
+                    {
+			    var imgs = mut.addedNodes[nidx].getElementsByTagName('img');
+			    for (var iidx = 0, ilen = imgs.length; iidx < ilen; iidx++) {
+				imgs[iidx].addEventListener('load', onImageLoad);
+			    }
+		     }
                 }
             }
         });

@@ -409,6 +409,16 @@ public class XMPPConnection extends Connection
         }
     }
 
+	public void sendRawXmppMessage(String data)
+	{
+		try {
+			Log.info("endRawXmppMessage " + data );
+			packetWriter.sendRawXmppMessage(data);
+		} catch ( Exception e ) {
+			Log.error( "An error occurred while attempting to route the packet : ", e );
+		}
+	}
+
     /**
      * @deprecated Method addPacketWriterInterceptor is deprecated
      */
@@ -593,11 +603,21 @@ public class XMPPConnection extends Connection
 			done = false;
 		}
 
+    	public void sendRawXmppMessage(String data)
+    	{
+			try {
+				Log.info("OpenfirePacketWriter sendRawXmppMessage " + data );
+				smackConnection.sendRawXmppMessage(data);
+			} catch ( Exception e ) {
+				Log.error( "An error occurred while attempting to route the packet : ", e );
+			}
+		}
+
     	public void sendPacket(String data)
     	{
 			try {
 				Log.info("OpenfirePacketWriter sendPacket " + data );
-				smackConnection.sendPacket(data);
+				smackConnection.sendSmackXmppMessage(data);
 			} catch ( Exception e ) {
 				Log.error( "An error occurred while attempting to route the packet : ", e );
 			}
@@ -765,7 +785,7 @@ public class XMPPConnection extends Connection
 			}
 
 			// Deliver the incoming packet to listeners.
-			//listenerExecutor.submit(new ListenerNotification(packet));
+			listenerExecutor.submit(new ListenerNotification(packet));
 		}
 
 		public void notifyReconnection()

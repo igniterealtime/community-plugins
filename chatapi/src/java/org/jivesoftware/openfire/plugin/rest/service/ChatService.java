@@ -299,6 +299,8 @@ public class ChatService {
 	{
 		RosterEntities roster = RestEventSourceServlet.getRoster(getEndUser());
 
+		//RosterEntities roster = userService.getRosterEntities(getEndUser());
+
 		if (roster == null)
 		{
 			throw new ServiceException("Exception", "get roster failed", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);

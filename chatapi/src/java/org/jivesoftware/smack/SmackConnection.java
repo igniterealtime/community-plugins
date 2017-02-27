@@ -265,9 +265,37 @@ public class SmackConnection extends VirtualConnection
 		return null;
 	}
 
-	public void sendPacket(String stanza)
+	public void sendSmackXmppMessage(String stanza)
 	{
-		Log.debug("sendPacket\n" + stanza);
+		Log.debug("sendSmackXmppMessage\n" + stanza);
+
+		XMPPPacketReader reader = null;
+		try {
+			reader = readerPool.borrowObject();
+			Document doc = reader.read(new StringReader(stanza));
+
+			if (router == null) {
+				if (isStreamManagementAvailable()) {
+					router = new StreamManagementPacketRouter(xmppSession);
+				} else {
+					// fall back for older Openfire installations
+					router = new SessionPacketRouter(xmppSession);
+				}
+			}
+			router.route(doc.getRootElement());
+
+		} catch (Exception ex) {
+			Log.error("Failed to process smack XMPP stanza", ex);
+		} finally {
+			if (reader != null) {
+				readerPool.returnObject(reader);
+			}
+		}
+	}
+
+	public void sendRawXmppMessage(String stanza)
+	{
+		Log.debug("sendRawXmppMessage\n" + stanza);
 
 		XMPPPacketReader reader = null;
 		try {
@@ -280,7 +308,7 @@ public class SmackConnection extends VirtualConnection
 				processStanza(doc.getRootElement());
 			}
 		} catch (Exception ex) {
-			Log.error("Failed to process XMPP stanza", ex);
+			Log.error("Failed to process raw XMPP stanza", ex);
 		} finally {
 			if (reader != null) {
 				readerPool.returnObject(reader);
@@ -406,7 +434,7 @@ public class SmackConnection extends VirtualConnection
 				sb.append(String.format("<sm xmlns='%s'/>", StreamManager.NAMESPACE_V3));
 			}
 
-			sendPacket("<presence from=\"" + username + "@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() + "\" />");
+			sendSmackXmppMessage("<presence from=\"" + username + "@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() + "\" />");
 		}
 
 		sb.append("</stream:features>");

@@ -160,7 +160,7 @@ public class RestEventSourceServlet extends EventSourceServlet
 		Log.info("sendXmppMessage " + source + " " + "\n" + message);
 
 		try {
-			connections.get(source).getConnection().sendPacket(message);
+			connections.get(source).getConnection().sendRawXmppMessage(message);
 			return true;
 
 		} catch (Exception e) {
@@ -250,17 +250,20 @@ public class RestEventSourceServlet extends EventSourceServlet
 
 	public static RosterEntities getRoster(String source)
 	{
-		Log.info("getRoster " + source);
-
 		List<RosterItemEntity> rosterEntities = new ArrayList<RosterItemEntity>();
 
 		try {
 			Roster roster = connections.get(source).getRoster();
 			Collection<RosterEntry> entries = roster.getEntries();
 
+			Log.info("getRoster " + source + " " + entries.size());
+
+
 			for(RosterEntry entry : entries)
 			{
 				Presence presence = roster.getPresence(entry.getUser());
+
+				Log.info("Roster entry " + source + " " + entry.getUser() + " " + entry.getName() + " " + presence.getType().name() + " " + presence.getMode() + " " + presence.getStatus());
 
 				int entryStatus = 0;
 
@@ -290,8 +293,6 @@ public class RestEventSourceServlet extends EventSourceServlet
 				rosterItemEntity.setStatus(presence.getStatus());
 				rosterItemEntity.setShow(show);
 				rosterEntities.add(rosterItemEntity);
-
-				Log.info("Roster entry " + source + " " + entry.getUser() + " " + entry.getName() + " " + presence.getType().name() + " " + presence.getMode() + " " + presence.getStatus());
 			}
 
 		} catch (Exception e) {
