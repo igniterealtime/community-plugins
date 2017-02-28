@@ -30,8 +30,11 @@ import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.jitsi.impl.neomedia.rtcp.termination.strategies.BasicRTCPTerminationStrategy;
+import org.ice4j.ice.harvest.MappingCandidateHarvesters;
 import org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext;
+import org.jitsi.jicofo.FocusManager;
+import org.jitsi.jicofo.auth.AuthenticationAuthority;
+import org.jitsi.jicofo.reservation.ReservationSystem;
 import org.jitsi.videobridge.openfire.PluginImpl;
 import org.jitsi.videobridge.HarvesterConfiguration;
 import org.jitsi.videobridge.VideoChannel;
@@ -259,15 +262,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 		System.setProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME,                 JiveGlobals.getProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME,     "false" ) );
 
-		System.setProperty( Videobridge.ENABLE_MEDIA_RECORDING_PNAME,       	  JiveGlobals.getProperty( Videobridge.ENABLE_MEDIA_RECORDING_PNAME, "false" ) );
-		System.setProperty( Videobridge.MEDIA_RECORDING_PATH_PNAME,               JiveGlobals.getProperty( Videobridge.MEDIA_RECORDING_PATH_PNAME,   pluginDirectory.getAbsolutePath() + File.separator + "recordings" ) );
-		System.setProperty( Videobridge.MEDIA_RECORDING_TOKEN_PNAME,              JiveGlobals.getProperty( Videobridge.MEDIA_RECORDING_TOKEN_PNAME,  "secret" ) );
-
-		System.setProperty( HarvesterConfiguration.NAT_HARVESTER_LOCAL_ADDRESS,   JiveGlobals.getProperty( HarvesterConfiguration.NAT_HARVESTER_LOCAL_ADDRESS,  ourIpAddress ) );
-		System.setProperty( HarvesterConfiguration.NAT_HARVESTER_PUBLIC_ADDRESS,  JiveGlobals.getProperty( HarvesterConfiguration.NAT_HARVESTER_PUBLIC_ADDRESS, ourIpAddress ) );
+		System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME,  JiveGlobals.getProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME,  ourIpAddress ) );
+		System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME,  JiveGlobals.getProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME, ourIpAddress ) );
 
 		System.setProperty( Videobridge.DEFAULT_OPTIONS_PROPERTY_NAME, "2" ); // allow videobridge access without focus
-		System.setProperty( VideoChannel.RTCP_TERMINATION_STRATEGY_PNAME,  BasicRTCPTerminationStrategy.class.getCanonicalName() );
 	}
 
 	private static final SecurityHandler basicAuth(String realm) {
@@ -391,6 +389,22 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     {
         return this.jitsiPluginWrapper.getVideobridge();
     }
+
+
+	public ReservationSystem getReservationService()
+	{
+		return this.jitsiJicofoWrapper.getReservationService();
+	}
+
+	public FocusManager getFocusManager()
+	{
+		return this.jitsiJicofoWrapper.getFocusManager();
+	}
+
+	public AuthenticationAuthority getAuthenticationAuthority()
+	{
+		return this.jitsiJicofoWrapper.getAuthenticationAuthority();
+	}
 
 	//-------------------------------------------------------
 	//

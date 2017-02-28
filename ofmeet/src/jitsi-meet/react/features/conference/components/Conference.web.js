@@ -1,17 +1,63 @@
+/* global $, APP */
+
 import React, { Component } from 'react';
+import { connect as reactReduxConnect } from 'react-redux';
+
+import { connect, disconnect } from '../../base/connection';
+import { Watermarks } from '../../base/react';
+import { FeedbackButton } from '../../feedback';
 
 /**
  * For legacy reasons, inline style for display none.
- * @type {{display: string}}
+ *
+ * @private
+ * @type {{
+ *     display: string
+ * }}
  */
-const DISPLAY_NONE_STYLE = {
+const _DISPLAY_NONE_STYLE = {
     display: 'none'
 };
 
 /**
- * Implements a React Component which renders initial conference layout
+ * The conference page of the Web application.
  */
-export default class Conference extends Component {
+class Conference extends Component {
+
+    /**
+     * Conference component's property types.
+     *
+     * @static
+     */
+    static propTypes = {
+        dispatch: React.PropTypes.func
+    }
+
+    /**
+     * Until we don't rewrite UI using react components
+     * we use UI.start from old app. Also method translates
+     * component right after it has been mounted.
+     *
+     * @inheritdoc
+     */
+    componentDidMount() {
+        APP.UI.start();
+
+        // XXX Temporary solution until we add React translation.
+        APP.translation.translateElement($('#videoconference_page'));
+
+        this.props.dispatch(connect());
+    }
+
+    /**
+     * Disconnect from the conference when component will be
+     * unmounted.
+     *
+     * @inheritdoc
+     */
+    componentWillUnmount() {
+        this.props.dispatch(disconnect());
+    }
 
     /**
      * Implements React's {@link Component#render()}.
@@ -26,7 +72,7 @@ export default class Conference extends Component {
                     <div
                         className = 'notice'
                         id = 'notice'
-                        style = { DISPLAY_NONE_STYLE }>
+                        style = { _DISPLAY_NONE_STYLE }>
                         <span
                             className = 'noticeText'
                             id = 'noticeText' />
@@ -42,9 +88,9 @@ export default class Conference extends Component {
                     className = 'toolbar'
                     id = 'extendedToolbar'>
                     <div id = 'extendedToolbarButtons' />
-                    <a
-                        className = 'button icon-feedback'
-                        id = 'feedbackButton' />
+
+                    <FeedbackButton />
+
                     <div id = 'sideToolbarContainer' />
                 </div>
                 <div id = 'videospace'>
@@ -55,18 +101,9 @@ export default class Conference extends Component {
                             <div id = 'sharedVideoIFrame' />
                         </div>
                         <div id = 'etherpad' />
-                        <a target = '_new'>
-                            <div className = 'watermark leftwatermark' />
-                        </a>
-                        <a target = '_new'>
-                            <div className = 'watermark rightwatermark' />
-                        </a>
-                        <a
-                            className = 'poweredby'
-                            href = 'http://jitsi.org'
-                            target = '_new'>
-                            <span data-i18n = 'poweredby' /> jitsi.org
-                        </a>
+
+                        <Watermarks />
+
                         <div id = 'dominantSpeaker'>
                             <div className = 'dynamic-shadow' />
                             <img
@@ -102,16 +139,14 @@ export default class Conference extends Component {
                             <span
                                 className = 'videocontainer'
                                 id = 'localVideoContainer'>
-                                <div
-                                    className = 'videocontainer__background' />
+                                <div className = 'videocontainer__background' />
                                 <span id = 'localVideoWrapper' />
                                 <audio
                                     autoPlay = { true }
                                     id = 'localAudio'
                                     muted = { true } />
                                 <div className = 'videocontainer__toolbar' />
-                                <div
-                                    className = 'videocontainer__toptoolbar' />
+                                <div className = 'videocontainer__toptoolbar' />
                                 <div
                                     className
                                         = 'videocontainer__hoverOverlay' />
@@ -131,3 +166,5 @@ export default class Conference extends Component {
         );
     }
 }
+
+export default reactReduxConnect()(Conference);

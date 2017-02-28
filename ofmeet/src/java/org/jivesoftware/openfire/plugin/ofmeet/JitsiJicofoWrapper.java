@@ -1,5 +1,9 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
+import net.java.sip.communicator.util.ServiceUtils;
+import org.jitsi.jicofo.FocusBundleActivator;
+import org.jitsi.jicofo.auth.AuthenticationAuthority;
+import org.jitsi.jicofo.reservation.ReservationSystem;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.util.JiveGlobals;
 import org.slf4j.Logger;
@@ -38,14 +42,23 @@ public class JitsiJicofoWrapper
     {
         Log.debug( "Initializing Jitsi Focus Component (jicofo)...");
 
-        if ( jicofoComponent != null || jicofoLauncher != null );
+        if ( jicofoComponent != null || jicofoLauncher != null )
         {
             Log.warn( "Another Jitsi Focus Component (jicofo) appears to have been initialized earlier! Unexpected behavior might be the result of this new initialization!" );
         }
 
+        String focusUserName = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid" );
+        if ( focusUserName == null || focusUserName.isEmpty() )
+        {
+            Log.warn( "The focus user JID is not configured in property 'org.jitsi.videobridge.ofmeet.focus.user.jid', which is likely going to cause problems!" );
+            focusUserName = XMPPServer.getInstance().createJID( "focus", "unused" ).toBareJID();
+        }
 
-        final String focusUserName = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@btg199251");
-        final String focusPassword = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.password", "focus-password-" + System.currentTimeMillis());
+        final String focusPassword = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.password" );
+        if ( focusPassword == null || focusPassword.isEmpty())
+        {
+            Log.warn( "The focus user password is not configured in property 'org.jitsi.videobridge.ofmeet.focus.user.password', which is likely going to cause problems!" );
+        }
 
         System.setProperty( FocusManager.HOSTNAME_PNAME, XMPPServer.getInstance().getServerInfo().getHostname() );
         System.setProperty( FocusManager.XMPP_DOMAIN_PNAME, XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
@@ -103,5 +116,25 @@ public class JitsiJicofoWrapper
         }
 
         Log.trace( "Successfully destroyed Jitsi Focus Component.   " );
+    }
+
+    public FocusComponent getFocusComponent()
+    {
+        return jicofoComponent;
+    }
+
+    public ReservationSystem getReservationService()
+    {
+        return ServiceUtils.getService(FocusBundleActivator.bundleContext, ReservationSystem.class);
+    }
+
+    public FocusManager getFocusManager()
+    {
+        return ServiceUtils.getService(FocusBundleActivator.bundleContext, FocusManager.class);
+    }
+
+    public AuthenticationAuthority getAuthenticationAuthority()
+    {
+        return ServiceUtils.getService( FocusBundleActivator.bundleContext, AuthenticationAuthority.class);
     }
 }

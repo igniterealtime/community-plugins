@@ -5,8 +5,6 @@ import {
     LIB_INITIALIZED,
     SET_CONFIG
 } from './actionTypes';
-import './middleware';
-import './reducer';
 
 /**
  * Disposes lib-jitsi-meet.
@@ -38,6 +36,12 @@ export function initLib() {
 
         if (!config) {
             throw new Error('Cannot initialize lib-jitsi-meet without config');
+        }
+
+        // XXX Temporarily until conference.js is moved to the React app we
+        // shouldn't use JitsiMeetJS from the React app.
+        if (typeof APP !== 'undefined') {
+            return Promise.resolve();
         }
 
         return JitsiMeetJS.init(config)

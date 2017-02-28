@@ -11,8 +11,8 @@
 <%@ page import="java.io.File" %>
 <%@ page import="java.net.InetAddress" %>
 <%@ page import="org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext" %>
-<%@ page import="org.jitsi.videobridge.HarvesterConfiguration" %>
 <%@ page import="org.jitsi.videobridge.Videobridge" %>
+<%@ page import="org.ice4j.ice.harvest.MappingCandidateHarvesters" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -81,20 +81,14 @@
         JiveGlobals.setProperty(SRTPCryptoContext.CHECK_REPLAY_PNAME, checkReplay);
         
 	String localAddress = request.getParameter("localaddress"); 
-        JiveGlobals.setProperty(HarvesterConfiguration.NAT_HARVESTER_LOCAL_ADDRESS, localAddress);
+        JiveGlobals.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME, localAddress);
 
 	String publicAddress = request.getParameter("publicaddress"); 
-        JiveGlobals.setProperty(HarvesterConfiguration.NAT_HARVESTER_PUBLIC_ADDRESS, publicAddress);
+        JiveGlobals.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, publicAddress);
         
 	String securityenabled = request.getParameter("securityenabled"); 
         JiveGlobals.setProperty("ofmeet.security.enabled", securityenabled);	
 
-	String autorecordenabled = request.getParameter("autorecordenabled"); 
-        JiveGlobals.setProperty("ofmeet.autorecord.enabled", autorecordenabled);	
-        
-	String enabled = request.getParameter("enabled"); 	
-        JiveGlobals.setProperty(Videobridge.ENABLE_MEDIA_RECORDING_PNAME, enabled);
-        
 	String authusername = request.getParameter("authusername"); 
         JiveGlobals.setProperty("voicebridge.default.proxy.sipauthuser", authusername);	
         
@@ -137,13 +131,7 @@
 	String allowdirectsip = request.getParameter("allowdirectsip"); 
         JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.allow.direct.sip", allowdirectsip);   
         
-	String recordsecret = request.getParameter("recordsecret"); 	
-        JiveGlobals.setProperty(Videobridge.MEDIA_RECORDING_TOKEN_PNAME, recordsecret);
-
-	String recordpath = request.getParameter("recordpath"); 
-        JiveGlobals.setProperty( Videobridge.MEDIA_RECORDING_PATH_PNAME, recordpath);
-        
-	String adaptivelastn = request.getParameter("adaptivelastn"); 
+	String adaptivelastn = request.getParameter("adaptivelastn");
         JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.adaptive.lastn", adaptivelastn); 
 
 	String adaptivesimulcast = request.getParameter("adaptivesimulcast"); 
@@ -502,7 +490,7 @@
                 </td>
 		<td>
                     <input name="localaddress" type="text" maxlength="20" size="15"
-                           value="<%=JiveGlobals.getProperty(HarvesterConfiguration.NAT_HARVESTER_LOCAL_ADDRESS, ourIpAddress)%>"/>
+                           value="<%=JiveGlobals.getProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME, ourIpAddress)%>"/>
                 </td>
             </tr>
             <tr>
@@ -511,7 +499,7 @@
                 </td>
 		<td>
                     <input name="publicaddress" type="text" maxlength="20" size="15"
-                           value="<%=JiveGlobals.getProperty(HarvesterConfiguration.NAT_HARVESTER_PUBLIC_ADDRESS, ourIpAddress)%>"/>
+                           value="<%=JiveGlobals.getProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, ourIpAddress)%>"/>
                 </td>
             </tr>            
 	    <tr>
@@ -595,58 +583,6 @@
             </tbody>
         </table> 
     </p>
-</div>
-<div class="jive-contentBoxHeader">   
-	<fmt:message key="config.page.configuration.recording.title"/>
-</div>
-<div class="jive-contentBox">      
-    <p>        
-        <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tbody>             
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="enabled" <%= ("false".equals(JiveGlobals.getProperty( Videobridge.ENABLE_MEDIA_RECORDING_PNAME, "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.record.disabled" /></b> - <fmt:message key="config.page.configuration.record.disabled_description" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="enabled" <%= ("true".equals(JiveGlobals.getProperty( Videobridge.ENABLE_MEDIA_RECORDING_PNAME, "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.record.enabled" /></b> - <fmt:message key="config.page.configuration.record.enabled_description" />
-		    </td>
-	    </tr> 
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="config.page.configuration.record.path"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="recordpath"
-			   value="<%= JiveGlobals.getProperty(Videobridge.MEDIA_RECORDING_PATH_PNAME, container.pluginDirectory.getAbsolutePath() + File.separator + "recordings") %>">
-		</td>
-	    </tr>
-
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="config.page.configuration.record.secret"/>
-		</td>
-		<td><input type="password" size="60" maxlength="100" name="recordsecret"
-			   value="<%= JiveGlobals.getProperty(Videobridge.MEDIA_RECORDING_TOKEN_PNAME, "secret") %>">
-		</td>
-	    </tr>
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="autorecordenabled" <%= ("false".equals(JiveGlobals.getProperty("ofmeet.autorecord.enabled", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.autorecord.disabled" /></b> - <fmt:message key="config.page.configuration.autorecord.disabled_description" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="autorecordenabled" <%= ("true".equals(JiveGlobals.getProperty("ofmeet.autorecord.enabled", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.autorecord.enabled" /></b> - <fmt:message key="config.page.configuration.autorecord.enabled_description" />
-		    </td>
-	    </tr> 	    
-            </tbody>
-        </table>
-    </p> 
 </div>
 <div class="jive-contentBoxHeader">   
 	<fmt:message key="config.page.configuration.advanced.features.title"/>

@@ -7,7 +7,7 @@
 
 package org.jivesoftware.openfire.plugin.ofmeet;
 
-import net.sf.json.JSONObject;
+import net.sf.json.*;
 import org.dom4j.Element;
 import org.jitsi.videobridge.Conference;
 import org.jitsi.videobridge.Videobridge;
@@ -37,410 +37,457 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class ConfigServlet extends HttpServlet
 {
-    private static final Logger Log = LoggerFactory.getLogger(ConfigServlet.class);
+    private static final Logger Log = LoggerFactory.getLogger( ConfigServlet.class );
     public static final long serialVersionUID = 24362462L;
     public static String globalConferenceId = null;
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        try {
-            Log.info("Config servlet");
+    public void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
+    {
+        try
+        {
+            Log.info( "Config servlet" );
             String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
             String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
             String userName = null;
             String userAvatar = "null";
-            String connectionUrl = "window.location.protocol + '//' + window.location.host + '/http-bind/'";
+            String connectionUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/http-bind/";
             String accessToken = null;
             SipAccount sipAccount = null;
-            String conferences = "[";
 
-            if (XMPPServer.getInstance().getPluginManager().getPlugin("websocket") != null)
+            if ( XMPPServer.getInstance().getPluginManager().getPlugin( "websocket" ) != null )
             {
-                connectionUrl = "'wss://' + window.location.host + '/ws/'";
+                final String websocketScheme;
+                if ( request.getScheme().endsWith( "s" ) )
+                {
+                    websocketScheme = "wss";
+                }
+                else
+                {
+                    websocketScheme = "ws";
+                }
+                connectionUrl = websocketScheme + "://" + request.getServerName() + ":" + request.getServerPort() + "/ws/";
             }
 
-            String securityEnabled = JiveGlobals.getProperty("ofmeet.security.enabled", "true");
+            boolean securityEnabled = JiveGlobals.getBooleanProperty( "ofmeet.security.enabled", true );
 
-            if ("true".equals(securityEnabled))
+            final JSONArray conferences = new JSONArray();
+
+            if ( securityEnabled )
             {
                 userName = request.getUserPrincipal().getName();
 
-                final String token = TokenManager.getInstance().retrieveToken(request.getUserPrincipal());
+                final String token = TokenManager.getInstance().retrieveToken( request.getUserPrincipal() );
 
-                if (token != null)
+                if ( token != null )
                 {
                     accessToken = token;
                 }
 
                 VCardManager vcardManager = VCardManager.getInstance();
-                Element vcard = vcardManager.getVCard(userName);
+                Element vcard = vcardManager.getVCard( userName );
 
-                if (vcard != null)
+                if ( vcard != null )
                 {
-                    Element photo = vcard.element("PHOTO");
+                    Element photo = vcard.element( "PHOTO" );
 
-                    if (photo != null)
+                    if ( photo != null )
                     {
-                        String type = photo.element("TYPE").getText();
-                        String binval = photo.element("BINVAL").getText();
-                        userAvatar = "data:" + type + ";base64," + binval.replace("\n", "").replace("\r", "");;
+                        String type = photo.element( "TYPE" ).getText();
+                        String binval = photo.element( "BINVAL" ).getText();
+                        userAvatar = "data:" + type + ";base64," + binval.replace( "\n", "" ).replace( "\r", "" );
                     }
                 }
 
-                boolean sipAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("sip") != null;
-                boolean switchAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("ofswitch") != null;
+                boolean sipAvailable = XMPPServer.getInstance().getPluginManager().getPlugin( "sip" ) != null;
+                boolean switchAvailable = XMPPServer.getInstance().getPluginManager().getPlugin( "ofswitch" ) != null;
 
-                if (sipAvailable)
+                if ( sipAvailable )
                 {
-                    sipAccount = SipAccountDAO.getAccountByUser(userName);
+                    sipAccount = SipAccountDAO.getAccountByUser( userName );
                 }
 
-                try {
+                try
+                {
 
-                    boolean isBookmarksAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("bookmarks") != null;
+                    boolean isBookmarksAvailable = XMPPServer.getInstance().getPluginManager().getPlugin( "bookmarks" ) != null;
 
-                    if (isBookmarksAvailable)
+                    if ( isBookmarksAvailable )
                     {
                         final Collection<Bookmark> bookmarks = BookmarkManager.getBookmarks();
 
-                        for (Bookmark bookmark : bookmarks)
+                        for ( Bookmark bookmark : bookmarks )
                         {
-                            boolean addBookmarkForUser = bookmark.isGlobalBookmark() || isBookmarkForJID(userName, bookmark);
+                            boolean addBookmarkForUser = bookmark.isGlobalBookmark() || isBookmarkForJID( userName, bookmark );
 
-                            if (addBookmarkForUser)
+                            if ( addBookmarkForUser )
                             {
-                                if (bookmark.getType() == Bookmark.Type.group_chat)
+                                if ( bookmark.getType() == Bookmark.Type.group_chat )
                                 {
-                                    String url = bookmark.getProperty("url");
+                                    String url = bookmark.getProperty( "url" );
 
-                                    if (url == null)
+                                    if ( url == null )
                                     {
                                         String id = bookmark.getBookmarkID() + "" + System.currentTimeMillis();
-                                        String rootUrl = JiveGlobals.getProperty("ofmeet.root.url.secure", "https://" + hostname + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443"));
+                                        String rootUrl = JiveGlobals.getProperty( "ofmeet.root.url.secure", "https://" + hostname + ":" + JiveGlobals.getProperty( "httpbind.port.secure", "7443" ) );
                                         url = rootUrl + "/ofmeet/?b=" + id;
-                                        bookmark.setProperty("url", url);
+                                        bookmark.setProperty( "url", url );
                                     }
-                                    conferences = conferences + (conferences.equals("[") ? "" : ",");
-                                    conferences = conferences + "{url: '" + url + "', name: '" + bookmark.getName() + "', jid: '" + bookmark.getValue() + "'}";
+                                    final JSONObject conference = new JSONObject();
+                                    conference.put( "url", url );
+                                    conference.put( "name", bookmark.getName() );
+                                    conference.put( "jid", bookmark.getValue() );
+                                    conferences.put( conference );
                                 }
                             }
                         }
                     }
 
-                } catch (Exception e) {
-
+                }
+                catch ( Exception e )
+                {
+                    Log.warn( "Unable to read bookmarks!", e );
                 }
             }
 
-            conferences = conferences + "]";
+            boolean nodejs = XMPPServer.getInstance().getPluginManager().getPlugin( "nodejs" ) != null;
 
-            boolean nodejs = XMPPServer.getInstance().getPluginManager().getPlugin("nodejs") != null;
-
-            writeHeader(response);
+            writeHeader( response );
 
             ServletOutputStream out = response.getOutputStream();
 
             String recordingKey = null;
 
-            if (JiveGlobals.getProperty("ofmeet.autorecord.enabled", "false").equals("true"))
-            {
-                recordingKey = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.recording.secret", "secret");
-            }
 
             // new ones
-            String disableSimulcast 	= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.disable.simulcast", "false");
-            String minHDHeight			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.min.hdheight", "540");
+            boolean disableSimulcast = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.disable.simulcast", false );
+            int minHDHeight = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.min.hdheight", 540 );
 
-            String resolution 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.resolution", "360");
-            String audioMixer			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.audio.mixer", "false");
-            String audioBandwidth 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.audio.bandwidth", "128");
-            String videoBandwidth 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.video.bandwidth", "4096");
-            String useNicks 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.usenicks", "false");
-            String useIPv6 				= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.useipv6", "false");
-            String useStunTurn 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.use.stunturn", "false");
-            String recordVideo 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.media.record", "false");
-            String defaultSipNumber 	= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.default.sip.number", "");
-            String adaptiveLastN 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.adaptive.lastn", "false");
-            String adaptiveSimulcast	= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.adaptive.simulcast", "false");
-            String useRtcpMux 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.use.rtcp.mux", "true");
-            String useBundle 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.use.bundle", "true");
-            String enableWelcomePage	= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.welcomePage", "true");
-            String enableRtpStats 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.rtp.stats", "true");
-            String openSctp 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.open.sctp", "true");
-            String desktopSharing 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.desktop.sharing", "ext");
-            String chromeExtensionId	= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.chrome.extension.id", "fohfnhgabmicpkjcpjpjongpijcffaba");
-            String channelLastN 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.channel.lastn", "-1");
-            String desktopShareSrcs		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.desktop.sharing.sources", "[\"screen\", \"window\"]");
-            String minChromeExtVer		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.min.chrome.ext.ver", "0.1");
-            String startBitrate			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.start.bitrate", "800");
-            String logStats 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.enable.stats.logging", "false");
-            String focusUserJid 		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@"+domain);
-            String iceServers 			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.iceservers", "");
+            int resolution = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.resolution", 360 );
+            boolean audioMixer = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.audio.mixer", false );
+            int audioBandwidth = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.audio.bandwidth", 128 );
+            int videoBandwidth = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.video.bandwidth", 4096 );
+            boolean useNicks = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.usenicks", false );
+            boolean useIPv6 = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.useipv6", false );
+            boolean useStunTurn = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.stunturn", false );
+            boolean recordVideo = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.media.record", false );
+            String defaultSipNumber = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.sip.number", "" );
+            boolean adaptiveLastN = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.adaptive.lastn", false );
+            boolean adaptiveSimulcast = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.adaptive.simulcast", false );
+            boolean useRtcpMux = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.rtcp.mux", true );
+            boolean useBundle = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.bundle", true );
+            boolean enableWelcomePage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.welcomePage", true );
+            boolean enableRtpStats = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.rtp.stats", true );
+            boolean openSctp = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.open.sctp", true );
+            String desktopSharing = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing", "ext" );
+            String chromeExtensionId = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.chrome.extension.id", "fohfnhgabmicpkjcpjpjongpijcffaba" );
+            int channelLastN = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.channel.lastn", -1 );
+            String desktopShareSrcs = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing.sources", "[\"screen\", \"window\"]" );
+            String minChromeExtVer = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.min.chrome.ext.ver", "0.1" );
+            int startBitrate = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.start.bitrate", 800 );
+            boolean logStats = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.stats.logging", false );
+            String focusUserJid = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@" + domain );
+            String iceServers = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.iceservers", "" );
 
-            String xirsysUrl = JiveGlobals.getProperty("ofmeet.xirsys.url", null);
+            String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
 
-            if (xirsysUrl != null)
+            if ( xirsysUrl != null )
             {
-                Log.info("Config. found xirsys Url " + xirsysUrl);
+                Log.info( "Config. found xirsys Url " + xirsysUrl );
 
-                String xirsysJson = getHTML(xirsysUrl);
-                Log.info("Config. got xirsys json " + xirsysJson);
+                String xirsysJson = getHTML( xirsysUrl );
+                Log.info( "Config. got xirsys json " + xirsysJson );
 
-                JSONObject jsonObject = new JSONObject(xirsysJson);
-                iceServers = jsonObject.getString("d");
+                JSONObject jsonObject = new JSONObject( xirsysJson );
+                iceServers = jsonObject.getString( "d" );
 
-                Log.info("Config. got xirsys iceSevers " + iceServers);
+                Log.info( "Config. got xirsys iceSevers " + iceServers );
             }
 
-            if ("on".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.global.intercom", "off")))
+            if ( "on".equals( JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.global.intercom", "off" ) ) )
             {
                 final OfMeetPlugin ofmeet = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin( "ofmeet" );
                 Videobridge videobridge = ofmeet.getVideobridge();
 
-                if (globalConferenceId == null || videobridge.getConference(globalConferenceId, null) == null)
+                if ( globalConferenceId == null || videobridge.getConference( globalConferenceId, null ) == null )
                 {
-                    Conference conference = videobridge.createConference(null, "Openfire Meetings");
-                    if (recordVideo.equals("true")) conference.setRecording(true);
-                    conference.setLastKnownFocus(domain);
+                    Conference conference = videobridge.createConference( null, "Openfire Meetings" );
+                    conference.setLastKnownFocus( domain );
                     globalConferenceId = conference.getID();
                 }
             }
 
-            out.println("var config = {");
-            out.println("    hosts: {");
-            out.println("        domain: '" + domain + "',");
-            out.println("        muc: 'conference." + domain + "',");
-            out.println("        bridge: 'videobridge." + domain + "',");
-            out.println("        focus: 'focus." + domain + "',");
-            out.println("    },");
-//            out.println("    getroomnode: function (path)");
-//            out.println("    {");
-//            out.println("		var name = 'r';");
-//            out.println("		var roomnode = null;");
-//
-//            out.println("		var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);");
-//
-//            out.println("		if (!results)");
-//            out.println("			roomnode = null; ");
-//            out.println("		else 	roomnode = results[1] || undefined;	");
-//
-//            out.println("		if (!roomnode) {");
-//            out.println("			roomnode = Math.random().toString(36).substr(2, 20);");
-//            out.println("			window.history.pushState('VideoChat', 'Room: ' + roomnode, path + '/' + roomnode);");
-//            out.println("		}");
-//            out.println("		return roomnode.toLowerCase();    ");
-//            out.println("    },	");
+            final JSONObject config = new JSONObject();
 
-            if (sipAccount != null)
+            final Map<String, String> hosts = new HashMap<>();
+            hosts.put( "domain", domain );
+            hosts.put( "muc", "conference." + domain );
+            hosts.put( "bridge", "videobridge." + domain );
+            hosts.put( "focus", "focus." + domain );
+            config.put( "hosts", hosts );
+
+            if ( sipAccount != null )
             {
-                Roster roster = XMPPServer.getInstance().getRosterManager().getRoster(userName);
-                String sipPeers = "[";
+                final Roster roster = XMPPServer.getInstance().getRosterManager().getRoster( userName );
+                final JSONArray sipPeers = new JSONArray();
 
-                for (RosterItem item : roster.getRosterItems())
+                for ( final RosterItem item : roster.getRosterItems() )
                 {
-                    String peerUser = item.getJid().getNode();
-                    SipAccount peerAccount = SipAccountDAO.getAccountByUser(peerUser);
+                    final String peerUser = item.getJid().getNode();
+                    final SipAccount peerAccount = SipAccountDAO.getAccountByUser( peerUser );
 
-                    if (peerAccount != null)
+                    if ( peerAccount != null )
                     {
-                        sipPeers = sipPeers + (sipPeers.equals("[") ? "" : ",");
-                        sipPeers = sipPeers + "{username: '" + peerAccount.getSipUsername() + "', name: '" + peerAccount.getDisplayName() + "'}";
+                        final JSONObject peer = new JSONObject();
+                        peer.put( "username", peerAccount.getSipUsername() );
+                        peer.put( "name", peerAccount.getDisplayName() );
+                        sipPeers.put( peer );
                     }
                 }
-                sipPeers = sipPeers + "]";
 
-                out.println("    sip: {");
-                out.println("        peers: " 				+ sipPeers + ",");
-                out.println("        username: '" 			+ sipAccount.getSipUsername() + "',");
-                out.println("        authusername: '" 		+ sipAccount.getAuthUsername() + "',");
-                out.println("        displayname: '" 		+ sipAccount.getDisplayName() + "',");
-                out.println("        password: '" 			+ sipAccount.getPassword() + "',");
-                out.println("        server: '" 			+ sipAccount.getServer() + "',");
-                out.println("        enabled: " 			+ sipAccount.isEnabled() + ",");
-                out.println("        voicemail: '" 			+ sipAccount.getVoiceMailNumber() + "',");
-                out.println("        outboundproxy: '" 		+ sipAccount.getOutboundproxy() + "',");
-                out.println("    },");
+                final JSONObject sip = new JSONObject();
+                sip.put( "peers", sipPeers );
+                sip.put( "username", sipAccount.getSipUsername() );
+                sip.put( "authusername", sipAccount.getAuthUsername() );
+                sip.put( "displayname", sipAccount.getDisplayName() );
+                sip.put( "password", sipAccount.getPassword() );
+                sip.put( "server", sipAccount.getServer() );
+                sip.put( "enabled", sipAccount.isEnabled() );
+                sip.put( "voicemail", sipAccount.getVoiceMailNumber() );
+                sip.put( "outboundproxy", sipAccount.getOutboundproxy() );
+
+                config.put( "sip", sip );
             }
 
-            if (!iceServers.trim().equals("")) out.println("    iceServers: " + iceServers + ",");
-            out.println("    enforcedBridge: 'videobridge." + domain + "',");
-            out.println("    disableSimulcast: " + disableSimulcast + ",");
-            out.println("    useStunTurn: " + useStunTurn + ",");
-            out.println("    useIPv6: " + useIPv6 + ",");
-            out.println("    useNicks: " + useNicks + ",");
-            out.println("    adaptiveLastN: " + adaptiveLastN + ",");
-            out.println("    adaptiveSimulcast: " + adaptiveSimulcast + ",");
-            out.println("    useRtcpMux: " + useRtcpMux + ",");
-            out.println("    useBundle: " + useBundle + ",");
-            out.println("    enableWelcomePage: " + enableWelcomePage + ",");
-            out.println("    enableRtpStats: " + enableRtpStats + ",");
-            out.println("    openSctp: " + openSctp + ",");
-            if (recordingKey == null) out.println("    enableRecording: " + recordVideo + ",");
-            if (recordingKey != null) out.println("    recordingKey: '" + recordingKey + "',");
-            out.println("    clientNode: 'http://igniterealtime.org/ofmeet/jitsi-meet/',");
-            out.println("    focusUserJid: '" + focusUserJid + "',");
-            out.println("    defaultSipNumber: '" + defaultSipNumber + "',");
-            out.println("    desktopSharing: '" + desktopSharing + "',");
-            out.println("    chromeExtensionId: '" + chromeExtensionId + "',");
-            out.println("    desktopSharingSources: '" + desktopShareSrcs + "',");
-            out.println("    minChromeExtVersion: '" + minChromeExtVer + "',");
-            out.println("    channelLastN: " + channelLastN + ",");
-            out.println("    minHDHeight: " + minHDHeight + ",");
-            out.println("    useNodeJs: " + (nodejs ? "true" : "false") + ",");
+            if ( iceServers != null && !iceServers.trim().isEmpty() )
+            {
+                config.put( "iceServers", iceServers.trim() );
+            }
+            config.put( "enforcedBridge", "videobridge." + domain );
+            config.put( "disableSimulcast", disableSimulcast );
+            config.put( "useStunTurn", useStunTurn );
+            config.put( "useIPv6", useIPv6 );
+            config.put( "useNicks", useNicks );
+            config.put( "adaptiveLastN", adaptiveLastN );
+            config.put( "adaptiveSimulcast", adaptiveSimulcast );
+            config.put( "useRtcpMux", useRtcpMux );
+            config.put( "useBundle", useBundle );
+            config.put( "enableWelcomePage", enableWelcomePage );
+            config.put( "enableRtpStats", enableRtpStats );
+            config.put( "openSctp", openSctp );
 
-            out.println("    desktopSharingFirefoxExtId: 'jidesha@meet.jit.si',");
-            out.println("    desktopSharingFirefoxDisabled: false,");
-            out.println("    desktopSharingFirefoxMaxVersionExtRequired: -1,");
-            out.println("    desktopSharingFirefoxExtensionURL: window.location.protocol + '//' + window.location.host + '/ofmeet/jidesha-0.1.1-fx.xpi',");
-            out.println("    desktopSharingFirefoxExtId: 'jidesha@meet.jit.si',");
+            if ( recordingKey == null || recordingKey.isEmpty() )
+            {
+                config.put( "enableRecording", recordVideo );
+            }
+            else
+            {
+                config.put( "recordingKey", recordingKey );
+            }
+            config.put( "clientNode", "http://igniterealtime.org/ofmeet/jitsi-meet/" );
+            config.put( "focusUserJid", focusUserJid );
+            config.put( "defaultSipNumber", defaultSipNumber );
+            config.put( "desktopSharing", desktopSharing );
+            config.put( "chromeExtensionId", chromeExtensionId );
+            config.put( "desktopSharingSources", JSONArray.fromString( desktopShareSrcs ) );
+            config.put( "minChromeExtVersion", minChromeExtVer );
+            config.put( "channelLastN", channelLastN );
+            config.put( "minHDHeight", minHDHeight );
+            config.put( "useNodeJs", nodejs );
+            config.put( "desktopSharingFirefoxExtId", "jidesha@meet.jit.si" );
+            config.put( "desktopSharingFirefoxDisabled", false );
+            config.put( "desktopSharingFirefoxMaxVersionExtRequired", -1 );
+            config.put( "desktopSharingFirefoxExtensionURL", request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/jidesha-0.1.1-fx.xpi");
+            config.put( "desktopSharingFirefoxExtId", "jidesha@meet.jit.si" );
+            config.put( "hiddenDomain", "recorder." + domain );
+            config.put( "startBitrate", startBitrate );
+            config.put( "recordingType", "colibri" );
+            config.put( "disableAudioLevels", false );
+            config.put( "stereo", false );
+            config.put( "requireDisplayName", false );
+            config.put( "startAudioMuted", 9 );
+            config.put( "startVideoMuted", 9 );
+            config.put( "resolution", resolution );
+            config.put( "audioMixer", audioMixer );
+            config.put( "audioBandwidth", audioBandwidth );
+            config.put( "videoBandwidth", videoBandwidth );
 
-            out.println("    hiddenDomain: 'recorder." + domain + "',");
-            out.println("    startBitrate: '" + startBitrate + "',");
-            out.println("    recordingType: 'colibri',");
-            out.println("    disableAudioLevels: false,");
-            out.println("    stereo: false,");
-            out.println("    requireDisplayName: false,");
-            out.println("    startAudioMuted: 9,");
-            out.println("    startVideoMuted: 9,");
+            if ( userName != null && !userName.isEmpty() )
+            {
+                config.put( "id", userName + "@" + domain );
+            }
 
-            out.println("    resolution: '" + resolution + "',");
-            out.println("    audioMixer: " + audioMixer + ",");
-            out.println("    audioBandwidth: '" + audioBandwidth + "',");
-            out.println("    videoBandwidth: '" + videoBandwidth + "',");
-            if (userName != null) out.println("    id: '" + userName + "@" + domain + "',");
-            if (accessToken != null) out.println("    password: '" + accessToken + "',");
-            out.println("    userAvatar: '" + userAvatar + "',");
-            out.println("    useRoomAsSharedDocumentName: false,");
-            out.println("    logStats: " + logStats + ",");
-            out.println("    conferences: " + conferences + ",");
-            if (globalConferenceId != null) out.println("    globalConferenceId: '" + globalConferenceId + "',");
-            out.println("    bosh: " + connectionUrl);
-            out.println("};	");
+            if ( accessToken != null && !accessToken.isEmpty() )
+            {
+                config.put( "password", accessToken );
+            }
+            config.put( "userAvatar", userAvatar );
+            config.put( "useRoomAsSharedDocumentName", false );
+            config.put( "logStats", logStats );
+            config.put( "conferences", conferences );
+            if ( globalConferenceId != null && !globalConferenceId.isEmpty() )
+            {
+                config.put( "globalConferenceId", globalConferenceId );
+            }
+            config.put( "disableRtx", true );
+            config.put( "bosh", connectionUrl );
 
+            out.println( "var config = " + config.toString( 2 ) + ";" );
 
             // UI Config
+            String defaultBackground = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.background", "#474747" );
+            int canvasExtra = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.canvas.extra", 104 );
+            int canvasRadius = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.canvas.radius", 7 );
+            String shadowColor = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.shadow.color", "#ffffff" );
+            int initialToolbarTimeout = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.initial.toolbar.timeout", 20000 );
+            int toolbarTimeout = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.toolbar.timeout", 4000 );
+            String defRemoteDisplName = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.remote.displayname", "Change Me" );
+            String defDomSpkrDisplName = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.speaker.displayname", "Speaker" );
+            String defLocalDisplName = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.local.displayname", "Me" );
+            String watermarkLink = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.watermark.link", "" );
+            boolean showWatermark = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.watermark", false );
+            String brandWatermarkLink = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.link", "" );
+            boolean brandShowWatermark = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", false );
+            boolean showPoweredBy = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.poweredby", false );
+            boolean randomRoomNames = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", true );
+            String applicationName = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.application.name", "Openfire Meetings" );
+            int activeSpkrAvatarSize = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.active.speaker.avatarsize", 100 );
+            boolean showContactListAvatars = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.contactlist.avatars", false );
+            boolean initationPoweredBy = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.invitation.poweredby", true );
+            String videoLayoutFit = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.video.layout.fit", "both" );
+            String toolbarButtons = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.toolbar.buttons", "'authentication', 'microphone', 'camera', 'desktop','recording', 'security', 'invite', 'chat', 'etherpad', 'sharedvideo','fullscreen', 'sip', 'dialpad', 'settings', 'hangup', 'filmstrip','contacts'" );
+            String settingsSections = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.settings.sections", "'language', 'devices', 'moderator'" );
+            String mainToolbarButtons = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.main.toolbar.buttons", "'microphone', 'camera', 'desktop', 'invite', 'hangup'" );
+            if ( !toolbarButtons.trim().startsWith( "[" ) )
+            {
+                toolbarButtons = "[" + toolbarButtons;
+            }
+            if ( !toolbarButtons.trim().endsWith( "]" ) )
+            {
+                toolbarButtons = toolbarButtons + "]";
+            }
+            if ( !settingsSections.trim().startsWith( "[" ) )
+            {
+                settingsSections = "[" + settingsSections;
+            }
+            if ( !settingsSections.trim().endsWith( "]" ) )
+            {
+                settingsSections = settingsSections + "]";
+            }
+            if ( !mainToolbarButtons.trim().startsWith( "[" ) )
+            {
+                mainToolbarButtons = "[" + mainToolbarButtons;
+            }
+            if ( !mainToolbarButtons.trim().endsWith( "]" ) )
+            {
+                mainToolbarButtons = mainToolbarButtons + "]";
+            }
 
-            String defaultBackground		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.default.background", "#474747");
-            String canvasExtra				= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.canvas.extra", "104");
-            String canvasRadius				= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.canvas.radius", "7");
-            String shadowColor				= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.shadow.color", "#ffffff");
-            String initialToolbarTimeout	= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.initial.toolbar.timeout", "20000");
-            String toolbarTimeout			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.toolbar.timeout", "4000");
-            String defRemoteDisplName		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.default.remote.displayname", "Change Me");
-            String defDomSpkrDisplName		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.default.speaker.displayname", "Speaker");
-            String defLocalDisplName		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.default.local.displayname", "Me");
-            String watermarkLink			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.watermark.link", "");
-            String showWatermark			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.show.watermark", "false");
-            String brandWatermarkLink		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.brand.watermark.link", "");
-            String brandShowWatermark		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.brand.show.watermark", "false");
-            String showPoweredBy			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.show.poweredby", "false");
-            String randomRoomNames			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.random.roomnames", "true");
-            String applicationName			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.application.name", "Openfire Meetings");
-            String activeSpkrAvatarSize		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.active.speaker.avatarsize", "100");
+            final JSONObject interfaceConfig = new JSONObject();
 
-            String showContactListAvatars	= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.show.contactlist.avatars", "false");
-            String initationPoweredBy		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.invitation.poweredby", "true");
-            String videoLayoutFit			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.video.layout.fit", "both");
-            String toolbarButtons			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.toolbar.buttons", "'authentication', 'microphone', 'camera', 'desktop','recording', 'security', 'invite', 'chat', 'etherpad', 'sharedvideo','fullscreen', 'sip', 'dialpad', 'settings', 'hangup', 'filmstrip','contacts'");
-            String settingsSections			= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.settings.sections", "'language', 'devices', 'moderator'");
-            String mainToolbarButtons		= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.main.toolbar.buttons", "'microphone', 'camera', 'desktop', 'invite', 'hangup'");
+            interfaceConfig.put( "CANVAS_EXTRA", canvasExtra );
+            interfaceConfig.put( "CANVAS_RADIUS", canvasRadius );
+            interfaceConfig.put( "SHADOW_COLOR", shadowColor );
+            interfaceConfig.put( "DEFAULT_BACKGROUND", defaultBackground );
+            interfaceConfig.put( "INITIAL_TOOLBAR_TIMEOUT", initialToolbarTimeout );
+            interfaceConfig.put( "TOOLBAR_TIMEOUT", toolbarTimeout );
+            interfaceConfig.put( "DEFAULT_REMOTE_DISPLAY_NAME", defRemoteDisplName );
+            interfaceConfig.put( "DEFAULT_DOMINANT_SPEAKER_DISPLAY_NAME", defDomSpkrDisplName );
+            interfaceConfig.put( "DEFAULT_LOCAL_DISPLAY_NAME", defLocalDisplName );
+            interfaceConfig.put( "SHOW_JITSI_WATERMARK", showWatermark );
+            interfaceConfig.put( "JITSI_WATERMARK_LINK", watermarkLink );
+            interfaceConfig.put( "SHOW_BRAND_WATERMARK", brandShowWatermark );
+            interfaceConfig.put( "BRAND_WATERMARK_LINK", brandWatermarkLink );
+            interfaceConfig.put( "SHOW_POWERED_BY", showPoweredBy );
+            interfaceConfig.put( "GENERATE_ROOMNAMES_ON_WELCOME_PAGE", randomRoomNames );
+            interfaceConfig.put( "APP_NAME", applicationName );
+            interfaceConfig.put( "INVITATION_POWERED_BY", initationPoweredBy );
+            interfaceConfig.put( "MAIN_TOOLBAR_BUTTONS", JSONArray.fromString( mainToolbarButtons ) );
+            interfaceConfig.put( "TOOLBAR_BUTTONS", JSONArray.fromString( toolbarButtons ) );
+            interfaceConfig.put( "SETTINGS_SECTIONS", JSONArray.fromString( settingsSections ) );
+            interfaceConfig.put( "VIDEO_LAYOUT_FIT", videoLayoutFit );
+            interfaceConfig.put( "SHOW_CONTACTLIST_AVATARS", showContactListAvatars );
+            interfaceConfig.put( "filmStripOnly", false );
+            interfaceConfig.put( "RANDOM_AVATAR_URL_PREFIX", "" );
+            interfaceConfig.put( "RANDOM_AVATAR_URL_SUFFIX", "" );
+            interfaceConfig.put( "FILM_STRIP_MAX_HEIGHT", 120 );
+            interfaceConfig.put( "LOCAL_THUMBNAIL_RATIO_WIDTH", 16 );
+            interfaceConfig.put( "LOCAL_THUMBNAIL_RATIO_HEIGHT", 9 );
+            interfaceConfig.put( "REMOTE_THUMBNAIL_RATIO_WIDTH", 1 );
+            interfaceConfig.put( "REMOTE_THUMBNAIL_RATIO_HEIGHT", 1 );
+            interfaceConfig.put( "ENABLE_FEEDBACK_ANIMATION", false );
+            interfaceConfig.put( "DISABLE_FOCUS_INDICATOR", false );
+            interfaceConfig.put( "ACTIVE_SPEAKER_AVATAR_SIZE", activeSpkrAvatarSize );
 
-            out.println("var interfaceConfig = {");
-            out.println("    CANVAS_EXTRA: " + canvasExtra + ",");
-            out.println("	 CANVAS_RADIUS: " + canvasRadius + ",");
-            out.println("    SHADOW_COLOR: '" + shadowColor + "',");
-            out.println("    DEFAULT_BACKGROUND: '" + defaultBackground + "',");
-            out.println("    INITIAL_TOOLBAR_TIMEOUT: " + initialToolbarTimeout + ",");
-            out.println("    TOOLBAR_TIMEOUT: " + toolbarTimeout + ",");
-            out.println("    DEFAULT_REMOTE_DISPLAY_NAME: '" + defRemoteDisplName + "',");
-            out.println("    DEFAULT_DOMINANT_SPEAKER_DISPLAY_NAME: '" + defDomSpkrDisplName + "',");
-            out.println("	 DEFAULT_LOCAL_DISPLAY_NAME: '" + defLocalDisplName + "',");
-            out.println("    SHOW_JITSI_WATERMARK: " + showWatermark + ",");
-            out.println("    JITSI_WATERMARK_LINK: '" + watermarkLink + "',");
-            out.println("    SHOW_BRAND_WATERMARK: " + brandShowWatermark + ",");
-            out.println("    BRAND_WATERMARK_LINK: '" + brandWatermarkLink + "',");
-            out.println("    SHOW_POWERED_BY: " + showPoweredBy + ",");
-            out.println("    GENERATE_ROOMNAMES_ON_WELCOME_PAGE: " + randomRoomNames + ",");
-            out.println("    APP_NAME: '" + applicationName + "',");
-
-            out.println("    INVITATION_POWERED_BY: " + initationPoweredBy + ",");
-            out.println("    MAIN_TOOLBAR_BUTTONS: [" + mainToolbarButtons + "],");
-            out.println("    TOOLBAR_BUTTONS: [" + toolbarButtons + "],");
-            out.println("    SETTINGS_SECTIONS: [" + settingsSections + "],");
-            out.println("    VIDEO_LAYOUT_FIT: '" + videoLayoutFit + "',");
-            out.println("    SHOW_CONTACTLIST_AVATARS: " + showContactListAvatars + ",");
-            out.println("    filmStripOnly: false,");
-            out.println("    RANDOM_AVATAR_URL_PREFIX: '',");
-            out.println("    RANDOM_AVATAR_URL_SUFFIX: '',");
-            out.println("    FILM_STRIP_MAX_HEIGHT: 120,");
-
-            out.println("    LOCAL_THUMBNAIL_RATIO_WIDTH: 16,");
-            out.println("    LOCAL_THUMBNAIL_RATIO_HEIGHT: 9,");
-            out.println("    REMOTE_THUMBNAIL_RATIO_WIDTH: 1,");
-            out.println("    REMOTE_THUMBNAIL_RATIO_HEIGHT: 1,");
-            out.println("    ENABLE_FEEDBACK_ANIMATION: false,");
-            out.println("    DISABLE_FOCUS_INDICATOR: false,");
-
-            out.println("    ACTIVE_SPEAKER_AVATAR_SIZE: " + activeSpkrAvatarSize);
-            out.println("}; ");
+            out.println( "var interfaceConfig = " + interfaceConfig.toString( 2 ) + ";" );
         }
-        catch(Exception e) {
-            Log.error("Config doGet Error", e);
-        }
-    }
-
-
-    private void writeHeader(HttpServletResponse response)
-    {
-
-        try {
-            response.setHeader("Expires", "Sat, 6 May 1995 12:00:00 GMT");
-            response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-            response.addHeader("Cache-Control", "post-check=0, pre-check=0");
-            response.setHeader("Pragma", "no-cache");
-            response.setHeader("Content-Type", "application/javascript");
-            response.setHeader("Connection", "close");
-        }
-        catch(Exception e)
+        catch ( Exception e )
         {
-            Log.error("Config writeHeader Error", e);
+            Log.error( "Config doGet Error", e );
         }
     }
 
-    private boolean isBookmarkForJID(String username, Bookmark bookmark) {
+    private void writeHeader( HttpServletResponse response )
+    {
+        try
+        {
+            response.setHeader( "Expires", "Sat, 6 May 1995 12:00:00 GMT" );
+            response.setHeader( "Cache-Control", "no-store, no-cache, must-revalidate" );
+            response.addHeader( "Cache-Control", "post-check=0, pre-check=0" );
+            response.setHeader( "Pragma", "no-cache" );
+            response.setHeader( "Content-Type", "application/javascript" );
+            response.setHeader( "Connection", "close" );
+        }
+        catch ( Exception e )
+        {
+            Log.error( "Config writeHeader Error", e );
+        }
+    }
 
-        if (username == null || username.equals("null")) return false;
+    private boolean isBookmarkForJID( String username, Bookmark bookmark )
+    {
+        if ( username == null || username.equals( "null" ) )
+        {
+            return false;
+        }
 
-        if (bookmark.getUsers().contains(username)) {
+        if ( bookmark.getUsers().contains( username ) )
+        {
             return true;
         }
 
         Collection<String> groups = bookmark.getGroups();
 
-        if (groups != null && !groups.isEmpty()) {
+        if ( groups != null && !groups.isEmpty() )
+        {
             GroupManager groupManager = GroupManager.getInstance();
 
-            for (String groupName : groups) {
-                try {
-                    Group group = groupManager.getGroup(groupName);
+            for ( String groupName : groups )
+            {
+                try
+                {
+                    Group group = groupManager.getGroup( groupName );
 
-                    if (group.isUser(username)) {
+                    if ( group.isUser( username ) )
+                    {
                         return true;
                     }
                 }
-                catch (GroupNotFoundException e) {
-                    Log.debug(e.getMessage(), e);
+                catch ( GroupNotFoundException e )
+                {
+                    Log.debug( e.getMessage(), e );
                 }
             }
         }
         return false;
     }
 
-    private String getHTML(String urlToRead)
+    private String getHTML( String urlToRead )
     {
         URL url;
         HttpURLConnection conn;
@@ -448,19 +495,21 @@ public class ConfigServlet extends HttpServlet
         String line;
         StringBuilder result = new StringBuilder();
 
-        try {
-            url = new URL(urlToRead);
+        try
+        {
+            url = new URL( urlToRead );
             conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            while ((line = rd.readLine()) != null) {
-                result.append(line);
+            conn.setRequestMethod( "GET" );
+            rd = new BufferedReader( new InputStreamReader( conn.getInputStream() ) );
+            while ( ( line = rd.readLine() ) != null )
+            {
+                result.append( line );
             }
             rd.close();
-        } catch (IOException e) {
-            Log.error("getHTML", e);
-        } catch (Exception e) {
-            Log.error("getHTML", e);
+        }
+        catch ( Exception e )
+        {
+            Log.error( "getHTML", e );
         }
 
         return result.toString();

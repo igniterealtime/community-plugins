@@ -23,8 +23,8 @@
 	<description>Openfire Meetings Build</description>
 
 	<!-- The tag (or branch, but it's safer to use a fixed reference) for the source of the Jitsi Jicofo project. -->
-	<property name="jicofo-git-branch" value="306"/>
-	<property name="videobridge-git-branch" value="842"/>
+	<property name="jicofo-git-branch" value="jitsi-meet_1729"/>
+	<property name="videobridge-git-branch" value="jitsi-meet_1729"/>
 
 	<property environment="env"/>
 
@@ -135,6 +135,13 @@
 		<dependencies pathId="jitsi.classpath" filesetid="jitsi.fileset" versionsid="dependency.versions">
 			<dependency groupId="org.jitsi" artifactId="jitsi-videobridge" version="${videobridge-git-branch}-SNAPSHOT"/>
 			<dependency groupId="org.jitsi" artifactId="jicofo" version="${jicofo-git-branch}-SNAPSHOT"/>
+
+			<!-- This works around a problem where audio/video in a meet would not work (unless you reload).
+			     The cause for this problem was that jitsi-protocol-20151211.202410-3 (from Videobridge) was
+			     added to OFMeet, instead of 20151211.202410-4 (from Jicofo). The difference is in the last number.
+			 -->
+			<dependency groupId="org.jitsi" artifactId="jitsi-protocol" version="2.9-20160823.174711-4"/>
+
 		</dependencies>
 
 		<path id="build.classpath">

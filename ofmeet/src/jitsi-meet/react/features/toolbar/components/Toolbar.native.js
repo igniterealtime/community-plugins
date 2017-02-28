@@ -6,7 +6,7 @@ import { MEDIA_TYPE, toggleCameraFacingMode } from '../../base/media';
 import { Container } from '../../base/react';
 import { ColorPalette } from '../../base/styles';
 
-import { AbstractToolbar, mapStateToProps } from './AbstractToolbar';
+import { AbstractToolbar, _mapStateToProps } from './AbstractToolbar';
 import { styles } from './styles';
 import ToolbarButton from './ToolbarButton';
 
@@ -106,7 +106,7 @@ class Toolbar extends AbstractToolbar {
      * @returns {ReactElement}
      */
     _renderSecondaryToolbar() {
-        const iconStyle = styles.whiteIcon;
+        const iconStyle = styles.secondaryToolbarIcon;
         const style = styles.secondaryToolbarButton;
         const underlayColor = 'transparent';
 
@@ -116,14 +116,14 @@ class Toolbar extends AbstractToolbar {
         return (
             <View style = { styles.secondaryToolbar }>
                 <ToolbarButton
-                    iconName = 'reload'
+                    iconName = 'switch-camera'
                     iconStyle = { iconStyle }
                     onClick = { this._toggleCameraFacingMode }
                     style = { style }
                     underlayColor = { underlayColor } />
                 <ToolbarButton
                     iconName = {
-                        this.props.locked ? 'security-locked' : 'security'
+                        this.props._locked ? 'security-locked' : 'security'
                     }
                     iconStyle = { iconStyle }
                     onClick = { this._onRoomLock }
@@ -156,8 +156,8 @@ class Toolbar extends AbstractToolbar {
 Object.assign(Toolbar.prototype, {
     audioIcon: 'microphone',
     audioMutedIcon: 'mic-disabled',
-    videoIcon: 'webCam',
+    videoIcon: 'camera',
     videoMutedIcon: 'camera-disabled'
 });
 
-export default connect(mapStateToProps)(Toolbar);
+export default connect(_mapStateToProps)(Toolbar);

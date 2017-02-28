@@ -3,8 +3,8 @@ import { connect as reactReduxConnect } from 'react-redux';
 
 import { connect, disconnect } from '../../base/connection';
 import { Container } from '../../base/react';
-import { FilmStrip } from '../../filmStrip';
-import { LargeVideo } from '../../largeVideo';
+import { FilmStrip } from '../../film-strip';
+import { LargeVideo } from '../../large-video';
 import { RoomLockPrompt } from '../../room-lock';
 import { Toolbar } from '../../toolbar';
 
@@ -13,11 +13,14 @@ import { styles } from './styles';
 
 /**
  * The timeout in milliseconds after which the toolbar will be hidden.
+ *
+ * @private
+ * @type {number}
  */
-const TOOLBAR_TIMEOUT_MS = 5000;
+const _TOOLBAR_TIMEOUT_MS = 5000;
 
 /**
- * The conference page of the application.
+ * The conference page of the mobile (i.e. React Native) application.
  */
 class Conference extends Component {
     /**
@@ -55,7 +58,7 @@ class Conference extends Component {
     constructor(props) {
         super(props);
 
-        this.state = { toolbarVisible: false };
+        this.state = { toolbarVisible: true };
 
         /**
          * The numerical ID of the timeout in milliseconds after which the
@@ -68,6 +71,16 @@ class Conference extends Component {
 
         // Bind event handlers so they are only bound once for every instance.
         this._onClick = this._onClick.bind(this);
+    }
+
+    /**
+     * Inits the toolbar timeout after the component is initially rendered.
+     *
+     * @inheritdoc
+     * returns {void}
+     */
+    componentDidMount() {
+        this._setToolbarTimeout(this.state.toolbarVisible);
     }
 
     /**
@@ -145,11 +158,7 @@ class Conference extends Component {
 
         this.setState({ toolbarVisible });
 
-        this._clearToolbarTimeout();
-        if (toolbarVisible) {
-            this._toolbarTimeout
-                = setTimeout(this._onClick, TOOLBAR_TIMEOUT_MS);
-        }
+        this._setToolbarTimeout(toolbarVisible);
     }
 
     /**
@@ -201,17 +210,34 @@ class Conference extends Component {
 
         return null;
     }
+
+    /**
+     * Triggers the default toolbar timeout.
+     *
+     * @param {boolean} toolbarVisible - Indicates if the toolbar is currently
+     * visible.
+     * @private
+     * @returns {void}
+     */
+    _setToolbarTimeout(toolbarVisible) {
+        this._clearToolbarTimeout();
+        if (toolbarVisible) {
+            this._toolbarTimeout
+                = setTimeout(this._onClick, _TOOLBAR_TIMEOUT_MS);
+        }
+    }
 }
 
 /**
  * Maps (parts of) the Redux state to the associated Conference's props.
  *
  * @param {Object} state - The Redux state.
+ * @private
  * @returns {{
  *     _passwordRequired: boolean
  * }}
  */
-function mapStateToProps(state) {
+function _mapStateToProps(state) {
     return {
         /**
          * The indicator which determines whether a password is required to join
@@ -233,4 +259,4 @@ function mapStateToProps(state) {
     };
 }
 
-export default reactReduxConnect(mapStateToProps)(Conference);
+export default reactReduxConnect(_mapStateToProps)(Conference);

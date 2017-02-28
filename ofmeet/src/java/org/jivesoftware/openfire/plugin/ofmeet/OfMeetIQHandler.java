@@ -86,17 +86,11 @@ public class OfMeetIQHandler extends IQHandler
 
                 if (room != null && !"".equals(room) && roomName.equals(room))
                 {
-                    if (JiveGlobals.getProperty("ofmeet.autorecord.enabled", "false").equals("true") && !conference.isRecording())
-                    {
-                        conference.setRecording(true);
-                    }
-
                     JSONObject userJSON = new JSONObject();
                     userJSON.put("room", roomName);
                     userJSON.put("id", conference.getID());
                     userJSON.put("lastActivityTime", String.valueOf(conference.getLastActivityTime()));
                     userJSON.put("focus", conference.getFocus());
-                    userJSON.put("recording", conference.isRecording() ? "yes" : "no");
                     userJSON.put("expired", conference.isExpired() ? "yes" : "no");
 
                     childElement.setText(userJSON.toString());
