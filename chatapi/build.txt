@@ -41,11 +41,11 @@ compile-jsps:
      [copy] Copying 1 file to C:\Projects\ignite\community-plugins\chatapi\src\web\WEB-INF
 
 jar:
-     [copy] Copying 111 files to C:\Projects\ignite\community-plugins\chatapi\build\jar
+     [copy] Copying 113 files to C:\Projects\ignite\community-plugins\chatapi\build\jar
      [copy] Copying 18 files to C:\Projects\ignite\community-plugins\chatapi\build\jar\lib
-     [copy] Copying 24 files to C:\Projects\ignite\community-plugins\chatapi\build\jar
+     [copy] Copying 26 files to C:\Projects\ignite\community-plugins\chatapi\build\jar
       [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_1_1\target\openfire\plugins\chatapi.jar
    [delete] Deleting directory C:\Projects\ignite\community-plugins\chatapi\build
 
 BUILD SUCCESSFUL
-Total time: 11 seconds
+Total time: 25 seconds
