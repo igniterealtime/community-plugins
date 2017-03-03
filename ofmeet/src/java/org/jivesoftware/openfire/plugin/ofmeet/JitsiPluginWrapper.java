@@ -39,6 +39,10 @@ public class JitsiPluginWrapper
         {
             Log.warn( "Another Jitsi Videobridge appears to have been initialized earlier! Unexpected behavior might be the result of this new initialization!" );
         }
+
+        // Disable health check. Our JVB is not an external component, so there's no need to check for its connectivity.
+        System.setProperty( "org.jitsi.videobridge.PING_INTERVAL", "-1" );
+
         jitsiPlugin = new PluginImpl();
         jitsiPlugin.initializePlugin( manager, pluginDirectory );
         Log.trace( "Successfully initialized Jitsi Videobridge." );
