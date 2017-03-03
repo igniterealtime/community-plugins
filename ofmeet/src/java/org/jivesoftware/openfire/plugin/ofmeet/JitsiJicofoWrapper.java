@@ -2,6 +2,7 @@ package org.jivesoftware.openfire.plugin.ofmeet;
 
 import net.java.sip.communicator.util.ServiceUtils;
 import org.jitsi.jicofo.FocusBundleActivator;
+import org.jitsi.jicofo.JvbDoctor;
 import org.jitsi.jicofo.auth.AuthenticationAuthority;
 import org.jitsi.jicofo.reservation.ReservationSystem;
 import org.jivesoftware.openfire.XMPPServer;
@@ -65,6 +66,10 @@ public class JitsiJicofoWrapper
         System.setProperty( FocusManager.FOCUS_USER_DOMAIN_PNAME, XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
         System.setProperty( FocusManager.FOCUS_USER_NAME_PNAME, focusUserName.split("@")[0]);
         System.setProperty( FocusManager.FOCUS_USER_PASSWORD_PNAME, focusPassword);
+
+        // Disable health check. Our JVB is not an external component, so there's no need to check for its connectivity.
+        // Also, the health check appears to cumulatively use and not release resources!
+        System.setProperty( JvbDoctor.HEALTH_CHECK_INTERVAL_PNAME, "-1" );
 
         boolean focusAnonymous = "false".equals(JiveGlobals.getProperty("ofmeet.security.enabled", "true"));
 
