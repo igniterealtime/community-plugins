@@ -71,6 +71,9 @@ public class JitsiJicofoWrapper
         // Also, the health check appears to cumulatively use and not release resources!
         System.setProperty( JvbDoctor.HEALTH_CHECK_INTERVAL_PNAME, "-1" );
 
+        // Disable JVB rediscovery. We are running with one hard-coded videobridge, there's no need for dynamic detection of others.
+        System.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "-1" ); // Aught to use a reference to ComponentsDiscovery.REDISCOVERY_INTERVAL_PNAME, but that constant is private.
+
         boolean focusAnonymous = "false".equals(JiveGlobals.getProperty("ofmeet.security.enabled", "true"));
 
         // The static OSGi instance will have a bundle config set (which is done in the videobridge plugin. We
