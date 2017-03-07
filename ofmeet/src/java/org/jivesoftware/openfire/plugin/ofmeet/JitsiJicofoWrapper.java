@@ -55,7 +55,7 @@ public class JitsiJicofoWrapper
             focusUserName = XMPPServer.getInstance().createJID( "focus", "unused" ).toBareJID();
         }
 
-        final String focusPassword = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.password" );
+        final String focusPassword = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.password", "" );
         if ( focusPassword == null || focusPassword.isEmpty())
         {
             Log.warn( "The focus user password is not configured in property 'org.jitsi.videobridge.ofmeet.focus.user.password', which is likely going to cause problems!" );
