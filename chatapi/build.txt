@@ -48,4 +48,4 @@ jar:
    [delete] Deleting directory C:\Projects\ignite\community-plugins\chatapi\build
 
 BUILD SUCCESSFUL
-Total time: 25 seconds
+Total time: 17 seconds
