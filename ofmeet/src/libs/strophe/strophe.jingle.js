@@ -16,6 +16,7 @@ Strophe.addConnectionPlugin('jingle', {
     localVideo: null,
 
     init: function (conn) {
+    	this.ice_config.rtcpMuxPolicy = 'negotiate';		// BAO breaking change chrome M57
         this.connection = conn;
         if (this.connection.disco) {
             // http://xmpp.org/extensions/xep-0167.html#support
