@@ -4,8 +4,7 @@ jdk:
   - oraclejdk8
 env:
   - ENVTARGET=ofmeet
-  - ENVTARGET=ofsocial
-  - ENVTARGET=ofturn  
+  - ENVTARGET=ofsocial 
   - ENVTARGET=chatapi
 script: 
   - ant -f $ENVTARGET/build.xml jar
