@@ -9,4 +9,11 @@ env:
   - ENVTARGET=chatapi
 script: 
   - ant -f $ENVTARGET/build.xml jar
-
+deploy:
+  provider: releases
+  api_key:
+    secure: bf0e0cc8ba25e2056f4417a7b26ce2feff1c761b
+  file: "chatapi.jar"
+  skip_cleanup: true
+  on:
+    tags: true
