@@ -1,0 +1,26 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "bento/ubuntu-16.04"
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 2048
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    # Jitsi-meet developers suggest using Node.JS 6. Make sure that's installed, 
+    # instead of whatever the package manager currently provides.
+    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+    apt-get install -y nodejs
+
+    # Install project dependencies
+    #cd /vagrant/
+    # npm install in /vagrant/ warns that these should be installed globally.
+    #npm install -g coffee-script
+    #npm install -g marked
+    #npm install -g jsonlint
+    #npm install -g node-gyp
+  SHELL
+end

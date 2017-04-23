@@ -23,13 +23,14 @@
 	<description>Openfire Meetings Build</description>
 
 	<!-- The tag (or branch, but it's safer to use a fixed reference) for the source of the Jitsi Jicofo project. -->
-	<property name="jicofo-git-branch" value="jitsi-meet_1729"/>
-	<property name="videobridge-git-branch" value="jitsi-meet_1729"/>
+	<property name="jicofo-git-branch" value="jitsi-meet_1947"/>
+	<property name="videobridge-git-branch" value="jitsi-meet_1947"/>
+	<property name="openfire-git-branch" value="jitsi-meet_1947"/>
 
 	<property environment="env"/>
 
-	<property name="openfire.home" 	     value="./openfire_4_0_2/target/openfire" />
-	<property name="lib.ant.dir" 	     value="./openfire_4_0_2/build/lib/ant" />
+	<property name="openfire.home" 	     value="./openfire_4_1_4/target/openfire" />
+	<property name="lib.ant.dir" 	     value="./openfire_4_1_4/build/lib/ant" />
 	<property name="ofmeet.dir" 	     value="ofmeet" />
 	<property name="jicofo.workdir"      value="${ofmeet.dir}/clones/jicofo-${jicofo-git-branch}"/>
 	<property name="videobridge.workdir" value="${ofmeet.dir}/clones/videobridge-${videobridge-git-branch}"/>
@@ -114,6 +115,13 @@
 				repo.branch="${videobridge-git-branch}"
 				target.dir="${videobridge.workdir}" />
 
+		<download-and-install
+				name="Ignite Realtime Openfire"
+				repo.url="https://github.com/jitsi/jitsi-videobridge.git"
+				repo.branch="${videobridge-git-branch}"
+				target.dir="${videobridge.workdir}" />
+
+
 		<ant dir="${videobridge.workdir}" inheritall="true" target="dist.openfire"/>
 
 		<javac source="1.7" target="1.7" debug="true" deprecation="false" srcdir="${videobridge.workdir}/openfire/src/java" destdir="${ofmeet.dir}/build/ofplugin-videobridge">
@@ -186,7 +194,7 @@
 			<classpath>
 				<pathelement location="${java.home}/../lib/tools.jar"/>
 				<fileset dir="${ofmeet.dir}/lib" includes="**/*.jar"/>
-				<fileset dir="${openfire.home}/lib" includes="*.jar"/>
+				<fileset dir="${openfire.home}/lib" includes="*.jar" excludes="slf4j-log4j12.jar"/>
 				<fileset dir="${lib.ant.dir}" includes="*.jar" />
 				<fileset dir="${ant.home}/lib" includes="ant.jar" />
 			</classpath>
