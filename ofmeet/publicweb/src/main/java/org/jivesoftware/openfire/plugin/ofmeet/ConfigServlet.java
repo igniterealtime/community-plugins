@@ -23,8 +23,7 @@
 
 package org.jivesoftware.openfire.plugin.ofmeet;
 
-import org.jitsi.videobridge.Conference;
-import org.jitsi.videobridge.Videobridge;
+import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.util.JiveGlobals;
 import org.json.JSONArray;
@@ -71,14 +70,11 @@ public class ConfigServlet extends HttpServlet
         {
             Log.trace( "[{}] config requested.", request.getRemoteAddr() );
 
-            final String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
+            final OFMeetConfig ofMeetConfig = OFMeetConfig.getInstance();
+
             final String xmppDomain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
 
-
-
             final JSONArray conferences = new JSONArray();
-
-
 
             writeHeader( response );
 
@@ -87,10 +83,7 @@ public class ConfigServlet extends HttpServlet
             String recordingKey = null;
 
 
-            // new ones
-            boolean disableSimulcast = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.disable.simulcast", false );
             int minHDHeight = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.min.hdheight", 540 );
-
             int resolution = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.resolution", 360 );
             boolean audioMixer = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.audio.mixer", false );
             int audioBandwidth = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.audio.bandwidth", 128 );
@@ -100,8 +93,6 @@ public class ConfigServlet extends HttpServlet
             boolean useStunTurn = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.stunturn", false );
             boolean recordVideo = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.media.record", false );
             String defaultSipNumber = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.sip.number", "" );
-            boolean adaptiveLastN = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.adaptive.lastn", false );
-            boolean adaptiveSimulcast = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.adaptive.simulcast", false );
             boolean useRtcpMux = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.rtcp.mux", true );
             boolean useBundle = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.bundle", true );
             boolean enableWelcomePage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.welcomePage", true );
@@ -109,41 +100,26 @@ public class ConfigServlet extends HttpServlet
             boolean openSctp = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.open.sctp", true );
             String desktopSharing = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing", "ext" );
             String chromeExtensionId = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.chrome.extension.id", "fohfnhgabmicpkjcpjpjongpijcffaba" );
-            int channelLastN = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.channel.lastn", -1 );
             String desktopShareSrcs = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing.sources", "[\"screen\", \"window\"]" );
             String minChromeExtVer = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.min.chrome.ext.ver", "0.1" );
             int startBitrate = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.start.bitrate", 800 );
             boolean logStats = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.stats.logging", false );
             String focusUserJid = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@" + xmppDomain );
             String iceServers = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.iceservers", "" );
-
             String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
 
             if ( xirsysUrl != null )
             {
-                Log.info( "Config. found xirsys Url " + xirsysUrl );
+                Log.info( "OFMeetConfig. found xirsys Url " + xirsysUrl );
 
                 String xirsysJson = getHTML( xirsysUrl );
-                Log.info( "Config. got xirsys json " + xirsysJson );
+                Log.info( "OFMeetConfig. got xirsys json " + xirsysJson );
 
                 JSONObject jsonObject = new JSONObject( xirsysJson );
                 iceServers = jsonObject.getString( "d" );
 
-                Log.info( "Config. got xirsys iceSevers " + iceServers );
+                Log.info( "OFMeetConfig. got xirsys iceSevers " + iceServers );
             }
-// TODO move to plugin?
-//            if ( "on".equals( JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.global.intercom", "off" ) ) )
-//            {
-//                final OfMeetPlugin ofmeet = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin( "ofmeet" );
-//                Videobridge videobridge = ofmeet.getVideobridge();
-//
-//                if ( globalConferenceId == null || videobridge.getConference( globalConferenceId, null ) == null )
-//                {
-//                    Conference conference = videobridge.createConference( null, "Openfire Meetings" );
-//                    conference.setLastKnownFocus( xmppDomain );
-//                    globalConferenceId = conference.getID();
-//                }
-//            }
 
             final JSONObject config = new JSONObject();
 
@@ -160,12 +136,9 @@ public class ConfigServlet extends HttpServlet
                 config.put( "iceServers", iceServers.trim() );
             }
             config.put( "enforcedBridge", "videobridge." + xmppDomain );
-            config.put( "disableSimulcast", disableSimulcast );
             config.put( "useStunTurn", useStunTurn );
             config.put( "useIPv6", useIPv6 );
             config.put( "useNicks", useNicks );
-            config.put( "adaptiveLastN", adaptiveLastN );
-            config.put( "adaptiveSimulcast", adaptiveSimulcast );
             config.put( "useRtcpMux", useRtcpMux );
             config.put( "useBundle", useBundle );
             config.put( "enableWelcomePage", enableWelcomePage );
@@ -187,7 +160,6 @@ public class ConfigServlet extends HttpServlet
             config.put( "chromeExtensionId", chromeExtensionId );
             config.put( "desktopSharingSources", new JSONArray( desktopShareSrcs ) );
             config.put( "minChromeExtVersion", minChromeExtVer );
-            config.put( "channelLastN", channelLastN );
             config.put( "minHDHeight", minHDHeight );
             config.put( "desktopSharingFirefoxExtId", "jidesha@meet.jit.si" );
             config.put( "desktopSharingFirefoxDisabled", false );
@@ -217,11 +189,19 @@ public class ConfigServlet extends HttpServlet
             config.put( "disableRtx", true );
             config.put( "bosh", getMostPreferredConnectionURL( request ) );
 
+            config.put( "channelLastN", ofMeetConfig.getChannelLastN() );
+            config.put( "adaptiveLastN", ofMeetConfig.getAdaptiveLastN() );
+            config.put( "disableSimulcast", !ofMeetConfig.getSimulcast() );
+
+            // TODO: find out if both of the settings below are in use (seems silly).
+            config.put( "adaptiveSimulcast", ofMeetConfig.getAdaptiveSimulcast() );
+            config.put( "disableAdaptiveSimulcast", !ofMeetConfig.getAdaptiveSimulcast() );
+
             out.println( "var config = " + config.toString( 2 ) + ";" );
         }
         catch ( Exception e )
         {
-            Log.error( "Config doGet Error", e );
+            Log.error( "OFMeetConfig doGet Error", e );
         }
     }
 
@@ -238,7 +218,7 @@ public class ConfigServlet extends HttpServlet
         }
         catch ( Exception e )
         {
-            Log.error( "Config writeHeader Error", e );
+            Log.error( "OFMeetConfig writeHeader Error", e );
         }
     }
 

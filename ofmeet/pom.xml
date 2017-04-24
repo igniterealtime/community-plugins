@@ -29,6 +29,7 @@
 
     <modules>
         <module>publicweb</module>
+        <module>ofmeet-config</module>
         <module>openfireplugin</module>
     </modules>
 

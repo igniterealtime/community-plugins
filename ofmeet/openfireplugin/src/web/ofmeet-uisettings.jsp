@@ -29,7 +29,7 @@
 	final String csrfParam = ParamUtils.getParameter( request, "csrf" );
 
 	// Get handle on the plugin
-	OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
+	final OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
 
 	final Map<String, String> errors = new HashMap<>();
 
@@ -221,8 +221,7 @@
                     <fmt:message key="ofmeet.brand.show.watermark.enabled" />
                 </td>
                 <td nowrap>
-                    <fmt:message key="ofmeet.watermark.link"/>:&nbsp;
-                    <input type="text" size="60" maxlength="100" name="brandWatermarkLink" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.brand.watermark.link", "")}">
+                    <fmt:message key="ofmeet.watermark.link"/>:&nbsp;<input type="text" size="60" maxlength="100" name="brandWatermarkLink" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.brand.watermark.link", "")}">
                 </td>
             </tr>
 		</table>

@@ -19,17 +19,11 @@
 
 package org.jivesoftware.openfire.plugin.ofmeet;
 
-import org.apache.jasper.servlet.JasperInitializer;
-import org.apache.tomcat.InstanceManager;
-import org.apache.tomcat.SimpleInstanceManager;
 import org.dom4j.Element;
-import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
-import org.eclipse.jetty.plus.annotation.ContainerInitializer;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.ice4j.ice.harvest.MappingCandidateHarvesters;
@@ -37,10 +31,9 @@ import org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext;
 import org.jitsi.jicofo.FocusManager;
 import org.jitsi.jicofo.auth.AuthenticationAuthority;
 import org.jitsi.jicofo.reservation.ReservationSystem;
-import org.jitsi.videobridge.openfire.PluginImpl;
-import org.jitsi.videobridge.HarvesterConfiguration;
-import org.jitsi.videobridge.VideoChannel;
+import org.jitsi.videobridge.Conference;
 import org.jitsi.videobridge.Videobridge;
+import org.jitsi.videobridge.openfire.PluginImpl;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
@@ -61,17 +54,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
 
-import javax.servlet.DispatcherType;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
@@ -86,6 +78,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
 
+    public boolean restartNeeded = false;
+
 	private PluginManager manager;
 	public File pluginDirectory;
 
@@ -95,8 +89,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	private final JitsiPluginWrapper jitsiPluginWrapper;
 	private final JitsiJicofoWrapper jitsiJicofoWrapper;
     private final MeetingPlanner meetingPlanner;
+    private String globalConferenceId = null;
 
-	public OfMeetPlugin()
+    public OfMeetPlugin()
 	{
 		jitsiPluginWrapper = new JitsiPluginWrapper();
 		jitsiJicofoWrapper = new JitsiJicofoWrapper();
@@ -160,7 +155,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         	SessionEventDispatcher.addListener(this);
 
-		} catch (Exception e) {
+            final String hasGlobalIntercom = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.global.intercom", "off" );
+            configureGlobalIntercom( hasGlobalIntercom.equalsIgnoreCase( "true" ) || hasGlobalIntercom.equalsIgnoreCase( "on" ) );
+		}
+		catch (Exception e) {
 			Log.error("Could NOT start open fire meetings", e);
 		}
 
@@ -380,7 +378,28 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
 	}
 
-	//-------------------------------------------------------
+	public void configureGlobalIntercom( boolean enabled )
+    {
+        if ( enabled && ( globalConferenceId == null || getVideobridge().getConference( globalConferenceId, null ) == null ) )
+        {
+            Conference conference = getVideobridge().createConference( null, "Openfire Meetings" );
+            conference.setLastKnownFocus( XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
+            globalConferenceId = conference.getID();
+        }
+        else if ( !enabled && globalConferenceId != null )
+        {
+            globalConferenceId = null;
+            final Conference conference = getVideobridge().getConference( globalConferenceId, null );
+            if ( conference != null )
+            {
+                getVideobridge().expireConference( conference );
+            }
+        }
+
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.global.intercom", enabled ? "on" : "off" );
+    }
+
+    //-------------------------------------------------------
 	//
 	//		clustering
 	//

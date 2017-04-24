@@ -1,650 +1,368 @@
 <%--
- - Jitsi VideoBridge, OpenSource video conferencing.
- -
- - Distributable under LGPL license.
- - See terms of license at gnu.org.
---%>
-<%@ page import="org.jivesoftware.openfire.plugin.ofmeet.*" %>
-<%@ page import="org.jitsi.videobridge.openfire.*" %>
-<%@ page import="org.jivesoftware.openfire.*" %>
-<%@ page import="org.jivesoftware.util.*" %>
-<%@ page import="java.io.File" %>
-<%@ page import="java.net.InetAddress" %>
-<%@ page import="org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext" %>
-<%@ page import="org.jitsi.videobridge.Videobridge" %>
+  ~ Copyright (c) 2017 Ignite Realtime Foundation. All rights reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  --%>
 <%@ page import="org.ice4j.ice.harvest.MappingCandidateHarvesters" %>
+<%@ page import="org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext" %>
+<%@ page import="org.jitsi.videobridge.openfire.PluginImpl" %>
+<%@ page import="org.jivesoftware.openfire.XMPPServer" %>
+<%@ page import="org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin" %>
+<%@ page import="java.net.InetAddress" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="org.jivesoftware.util.*" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="admin" prefix="admin" %>
+<jsp:useBean id="random" class="java.util.Random" scope="application" />
+<jsp:useBean id="ofmeetConfig" class="org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig" scope="application"/>
 <%
+    boolean update = request.getParameter( "update" ) != null;
 
-    boolean update = request.getParameter("update") != null;
-    String errorMessage = null;
+    final Cookie csrfCookie = CookieUtils.getCookie( request, "csrf" );
+    final String csrfParam = ParamUtils.getParameter( request, "csrf" );
 
     // Get handle on the plugin
-    OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
+    final OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin( "ofmeet" );
 
-    String ourIpAddress = "127.0.0.1";  
+    String ourIpAddress = "127.0.0.1";
     String ourHostname = XMPPServer.getInstance().getServerInfo().getHostname();
-    
-    try {
-	ourIpAddress = InetAddress.getByName(ourHostname).getHostAddress();
-    } catch (Exception e) {
 
-    }  
-    
-    if (update)
+    try
     {
-        String minPort = request.getParameter("minport");
-        if (minPort != null) {
-            minPort = minPort.trim();
-            try
-            {
-                int port = Integer.valueOf(minPort);
+        ourIpAddress = InetAddress.getByName( ourHostname ).getHostAddress();
+    }
+    catch ( Exception e )
+    {
 
-                if(port >= 1 && port <= 65535)
-                    JiveGlobals.setProperty(
-                        PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, minPort);
-                else
-                    throw new NumberFormatException("out of range port");
+    }
 
-            }
-            catch (Exception e)
-            {
-                errorMessage = LocaleUtils.getLocalizedString(
-                    "config.page.configuration.error.minport",
-                    "ofmeet");
-            }
+    final Map<String, String> errors = new HashMap<>();
+
+    if ( update )
+    {
+        if ( csrfCookie == null || csrfParam == null || !csrfCookie.getValue().equals( csrfParam ) )
+        {
+            errors.put( "csrf", "CSRF Failure!" );
         }
-        String maxPort = request.getParameter("maxport");
-        if (maxPort != null) {
-            maxPort = maxPort.trim();
-            try
-            {
-                int port = Integer.valueOf(maxPort);
 
-                if(port >= 1 && port <= 65535)
-                    JiveGlobals.setProperty(
-                        PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME, maxPort);
-                else
-                    throw new NumberFormatException("out of range port");
+        final String minPort = request.getParameter( "minport" );
+        try {
+            final int port = Integer.parseInt( minPort );
+            if ( port < 1 && port > 65535 ) {
+                errors.put( "minPort", "Port number is out of the valid range (1 >= port => 65535)." );
             }
-            catch (Exception e)
-            {
-                errorMessage = LocaleUtils.getLocalizedString(
-                    "config.page.configuration.error.maxport",
-                    "ofmeet");
-            }
+        } catch (NumberFormatException ex ) {
+            errors.put( "minPort", "Cannot parse value as integer value." );
         }
-        
-	String checkReplay = request.getParameter("checkreplay"); 
-        JiveGlobals.setProperty(SRTPCryptoContext.CHECK_REPLAY_PNAME, checkReplay);
-        
-	String localAddress = request.getParameter("localaddress"); 
-        JiveGlobals.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME, localAddress);
 
-	String publicAddress = request.getParameter("publicaddress"); 
-        JiveGlobals.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, publicAddress);
-        
-	String securityenabled = request.getParameter("securityenabled"); 
-        JiveGlobals.setProperty("ofmeet.security.enabled", securityenabled);	
+        final String maxPort = request.getParameter( "maxport" );
+        try {
+            final int port = Integer.parseInt( maxPort );
+            if ( port < 1 && port > 65535 ) {
+                errors.put( "maxport", "Port number is out of the valid range (1 >= port => 65535)." );
+            }
+        } catch (NumberFormatException ex ) {
+            errors.put( "maxport", "Cannot parse value as integer value." );
+        }
 
-	String authusername = request.getParameter("authusername"); 
-        JiveGlobals.setProperty("voicebridge.default.proxy.sipauthuser", authusername);	
-        
-	String sippassword = request.getParameter("sippassword"); 	
-        JiveGlobals.setProperty("voicebridge.default.proxy.sippassword", sippassword);	
-        
-	String server = request.getParameter("server"); 	
-        JiveGlobals.setProperty("voicebridge.default.proxy.sipserver", server); 
-        
-	String outboundproxy = request.getParameter("outboundproxy"); 	
-        JiveGlobals.setProperty("voicebridge.default.proxy.outboundproxy", outboundproxy);  
+        final boolean checkreplay = ParamUtils.getBooleanParameter( request, "checkreplay" );
+        final String localAddress = request.getParameter( "localaddress" );
+        final String publicAddress = request.getParameter( "publicaddress" );
+        final boolean securityenabled = ParamUtils.getBooleanParameter( request, "securityenabled" );
+        final String authusername = request.getParameter( "authusername" );
+        final String sippassword = request.getParameter( "sippassword" );
+        final String server = request.getParameter( "server" );
+        final String outboundproxy = request.getParameter( "outboundproxy" );
+        final String iceServers = request.getParameter( "iceservers" );
+        final boolean useIPv6 = ParamUtils.getBooleanParameter( request, "useipv6" );
+        final boolean useNicks = ParamUtils.getBooleanParameter( request, "usenicks" );
+        final String resolution = request.getParameter( "resolution" );
+        try {
+            Integer.parseInt( resolution );
+        } catch (NumberFormatException ex ) {
+            errors.put( "resolution", "Cannot parse value as integer value." );
+        }
+        final String audiobandwidth = request.getParameter( "audiobandwidth" );
+        try {
+            Integer.parseInt( audiobandwidth );
+        } catch (NumberFormatException ex ) {
+            errors.put( "audiobandwidth", "Cannot parse value as integer value." );
+        }
+        final String videobandwidth = request.getParameter( "videobandwidth" );
+        try {
+            Integer.parseInt( videobandwidth );
+        } catch (NumberFormatException ex ) {
+            errors.put( "videobandwidth", "Cannot parse value as integer value." );
+        }
+        final boolean audiomixer = ParamUtils.getBooleanParameter( request, "audiomixer" );
+        final String clientusername = request.getParameter( "clientusername" );
+        final String clientpassword = request.getParameter( "clientpassword" );
+        final String enableSip = request.getParameter( "enableSip" );
+        final boolean allowdirectsip = ParamUtils.getBooleanParameter( request, "allowdirectsip" );
+        final String focusjid = request.getParameter( "focusjid" );
+        final String focuspassword = request.getParameter( "focuspassword" );
+        final String hqVoice = request.getParameter( "hqVoice" );
+        final boolean globalIntercom = ParamUtils.getBooleanParameter( request, "globalIntercom" );
 
-	String iceServers = request.getParameter("iceservers"); 	
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.iceservers", iceServers);         
-        
-	String useIPv6 = request.getParameter("useipv6"); 	
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.useipv6", useIPv6);         
-        
-	String useNicks = request.getParameter("usenicks"); 	
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.usenicks", useNicks);         
-        
-	String resolution = request.getParameter("resolution"); 	
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.resolution", resolution);                 
+        int channelLastN = -1;
+        try {
+            channelLastN = Integer.parseInt( request.getParameter( "channellastn" ) );
+        } catch (NumberFormatException ex ) {
+            errors.put( "channellastn", "Cannot parse value as integer value." );
+        }
 
-	String audiobandwidth = request.getParameter("audiobandwidth"); 	
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.audio.bandwidth", audiobandwidth);   
-        
-	String videobandwidth = request.getParameter("videobandwidth"); 	
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.video.bandwidth", videobandwidth);     
-        
-	String audiomixer = request.getParameter("audiomixer"); 	
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.audio.mixer", audiomixer);   
-        
-	String clientusername = request.getParameter("clientusername"); 	
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.sip.username", clientusername);    
-        
-	String clientpassword = request.getParameter("clientpassword"); 	
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.sip.password", clientpassword);          
+        final boolean adaptivelastn = ParamUtils.getBooleanParameter( request, "adaptivelastn" );
+        final boolean simulcast = ParamUtils.getBooleanParameter( request, "simulcast" );
+        final boolean adaptivesimulcast = ParamUtils.getBooleanParameter( request, "adaptivesimulcast" );
 
-	String allowdirectsip = request.getParameter("allowdirectsip"); 
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.allow.direct.sip", allowdirectsip);   
-        
-	String adaptivelastn = request.getParameter("adaptivelastn");
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.adaptive.lastn", adaptivelastn); 
+        if ( errors.isEmpty() )
+        {
+            JiveGlobals.setProperty( PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, minPort );
+            JiveGlobals.setProperty( PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME, maxPort );
+            JiveGlobals.setProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME, Boolean.toString( checkreplay ) );
+            JiveGlobals.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME, localAddress );
+            JiveGlobals.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, publicAddress );
+            JiveGlobals.setProperty( "ofmeet.security.enabled", Boolean.toString( securityenabled ) );
+            JiveGlobals.setProperty( "voicebridge.default.proxy.sipauthuser", authusername );
+            JiveGlobals.setProperty( "voicebridge.default.proxy.sippassword", sippassword );
+            JiveGlobals.setProperty( "voicebridge.default.proxy.sipserver", server );
+            JiveGlobals.setProperty( "voicebridge.default.proxy.outboundproxy", outboundproxy );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.iceservers", iceServers );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.useipv6", Boolean.toString( useIPv6 ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.usenicks", Boolean.toString( useNicks ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.resolution", resolution );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.audio.bandwidth", audiobandwidth );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.video.bandwidth", videobandwidth );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.audio.mixer", Boolean.toString( audiomixer ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.username", clientusername );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.password", clientpassword );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.enabled", enableSip );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.allow.direct.sip", Boolean.toString( allowdirectsip ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.hq.voice", hqVoice );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid", focusjid );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", focuspassword );
 
-	String adaptivesimulcast = request.getParameter("adaptivesimulcast"); 
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.adaptive.simulcast", adaptivesimulcast);         
+            ofmeetConfig.setChannelLastN( channelLastN );
+            ofmeetConfig.setAdaptiveLastN( adaptivelastn );
+            ofmeetConfig.setSimulcast( simulcast );
+            ofmeetConfig.setAdaptiveSimulcast( adaptivesimulcast );
 
-	String disablesimulcast = request.getParameter("disablesimulcast"); 
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.disable.simulcast", disablesimulcast); 
+            container.configureGlobalIntercom( globalIntercom );
 
-	String focusjid = request.getParameter("focusjid"); 
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", focusjid); 
-        
-	String focuspassword = request.getParameter("focuspassword"); 
-        JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.focus.user.password", focuspassword); 
-        
-	String canvasExtra = request.getParameter("canvasExtra"); 
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.canvas.extra", canvasExtra);
-	
-	String canvasRadius = request.getParameter("canvasRadius");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.canvas.radius", canvasRadius);
-	
-	String shadowColor = request.getParameter("shadowColor");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.shadow.color", shadowColor);
-	
-	String initialToolbarTimeout = request.getParameter("initialToolbarTimeout");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.initial.toolbar.timeout", initialToolbarTimeout);
-	
-	String toolbarTimeout = request.getParameter("toolbarTimeout");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.toolbar.timeout", toolbarTimeout);
-	
-	String defRemoteDisplName = request.getParameter("defRemoteDisplName");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.default.remote.displayname", defRemoteDisplName);
-	
-	String defDomSpkrDisplName = request.getParameter("defDomSpkrDisplName");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.default.speaker.displayname", defDomSpkrDisplName);
-	
-	String defLocalDisplName = request.getParameter("defLocalDisplName");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.default.local.displayname", defLocalDisplName);
-	
-	String watermarkLink = request.getParameter("watermarkLink");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.watermark.link", watermarkLink);
-	
-	String showWatermark = request.getParameter("showWatermark");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.show.watermark", showWatermark);
-	
-	String brandWatermarkLink = request.getParameter("brandWatermarkLink");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.brand.watermark.link", brandWatermarkLink);
-	
-	String brandShowWatermark = request.getParameter("brandShowWatermark");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.brand.show.watermark", brandShowWatermark);
-	
-	String showPoweredBy = request.getParameter("showPoweredBy");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.show.poweredby", showPoweredBy);
-	
-	String randomRoomNames = request.getParameter("randomRoomNames");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.random.roomnames", randomRoomNames);
-	
-	String applicationName = request.getParameter("applicationName");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.application.name", applicationName);
-	
-	String activeSpkrAvatarSize = request.getParameter("activeSpkrAvatarSize");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.active.speaker.avatarsize", activeSpkrAvatarSize);
+            container.populateJitsiSystemPropertiesWithJivePropertyValues();
 
-	String enableSip = request.getParameter("enableSip");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.sip.enabled", enableSip);
+            container.restartNeeded = true;
 
-	String hqVoice = request.getParameter("hqVoice");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.sip.hq.voice", hqVoice);	
-	
-	String globalIntercom = request.getParameter("globalIntercom");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.global.intercom", globalIntercom);
-	
-	String windowsSso = request.getParameter("windowsSso");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.windows.sso", windowsSso);
+            response.sendRedirect( "ofmeet-settings.jsp?settingsSaved=true" );
+            return;
+        }
+    }
 
-	String azureClientId = request.getParameter("azureClientId");
-	JiveGlobals.setProperty("org.jitsi.videobridge.ofmeet.azure.clientid", azureClientId);
+    final String csrf = StringUtils.randomString( 15 );
+    CookieUtils.setCookie( request, response, "csrf", csrf, -1 );
 
-	container.populateJitsiSystemPropertiesWithJivePropertyValues();
-	}
-
+    pageContext.setAttribute( "csrf", csrf );
+    pageContext.setAttribute( "errors", errors );
+    pageContext.setAttribute( "restartNeeded", container.restartNeeded );
+    pageContext.setAttribute( "ourIpAddress", ourIpAddress );
+    pageContext.setAttribute( "ourHostname", ourHostname );
+    pageContext.setAttribute( "serverInfo", XMPPServer.getInstance().getServerInfo() );
+    pageContext.setAttribute( "MIN_PORT_NUMBER_PROPERTY_NAME", PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME );
+    pageContext.setAttribute( "MAX_PORT_NUMBER_PROPERTY_NAME", PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME );
+    pageContext.setAttribute( "NAT_HARVESTER_LOCAL_ADDRESS_PNAME", MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME );
+    pageContext.setAttribute( "NAT_HARVESTER_PUBLIC_ADDRESS_PNAME", MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME );
+    pageContext.setAttribute( "CHECK_REPLAY_PNAME", SRTPCryptoContext.CHECK_REPLAY_PNAME );
 %>
 <html>
 <head>
-   <title><fmt:message key="config.page.settings.title" /></title>
-
-   <meta name="pageID" content="ofmeet-settings"/>
+    <title><fmt:message key="config.page.settings.title"/></title>
+    <meta name="pageID" content="ofmeet-settings"/>
 </head>
 <body>
-<% if (errorMessage != null) { %>
-<div class="error">
-    <%= errorMessage%>
-</div>
-<br/>
-<% } %>
+
+<c:choose>
+    <c:when test="${not empty param.settingsSaved and empty errors}">
+        <admin:infoBox type="success"><fmt:message key="config.page.configuration.save.success" /></admin:infoBox>
+    </c:when>
+    <c:otherwise>
+        <c:forEach var="err" items="${errors}">
+            <admin:infobox type="error">
+                <c:choose>
+                    <c:when test="${err.key eq 'csrf'}"><fmt:message key="global.csrf.failed"/></c:when>
+                    <c:otherwise>
+                        <c:if test="${not empty err.value}">
+                            <c:out value="${err.value}"/>
+                        </c:if>
+                        (<c:out value="${err.key}"/>)
+                    </c:otherwise>
+                </c:choose>
+            </admin:infobox>
+        </c:forEach>
+    </c:otherwise>
+</c:choose>
+
+<c:if test="${restartNeeded}">
+    <admin:infoBox type="warning"><fmt:message key="config.page.configuration.restart.warning"/></admin:infoBox>
+</c:if>
+
+<p><fmt:message key="config.page.settings.introduction" /></p>
 
 <form action="ofmeet-settings.jsp" method="post">
-<div class="jive-contentBoxHeader">   
-	<fmt:message key="config.page.configuration.ofmeet.title"/>
-</div>
-<div class="jive-contentBox">
-    <p>
-        <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tbody>             
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="useipv6" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.useipv6", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.ofmeet.useipv6.disabled" /></b> - <fmt:message key="config.page.configuration.ofmeet.useipv6.disabled_desc" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="useipv6" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.useipv6", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.ofmeet.useipv6.enabled" /></b> - <fmt:message key="config.page.configuration.ofmeet.useipv6.enabled_desc" />
-		    </td>
-	    </tr> 
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="usenicks" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.usenicks", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.ofmeet.usenicks.disabled" /></b> - <fmt:message key="config.page.configuration.ofmeet.usenicks.disabled_desc" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="usenicks" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.usenicks", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.ofmeet.usenicks.enabled" /></b> - <fmt:message key="config.page.configuration.ofmeet.usenicks.enabled_desc" />
-		    </td>
-	    </tr>
-	    <tr>
-		<td colspan="2" align="left" width="200">
-		    <fmt:message key="config.page.configuration.ofmeet.iceservers"/>
-		</td>
-	    </tr>	
-	    <tr>		
-		<td colspan="2"><input type="text" size="100" maxlength="256" name="iceservers"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.iceservers", "") %>" placeholder="{ 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] }">
-		</td>
-	    </tr>	
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="config.page.configuration.ofmeet.resolution"/>
-		</td>
-		<td><input type="text" size="10" maxlength="100" name="resolution"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.resolution", "360") %>">
-		</td>
-	    </tr>
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="config.page.configuration.ofmeet.audio.bandwidth"/>
-		</td>
-		<td><input type="text" size="10" maxlength="100" name="audiobandwidth"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.audio.bandwidth", "64") %>">
-		</td>
-	    </tr>
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="config.page.configuration.ofmeet.video.bandwidth"/>
-		</td>
-		<td><input type="text" size="10" maxlength="100" name="videobandwidth"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.video.bandwidth", "512") %>">
-		</td>
-	    </tr>
-	    
-	    <tr>
-		    <td nowrap  colspan="2">
-			<input type="checkbox" name="globalIntercom"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.global.intercom", "off").equals("on")) ? " checked" : "" %>>
-			<fmt:message key="config.page.configuration.global.intercom" />		
-		    </td>
-	    </tr>	    
-            </tbody>
-        </table>
-    </p>
-</div>
-<div class="jive-contentBoxHeader">   
-	<fmt:message key="config.page.configuration.ui.title"/>
-</div>
-<div class="jive-contentBox">    
-    <p>
-        <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tbody>
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="ofmeet.application.name"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="applicationName"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.application.name", "Openfire Meetings") %>">
-		</td>
-	    </tr>  
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="ofmeet.active.speaker.avatarsize"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="activeSpkrAvatarSize"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.active.speaker.avatarsize", "100") %>">
-		</td>
-	    </tr>	    
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="ofmeet.canvas.extra"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="canvasExtra"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.canvas.extra", "104") %>">
-		</td>
-	    </tr>  	    
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="ofmeet.canvas.radius"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="canvasRadius"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.canvas.radius", "7") %>">
-		</td>		
-	    </tr>	
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="ofmeet.shadow.color"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="shadowColor"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.shadow.color", "#ffffff") %>">
-		</td>		
-	    </tr>
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="ofmeet.initial.toolbar.timeout"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="initialToolbarTimeout"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.initial.toolbar.timeout", "20000") %>">
-		</td>		
-	    </tr>
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="ofmeet.toolbar.timeout"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="toolbarTimeout"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.toolbar.timeout", "4000") %>">
-		</td>		
-	    </tr>
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="ofmeet.default.remote.displayname"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="defRemoteDisplName"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.default.remote.displayname", "Change Me") %>">
-		</td>		
-	    </tr>
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="ofmeet.default.speaker.displayname"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="defDomSpkrDisplName"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.default.speaker.displayname", "Speaker") %>">
-		</td>		
-	    </tr>
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="ofmeet.default.local.displayname"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="defLocalDisplName"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.default.local.displayname", "Me") %>">
-		</td>		
-	    </tr>
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="showWatermark" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.show.watermark", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.disabled" /></b> - <fmt:message key="ofmeet.show.watermark.disabled" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="showWatermark" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.show.watermark", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.enabled" /></b> - <fmt:message key="ofmeet.show.watermark.enabled" />
-		    </td>
-	    </tr>
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="ofmeet.watermark.link"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="watermarkLink"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.watermark.link", "") %>">
-		</td>		
-	    </tr>
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="brandShowWatermark" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.brand.show.watermark", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.disabled" /></b> - <fmt:message key="ofmeet.brand.show.watermark.disabled" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="brandShowWatermark" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.brand.show.watermark", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.enabled" /></b> - <fmt:message key="ofmeet.brand.show.watermark.enabled" />
-		    </td>
-	    </tr>
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="ofmeet.brand.watermark.link"/>
-		</td>
-		<td><input type="text" size="60" maxlength="100" name="brandWatermarkLink"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.brand.watermark.link", "") %>">
-		</td>		
-	    </tr>
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="showPoweredBy" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.show.poweredby", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.disabled" /></b> - <fmt:message key="ofmeet.show.poweredby.disabled" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="showPoweredBy" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.show.poweredby", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.enabled" /></b> - <fmt:message key="ofmeet.show.poweredby.enabled" />
-		    </td>
-	    </tr>
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="randomRoomNames" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.random.roomnames", "true")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.disabled" /></b> - <fmt:message key="ofmeet.random.roomnames.disabled" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="randomRoomNames" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.random.roomnames", "true")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.enabled" /></b> - <fmt:message key="ofmeet.random.roomnames.enabled" />
-		    </td>
-	    </tr>	    
-            </tbody>
-        </table> 
-     </p>
-</div>
-<div class="jive-contentBoxHeader">   
-	<fmt:message key="config.page.configuration.media.title"/>
-</div>
-<div class="jive-contentBox">      
-    <p>
-        <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tbody>
-            <tr>
-                <td align="left" width="200">
-                	<fmt:message key="config.page.configuration.min.port"/><br>
-                </td>
- 		<td>
-                    <input name="minport" type="text" maxlength="5" size="5"
-                           value="<%=System.getProperty( PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, "5000" ) %>"/>
-                </td>
-            </tr>
-            <tr>
-                <td align="left" width="200">
-                	<fmt:message key="config.page.configuration.max.port"/><br>
-                </td>
-    		<td>
-                    <input name="maxport" type="text" maxlength="5" size="5"
-                           value="<%=System.getProperty( PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME, "6000" ) %>"/>
-                </td>
-            </tr>
-            <tr>
-                <td align="left" width="200">
-                	<fmt:message key="config.page.configuration.local.ip.address"/><br>
-                </td>
-		<td>
-                    <input name="localaddress" type="text" maxlength="20" size="15"
-                           value="<%=JiveGlobals.getProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME, ourIpAddress)%>"/>
-                </td>
-            </tr>
-            <tr>
-                <td align="left" width="200">
-                	<fmt:message key="config.page.configuration.public.ip.address"/><br>
-                </td>
-		<td>
-                    <input name="publicaddress" type="text" maxlength="20" size="15"
-                           value="<%=JiveGlobals.getProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, ourIpAddress)%>"/>
-                </td>
-            </tr>            
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="checkreplay" <%= ("false".equals(JiveGlobals.getProperty(SRTPCryptoContext.CHECK_REPLAY_PNAME, "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.checkreplay.disabled" /></b> - <fmt:message key="config.page.configuration.checkreplay.disabled_description" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="checkreplay" <%= ("true".equals(JiveGlobals.getProperty(SRTPCryptoContext.CHECK_REPLAY_PNAME, "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.checkreplay.enabled" /></b> - <fmt:message key="config.page.configuration.checkreplay.enabled_description" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="audiomixer" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.audio.mixer", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.audiomixer.disabled" /></b> - <fmt:message key="config.page.configuration.audiomixer.disabled_description" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="audiomixer" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.audio.mixer", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.audiomixer.enabled" /></b> - <fmt:message key="config.page.configuration.audiomixer.enabled_description" />
-		    </td>
-	    </tr> 	    
-            </tbody>
-        </table> 
-     </p>   
-</div>
-<div class="jive-contentBoxHeader">   
-	<fmt:message key="config.page.configuration.security.title"/>
-</div>
-<div class="jive-contentBox">       
-     <p>
-        <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tbody>  
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="config.page.configuration.focus.jid"/>
-		</td>
-		<td><input type="text" size="20" maxlength="100" name="focusjid"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain()) %>">
-		</td>
-	    </tr>
 
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="config.page.configuration.focus.password"/>
-		</td>
-		<td><input type="password" size="20" maxlength="100" name="focuspassword"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.password", "focus-password-" + System.currentTimeMillis()) %>">
-		</td>
-	    </tr>            
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="securityenabled" <%= ("false".equals(JiveGlobals.getProperty("ofmeet.security.enabled", "true")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.security.disabled" /></b> - <fmt:message key="config.page.configuration.security.disabled_description" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="securityenabled" <%= ("true".equals(JiveGlobals.getProperty("ofmeet.security.enabled", "true")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.security.enabled" /></b> - <fmt:message key="config.page.configuration.security.enabled_description" />
-		    </td>
-	    </tr> 
-	    <tr>
-		    <td nowrap  colspan="2">
-			<input type="checkbox" name="windowsSso"<%= (JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.windows.sso", "off").equals("on")) ? " checked" : "" %>>
-			<fmt:message key="config.page.configuration.security.windows.sso" />		
-		    </td>
-	    </tr>
-	    <tr>
-		<td align="left" width="200">
-		    <fmt:message key="config.page.configuration.azure.clientid"/>
-		</td>
-		<td><input type="text" size="40" maxlength="100" name="azureClientId"
-			   value="<%= JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.azure.clientid", "9ba1a5c7-f17a-4de9-a1f1-6178c8d51223") %>">
-		</td>
-	    </tr>	    
-            </tbody>
-        </table> 
-    </p>
-</div>
-<div class="jive-contentBoxHeader">   
-	<fmt:message key="config.page.configuration.advanced.features.title"/>
-</div>
-<div class="jive-contentBox">     
-    <p>
+    <fmt:message key="config.page.configuration.ofmeet.title" var="boxtitleofmeet"/>
+    <admin:contentBox title="${boxtitleofmeet}">
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tbody> 
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="adaptivelastn" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.adaptive.lastn", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.adaptivelastn.disabled" /></b> - <fmt:message key="config.page.configuration.adaptivelastn.disabled_description" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="adaptivelastn" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.adaptive.lastn", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.adaptivelastn.enabled" /></b> - <fmt:message key="config.page.configuration.adaptivelastn.enabled_description" />
-		    </td>
-	    </tr> 
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="adaptivesimulcast" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.adaptive.simulcast", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.adaptivesimulcast.disabled" /></b> - <fmt:message key="config.page.configuration.adaptivesimulcast.disabled_description" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="adaptivesimulcast" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.adaptive.simulcast", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.adaptivesimulcast.enabled" /></b> - <fmt:message key="config.page.configuration.adaptivesimulcast.enabled_description" />
-		    </td>
-	    </tr>
-
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="true" name="disablesimulcast" <%= ("true".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.disable.simulcast", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.disablesimulcast.disabled" /></b> - <fmt:message key="config.page.configuration.disablesimulcast.disabled_description" />
-		    </td>
-	    </tr>   
-	    <tr>
-		    <td  nowrap colspan="2">
-			<input type="radio" value="false" name="disablesimulcast" <%= ("false".equals(JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.disable.simulcast", "false")) ? "checked" : "") %>>
-			<b><fmt:message key="config.page.configuration.disablesimulcast.enabled" /></b> - <fmt:message key="config.page.configuration.disablesimulcast.enabled_description" />
-		    </td>
-	    </tr>	    
-        </table>
-   </p>  
-</div>
-<div class="jive-contentBoxHeader">   
-	<fmt:message key="config.page.configuration.save.title"/>
-</div>
-<div class="jive-contentBox">     
-   <p>
-        <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tbody> 	    
             <tr>
-                <th colspan="2"><input type="submit" name="update" value="<fmt:message key="config.page.configuration.submit" />">&nbsp;&nbsp;<fmt:message key="config.page.configuration.restart.warning"/></th>
-            </tr>	    
-            </tbody>            
-        </table> 
-    </p>
-</div>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="useipv6" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.useipv6", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.useipv6.enabled_desc" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="usenicks" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.usenicks", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.usenicks.enabled_desc" />
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2" align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.iceservers"/>:</td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="text" size="100" maxlength="256" name="iceservers"
+                           value="${admin:getProperty("org.jitsi.videobridge.ofmeet.iceservers", "")}"
+                           placeholder="{ 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] }">
+                </td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.resolution"/>:</td>
+                <td><input type="text" size="10" maxlength="100" name="resolution" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.resolution", 360)}"></td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.audio.bandwidth"/>:</td>
+                <td><input type="text" size="10" maxlength="100" name="audiobandwidth" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.audio.bandwidth", 64)}"></td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.video.bandwidth"/>:</td>
+                <td><input type="text" size="10" maxlength="100" name="videobandwidth" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.video.bandwidth", 512)}"></td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="globalIntercom" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.global.intercom", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.global.intercom"/>
+                </td>
+            </tr>
+        </table>
+    </admin:contentBox>
+
+    <fmt:message key="config.page.configuration.media.title" var="boxtitlemedia"/>
+    <admin:contentBox title="${boxtitlemedia}">
+
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.min.port"/>:</td>
+                <td><input name="minport" type="text" maxlength="5" size="5" value="${admin:getIntProperty( MIN_PORT_NUMBER_PROPERTY_NAME, 5000)}"/></td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.max.port"/>:</td>
+                <td><input name="maxport" type="text" maxlength="5" size="5" value="${admin:getIntProperty( MAX_PORT_NUMBER_PROPERTY_NAME, 6000)}"/></td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.local.ip.address"/>:</td>
+                <td><input name="localaddress" type="text" maxlength="20" size="15" value="${admin:getProperty( NAT_HARVESTER_LOCAL_ADDRESS_PNAME, ourIpAddress)}"/></td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.public.ip.address"/>:</td>
+                <td><input name="publicaddress" type="text" maxlength="20" size="15" value="${admin:getProperty( NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, ourIpAddress)}"/></td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="checkreplay" ${admin:getBooleanProperty( CHECK_REPLAY_PNAME, false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.checkreplay.enabled_description" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="audiomixer" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.audio.mixer", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.audiomixer.enabled_description" />
+                </td>
+            </tr>
+        </table>
+    </admin:contentBox>
+
+    <fmt:message key="config.page.configuration.security.title" var="boxtitlesecurity"/>
+    <admin:contentBox title="${boxtitlesecurity}">
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.focus.jid"/>:</td>
+                <td><input type="text" size="20" maxlength="100" name="focusjid" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@".concat( serverInfo.XMPPDomain ))}"></td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.focus.password"/>:</td>
+                <td><input type="password" size="20" maxlength="100" name="focuspassword" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.focus.user.password", "focus-password-".concat( random.nextInt(15) ) )}"></td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="securityenabled" ${admin:getBooleanProperty( "ofmeet.security.enabled", true) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.security.enabled_description" />
+                </td>
+            </tr>
+        </table>
+    </admin:contentBox>
+
+    <fmt:message key="config.page.configuration.lastn.title" var="boxtitlelastn"/>
+    <admin:contentBox title="${boxtitlelastn}">
+        <p><fmt:message key="config.page.configuration.lastn.description"/></p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.channellastn"/>:</td>
+                <td><input type="text" size="20" maxlength="20" name="channellastn" value="${ofmeetConfig.channelLastN}"></td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="adaptivelastn" ${ofmeetConfig.adaptiveLastN ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.adaptivelastn" />
+                </td>
+            </tr>
+        </table>
+    </admin:contentBox>
+
+    <fmt:message key="config.page.configuration.simulcast.title" var="boxtitlesimulcast"/>
+    <admin:contentBox title="${boxtitlesimulcast}">
+        <p><fmt:message key="config.page.configuration.simulcast.description"/></p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="simulcast" ${ofmeetConfig.simulcast ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.simulcast" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="adaptivesimulcast" ${ofmeetConfig.adaptiveSimulcast ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.adaptivesimulcast" />
+                </td>
+            </tr>
+        </table>
+    </admin:contentBox>
+
+    <input type="hidden" name="csrf" value="${csrf}">
+
+    <input type="submit" name="update" value="<fmt:message key="global.save_settings" />">
 </form>
 </body>
 </html>

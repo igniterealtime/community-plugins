@@ -66,6 +66,11 @@
         </dependency>
         <dependency>
             <groupId>org.igniterealtime.openfire</groupId>
+            <artifactId>ofmeet-config</artifactId>
+            <version>0.4.9-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.igniterealtime.openfire</groupId>
             <artifactId>xmppserver</artifactId>
             <version>${openfire.version}</version>
             <scope>provided</scope>
