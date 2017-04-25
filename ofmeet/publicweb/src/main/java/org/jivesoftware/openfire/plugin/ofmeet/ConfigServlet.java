@@ -126,7 +126,7 @@ public class ConfigServlet extends HttpServlet
             final Map<String, String> hosts = new HashMap<>();
             hosts.put( "domain", xmppDomain );
             hosts.put( "muc", "conference." + xmppDomain );
-            hosts.put( "bridge", "videobridge." + xmppDomain );
+            hosts.put( "bridge", "jitsi-videobridge." + xmppDomain );
             hosts.put( "focus", "focus." + xmppDomain );
             config.put( "hosts", hosts );
 
@@ -135,7 +135,7 @@ public class ConfigServlet extends HttpServlet
             {
                 config.put( "iceServers", iceServers.trim() );
             }
-            config.put( "enforcedBridge", "videobridge." + xmppDomain );
+            config.put( "enforcedBridge", "jitsi-videobridge." + xmppDomain );
             config.put( "useStunTurn", useStunTurn );
             config.put( "useIPv6", useIPv6 );
             config.put( "useNicks", useNicks );
