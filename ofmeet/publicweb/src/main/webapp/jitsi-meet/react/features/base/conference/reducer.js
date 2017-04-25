@@ -1,9 +1,7 @@
+import { LOCKED_LOCALLY, LOCKED_REMOTELY } from '../../room-lock';
+
 import { JitsiConferenceErrors } from '../lib-jitsi-meet';
-import {
-    ReducerRegistry,
-    setStateProperties,
-    setStateProperty
-} from '../redux';
+import { assign, ReducerRegistry, set } from '../redux';
 
 import {
     CONFERENCE_FAILED,
@@ -78,12 +76,20 @@ function _conferenceFailed(state, action) {
             : undefined;
 
     return (
-        setStateProperties(state, {
+        assign(state, {
             audioOnly: undefined,
             audioOnlyVideoMuted: undefined,
             conference: undefined,
             leaving: undefined,
-            locked: undefined,
+
+            /**
+             * The indicator of how the conference/room is locked. If falsy, the
+             * conference/room is unlocked; otherwise, it's either
+             * {@code LOCKED_LOCALLY| or {@code LOCKED_REMOTELY}.
+             *
+             * @type {string}
+             */
+            locked: passwordRequired ? LOCKED_REMOTELY : undefined,
             password: undefined,
 
             /**
@@ -112,10 +118,10 @@ function _conferenceJoined(state, action) {
     // i.e. password-protected is private to lib-jitsi-meet. However, the
     // library does not fire LOCK_STATE_CHANGED upon joining a JitsiConference
     // with a password.
-    const locked = conference.room.locked || undefined;
+    const locked = conference.room.locked ? LOCKED_REMOTELY : undefined;
 
     return (
-        setStateProperties(state, {
+        assign(state, {
             /**
              * The JitsiConference instance represented by the Redux state of
              * the feature base/conference.
@@ -153,7 +159,7 @@ function _conferenceLeft(state, action) {
     }
 
     return (
-        setStateProperties(state, {
+        assign(state, {
             audioOnly: undefined,
             audioOnlyVideoMuted: undefined,
             conference: undefined,
@@ -182,7 +188,7 @@ function _conferenceWillLeave(state, action) {
     }
 
     return (
-        setStateProperties(state, {
+        assign(state, {
             /**
              * The JitsiConference instance which is currently in the process of
              * being left.
@@ -209,7 +215,16 @@ function _lockStateChanged(state, action) {
         return state;
     }
 
-    return setStateProperty(state, 'locked', action.locked || undefined);
+    let locked;
+
+    if (action.locked) {
+        locked = state.locked || LOCKED_REMOTELY;
+    }
+
+    return assign(state, {
+        locked,
+        password: action.locked ? state.password : null
+    });
 }
 
 /**
@@ -223,7 +238,7 @@ function _lockStateChanged(state, action) {
  * reduction of the specified action.
  */
 function _setAudioOnly(state, action) {
-    return setStateProperty(state, 'audioOnly', action.audioOnly);
+    return set(state, 'audioOnly', action.audioOnly);
 }
 
 /**
@@ -238,7 +253,7 @@ function _setAudioOnly(state, action) {
  * reduction of the specified action.
  */
 function _setAudioOnlyVideoMuted(state, action) {
-    return setStateProperty(state, 'audioOnlyVideoMuted', action.muted);
+    return set(state, 'audioOnlyVideoMuted', action.muted);
 }
 
 /**
@@ -257,7 +272,9 @@ function _setPassword(state, action) {
     case conference.join:
         if (state.passwordRequired === conference) {
             return (
-                setStateProperties(state, {
+                assign(state, {
+                    locked: LOCKED_REMOTELY,
+
                     /**
                      * The password with which the conference is to be joined.
                      *
@@ -268,6 +285,12 @@ function _setPassword(state, action) {
                 }));
         }
         break;
+
+    case conference.lock:
+        return assign(state, {
+            locked: action.password ? LOCKED_LOCALLY : undefined,
+            password: action.password
+        });
     }
 
     return state;
@@ -297,5 +320,5 @@ function _setRoom(state, action) {
      *
      * @type {string}
      */
-    return setStateProperty(state, 'room', room);
+    return set(state, 'room', room);
 }

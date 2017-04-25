@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 /**
  * Sets specific properties of a specific state to specific values and prevents
  * unnecessary state changes.
@@ -11,14 +13,27 @@
  * from the specified target by setting the specified properties to the
  * specified values.
  */
-export function setStateProperties(target, source) {
+export function assign(target, source) {
     let t = target;
 
     for (const property in source) { // eslint-disable-line guard-for-in
-        t = setStateProperty(t, property, source[property], t === target);
+        t = set(t, property, source[property], t === target);
     }
 
     return t;
+}
+
+/**
+ * Determines whether {@code a} equals {@code b} according to deep comparison
+ * (which makes sense for Redux and its state definition).
+ *
+ * @param {*} a - The value to compare to {@code b}.
+ * @param {*} b - The value to compare to {@code a}.
+ * @returns {boolean} True if {@code a} equals {@code b} (according to deep
+ * comparison); false, otherwise.
+ */
+export function equals(a, b) {
+    return _.isEqual(a, b);
 }
 
 /**
@@ -37,8 +52,8 @@ export function setStateProperties(target, source) {
  * constructed from the specified <tt>state</tt> by setting the specified
  * <tt>property</tt> to the specified <tt>value</tt>.
  */
-export function setStateProperty(state, property, value) {
-    return _setStateProperty(state, property, value, /* copyOnWrite */ true);
+export function set(state, property, value) {
+    return _set(state, property, value, /* copyOnWrite */ true);
 }
 
 /* eslint-disable max-params */
@@ -62,7 +77,7 @@ export function setStateProperty(state, property, value) {
  * <tt>state</tt> by setting the specified <tt>property</tt> to the specified
  * <tt>value</tt>.
  */
-function _setStateProperty(state, property, value, copyOnWrite) {
+function _set(state, property, value, copyOnWrite) {
     // Delete state properties that are to be set to undefined. (It is a matter
     // of personal preference, mostly.)
     if (typeof value === 'undefined'

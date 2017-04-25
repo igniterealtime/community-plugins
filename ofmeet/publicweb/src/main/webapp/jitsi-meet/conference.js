@@ -2,7 +2,6 @@
 const logger = require("jitsi-meet-logger").getLogger(__filename);
 
 import {openConnection} from './connection';
-import Invite from './modules/UI/invite/Invite';
 import ContactList from './modules/UI/side_pannels/contactlist/ContactList';
 
 import AuthHandler from './modules/UI/authentication/AuthHandler';
@@ -28,7 +27,8 @@ import {
     conferenceFailed,
     conferenceJoined,
     conferenceLeft,
-    EMAIL_COMMAND
+    EMAIL_COMMAND,
+    lockStateChanged
 } from './react/features/base/conference';
 import {
     updateDeviceList
@@ -37,6 +37,7 @@ import {
     isFatalJitsiConnectionError
 } from './react/features/base/lib-jitsi-meet';
 import {
+    localParticipantRoleChanged,
     participantJoined,
     participantLeft,
     participantRoleChanged,
@@ -372,10 +373,9 @@ function createLocalTracks(options, checkForPermissionPrompt) {
 }
 
 class ConferenceConnector {
-    constructor(resolve, reject, invite) {
+    constructor(resolve, reject) {
         this._resolve = resolve;
         this._reject = reject;
-        this._invite = invite;
         this.reconnectTimeout = null;
         room.on(ConferenceEvents.CONFERENCE_JOINED,
             this._handleConferenceJoined.bind(this));
@@ -409,15 +409,15 @@ class ConferenceConnector {
             break;
 
             // not enough rights to create conference
-        case ConferenceErrors.AUTHENTICATION_REQUIRED:
-            // schedule reconnect to check if someone else created the room
-            this.reconnectTimeout = setTimeout(function () {
-                room.join();
-            }, 5000);
+        case ConferenceErrors.AUTHENTICATION_REQUIRED: {
+                // Schedule reconnect to check if someone else created the room.
+                this.reconnectTimeout = setTimeout(() => room.join(), 5000);
 
-            // notify user that auth is required
-            AuthHandler.requireAuth(
-                room, this._invite.getRoomLocker().password);
+                const { password }
+                    = APP.store.getState()['features/base/conference'];
+
+                AuthHandler.requireAuth(room, password);
+            }
             break;
 
         case ConferenceErrors.RESERVATION_ERROR:
@@ -629,8 +629,7 @@ export default {
                 // XXX The API will take care of disconnecting from the XMPP
                 // server (and, thus, leaving the room) on unload.
                 return new Promise((resolve, reject) => {
-                    (new ConferenceConnector(
-                        resolve, reject, this.invite)).connect();
+                    (new ConferenceConnector(resolve, reject)).connect();
                 });
         });
     },
@@ -984,7 +983,6 @@ export default {
         room = connection.initJitsiConference(APP.conference.roomName,
             this._getConferenceOptions());
         this._setLocalAudioVideoStreams(localTracks);
-        this.invite = new Invite(room);
         this._room = room; // FIXME do not use this
 
         _setupLocalParticipantProperties();
@@ -1262,14 +1260,18 @@ export default {
 
 
         room.on(ConferenceEvents.USER_ROLE_CHANGED, (id, role) => {
-            APP.store.dispatch(participantRoleChanged(id, role));
             if (this.isLocalId(id)) {
                 logger.info(`My role changed, new role: ${role}`);
+
+                APP.store.dispatch(localParticipantRoleChanged(role));
+
                 if (this.isModerator !== room.isModerator()) {
                     this.isModerator = room.isModerator();
                     APP.UI.updateLocalRole(room.isModerator());
                 }
             } else {
+                APP.store.dispatch(participantRoleChanged(id, role));
+
                 let user = room.getParticipantById(id);
                 if (user) {
                     APP.UI.updateUserRole(user);
@@ -1443,6 +1445,10 @@ export default {
             APP.API.notifyDisplayNameChanged(id, formattedDisplayName);
             APP.UI.changeDisplayName(id, formattedDisplayName);
         });
+
+        room.on(
+            ConferenceEvents.LOCK_STATE_CHANGED,
+            (...args) => APP.store.dispatch(lockStateChanged(room, ...args)));
 
         room.on(ConferenceEvents.PARTICIPANT_PROPERTY_CHANGED,
                 (participant, name, oldValue, newValue) => {
@@ -2048,8 +2054,9 @@ export default {
         }
 
         APP.settings.setDisplayName(formattedNickname);
-        room.setDisplayName(formattedNickname);
-        APP.UI.changeDisplayName(this.getMyUserId(),
-            formattedNickname);
+        if (room) {
+            room.setDisplayName(formattedNickname);
+            APP.UI.changeDisplayName(this.getMyUserId(), formattedNickname);
+        }
     }
 };

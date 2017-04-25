@@ -22,6 +22,7 @@ import {
     _SET_AUDIO_ONLY_VIDEO_MUTED,
     SET_LASTN,
     SET_PASSWORD,
+    SET_PASSWORD_FAILED,
     SET_ROOM
 } from './actionTypes';
 import {
@@ -56,7 +57,7 @@ function _addConferenceListeners(conference, dispatch) {
 
     conference.on(
             JitsiConferenceEvents.LOCK_STATE_CHANGED,
-            (...args) => dispatch(_lockStateChanged(conference, ...args)));
+            (...args) => dispatch(lockStateChanged(conference, ...args)));
 
     // Dispatches into features/base/tracks follow:
 
@@ -253,7 +254,7 @@ export function createConference() {
 
         dispatch(_conferenceWillJoin(room));
 
-        const { config } = state['features/base/lib-jitsi-meet'];
+        const config = state['features/base/config'];
         const conference
             = connection.initJitsiConference(
 
@@ -292,7 +293,7 @@ export function createConference() {
  *     locked: boolean
  * }}
  */
-function _lockStateChanged(conference, locked) {
+export function lockStateChanged(conference, locked) {
     return {
         type: LOCK_STATE_CHANGED,
         conference,
@@ -367,7 +368,7 @@ export function _setAudioOnlyVideoMuted(muted: boolean) {
 export function setLastN(lastN: ?number) {
     return (dispatch: Dispatch<*>, getState: Function) => {
         if (typeof lastN === 'undefined') {
-            const { config } = getState()['features/base/lib-jitsi-meet'];
+            const config = getState()['features/base/config'];
 
             /* eslint-disable no-param-reassign */
 
@@ -440,7 +441,12 @@ export function setPassword(conference, method, password) {
                             conference,
                             method,
                             password
-                        })));
+                        }))
+                        .catch(error => dispatch({
+                            type: SET_PASSWORD_FAILED,
+                            error
+                        }))
+                );
             }
 
             return Promise.reject();
