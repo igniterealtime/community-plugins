@@ -265,6 +265,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		if ( publicWebApp != null )
 		{
 			HttpBindManager.getInstance().getContexts().removeHandler( publicWebApp );
+			publicWebApp.destroy();
 			publicWebApp = null;
 		}
 	}

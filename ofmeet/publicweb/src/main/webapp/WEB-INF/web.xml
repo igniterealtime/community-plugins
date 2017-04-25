@@ -35,6 +35,18 @@
 	</servlet-mapping>
 
 	<filter>
+		<filter-name>WatermarkFilter</filter-name>
+		<filter-class>org.jivesoftware.openfire.plugin.ofmeet.WatermarkFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>WatermarkFilter</filter-name>
+		<url-pattern>/jitsi-meet/images/watermark.png</url-pattern>
+		<url-pattern>/jitsi-meet/images/rightwatermark.png</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
+	<filter>
 		<filter-name>JitsiMeetRedirectFilter</filter-name>
 		<filter-class>org.jivesoftware.openfire.plugin.ofmeet.JitsiMeetRedirectFilter</filter-class>
 	</filter>

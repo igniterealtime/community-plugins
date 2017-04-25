@@ -18,10 +18,13 @@
 <%@ page import="org.jivesoftware.util.*" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.HashMap" %>
+<%@ page import="java.net.URL" %>
+<%@ page import="java.net.MalformedURLException" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="admin" prefix="admin" %>
+<jsp:useBean id="ofmeetConfig" class="org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig"/>
 <%
     boolean update = request.getParameter("update") != null;
 
@@ -82,10 +85,31 @@
         final boolean showPoweredBy = ParamUtils.getBooleanParameter( request, "showPoweredBy" );
         final boolean randomRoomNames = ParamUtils.getBooleanParameter( request, "randomRoomNames" );
 
-        final String watermarkLink = request.getParameter( "watermarkLink" );
         final boolean showWatermark =  ParamUtils.getBooleanParameter( request, "showWatermark" );
-        final String brandWatermarkLink = request.getParameter( "brandWatermarkLink" );
+        final String watermarkLogoUrlValue = request.getParameter( "watermarkLogoUrl" );
+        URL watermarkLogoUrl = null;
+        if ( watermarkLogoUrlValue != null && !watermarkLogoUrlValue.isEmpty() )
+        {
+            try {
+                watermarkLogoUrl = new URL( watermarkLogoUrlValue );
+            } catch ( MalformedURLException e ) {
+                errors.put( "watermarkLogoUrl", "Cannot parse value as a URL." );
+            }
+        }
+        final String watermarkLink = request.getParameter( "watermarkLink" );
+
         final boolean brandShowWatermark =  ParamUtils.getBooleanParameter( request, "brandShowWatermark" );
+        URL brandWatermarkLogoUrl = null;
+        final String brandWatermarkLogoUrlValue = request.getParameter( "brandWatermarkLogoUrl" );
+        if ( brandWatermarkLogoUrlValue != null && !brandWatermarkLogoUrlValue.isEmpty() )
+        {
+            try {
+                brandWatermarkLogoUrl = new URL( brandWatermarkLogoUrlValue );
+            } catch ( MalformedURLException e ) {
+                errors.put( "brandWatermarkLogoUrl", "Cannot parse value as a URL." );
+            }
+        }
+        final String brandWatermarkLink = request.getParameter( "brandWatermarkLink" );
 
         if ( errors.isEmpty() )
 		{
@@ -106,6 +130,8 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.link", brandWatermarkLink );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", Boolean.toString( brandShowWatermark ) );
 
+            ofmeetConfig.setWatermarkLogoUrl( watermarkLogoUrl );
+            ofmeetConfig.setBrandWatermarkLogoUrl( brandWatermarkLogoUrl );
 			container.populateJitsiSystemPropertiesWithJivePropertyValues();
 
             response.sendRedirect( "ofmeet-uisettings.jsp?settingsSaved=true" );
@@ -206,28 +232,67 @@
                     <fmt:message key="ofmeet.random.roomnames.enabled" />
                 </td>
             </tr>
-            <tr>
-                <td nowrap>
-                    <input type="checkbox" name="showWatermark" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.watermark", false) ? "checked" : ""}>
-                    <fmt:message key="ofmeet.show.watermark.enabled" />
-                </td>
-                <td nowrap>
-                    <fmt:message key="ofmeet.watermark.link"/>:&nbsp;<input type="text" size="60" maxlength="100" name="watermarkLink" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.watermark.link", "")}">
-                </td>
-            </tr>
-            <tr>
-                <td nowrap>
-                    <input type="checkbox" name="brandShowWatermark" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", false) ? "checked" : ""}>
-                    <fmt:message key="ofmeet.brand.show.watermark.enabled" />
-                </td>
-                <td nowrap>
-                    <fmt:message key="ofmeet.watermark.link"/>:&nbsp;<input type="text" size="60" maxlength="100" name="brandWatermarkLink" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.brand.watermark.link", "")}">
-                </td>
-            </tr>
 		</table>
 	</admin:contentBox>
 
-	<input type="hidden" name="csrf" value="${csrf}">
+    <fmt:message key="config.page.configuration.ui.title" var="boxtitleWatermarks"/>
+    <admin:contentBox title="${boxtitleWatermarks}">
+        <p><fmt:message key="ofmeet.watermark.description"/></p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td colspan="3" nowrap>
+                    <input type="checkbox" name="showWatermark" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.watermark", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.show.watermark.enabled" />
+                </td>
+            </tr>
+            <tr>
+                <td width="15"></td>
+                <td>
+                    <fmt:message key="ofmeet.watermark.logo.url"/>:
+                </td>
+                <td>
+                    <input type="text" size="60" maxlength="100" name="watermarkLogoUrl" placeholder="https:/meet.jit.si/images/watermark.png" value="${ofmeetConfig.watermarkLogoUrl}">
+                </td>
+            </tr>
+            <tr>
+                <td width="15"></td>
+                <td width="200">
+                    <fmt:message key="ofmeet.watermark.link"/>:
+                </td>
+                <td>
+                    <input type="text" size="60" maxlength="100" name="watermarkLink" placeholder="http://example.org" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.watermark.link", "")}">
+                </td>
+            </tr>
+            <tr><td colspan="3">&nbsp;</td></tr>
+            <tr>
+                <td colspan="3" nowrap>
+                    <input type="checkbox" name="brandShowWatermark" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.brand.show.watermark.enabled" />
+                </td>
+            </tr>
+            <tr>
+                <td width="15"></td>
+                <td width="200">
+                    <fmt:message key="ofmeet.watermark.logo.url"/>:
+                </td>
+                <td>
+                    <input type="text" size="60" maxlength="100" name="brandWatermarkLogoUrl" value="${ofmeetConfig.brandWatermarkLogoUrl}">
+                </td>
+            </tr>
+            <tr>
+                <td width="15"></td>
+                <td>
+                    <fmt:message key="ofmeet.watermark.link"/>:
+                </td>
+                <td>
+                    <input type="text" size="60" maxlength="100" name="brandWatermarkLink" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.brand.watermark.link", "")}">
+                </td>
+            </tr>
+        </table>
+    </admin:contentBox>
+
+
+    <input type="hidden" name="csrf" value="${csrf}">
 
     <input type="submit" name="update" value="<fmt:message key="global.save_settings" />">
 

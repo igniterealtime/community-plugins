@@ -70,7 +70,7 @@ public class ConfigServlet extends HttpServlet
         {
             Log.trace( "[{}] config requested.", request.getRemoteAddr() );
 
-            final OFMeetConfig ofMeetConfig = OFMeetConfig.getInstance();
+            final OFMeetConfig ofMeetConfig = new OFMeetConfig();
 
             final String xmppDomain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
 

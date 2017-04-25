@@ -18,6 +18,9 @@ package org.igniterealtime.openfire.plugin.ofmeet.config;
 
 import org.jivesoftware.util.JiveGlobals;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * A utility class to store various configuration items for OFMeet. The purpose of this class is to centralize all
  * interaction with Jive properties (and the definition of their default values)
@@ -26,17 +29,7 @@ import org.jivesoftware.util.JiveGlobals;
  */
 public class OFMeetConfig
 {
-    private static OFMeetConfig INSTANCE = null;
-
-    public static OFMeetConfig getInstance()
-    {
-        if ( INSTANCE == null )
-        {
-            INSTANCE = new OFMeetConfig();
-        }
-        return INSTANCE;
-    }
-
+    // No static methods! Static methods are not accessible when using this class as a bean in the Admin Console JSP pages.
     public void setChannelLastN( int lastN )
     {
         JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.channel.lastn", Integer.toString( lastN ) );
@@ -95,5 +88,61 @@ public class OFMeetConfig
     public void resetAdaptiveSimulcast()
     {
         JiveGlobals.deleteXMLProperty("org.jitsi.videobridge.ofmeet.adaptive.simulcast" );
+    }
+
+    public void setWatermarkLogoUrl( URL url )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.watermark.logo", url == null ? null : url.toExternalForm() );
+    }
+
+    public URL getWatermarkLogoUrl()
+    {
+        final String value = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.watermark.logo" );
+        if ( value == null || value.isEmpty() )
+        {
+            return null;
+        }
+
+        try
+        {
+            return new URL( value );
+        }
+        catch ( MalformedURLException e )
+        {
+            return null;
+        }
+    }
+
+    public void resetWatermarkLogoUrl( URL url )
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.watermark.logo" );
+    }
+
+    public void setBrandWatermarkLogoUrl( URL url )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.logo", url == null ? null : url.toExternalForm() );
+    }
+
+    public URL getBrandWatermarkLogoUrl()
+    {
+        final String value = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.logo" );
+        if ( value == null || value.isEmpty() )
+        {
+            return null;
+        }
+
+        try
+        {
+            return new URL( value );
+        }
+        catch ( MalformedURLException e )
+        {
+            return null;
+        }
+    }
+
+    public void resetBrandWatermarkLogoUrl( URL url )
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.logo" );
     }
 }

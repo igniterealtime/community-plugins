@@ -26,8 +26,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="admin" prefix="admin" %>
-<jsp:useBean id="random" class="java.util.Random" scope="application" />
-<jsp:useBean id="ofmeetConfig" class="org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig" scope="application"/>
+<jsp:useBean id="random" class="java.util.Random"/>
+<jsp:useBean id="ofmeetConfig" class="org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig"/>
 <%
     boolean update = request.getParameter( "update" ) != null;
 
