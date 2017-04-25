@@ -16,10 +16,9 @@
 <%@ page import="org.jivesoftware.openfire.plugin.ofmeet.*" %>
 <%@ page import="org.jivesoftware.openfire.*" %>
 <%@ page import="org.jivesoftware.util.*" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.HashMap" %>
 <%@ page import="java.net.URL" %>
 <%@ page import="java.net.MalformedURLException" %>
+<%@ page import="java.util.*" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -85,7 +84,7 @@
         final boolean showPoweredBy = ParamUtils.getBooleanParameter( request, "showPoweredBy" );
         final boolean randomRoomNames = ParamUtils.getBooleanParameter( request, "randomRoomNames" );
 
-        final boolean showWatermark =  ParamUtils.getBooleanParameter( request, "showWatermark" );
+        final boolean showWatermark = ParamUtils.getBooleanParameter( request, "showWatermark" );
         final String watermarkLogoUrlValue = request.getParameter( "watermarkLogoUrl" );
         URL watermarkLogoUrl = null;
         if ( watermarkLogoUrlValue != null && !watermarkLogoUrlValue.isEmpty() )
@@ -98,7 +97,7 @@
         }
         final String watermarkLink = request.getParameter( "watermarkLink" );
 
-        final boolean brandShowWatermark =  ParamUtils.getBooleanParameter( request, "brandShowWatermark" );
+        final boolean brandShowWatermark = ParamUtils.getBooleanParameter( request, "brandShowWatermark" );
         URL brandWatermarkLogoUrl = null;
         final String brandWatermarkLogoUrlValue = request.getParameter( "brandWatermarkLogoUrl" );
         if ( brandWatermarkLogoUrlValue != null && !brandWatermarkLogoUrlValue.isEmpty() )
@@ -110,6 +109,31 @@
             }
         }
         final String brandWatermarkLink = request.getParameter( "brandWatermarkLink" );
+
+        // Buttons
+        final String[] buttonsEnabled = new String[99];
+        final String[] buttonsOnTop = new String[99];
+        for ( final String buttonName : ofmeetConfig.getButtonsImplemented() )
+        {
+            final boolean buttonEnabled = ParamUtils.getBooleanParameter( request, "button-enabled-" + buttonName );
+            if ( buttonEnabled )
+            {
+                final int position = ParamUtils.getIntParameter( request, "button-order-" + buttonName, -1 );
+                if ( position < 0 )
+                {
+                    errors.put( "buttons", "Missing position for button: " + buttonName );
+                }
+                else
+                {
+                    final boolean onTop = "top".equals( ParamUtils.getParameter( request, "button-position-" + buttonName ) );
+                    buttonsEnabled[ position ] = buttonName;
+                    if ( onTop )
+                    {
+                        buttonsOnTop[ position ] = buttonName;
+                    }
+                }
+            }
+        }
 
         if ( errors.isEmpty() )
 		{
@@ -132,6 +156,10 @@
 
             ofmeetConfig.setWatermarkLogoUrl( watermarkLogoUrl );
             ofmeetConfig.setBrandWatermarkLogoUrl( brandWatermarkLogoUrl );
+
+            ofmeetConfig.setButtonsEnabled( Arrays.asList( buttonsEnabled ) );
+            ofmeetConfig.setButtonsOnTop( Arrays.asList( buttonsOnTop ) );
+
 			container.populateJitsiSystemPropertiesWithJivePropertyValues();
 
             response.sendRedirect( "ofmeet-uisettings.jsp?settingsSaved=true" );
@@ -201,14 +229,6 @@
                 <td><input type="text" size="60" maxlength="100" name="shadowColor" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.shadow.color", "#ffffff")}"></td>
             </tr>
             <tr>
-                <td width="200"><fmt:message key="ofmeet.initial.toolbar.timeout"/>:</td>
-                <td><input type="text" size="60" maxlength="100" name="initialToolbarTimeout" value="${admin:getLongProperty("org.jitsi.videobridge.ofmeet.initial.toolbar.timeout", 20000)}"></td>
-            </tr>
-            <tr>
-                <td width="200"><fmt:message key="ofmeet.toolbar.timeout"/>:</td>
-                <td><input type="text" size="60" maxlength="100" name="toolbarTimeout" value="${admin:getLongProperty("org.jitsi.videobridge.ofmeet.toolbar.timeout", 4000)}"></td>
-            </tr>
-            <tr>
                 <td width="200"><fmt:message key="ofmeet.default.remote.displayname"/>:</td>
                 <td><input type="text" size="60" maxlength="100" name="defRemoteDisplName" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.default.remote.displayname", "Change Me")}"></td>
             </tr>
@@ -235,7 +255,46 @@
 		</table>
 	</admin:contentBox>
 
-    <fmt:message key="config.page.configuration.ui.title" var="boxtitleWatermarks"/>
+    <fmt:message key="ofmeet.toolbar.title" var="boxtitleToolbar"/>
+    <admin:contentBox title="${boxtitleToolbar}">
+        <p><fmt:message key="ofmeet.toolbar.timeout.description"/></p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.initial.toolbar.timeout"/>:</td>
+                <td><input type="text" size="10" maxlength="20" name="initialToolbarTimeout" value="${admin:getLongProperty("org.jitsi.videobridge.ofmeet.initial.toolbar.timeout", 20000)}"></td>
+            </tr>
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.toolbar.timeout"/>:</td>
+                <td><input type="text" size="10" maxlength="20" name="toolbarTimeout" value="${admin:getLongProperty("org.jitsi.videobridge.ofmeet.toolbar.timeout", 4000)}"></td>
+            </tr>
+        </table>
+        <br/>
+        <p><fmt:message key="ofmeet.toolbar.buttons.description"/></p>
+        <div class="jive-table">
+            <table cellpadding="3" cellspacing="0" border="0" width="100%">
+                <tr>
+                    <th>&nbsp;</th>
+                    <th><fmt:message key="ofmeet.toolbar.button_name"/></th>
+                    <th style="text-align: center" width="80"><fmt:message key="ofmeet.toolbar.enabled"/></th>
+                    <th style="text-align: center" width="80"><fmt:message key="ofmeet.toolbar.left_toolbar"/></th>
+                    <th style="text-align: center" width="80"><fmt:message key="ofmeet.toolbar.top_toolbar"/></th>
+                </tr>
+                <c:forEach items="${ofmeetConfig.buttonsImplemented}" var="buttonName" varStatus="status">
+                    <tr class="${ ( (status.index + 1) % 2 ) eq 0 ? 'jive-even' : 'jive-odd'}">
+                        <td width="1%">${status.count}</td>
+                        <td><c:out value="${buttonName}"/></td>
+                        <td align="center"><input type="checkbox" name="button-enabled-${buttonName}" ${ofmeetConfig.buttonsEnabled.contains( buttonName ) ? 'checked': ''}></td>
+                        <td align="center"><input type="radio" name="button-position-${buttonName}" value="left"${ofmeetConfig.buttonsOnTop.contains( buttonName ) ? '': 'checked'}/></td>
+                        <td align="center"><input type="radio" name="button-position-${buttonName}" value="top" ${ofmeetConfig.buttonsOnTop.contains( buttonName ) ? 'checked': ''}/>
+                                           <input type="hidden" name="button-order-${buttonName}" value="${status.count}"/>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </table>
+        </div>
+    </admin:contentBox>
+
+    <fmt:message key="ofmeet.watermark.title" var="boxtitleWatermarks"/>
     <admin:contentBox title="${boxtitleWatermarks}">
         <p><fmt:message key="ofmeet.watermark.description"/></p>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">

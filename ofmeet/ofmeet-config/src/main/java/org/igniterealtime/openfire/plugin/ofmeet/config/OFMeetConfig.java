@@ -20,6 +20,8 @@ import org.jivesoftware.util.JiveGlobals;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A utility class to store various configuration items for OFMeet. The purpose of this class is to centralize all
@@ -145,4 +147,50 @@ public class OFMeetConfig
     {
         JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.logo" );
     }
+
+    public void setButtonsImplemented( List<String> buttons )
+    {
+        JiveGlobals.setProperty( "ofmeet.buttons.implemented", buttons );
+    }
+
+    public List<String> getButtonsImplemented()
+    {
+        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "hangup", "profile", "contacts", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand", "filmstrip" ) );
+    }
+
+    public void resetButtonsImplemented()
+    {
+        JiveGlobals.deleteProperty( "ofmeet.buttons.implemented" );
+    }
+
+    public void setButtonsEnabled( List<String> buttons )
+    {
+        JiveGlobals.setProperty( "ofmeet.buttons.enabled", buttons );
+    }
+
+    public List<String> getButtonsEnabled()
+    {
+        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "hangup", "profile", "contacts", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand", "filmstrip" ) );
+    }
+
+    public void resetButtonsEnabled()
+    {
+        JiveGlobals.deleteProperty( "ofmeet.buttons.enabled" );
+    }
+
+    public void setButtonsOnTop( List<String> buttons )
+    {
+        JiveGlobals.setProperty( "ofmeet.buttons.onTop", buttons );
+    }
+
+    public List<String> getButtonsOnTop()
+    {
+        return JiveGlobals.getListProperty( "ofmeet.buttons.onTop", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "hangup" ) );
+    }
+
+    public void resetButtonsOnTop()
+    {
+        JiveGlobals.deleteProperty( "ofmeet.buttons.onTop" );
+    }
+
 }

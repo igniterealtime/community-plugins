@@ -15,6 +15,7 @@
  */
 package org.jivesoftware.openfire.plugin.ofmeet;
 
+import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jivesoftware.util.JiveGlobals;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -44,18 +45,20 @@ public class InterfaceConfigServlet extends HttpServlet
         {
             Log.trace( "[{}] interface_config requested.", request.getRemoteAddr() );
 
+            final OFMeetConfig ofMeetConfig = new OFMeetConfig();
             final JSONObject config = new JSONObject();
 
-            config.put( "MAIN_TOOLBAR_BUTTONS",                  new JSONArray( JiveGlobals.getListProperty( "org.jitsi.videobridge.ofmeet.main.toolbar.buttons", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "hangup" ) ) ) );
-            config.put( "TOOLBAR_BUTTONS",                       new JSONArray( JiveGlobals.getListProperty( "org.jitsi.videobridge.ofmeet.toolbar.buttons",      Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "hangup", "profile", "contacts", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand", "filmstrip" ) ) ) );
+            config.put( "TOOLBAR_BUTTONS",                       new JSONArray( ofMeetConfig.getButtonsEnabled() ) );
+            config.put( "MAIN_TOOLBAR_BUTTONS",                  new JSONArray( ofMeetConfig.getButtonsOnTop()   ) );
+            config.put( "INITIAL_TOOLBAR_TIMEOUT",               JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.initial.toolbar.timeout",       20000               ) );
+            config.put( "TOOLBAR_TIMEOUT",                       JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.toolbar.timeout",               4000                ) );
+
             config.put( "SETTINGS_SECTIONS",                     new JSONArray( JiveGlobals.getListProperty( "org.jitsi.videobridge.ofmeet.settings.sections",    Arrays.asList( "language", "devices", "moderator" ) ) ) );
 
             config.put( "CANVAS_EXTRA",                          JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.canvas.extra",                  104                 ) );
             config.put( "CANVAS_RADIUS",                         JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.canvas.radius",                 0                   ) );
             config.put( "SHADOW_COLOR",                          JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.shadow.color",                  "#ffffff"           ) );
             config.put( "DEFAULT_BACKGROUND",                    JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.default.background",            "#474747"           ) );
-            config.put( "INITIAL_TOOLBAR_TIMEOUT",               JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.initial.toolbar.timeout",       20000               ) );
-            config.put( "TOOLBAR_TIMEOUT",                       JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.toolbar.timeout",               4000                ) );
             config.put( "DEFAULT_REMOTE_DISPLAY_NAME",           JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.default.remote.displayname",    "Change Me"         ) );
             config.put( "DEFAULT_DOMINANT_SPEAKER_DISPLAY_NAME", JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.default.speaker.displayname",   "Speaker"           ) );
             config.put( "DEFAULT_LOCAL_DISPLAY_NAME",            JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.default.local.displayname",     "Me"                ) );
