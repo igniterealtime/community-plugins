@@ -17,19 +17,14 @@
   - limitations under the License.
 --%>
 
-<%@ page import="org.jitsi.videobridge.Conference,
-                 org.jitsi.videobridge.Videobridge,
-                 org.jivesoftware.openfire.XMPPServer,
-                 org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin,
-                 org.jivesoftware.util.StringUtils"
+<%@ page import="org.jivesoftware.openfire.XMPPServer,
+                 org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin"
     errorPage="error.jsp"
 %>
-<%@ page import="java.net.URLEncoder" %>
-<%@ page import="org.jitsi.jicofo.FocusManager" %>
-<%@ page import="org.jitsi.jicofo.JitsiMeetConference" %>
-
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="admin" prefix="admin" %>
+<jsp:useBean id="dateValue" class="java.util.Date"/>
 <jsp:useBean id="webManager" class="org.jivesoftware.util.WebManager"  />
 <% webManager.init(request, response, session, application, out ); %>
 
@@ -37,9 +32,10 @@
     final String mucDomain = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices().iterator().next().getServiceDomain();
 
     final OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
-    final FocusManager focusManager = container.getFocusManager();
-    final Videobridge videobridge = container.getVideobridge();
-    final int confCount = videobridge.getConferenceCount();
+
+    pageContext.setAttribute( "ofmeet", container );
+    pageContext.setAttribute( "mucDomain", mucDomain);
+
 %>
 <html>
     <head>
@@ -52,24 +48,11 @@
 <fmt:message key="ofmeet.conference.summary" />
 </p>
 
-<%  if (request.getParameter("deletesuccess") != null) { %>
+<c:if test="${not empty param.deletesuccess}">
+    <admin:infoBox type="success"><fmt:message key="ofmeet.conference.expired" /></admin:infoBox>
+</c:if>
 
-    <div class="jive-success">
-    <table cellpadding="0" cellspacing="0" border="0">
-    <tbody>
-        <tr><td class="jive-icon"><img src="images/success-16x16.gif" width="16" height="16" border="0" alt=""></td>
-        <td class="jive-icon-label">
-        <fmt:message key="ofmeet.conference.expired" />
-        </td></tr>
-    </tbody>
-    </table>
-    </div><br>
-
-<%  } %>
-
-<p>
-<fmt:message key="ofmeet.summary.conferences" />: <%= confCount %>
-</p>
+<p><fmt:message key="ofmeet.summary.conferences" />: <c:out value="${ofmeet.videobridge.conferenceCount}"/></p>
 
 <div class="jive-table">
 <table cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -89,89 +72,64 @@
 </thead>
 <tbody>
 
-<% 
-    if (confCount == 0) {
-%>
-    <tr>
-        <td align="center" colspan="10">
-            <fmt:message key="ofmeet.summary.no.conferences" />
-        </td>
-    </tr>
-
-<%
-    }
-    int i = 0;
-    for (Conference conference : videobridge.getConferences())
-    {
-    	i++;
-        String room = conference.getName();
-
-        JitsiMeetConference focusManagerConference = null;
-        if ( room != null )
-        {
-            focusManagerConference = focusManager.getConference( room + "@" + mucDomain );
-        }
-%>
-    <tr class="jive-<%= (((i%2)==0) ? "even" : "odd") %>">
-        <td width="1%">
-            <%= i %>
-        </td>
-        <td width="10%">
-            <a href="ofmeet-conference.jsp?confid=<%= URLEncoder.encode(conference.getID(), "UTF-8") %>&focus=<%= conference.getFocus() != null ? URLEncoder.encode(conference.getFocus(), "UTF-8") : "" %>">
-                <%= conference.getID() %>
-            </a>
-        </td>
-        <td width="25%">
-            <%
-            %><a href="/muc-room-occupants.jsp?roomJID=<%= room != null ? room : "&nbsp;" %>%40<%=mucDomain%>"><%= room != null ? room : "&nbsp;" %></a>
-        </td>
-        <td width="15%">
-            <% if (conference.getLastKnowFocus() != null && !"".equals(conference.getLastKnowFocus())) { %>
-                <%= conference.getLastKnowFocus() %>
-            <% }
-               else { %>
-                &nbsp;
-            <% } %>
-        </td>
-        <td align="center">
-            <%= focusManagerConference != null ? focusManagerConference.getParticipantCount() : "<i>None</i>" %>
-        </td>
-        <td width="15%">
-        	<%
-        		long lastActivity = conference.getLastActivityTime();
-        		String elapsed = lastActivity == 0 ? "&nbsp;" : StringUtils.getElapsedTime(System.currentTimeMillis() - lastActivity);
-        	%>
-		<%= elapsed %>
-        </td>  
-        <td align="center">
-		<%= conference.getEndpoints().size() %>
-        </td>         
-        <td width="10%">
-            <% if (conference.getSpeechActivity() != null && conference.getSpeechActivity().getDominantEndpoint() != null && conference.getSpeechActivity().getDominantEndpoint().getID() != null) { %>
-                <%= conference.getSpeechActivity().getDominantEndpoint().getID() %>
-            <% }
-               else { %>
-                &nbsp;
-            <% } %>
-        </td>
-        <td align="center">
-            <% if (conference.isExpired()) { %>
-                <img src="images/success-16x16.gif" width="16" height="16" border="0" alt="">
-            <% }
-               else { %>
-                &nbsp;
-            <% } %>		
-        </td>
-        <td align="center" style="border-right:1px #ccc solid;">
-            <a href="ofmeet-expire.jsp?confid=<%= URLEncoder.encode(conference.getID(), "UTF-8") %>&focus=<%= conference.getFocus() != null ? URLEncoder.encode(conference.getFocus(), "UTF-8") : "&nbsp;" %>" title="<fmt:message key="ofmeet.summary.expire" />">
-            	<img src="images/delete-16x16.gif" width="16" height="16" border="0" alt="">
-            </a>
-        </td>
-    </tr>
-
-<%
-    }
-%>
+<c:choose>
+    <c:when test="${ofmeet.videobridge.conferenceCount eq 0}">
+        <tr>
+            <td align="center" colspan="10">
+                <fmt:message key="ofmeet.summary.no.conferences" />
+            </td>
+        </tr>
+    </c:when>
+    <c:otherwise>
+        <c:forEach items="${ofmeet.videobridge.conferences}" var="conference" varStatus="status">
+            <tr class="${ ( (status.index + 1) % 2 ) eq 0 ? 'jive-even' : 'jive-odd'}">
+                <td width="1%">
+                    ${status.count}
+                </td>
+                <td width="10%">
+                    <a href="ofmeet-conference.jsp?confid=${conference.ID}&focus=${conference.focus}">
+                        <c:out value="${conference.ID}"/>
+                    </a>
+                </td>
+                <td width="25%">
+                    <%
+                    %><a href="/muc-room-occupants.jsp?roomJID=${conference.name}%40${mucDomain}"><c:out value="${conference.name}"/></a>
+                </td>
+                <td width="15%">
+                    <c:if test="${not empty conference.lastKnowFocus}">
+                        <c:out value="${conference.lastKnowFocus}"/>
+                    </c:if>
+                </td>
+                <td align="center">
+                    <c:out value="${conference.endpointCount}"/>
+                </td>
+                <td width="15%">
+                    <jsp:setProperty name="dateValue" property="time" value="${conference.lastActivityTime}"/>
+                    <fmt:formatDate value="${dateValue}" pattern="HH:mm"/>
+                    <c:out value="${dateValue}"/>
+                </td>
+                <td align="center">
+                    <c:out value="${conference.endpointCount}"/>
+                </td>
+                <td width="10%">
+                    <c:if test="${not empty conference.speechActivity and not empty conference.speechActivity.dominantEndpoint}">
+                        <c:out value="${conference.speechActivity.dominantEndpoint.ID}"/>
+                    </c:if>
+                </td>
+                <td align="center">
+                    <c:if test="${conference.expired}">
+                        <img src="images/success-16x16.gif" width="16" height="16" border="0" alt="">
+                    </c:if>
+                </td>
+                <td align="center" style="border-right:1px #ccc solid;">
+                    <a href="ofmeet-expire.jsp?confid=${conference.ID}&focus=${conference.focus}" title="<fmt:message key="ofmeet.summary.expire" />">
+                        <img src="images/delete-16x16.gif" width="16" height="16" border="0" alt="">
+                    </a>
+                </td>
+            </tr>
+        </c:forEach>
+    </c:otherwise>
+</c:choose>
 </tbody>
 </table>
 </div>

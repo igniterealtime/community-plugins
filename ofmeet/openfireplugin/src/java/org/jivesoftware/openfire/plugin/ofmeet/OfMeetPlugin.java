@@ -28,9 +28,6 @@ import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.ice4j.ice.harvest.MappingCandidateHarvesters;
 import org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext;
-import org.jitsi.jicofo.FocusManager;
-import org.jitsi.jicofo.auth.AuthenticationAuthority;
-import org.jitsi.jicofo.reservation.ReservationSystem;
 import org.jitsi.videobridge.Conference;
 import org.jitsi.videobridge.Videobridge;
 import org.jitsi.videobridge.openfire.PluginImpl;
@@ -87,14 +84,12 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	private WebAppContext publicWebApp;
 
 	private final JitsiPluginWrapper jitsiPluginWrapper;
-	private final JitsiJicofoWrapper jitsiJicofoWrapper;
     private final MeetingPlanner meetingPlanner;
     private String globalConferenceId = null;
 
     public OfMeetPlugin()
 	{
 		jitsiPluginWrapper = new JitsiPluginWrapper();
-		jitsiJicofoWrapper = new JitsiJicofoWrapper();
         meetingPlanner = new MeetingPlanner();
 	}
 
@@ -117,10 +112,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		try
 		{
 			populateJitsiSystemPropertiesWithJivePropertyValues();
-
-			// The order is of importance, as the latter needs to work with the OSGI context defined by the former!
 			jitsiPluginWrapper.initialize( manager, pluginDirectory );
-			jitsiJicofoWrapper.initialize();
 		}
 		catch ( Exception ex )
 		{
@@ -205,15 +197,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         catch ( Exception ex )
         {
             Log.error( "An exception occurred while trying to destroy the OFMeet IQ Handler." );
-        }
-
-        try
-        {
-            jitsiJicofoWrapper.destroy();
-        }
-        catch ( Exception ex )
-        {
-            Log.error( "An exception occurred while trying to destroy the Jitsi Jicofo wrapper." );
         }
 
         try
@@ -461,22 +444,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     {
         return this.jitsiPluginWrapper.getVideobridge();
     }
-
-
-	public ReservationSystem getReservationService()
-	{
-		return this.jitsiJicofoWrapper.getReservationService();
-	}
-
-	public FocusManager getFocusManager()
-	{
-		return this.jitsiJicofoWrapper.getFocusManager();
-	}
-
-	public AuthenticationAuthority getAuthenticationAuthority()
-	{
-		return this.jitsiJicofoWrapper.getAuthenticationAuthority();
-	}
 
 	//-------------------------------------------------------
 	//
