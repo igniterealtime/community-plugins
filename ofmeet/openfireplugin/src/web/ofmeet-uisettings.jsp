@@ -275,6 +275,7 @@
                 <tr>
                     <th>&nbsp;</th>
                     <th><fmt:message key="ofmeet.toolbar.button_name"/></th>
+                    <th><fmt:message key="ofmeet.toolbar.button_description"/></th>
                     <th style="text-align: center" width="80"><fmt:message key="ofmeet.toolbar.enabled"/></th>
                     <th style="text-align: center" width="80"><fmt:message key="ofmeet.toolbar.left_toolbar"/></th>
                     <th style="text-align: center" width="80"><fmt:message key="ofmeet.toolbar.top_toolbar"/></th>
@@ -283,6 +284,7 @@
                     <tr class="${ ( (status.index + 1) % 2 ) eq 0 ? 'jive-even' : 'jive-odd'}">
                         <td width="1%">${status.count}</td>
                         <td><c:out value="${buttonName}"/></td>
+                        <td><fmt:message key="ofmeet.toolbar.button.${buttonName}.description"/></td>
                         <td align="center"><input type="checkbox" name="button-enabled-${buttonName}" ${ofmeetConfig.buttonsEnabled.contains( buttonName ) ? 'checked': ''}></td>
                         <td align="center"><input type="radio" name="button-position-${buttonName}" value="left"${ofmeetConfig.buttonsOnTop.contains( buttonName ) ? '': 'checked'}/></td>
                         <td align="center"><input type="radio" name="button-position-${buttonName}" value="top" ${ofmeetConfig.buttonsOnTop.contains( buttonName ) ? 'checked': ''}/>

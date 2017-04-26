@@ -155,7 +155,9 @@ public class OFMeetConfig
 
     public List<String> getButtonsImplemented()
     {
-        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "hangup", "profile", "contacts", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand", "filmstrip" ) );
+        // These should match the implementations that are provided in the defaultToolbarButtons.js file in jitsi-meet.
+        // The order of this list is used as the default ordering of the buttons.
+        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "hangup", "profile", "contacts", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand" ) );
     }
 
     public void resetButtonsImplemented()
@@ -170,7 +172,7 @@ public class OFMeetConfig
 
     public List<String> getButtonsEnabled()
     {
-        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "hangup", "profile", "contacts", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand", "filmstrip" ) );
+        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "hangup", "profile", "contacts", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand" ) );
     }
 
     public void resetButtonsEnabled()
