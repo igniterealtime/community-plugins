@@ -131,9 +131,16 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         try
 		{
-			ClusterManager.addListener(this);
-
 			loadPublicWebApp();
+		}
+		catch ( Exception ex )
+		{
+			Log.error( "An exception occurred while attempting to load the public web application.", ex );
+		}
+
+		try
+		{
+			ClusterManager.addListener(this);
 
 			Log.info("OfMeet Plugin - Initialize email listener");
 
@@ -166,7 +173,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		}
 		catch ( Exception ex )
 		{
-			Log.error( "An exception occurred while trying to unload the public web application of OFMeet." );
+			Log.error( "An exception occurred while trying to unload the public web application of OFMeet.", ex );
 		}
 
         try
@@ -212,7 +219,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         EmailListener.getInstance().stop();
     }
 
-    protected void loadPublicWebApp()
+    protected void loadPublicWebApp() throws Exception
 	{
 		Log.info( "Initializing public web application" );
 
@@ -249,6 +256,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 		Log.debug( "Making WebAppContext available on HttpBindManager context." );
 		HttpBindManager.getInstance().getContexts().addHandler( publicWebApp );
+		publicWebApp.start();
 
 // No longer needed? Jitsi Meet now checks if the XMPP server supports anonymous authentication, and will prompt for a login otherwise.
 //            if ( JiveGlobals.getBooleanProperty("ofmeet.security.enabled", true ) )
@@ -260,11 +268,12 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		Log.debug( "Initialized public web application", publicWebApp.toString() );
 	}
 
-	public void unloadPublicWebApp()
+	public void unloadPublicWebApp() throws Exception
 	{
 		if ( publicWebApp != null )
 		{
 			HttpBindManager.getInstance().getContexts().removeHandler( publicWebApp );
+			publicWebApp.stop();
 			publicWebApp.destroy();
 			publicWebApp = null;
 		}
