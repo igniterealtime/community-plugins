@@ -183,7 +183,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
         catch ( Exception ex )
         {
-            Log.error( "An exception occurred while trying to remove support for the OfMeet-specific SASL support." );
+            Log.error( "An exception occurred while trying to remove support for the OfMeet-specific SASL support.", ex );
         }
 
         try
@@ -192,7 +192,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
         catch ( Exception ex )
         {
-            Log.error( "An exception occurred while trying to destroy the Meeting Planner" );
+            Log.error( "An exception occurred while trying to destroy the Meeting Planner", ex );
         }
 
         try
@@ -203,7 +203,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
         catch ( Exception ex )
         {
-            Log.error( "An exception occurred while trying to destroy the OFMeet IQ Handler." );
+            Log.error( "An exception occurred while trying to destroy the OFMeet IQ Handler.", ex );
         }
 
         try
@@ -212,7 +212,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
         catch ( Exception ex )
         {
-            Log.error( "An exception occurred while trying to destroy the Jitsi Videobridge plugin wrapper." );
+            Log.error( "An exception occurred while trying to destroy the Jitsi Videobridge plugin wrapper.", ex );
         }
 
         ClusterManager.removeListener(this);
