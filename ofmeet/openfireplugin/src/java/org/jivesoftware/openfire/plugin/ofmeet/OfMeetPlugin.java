@@ -255,8 +255,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		publicWebApp.setContextPath( "/ofmeet" );
 
 		Log.debug( "Making WebAppContext available on HttpBindManager context." );
-		HttpBindManager.getInstance().getContexts().addHandler( publicWebApp );
-		publicWebApp.start();
+		HttpBindManager.getInstance().addJettyHandler( publicWebApp );
 
 // No longer needed? Jitsi Meet now checks if the XMPP server supports anonymous authentication, and will prompt for a login otherwise.
 //            if ( JiveGlobals.getBooleanProperty("ofmeet.security.enabled", true ) )
@@ -272,10 +271,15 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	{
 		if ( publicWebApp != null )
 		{
-			HttpBindManager.getInstance().getContexts().removeHandler( publicWebApp );
-			publicWebApp.stop();
-			publicWebApp.destroy();
-			publicWebApp = null;
+			try
+			{
+				HttpBindManager.getInstance().removeJettyHandler( publicWebApp );
+				publicWebApp.destroy();
+			}
+			finally
+			{
+				publicWebApp = null;
+			}
 		}
 	}
 
