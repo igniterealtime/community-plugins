@@ -83,12 +83,12 @@ public class InterfaceConfigServlet extends HttpServlet
             // Jitsi-meet appears to have replaced LOCAL_THUMBNAIL_RATIO_WIDTH and LOCAL_THUMBNAIL_RATIO_HEIGHT with a combined value in LOCAL_THUMBNAIL_RATIO.
             final int localThumbnailRatioWidth  = JiveGlobals.getIntProperty("org.jitsi.videobridge.ofmeet.local.thumbnail.ratio.width",16 );
             final int localThumbnailRatioHeight = JiveGlobals.getIntProperty("org.jitsi.videobridge.ofmeet.local.thumbnail.ratio.height",9 );
-            config.put( "LOCAL_THUMBNAIL_RATIO", localThumbnailRatioWidth + "/" + localThumbnailRatioHeight);
+            config.put( "LOCAL_THUMBNAIL_RATIO", (double) localThumbnailRatioWidth / localThumbnailRatioHeight);
 
             // Same for REMOTE_THUMBNAIL_RATIO, but for some reason, the resulting value is a single digit.
             final int remoteThumbnailRatioWidth  = JiveGlobals.getIntProperty("org.jitsi.videobridge.ofmeet.remote.thumbnail.ratio.width",1 );
             final int remoteThumbnailRatioHeight = JiveGlobals.getIntProperty("org.jitsi.videobridge.ofmeet.remote.thumbnail.ratio.height",1 );
-            config.put( "REMOTE_THUMBNAIL_RATIO", remoteThumbnailRatioWidth / remoteThumbnailRatioHeight );
+            config.put( "REMOTE_THUMBNAIL_RATIO", (double) remoteThumbnailRatioWidth / remoteThumbnailRatioHeight );
 
             // Add response headers that instruct not to cache this data.
             response.setHeader( "Expires",       "Sat, 6 May 1995 12:00:00 GMT" );
