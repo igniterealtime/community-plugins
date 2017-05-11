@@ -26,7 +26,6 @@ import org.jivesoftware.util.JiveGlobals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.component.ComponentManagerFactory;
-import org.jitsi.impl.osgi.framework.OSGiLauncher;
 import org.jitsi.jicofo.FocusManager;
 import org.jitsi.jicofo.osgi.JicofoBundleConfig;
 import org.jitsi.jicofo.xmpp.FocusComponent;
@@ -48,7 +47,6 @@ public class JitsiJicofoWrapper
     private String jicofoSubdomain = "focus";
 
     private FocusComponent jicofoComponent;
-    private OSGiLauncher jicofoLauncher;
 
     /**
      * Initialize the wrapped component.
@@ -59,7 +57,7 @@ public class JitsiJicofoWrapper
     {
         Log.debug( "Initializing Jitsi Focus Component (jicofo)...");
 
-        if ( jicofoComponent != null || jicofoLauncher != null )
+        if ( jicofoComponent != null )
         {
             Log.warn( "Another Jitsi Focus Component (jicofo) appears to have been initialized earlier! Unexpected behavior might be the result of this new initialization!" );
         }
@@ -93,16 +91,12 @@ public class JitsiJicofoWrapper
 
         boolean focusAnonymous = "false".equals(JiveGlobals.getProperty("ofmeet.security.enabled", "true"));
 
-        // The static OSGi instance will have a bundle config set (which is done in the videobridge plugin. We
-        // can't re-initialize that, without breaking the videobridge code. Instead, we'll manually track a
-        // launcher for the jicofo OSGi bundle.
+        // Start the OSGi bundle for Jicofo.
         final OSGiBundleConfig jicofoConfig = new JicofoBundleConfig();
-        jicofoLauncher = new OSGiLauncher( jicofoConfig.getBundles() );
+        OSGi.setBundleConfig(jicofoConfig);
 
         jicofoComponent = new FocusComponent( XMPPServer.getInstance().getServerInfo().getHostname(), 0, XMPPServer.getInstance().getServerInfo().getXMPPDomain(), jicofoSubdomain, null, focusAnonymous, focusUserName);
-
-        // Instead of #init, manually start the OSGi launcher! #jicofoComponent.init();
-        jicofoLauncher.start( jicofoComponent );
+        jicofoComponent.init(); // Note that this is a Jicoco special, not Component#initialize!
 
         ComponentManagerFactory.getComponentManager().addComponent(jicofoSubdomain, jicofoComponent);
 
@@ -126,18 +120,10 @@ public class JitsiJicofoWrapper
         {
             ComponentManagerFactory.getComponentManager().removeComponent(jicofoSubdomain);
             jicofoSubdomain = null;
+
+            jicofoComponent.dispose();
             jicofoComponent = null;
 
-        }
-        if ( jicofoLauncher == null )
-        {
-            Log.warn( "Unable to destroy the Jitsi Focus Component as none appears to be running!" );
-        }
-        else
-        {
-            // Instead of jicofoComponent.dispose(), manually stop the OSGi launcher that we're tracking.
-            jicofoLauncher.stop( jicofoComponent );
-            jicofoLauncher = null;
         }
 
         Log.trace( "Successfully destroyed Jitsi Focus Component.   " );
