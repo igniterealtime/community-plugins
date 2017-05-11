@@ -22,6 +22,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="org.jivesoftware.util.*" %>
+<%@ page import="java.net.UnknownHostException" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -36,18 +37,6 @@
 
     // Get handle on the plugin
     final OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin( "ofmeet" );
-
-    String ourIpAddress = "127.0.0.1";
-    String ourHostname = XMPPServer.getInstance().getServerInfo().getHostname();
-
-    try
-    {
-        ourIpAddress = InetAddress.getByName( ourHostname ).getHostAddress();
-    }
-    catch ( Exception e )
-    {
-
-    }
 
     final Map<String, String> errors = new HashMap<>();
 
@@ -78,9 +67,46 @@
             errors.put( "maxport", "Cannot parse value as integer value." );
         }
 
+        InetAddress localAddress;
+        final String localAddressVal = request.getParameter( "localaddress" );
+        if ( localAddressVal == null || localAddressVal.isEmpty() )
+        {
+            localAddress = null;
+        }
+        else
+        {
+            try
+            {
+                localAddress = InetAddress.getByName( localAddressVal );
+            }
+            catch ( UnknownHostException e )
+            {
+                errors.put( "localAddress", "Value is not an IP address." );
+                localAddress = null;
+            }
+        }
+
+        InetAddress publicAddress;
+        final String publicAddressVal = request.getParameter( "publicaddress" );
+        if ( publicAddressVal == null || publicAddressVal.isEmpty() )
+        {
+            publicAddress = null;
+        }
+        else
+        {
+            try
+            {
+                publicAddress = InetAddress.getByName( publicAddressVal );
+            }
+            catch ( UnknownHostException e )
+            {
+                errors.put( "publicAddress", "Value is not an IP address." );
+                publicAddress = null;
+            }
+        }
+
+
         final boolean checkreplay = ParamUtils.getBooleanParameter( request, "checkreplay" );
-        final String localAddress = request.getParameter( "localaddress" );
-        final String publicAddress = request.getParameter( "publicaddress" );
         final boolean securityenabled = ParamUtils.getBooleanParameter( request, "securityenabled" );
         final String authusername = request.getParameter( "authusername" );
         final String sippassword = request.getParameter( "sippassword" );
@@ -133,8 +159,6 @@
             JiveGlobals.setProperty( PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, minPort );
             JiveGlobals.setProperty( PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME, maxPort );
             JiveGlobals.setProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME, Boolean.toString( checkreplay ) );
-            JiveGlobals.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME, localAddress );
-            JiveGlobals.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, publicAddress );
             JiveGlobals.setProperty( "ofmeet.security.enabled", Boolean.toString( securityenabled ) );
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipauthuser", authusername );
             JiveGlobals.setProperty( "voicebridge.default.proxy.sippassword", sippassword );
@@ -155,6 +179,8 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid", focusjid );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", focuspassword );
 
+            ofmeetConfig.setLocalNATAddress( localAddress );
+            ofmeetConfig.setPublicNATAddress( publicAddress );
             ofmeetConfig.setChannelLastN( channelLastN );
             ofmeetConfig.setAdaptiveLastN( adaptivelastn );
             ofmeetConfig.setSimulcast( simulcast );
@@ -177,8 +203,6 @@
     pageContext.setAttribute( "csrf", csrf );
     pageContext.setAttribute( "errors", errors );
     pageContext.setAttribute( "restartNeeded", container.restartNeeded );
-    pageContext.setAttribute( "ourIpAddress", ourIpAddress );
-    pageContext.setAttribute( "ourHostname", ourHostname );
     pageContext.setAttribute( "serverInfo", XMPPServer.getInstance().getServerInfo() );
     pageContext.setAttribute( "MIN_PORT_NUMBER_PROPERTY_NAME", PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME );
     pageContext.setAttribute( "MAX_PORT_NUMBER_PROPERTY_NAME", PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME );
@@ -283,11 +307,11 @@
             </tr>
             <tr>
                 <td align="left" width="200"><fmt:message key="config.page.configuration.local.ip.address"/>:</td>
-                <td><input name="localaddress" type="text" maxlength="20" size="15" value="${admin:getProperty( NAT_HARVESTER_LOCAL_ADDRESS_PNAME, ourIpAddress)}"/></td>
+                <td><input name="localaddress" type="text" maxlength="20" size="15" value="${ofmeetConfig.localNATAddress.hostAddress}"/></td>
             </tr>
             <tr>
                 <td align="left" width="200"><fmt:message key="config.page.configuration.public.ip.address"/>:</td>
-                <td><input name="publicaddress" type="text" maxlength="20" size="15" value="${admin:getProperty( NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, ourIpAddress)}"/></td>
+                <td><input name="publicaddress" type="text" maxlength="20" size="15" value="${ofmeetConfig.publicNATAddress.hostAddress}"/></td>
             </tr>
             <tr>
                 <td nowrap colspan="2">

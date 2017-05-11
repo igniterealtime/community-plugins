@@ -18,8 +18,10 @@ package org.igniterealtime.openfire.plugin.ofmeet.config;
 
 import org.jivesoftware.util.JiveGlobals;
 
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -193,6 +195,62 @@ public class OFMeetConfig
     public void resetButtonsOnTop()
     {
         JiveGlobals.deleteProperty( "ofmeet.buttons.onTop" );
+    }
+
+    public void setPublicNATAddress( InetAddress address )
+    {
+        JiveGlobals.setProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_PUBLIC_ADDRESS", address == null ? null : address.getHostAddress() );
+    }
+
+    public InetAddress getPublicNATAddress()
+    {
+        final String address = JiveGlobals.getProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_PUBLIC_ADDRESS" );
+        if ( address == null || address.isEmpty() )
+        {
+            return null;
+        }
+
+        try
+        {
+            return InetAddress.getByName( address );
+        }
+        catch ( UnknownHostException e )
+        {
+            return null;
+        }
+    }
+
+    public void resetPublicNATAddress()
+    {
+        JiveGlobals.deleteProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_PUBLIC_ADDRESS" );
+    }
+
+    public void setLocalNATAddress( InetAddress address )
+    {
+        JiveGlobals.setProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_PRIVATE_ADDRESS", address == null ? null : address.getHostAddress() );
+    }
+
+    public InetAddress getLocalNATAddress()
+    {
+        final String address = JiveGlobals.getProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_PRIVATE_ADDRESS" );
+        if ( address == null || address.isEmpty() )
+        {
+            return null;
+        }
+
+        try
+        {
+            return InetAddress.getByName( address );
+        }
+        catch ( UnknownHostException e )
+        {
+            return null;
+        }
+    }
+
+    public void resetLocalNATAddress()
+    {
+        JiveGlobals.deleteProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_PRIVATE_ADDRESS" );
     }
 
 }

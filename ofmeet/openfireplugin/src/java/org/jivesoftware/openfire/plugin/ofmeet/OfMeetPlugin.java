@@ -27,6 +27,7 @@ import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.ice4j.ice.harvest.MappingCandidateHarvesters;
+import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext;
 import org.jitsi.videobridge.Conference;
 import org.jitsi.videobridge.Videobridge;
@@ -289,16 +290,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	 */
 	public void populateJitsiSystemPropertiesWithJivePropertyValues()
 	{
-		String ourIpAddress;
-		try
-		{
-			ourIpAddress = InetAddress.getByName( XMPPServer.getInstance().getServerInfo().getHostname() ).getHostAddress();
-		}
-		catch ( Exception e )
-		{
-			ourIpAddress = "127.0.0.1";
-		}
-
         // MAX/MIN_PORT_DEFAULT_VALUE: Instead of 5000-6000 (jitsi's default) use something that does not clash with default XMPP port numbers.
         System.setProperty( PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, JiveGlobals.getProperty( PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, "50000" ) );
         System.setProperty( PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME, JiveGlobals.getProperty( PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME, "60000" ) );
@@ -310,10 +301,29 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 		System.setProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME,                 JiveGlobals.getProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME,     "false" ) );
 
-		System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME,  JiveGlobals.getProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME,  ourIpAddress ) );
-		System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, JiveGlobals.getProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, ourIpAddress ) );
+		// Set up the NAT harvester, but only when needed.
+		final InetAddress natPublic = new OFMeetConfig().getPublicNATAddress();
+		if ( natPublic == null )
+		{
+			System.clearProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME );
+		}
+		else
+		{
+			System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, natPublic.getHostAddress() );
+		}
 
-		System.setProperty( Videobridge.DEFAULT_OPTIONS_PROPERTY_NAME, "2" ); // allow videobridge access without focus
+		final InetAddress natLocal = new OFMeetConfig().getLocalNATAddress();
+		if ( natLocal == null )
+		{
+			System.clearProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME );
+		}
+		else
+		{
+			System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME, natLocal.getHostAddress() );
+		}
+
+		// allow videobridge access without focus
+		System.setProperty( Videobridge.DEFAULT_OPTIONS_PROPERTY_NAME, "2" );
 	}
 
 	private static final SecurityHandler basicAuth(String realm) {
