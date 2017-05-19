@@ -322,6 +322,23 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME, natLocal.getHostAddress() );
 		}
 
+		final List<String> stunMappingHarversterAddresses = new OFMeetConfig().getStunMappingHarversterAddresses();
+		if ( stunMappingHarversterAddresses == null || stunMappingHarversterAddresses.isEmpty() )
+		{
+			System.clearProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME );
+		}
+		else
+		{
+			// Concat into comma-separated string.
+			final StringBuilder sb = new StringBuilder();
+			for ( final String address : stunMappingHarversterAddresses )
+			{
+				sb.append( address );
+				sb.append( "," );
+			}
+			System.setProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME, sb.substring( 0, sb.length() - 1 ) );
+		}
+
 		// allow videobridge access without focus
 		System.setProperty( Videobridge.DEFAULT_OPTIONS_PROPERTY_NAME, "2" );
 	}

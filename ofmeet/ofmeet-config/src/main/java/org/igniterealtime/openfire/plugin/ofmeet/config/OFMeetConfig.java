@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -253,4 +254,25 @@ public class OFMeetConfig
         JiveGlobals.deleteProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_PRIVATE_ADDRESS" );
     }
 
+    public void setStunMappingHarversterAddresses( List<String> addresses )
+    {
+        if (addresses == null || addresses.isEmpty() )
+        {
+            JiveGlobals.deleteProperty( "org.ice4j.ice.harvest.STUN_MAPPING_HARVESTER_ADDRESSES" );
+        }
+        else
+        {
+            JiveGlobals.setProperty( "org.ice4j.ice.harvest.STUN_MAPPING_HARVESTER_ADDRESSES", addresses );
+        }
+    }
+
+    public List<String> getStunMappingHarversterAddresses()
+    {
+        return JiveGlobals.getListProperty( "org.ice4j.ice.harvest.STUN_MAPPING_HARVESTER_ADDRESSES", Collections.<String>emptyList() );
+    }
+
+    public void resetStunMappingHarversterAddresses()
+    {
+        JiveGlobals.deleteProperty( "org.ice4j.ice.harvest.STUN_MAPPING_HARVESTER_ADDRESSES" );
+    }
 }
