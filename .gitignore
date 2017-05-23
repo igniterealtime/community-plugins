@@ -6,4 +6,7 @@ build.txt
 **/target/
 ofmeet/work/
 ofmeet/repositories/
+ofmeet/web/src/main/webapp/jitsi-meet/
+!ofmeet/web/src/main/webapp/jitsi-meet/index.html
+
 target/openfire/lib
