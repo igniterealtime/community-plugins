@@ -1,13 +1,15 @@
 #!/bin/bash
 # ../buildtools/apache-ant-1.9.7/bin/ant -f build.xml -lib ../buildtools/maven-ant-tasks-2.1.3/ clean jar
 
-JICOFO_GIT_REFERENCE=jitsi-meet_1947
-VIDEOBRIDGE_GIT_REFERENCE=jitsi-meet_1947
-OPENFIRE_GIT_REFERENCE=4.1
+JITSI_MEET_GIT_REFERENCE=1959
+JICOFO_GIT_REFERENCE=jitsi-meet_$JITSI_MEET_GIT_REFERENCE
+VIDEOBRIDGE_GIT_REFERENCE=jitsi-meet_$JITSI_MEET_GIT_REFERENCE
+OPENFIRE_GIT_REFERENCE=master
 
 WORK_DIR=./work
 CLONE_DIR=./repositories
 
+JITSI_MEET_DOWNLOAD_DIR=$CLONE_DIR/jitsi-meet-$JITSI_MEET_GIT_REFERENCE
 JICOFO_GIT_CLONE_DIR=$CLONE_DIR/jitsi-jicofo-$JICOFO_GIT_REFERENCE
 VIDEOBRIDGE_GIT_CLONE_DIR=$CLONE_DIR/jitsi-videobridge-$VIDEOBRIDGE_GIT_REFERENCE
 OPENFIRE_GIT_CLONE_DIR=$CLONE_DIR/igniterealtime-openfire-$OPENFIRE_GIT_REFERENCE
@@ -46,9 +48,9 @@ function retrieveFromUpstreamGit
     # Check out sources.
     if [ "$(ls -A $4)" ]
     then
-        echo "Directory '$4' exists and is not empty. Assuming it contains an up-to-date shallow clone.."
+        echo "Directory '$4' exists and is not empty. Assuming it contains an up-to-date shallow clone."
     else
-        echo "Directory '$4' does not exists or is empty. Attempting git clone"
+        echo "Directory '$4' does not exists or is empty. Attempting git clone."
         mkdir -p "$4"
         git clone --depth 1 "$2" "$4"
     fi
@@ -56,6 +58,32 @@ function retrieveFromUpstreamGit
     echo "";
 }
 
+# Makes sure that a resource is stored locally.
+#
+# Arguments:
+# - first:  A human readable name (such as 'Jitsi Meet')
+# - second: The repository URL (from where to fetch data).
+# - third: The local directory in which to repository data is stored.
+function download
+{
+    # Input validation
+    if [ -z "$3" ]
+    then
+        echo "function 'download' must have three arguments: <name> <URL> <localDir>"
+        return 1
+    fi
+
+    echo "Downloading $1 into $3."
+    mkdir -p "$3"
+    cd "$3" && { curl -O $2 ; cd -; }
+    echo ""
+}
+
+# Builds and installs a Maven project.
+#
+# Arguments:
+# - first:  A human readable name (such as 'Jitsi Jicofo')
+# - third: The local directory in which to project sources are stored.
 function buildAndInstallMavenProject
 {
     # Input validation
@@ -78,19 +106,26 @@ function buildAndInstallMavenProject
     echo "";
 }
 
-echo "Collecting upstream GIT data..."
+echo "Collecting upstream data..."
 retrieveFromUpstreamGit "Jitsi Jicofo" "https://github.com/jitsi/jicofo.git" "$JICOFO_GIT_REFERENCE" "$JICOFO_GIT_CLONE_DIR"
 retrieveFromUpstreamGit "Jitsi Videobridge" "https://github.com/jitsi/jitsi-videobridge.git" "$VIDEOBRIDGE_GIT_REFERENCE" "$VIDEOBRIDGE_GIT_CLONE_DIR"
 retrieveFromUpstreamGit "Ignite Realtime Openfire" "https://github.com/igniterealtime/Openfire.git" "$OPENFIRE_GIT_REFERENCE" "$OPENFIRE_GIT_CLONE_DIR"
-echo "Done collecting upstream GIT data."
+download "Jitsi Meet" "https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.$JITSI_MEET_GIT_REFERENCE.tar.bz2" "$JITSI_MEET_DOWNLOAD_DIR"
+echo "Done collecting upstream data."
 echo ""
 
-echo "Building upstream GIT projects..."
+echo "Building upstream projects..."
 buildAndInstallMavenProject "Jitsi Jicofo" "$JICOFO_GIT_CLONE_DIR"
 buildAndInstallMavenProject "Jitsi Videobridge" "$VIDEOBRIDGE_GIT_CLONE_DIR"
 buildAndInstallMavenProject "Jitsi Videobridge Openfire plugin" "$VIDEOBRIDGE_GIT_CLONE_DIR/openfire"
 buildAndInstallMavenProject "Ignite Realtime Openfire" "$OPENFIRE_GIT_CLONE_DIR"
-echo "Done building upstream GIT projects."
+echo "Done building upstream projects."
+
+echo "Put in place the Jitsi Meet source code"
+rm -rf web/src/main/webapp/jitsi-meet
+tar jx -f "$JITSI_MEET_DOWNLOAD_DIR/jitsi-meet-1.0.$JITSI_MEET_GIT_REFERENCE.tar.bz2" --directory web/src/main/webapp
+# Retain the index file, as that has OFMeet-specific customization.
+git checkout -- web/src/main/webapp/jitsi-meet/index.html
 
 cleanWork
 

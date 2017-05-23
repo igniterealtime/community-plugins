@@ -4,7 +4,6 @@
 out/
 build.txt
 **/target/
-ofmeet/build/
-ofmeet/clones/
-ofmeet/src/web/WEB-INF/web.xml
+ofmeet/work/
+ofmeet/repositories/
 target/openfire/lib
