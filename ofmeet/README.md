@@ -26,3 +26,8 @@ Although you can all do this manually, a shell script has been provided that wil
     
     # Build the OFMeet artifacts
     mvn clean package
+
+After a successful execution, the two plugins should be available in these locations:
+
+    offocus/target/offocus.jar
+    ofmeet/target/ofmeet.jar

@@ -1,5 +1,5 @@
 #!/bin/bash
-# ../buildtools/apache-ant-1.9.7/bin/ant -f build.xml -lib ../buildtools/maven-ant-tasks-2.1.3/ clean jar
+# This script collects and puts in place various dependencies of the OFMeet project.
 
 JITSI_MEET_GIT_REFERENCE=1959
 JICOFO_GIT_REFERENCE=jitsi-meet_$JITSI_MEET_GIT_REFERENCE
@@ -13,6 +13,10 @@ JITSI_MEET_DOWNLOAD_DIR=$CLONE_DIR/jitsi-meet-$JITSI_MEET_GIT_REFERENCE
 JICOFO_GIT_CLONE_DIR=$CLONE_DIR/jitsi-jicofo-$JICOFO_GIT_REFERENCE
 VIDEOBRIDGE_GIT_CLONE_DIR=$CLONE_DIR/jitsi-videobridge-$VIDEOBRIDGE_GIT_REFERENCE
 OPENFIRE_GIT_CLONE_DIR=$CLONE_DIR/igniterealtime-openfire-$OPENFIRE_GIT_REFERENCE
+
+# For a truly clean reproduction, delete artifacts from the local maven repository before executing this script.
+# $ rm -rf ~/.m2/repository/org/igniterealtime/
+# $ rm -rf ~/.m2/repository/org/jitsi/
 
 # Removes the working directory.
 #
@@ -115,10 +119,10 @@ echo "Done collecting upstream data."
 echo ""
 
 echo "Building upstream projects..."
+buildAndInstallMavenProject "Ignite Realtime Openfire" "$OPENFIRE_GIT_CLONE_DIR"
 buildAndInstallMavenProject "Jitsi Jicofo" "$JICOFO_GIT_CLONE_DIR"
 buildAndInstallMavenProject "Jitsi Videobridge" "$VIDEOBRIDGE_GIT_CLONE_DIR"
 buildAndInstallMavenProject "Jitsi Videobridge Openfire plugin" "$VIDEOBRIDGE_GIT_CLONE_DIR/openfire"
-buildAndInstallMavenProject "Ignite Realtime Openfire" "$OPENFIRE_GIT_CLONE_DIR"
 echo "Done building upstream projects."
 
 echo "Put in place the Jitsi Meet source code"
