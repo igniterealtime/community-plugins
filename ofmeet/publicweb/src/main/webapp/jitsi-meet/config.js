@@ -41,7 +41,7 @@ var config = { // eslint-disable-line no-unused-vars
     // extension is required.
     desktopSharingFirefoxExtId: null,
     // Whether desktop sharing should be disabled on Firefox.
-    desktopSharingFirefoxDisabled: true,
+    desktopSharingFirefoxDisabled: false,
     // The maximum version of Firefox which requires a jidesha extension.
     // Example: if set to 41, we will require the extension for Firefox versions
     // up to and including 41. On Firefox 42 and higher, we will run without the
@@ -76,6 +76,8 @@ var config = { // eslint-disable-line no-unused-vars
     'During that time service will not be available. ' +
     'Apologise for inconvenience.',*/
     disableThirdPartyRequests: false,
+    // The minumum value a video's height (or width, whichever is smaller) needs
+    // to be in order to be considered high-definition.
     minHDHeight: 540,
     // If true - all users without token will be considered guests and all users
     // with token will be considered non-guests. Only guests will be allowed to

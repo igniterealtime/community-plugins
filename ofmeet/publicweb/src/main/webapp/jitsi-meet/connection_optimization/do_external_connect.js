@@ -1,37 +1,32 @@
-/* global config,
-          createConnectionExternally,
-          getConfigParamsFromUrl,
-          getRoomName */
+/* global config, createConnectionExternally */
+
+import getRoomName from '../react/features/base/config/getRoomName';
+import parseURLParams from '../react/features/base/config/parseURLParams';
 
 /**
  * Implements external connect using createConnectionExternally function defined
- * in external_connect.js for Jitsi Meet. Parses the room name and token from
- * the URL and executes createConnectionExternally.
+ * in external_connect.js for Jitsi Meet. Parses the room name and JSON Web
+ * Token (JWT) from the URL and executes createConnectionExternally.
  *
- * NOTE: If you are using lib-jitsi-meet without Jitsi Meet you should use this
+ * NOTE: If you are using lib-jitsi-meet without Jitsi Meet, you should use this
  * file as reference only because the implementation is Jitsi Meet-specific.
  *
  * NOTE: For optimal results this file should be included right after
  * external_connect.js.
  */
 
-const hashParams = getConfigParamsFromUrl('hash', true);
-const searchParams = getConfigParamsFromUrl('search', true);
+if (typeof createConnectionExternally === 'function') {
+    // URL params have higher proirity than config params.
+    let url
+        = parseURLParams(window.location, true, 'hash')[
+                'config.externalConnectUrl']
+            || config.externalConnectUrl;
+    let roomName;
 
-// URL params have higher proirity than config params.
-let url
-    = hashParams.hasOwnProperty('config.externalConnectUrl')
-        ? hashParams['config.externalConnectUrl']
-        : config.externalConnectUrl;
-
-if (url && window.createConnectionExternally) {
-    const roomName = getRoomName();
-
-    if (roomName) {
+    if (url && (roomName = getRoomName())) {
         url += `?room=${roomName}`;
 
-        const token
-            = hashParams['config.token'] || config.token || searchParams.jwt;
+        const token = parseURLParams(window.location, true, 'search').jwt;
 
         if (token) {
             url += `&token=${token}`;

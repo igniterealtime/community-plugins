@@ -4,8 +4,11 @@ if [ ! -f ~/github/jitsi-meet/jitsi-meet.tar.bz2 ]; then
   echo "Cannot find jitsi-meet distributable! Did you run `make source-package` ?";
   exit 1;
 fi
+
 rm -rf ~/github/community-plugins/ofmeet/publicweb/src/main/webapp/jitsi-meet
-tar jxf ~/github/jitsi-meet/jitsi-meet.tar.bz2 --directory ~/github/community-plugins/ofmeet/publicweb/src/main/webapp
+#tar jxf ~/github/jitsi-meet/jitsi-meet.tar.bz2 --directory ~/github/community-plugins/ofmeet/publicweb/src/main/webapp
+curl https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.1959.tar.bz2 | tar jx --directory ~/github/community-plugins/ofmeet/publicweb/src/main/webapp
+
 #cp -R ~/github/jitsi-meet ~/github/community-plugins/ofmeet/publicweb/src/main/webapp/jitsi-meet
 #rm -rf ~/github/community-plugins/ofmeet/publicweb/src/main/webapp/jitsi-meet/android
 #rm -rf ~/github/community-plugins/ofmeet/publicweb/src/main/webapp/jitsi-meet/modules

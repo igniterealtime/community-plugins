@@ -14,6 +14,10 @@
     "defaultNickname": "ex. Jane Pink",
     "defaultLink": "e.g. __url__",
     "callingName": "__name__",
+    "audioOnly": {
+        "audioOnly": "Audio only",
+        "featureToggleDisabled": "Toggling of __feature__ is disabled while in audio only mode"
+    },
     "userMedia": {
       "react-nativeGrantPermissions": "Select <b><i>Allow</i></b> when your browser asks for permissions.",
       "chromeGrantPermissions": "Select <b><i>Allow</i></b> when your browser asks for permissions.",
@@ -92,6 +96,7 @@
         "rejoinKeyTitle": "Rejoin"
     },
     "toolbar": {
+        "audioonly": "Enable / Disable audio only mode (saves bandwidth)",
         "mute": "Mute / Unmute",
         "videomute": "Start / Stop camera",
         "authenticate": "Authenticate",
@@ -149,7 +154,6 @@
         "selectAudioOutput": "Audio output",
         "followMe": "Everyone follows me",
         "noDevice": "None",
-        "noPermission": "Permission to use device is not granted",
         "cameraAndMic": "Camera and microphone",
         "moderator": "MODERATOR",
         "password": "SET PASSWORD",
@@ -213,6 +217,7 @@
     },
     "dialog": {
         "add": "Add",
+        "allow": "Allow",
         "kickMessage": "Ouch! You have been kicked out of the meet!",
         "popupError": "Your browser is blocking popup windows from this site. Please enable popups in your browser's security settings and try again.",
         "passwordErrorTitle": "Password Error",
@@ -331,7 +336,9 @@
         "muteParticipantTitle": "Mute this participant?",
         "muteParticipantBody": "You won't be able to unmute them, but they can unmute themselves at any time.",
         "muteParticipantButton": "Mute",
-        "remoteControlTitle": "Remote Control",
+        "remoteControlTitle": "Remote desktop control",
+        "remoteControlRequestMessage": "Will you allow __user__ to remotely control your desktop?",
+        "remoteControlShareScreenWarning": "Note that if you press \"Allow\" you will share your screen!",
         "remoteControlDeniedMessage": "__user__ rejected your remote control request!",
         "remoteControlAllowedMessage": "__user__ accepted your remote control request!",
         "remoteControlErrorMessage": "An error occurred while trying to request remote control permissions from __user__!",
@@ -421,18 +428,29 @@
         "speakerTime": "Speaker Time"
     },
     "deviceSelection": {
-        "currentlyVideoMuted": "Video is currently muted",
         "deviceSettings": "Device settings",
-        "noOtherDevices": "No other devices available",
+        "noPermission": "Permission not granted",
+        "previewUnavailable": "Preview unavailable",
         "selectADevice": "Select a device",
         "testAudio": "Test sound"
     },
     "invite": {
         "addPassword": "Add password",
+        "dialInNumbers": "Dial-in telephone numbers",
+        "errorFetchingNumbers": "Failed to obtain dial-in numbers",
         "hidePassword": "Hide password",
         "inviteTo": "Invite people to __conferenceName__",
+        "loadingNumbers": "Loading...",
         "locked": "This call is locked. New callers must have the link and enter the password to join.",
+        "noNumbers": "No numbers available",
+        "numbersDisabled": "Dialing in has been disabled",
         "showPassword": "Show password",
         "unlocked": "This call is unlocked. Any new caller with the link may join the call."
+    },
+    "videoStatus": {
+        "hd": "HD",
+        "hdVideo": "HD video",
+        "sd": "SD",
+        "sdVideo": "SD video"
     }
 }

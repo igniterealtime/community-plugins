@@ -19,8 +19,7 @@ import analytics from './modules/analytics/analytics';
 
 import EventEmitter from "events";
 
-import { showDesktopSharingButton } from './react/features/toolbox';
-
+import { getLocationContextRoot } from './react/features/app';
 import {
     AVATAR_ID_COMMAND,
     AVATAR_URL_COMMAND,
@@ -50,6 +49,7 @@ import {
     mediaPermissionPromptVisibilityChanged,
     suspendDetected
 } from './react/features/overlay';
+import { showDesktopSharingButton } from './react/features/toolbox';
 
 const ConnectionEvents = JitsiMeetJS.events.connection;
 const ConnectionErrors = JitsiMeetJS.errors.connection;
@@ -273,9 +273,11 @@ function muteLocalVideo(muted) {
 function maybeRedirectToWelcomePage(options) {
     // if close page is enabled redirect to it, without further action
     if (config.enableClosePage) {
+        const { isGuest } = APP.store.getState()['features/jwt'];
+
         // save whether current user is guest or not, before navigating
         // to close page
-        window.sessionStorage.setItem('guest', APP.tokenData.isGuest);
+        window.sessionStorage.setItem('guest', isGuest);
         assignWindowLocationPathname('static/'
                 + (options.feedbackSubmitted ? "close.html" : "close2.html"));
         return;
@@ -309,18 +311,11 @@ function assignWindowLocationPathname(pathname) {
     const windowLocation = window.location;
 
     if (!pathname.startsWith('/')) {
-        // XXX To support a deployment in a sub-directory, assume that the room
-        // (name) is the last non-directory component of the path (name).
-        let contextRoot = windowLocation.pathname;
-
-        contextRoot
-            = contextRoot.substring(0, contextRoot.lastIndexOf('/') + 1);
-
         // A pathname equal to ./ specifies the current directory. It will be
         // fine but pointless to include it because contextRoot is the current
         // directory.
         pathname.startsWith('./') && (pathname = pathname.substring(2));
-        pathname = contextRoot + pathname;
+        pathname = getLocationContextRoot(windowLocation) + pathname;
     }
 
     windowLocation.pathname = pathname;
@@ -603,8 +598,8 @@ export default {
 
                 APP.store.dispatch(showDesktopSharingButton());
 
-                APP.remoteControl.init();
                 this._createRoom(tracks);
+                APP.remoteControl.init();
 
                 if (UIUtil.isButtonEnabled('contacts')
                     && !interfaceConfig.filmStripOnly) {
@@ -1085,6 +1080,43 @@ export default {
             });
     },
 
+    /**
+     * Triggers a tooltip to display when a feature was attempted to be used
+     * while in audio only mode.
+     *
+     * @param {string} featureName - The name of the feature that attempted to
+     * toggle.
+     * @private
+     * @returns {void}
+     */
+    _displayAudioOnlyTooltip(featureName) {
+        let tooltipElementId = null;
+
+        switch (featureName) {
+        case 'screenShare':
+            tooltipElementId = '#screenshareWhileAudioOnly';
+            break;
+        case 'videoMute':
+            tooltipElementId = '#unmuteWhileAudioOnly';
+            break;
+        }
+
+        if (tooltipElementId) {
+            APP.UI.showToolbar(6000);
+            APP.UI.showCustomToolbarPopup(
+                tooltipElementId, true, 5000);
+        }
+    },
+
+    /**
+     * Returns whether or not the conference is currently in audio only mode.
+     *
+     * @returns {boolean}
+     */
+    isAudioOnly() {
+        return Boolean(
+            APP.store.getState()['features/base/conference'].audioOnly);
+    },
 
     videoSwitchInProgress: false,
     toggleScreenSharing(shareScreen = !this.isSharingScreen) {
@@ -1094,6 +1126,11 @@ export default {
         }
         if (!this.isDesktopSharingEnabled) {
             logger.warn("Cannot toggle screen sharing: not supported.");
+            return;
+        }
+
+        if (this.isAudioOnly()) {
+            this._displayAudioOnlyTooltip('screenShare');
             return;
         }
 
@@ -1400,6 +1437,10 @@ export default {
                 }
             });
 
+            APP.UI.addListener(
+                UIEvents.VIDEO_UNMUTING_WHILE_AUDIO_ONLY,
+                () => this._displayAudioOnlyTooltip('videoMute'));
+
             APP.UI.addListener(UIEvents.PINNED_ENDPOINT,
             (smallVideo, isPinned) => {
                 let smallVideoId = smallVideo.getId();
@@ -1442,6 +1483,10 @@ export default {
         room.on(ConferenceEvents.DISPLAY_NAME_CHANGED, (id, displayName) => {
             const formattedDisplayName
                 = displayName.substr(0, MAX_DISPLAY_NAME_LENGTH);
+            APP.store.dispatch(participantUpdated({
+                id,
+                name: formattedDisplayName
+            }));
             APP.API.notifyDisplayNameChanged(id, formattedDisplayName);
             APP.UI.changeDisplayName(id, formattedDisplayName);
         });
@@ -1508,7 +1553,14 @@ export default {
         });
 
         APP.UI.addListener(UIEvents.AUDIO_MUTED, muteLocalAudio);
-        APP.UI.addListener(UIEvents.VIDEO_MUTED, muteLocalVideo);
+        APP.UI.addListener(UIEvents.VIDEO_MUTED, muted => {
+            if (this.isAudioOnly() && !muted) {
+                this._displayAudioOnlyTooltip('videoMute');
+                return;
+            }
+
+            muteLocalVideo(muted);
+        });
 
         room.on(ConnectionQualityEvents.LOCAL_STATS_UPDATED,
             (stats) => {
@@ -1600,7 +1652,10 @@ export default {
         });
 
         APP.UI.addListener(UIEvents.SIP_DIAL, (sipNumber) => {
-            room.dial(sipNumber);
+            room.dial(sipNumber)
+                .catch((err) => {
+                    logger.error("Error dialing out", err);
+                });
         });
 
         APP.UI.addListener(UIEvents.RESOLUTION_CHANGED,
@@ -1657,6 +1712,14 @@ export default {
                     micDeviceId: null
                 })
                 .then(([stream]) => {
+                    if (this.isAudioOnly()) {
+                        return stream.mute()
+                            .then(() => stream);
+                    }
+
+                    return stream;
+                })
+                .then(stream => {
                     this.useVideoStream(stream);
                     logger.log('switched local video device');
                     APP.settings.setCameraDeviceId(cameraDeviceId, true);
@@ -1702,6 +1765,18 @@ export default {
                     });
             }
         );
+
+        APP.UI.addListener(UIEvents.TOGGLE_AUDIO_ONLY, audioOnly => {
+            muteLocalVideo(audioOnly);
+
+            // Immediately update the UI by having remote videos and the large
+            // video update themselves instead of waiting for some other event
+            // to cause the update, usually PARTICIPANT_CONN_STATUS_CHANGED.
+            // There is no guarantee another event will trigger the update
+            // immediately and in all situations, for example because a remote
+            // participant is having connection trouble so no status changes.
+            APP.UI.updateAllVideos();
+        });
 
         APP.UI.addListener(
             UIEvents.TOGGLE_SCREENSHARING, this.toggleScreenSharing.bind(this)
@@ -2052,6 +2127,12 @@ export default {
         if (formattedNickname === APP.settings.getDisplayName()) {
             return;
         }
+
+        APP.store.dispatch(participantUpdated({
+            id: this.getMyUserId(),
+            local: true,
+            name: formattedNickname
+        }));
 
         APP.settings.setDisplayName(formattedNickname);
         if (room) {
