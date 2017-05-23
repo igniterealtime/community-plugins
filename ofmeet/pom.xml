@@ -17,10 +17,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.igniterealtime.openfire</groupId>
-    <artifactId>ofmeet-parent</artifactId>
-    <version>0.4.9-SNAPSHOT</version>
-    <name>OFMeet Openfire Plugin (parent)</name>
+    <groupId>org.igniterealtime.openfire.ofmeet</groupId>
+    <artifactId>parent</artifactId>
+    <version>0.4.10-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -28,10 +27,10 @@
     </properties>
 
     <modules>
-        <module>publicweb</module>
-        <module>ofmeet-config</module>
-        <module>openfireplugin</module>
-        <module>offocusplugin</module>
+        <module>web</module>
+        <module>config</module>
+        <module>ofmeet</module>
+        <module>offocus</module>
     </modules>
 
 </project>

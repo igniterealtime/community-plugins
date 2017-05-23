@@ -21,7 +21,7 @@
     <name>Openfire Focus Provider</name>
     <description>Provides Focus component for the Jitsi Videobridge</description>
     <author>Ignite Realtime</author>
-    <version>0.4.9</version>
-    <date>04/25/2017</date>
-    <minServerVersion>4.1.4</minServerVersion>
+    <version>0.4.10 Alpha</version>
+    <date>05/23/2017</date>
+    <minServerVersion>4.2.0 Alpha</minServerVersion>
 </plugin>

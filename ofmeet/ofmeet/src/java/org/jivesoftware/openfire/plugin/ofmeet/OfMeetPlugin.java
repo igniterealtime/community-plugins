@@ -228,7 +228,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		final File libs = new File(pluginDirectory.getPath() + File.separator + "lib");
 		final File[] matchingFiles = libs.listFiles( new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return name.toLowerCase().startsWith("ofmeet-publicweb") && name.toLowerCase().endsWith(".war");
+				return name.toLowerCase().startsWith("web-") && name.toLowerCase().endsWith(".war");
 			}
 		});
 
