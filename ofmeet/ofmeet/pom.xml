@@ -18,15 +18,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>plugins</artifactId>
-        <groupId>org.igniterealtime.openfire</groupId>
-        <version>4.2.0-SNAPSHOT</version>
-        <relativePath/>
+        <groupId>org.igniterealtime.openfire.ofmeet</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.4.10-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.igniterealtime.openfire.ofmeet</groupId>
     <artifactId>ofmeet</artifactId>
-    <version>0.4.10-SNAPSHOT</version>
+
     <name>OFMeet Openfire Plugin</name>
     <description>An Openfire plugin that instantiates a Jitsi Video Bridge, as well as a Jitsi Meet web client.</description>
 
@@ -34,13 +32,71 @@
         <sourceDirectory>src/java</sourceDirectory>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.igniterealtime.openfire.plugins</groupId>
+                        <artifactId>openfire-plugin-assembly-descriptor</artifactId>
+                        <version>${openfire.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <finalName>${project.artifactId}</finalName>
+                            <attach>false</attach>
+                            <!-- This is where we use our shared assembly descriptor -->
+                            <descriptorRefs>
+                                <descriptorRef>openfire-plugin-assembly</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
-            <!-- Compiles the Openfire Admin Console JSP pages. -->
+            <!-- Compile the JSP pages -->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-jspc-maven-plugin</artifactId>
+                <version>9.2.14.v20151106</version>
+                <configuration>
+                    <webAppSourceDirectory>${project.build.sourceDirectory}/../web</webAppSourceDirectory>
+                    <webXml>${project.build.sourceDirectory}/../web/WEB-INF/web.xml</webXml>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>jspc</id>
+                        <goals>
+                            <goal>jspc</goal>
+                        </goals>
+                        <configuration>
+                            <jspc>
+                                <package>org.jivesoftware.openfire.plugin.${project.artifactId}</package>
+                            </jspc>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.igniterealtime.openfire</groupId>
+                        <artifactId>xmppserver</artifactId>
+                        <version>${openfire.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.igniterealtime.openfire</groupId>
+                        <artifactId>webadmintld</artifactId>
+                        <version>${openfire.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
+
 
             <!-- Fix for Mina 2.x -->
             <!-- https://issues.apache.org/jira/browse/DIRMINA-919 -->
@@ -57,24 +113,20 @@
         <dependency>
             <groupId>org.igniterealtime.openfire.ofmeet</groupId>
             <artifactId>web</artifactId>
-            <version>0.4.10-SNAPSHOT</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.igniterealtime.openfire.ofmeet</groupId>
             <artifactId>config</artifactId>
-            <version>0.4.10-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.igniterealtime.openfire</groupId>
             <artifactId>xmppserver</artifactId>
-            <version>${openfire.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jitsi</groupId>
             <artifactId>jitsi-videobridge-openfire</artifactId>
-            <version>2.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>

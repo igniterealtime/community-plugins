@@ -15,16 +15,8 @@ Install the offocus and ofmeet plugins into your Openfire instance.
 Build instructions
 ------------------
 
-This project is a Apache Maven project, but has dependencies that are not published in publicly accessible Maven repositories.
+This project is a Apache Maven project, and is build using the standard Maven invocation:
 
-To be able to build this project, the Maven artifacts for Openfire, Jitsi Videobridge, the Jitsi Videobridge Openfire plugin and Jicofo should be installed in your local Maven repository. Additionally, the source for Jitsi Meet should be added to the 'web' module, that on Github only contains those files modified for OFMeet.
-
-Although you can all do this manually, a shell script has been provided that will do this for you. The script depends on GIT, curl and Maven, which should be available on your path.
-
-    # Download, build and install all dependencies
-    ./prepare-dependencies.sh
-    
-    # Build the OFMeet artifacts
     mvn clean package
 
 After a successful execution, the two plugins should be available in these locations:
