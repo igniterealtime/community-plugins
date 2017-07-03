@@ -87,6 +87,8 @@ public class ChatApiPlugin implements Plugin, PropertyEventListener {
 	/** The custom authentication filter */
 	private String customAuthFilterClassName;
 
+    private ServletContextHandler context = null;
+    private ServletContextHandler context2 = null;
 
 	/**
 	 * Gets the single instance of ChatApiPlugin.
@@ -127,8 +129,7 @@ public class ChatApiPlugin implements Plugin, PropertyEventListener {
 		PropertyEventDispatcher.addListener(this);
 
 		// start REST service on http-bind port
-		ContextHandlerCollection contexts = HttpBindManager.getInstance().getContexts();
-		ServletContextHandler context = new ServletContextHandler(contexts, "/rest", ServletContextHandler.SESSIONS);
+		context = new ServletContextHandler(null, "/rest", ServletContextHandler.SESSIONS);
 		context.setClassLoader(this.getClass().getClassLoader());
 
 		ServletHolder restHolder = new ServletHolder(new JerseyWrapper());
@@ -147,7 +148,10 @@ public class ChatApiPlugin implements Plugin, PropertyEventListener {
 		context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
 		context.setSecurityHandler(basicAuth("ofmeet"));
 
-		WebAppContext context2 = new WebAppContext(contexts, pluginDirectory.getPath(), "/apps");
+		HttpBindManager.getInstance().addJettyHandler(context);
+
+
+		context2 = new WebAppContext(null, pluginDirectory.getPath(), "/apps");
 		context2.setClassLoader(this.getClass().getClassLoader());
 
 		// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
@@ -159,6 +163,8 @@ public class ChatApiPlugin implements Plugin, PropertyEventListener {
 
 		context2.setWelcomeFiles(new String[]{"index.jsp"});
 		context2.setSecurityHandler(basicAuth("ofmeet"));
+
+		HttpBindManager.getInstance().addJettyHandler(context2);
 
 		Security.addProvider( new OfMeetSaslProvider() );
 		SASLAuthentication.addSupportedMechanism( OfMeetSaslServer.MECHANISM_NAME );
@@ -174,6 +180,9 @@ public class ChatApiPlugin implements Plugin, PropertyEventListener {
 
 		SASLAuthentication.removeSupportedMechanism( OfMeetSaslServer.MECHANISM_NAME );
 		Security.removeProvider( OfMeetSaslProvider.NAME );
+
+		HttpBindManager.getInstance().removeJettyHandler(context);
+		HttpBindManager.getInstance().removeJettyHandler(context2);
 	}
 
 	/**

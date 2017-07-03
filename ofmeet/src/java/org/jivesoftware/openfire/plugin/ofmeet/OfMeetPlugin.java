@@ -94,6 +94,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private UserManager userManager = XMPPServer.getInstance().getUserManager();
     private ComponentManager componentManager;
     private OfMeetIQHandler ofmeetIQHandler = null;
+    private ServletContextHandler context = null;
+    private ServletContextHandler context2 = null;
 
     public static OfMeetPlugin self;
 	public static String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
@@ -116,7 +118,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     public void initializePlugin(final PluginManager manager, final File pluginDirectory)
     {
         componentManager = ComponentManagerFactory.getComponentManager();
-		ContextHandlerCollection contexts = HttpBindManager.getInstance().getContexts();
 
 		this.manager = manager;
 		this.pluginDirectory = pluginDirectory;
@@ -223,7 +224,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 			Log.info("OfMeet Plugin - Initialize websockets ");
 
-			ServletContextHandler context = new ServletContextHandler(contexts, "/ofmeetws", ServletContextHandler.SESSIONS);
+			context = new ServletContextHandler(null, "/ofmeetws", ServletContextHandler.SESSIONS);
 			context.addServlet(new ServletHolder(new XMPPServlet()),"/server");
 
 			// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
@@ -232,10 +233,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			initializers.add(new ContainerInitializer(new JettyJasperInitializer(), null));
 			context.setAttribute("org.eclipse.jetty.containerInitializers", initializers);
 			context.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+			HttpBindManager.getInstance().addJettyHandler(context);
 
 			Log.info("OfMeet Plugin - Initialize webservice");
 
-			WebAppContext context2 = new WebAppContext(contexts, pluginDirectory.getPath(), "/ofmeet");
+			context2 = new WebAppContext(null, pluginDirectory.getPath(), "/ofmeet");
 			context2.setClassLoader(this.getClass().getClassLoader());
 
 			// Ensure the JSP engine is initialized correctly (in order to be able to cope with Tomcat/Jasper precompiled JSPs).
@@ -266,6 +268,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 					context2.setSecurityHandler(basicAuth("ofmeet"));
 				}
 			}
+			HttpBindManager.getInstance().addJettyHandler(context2);
 
 			Log.info("OfMeet Plugin - Initialize email listener");
 
@@ -311,6 +314,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         	ClusterManager.removeListener(this);
 
 			EmailListener.getInstance().stop();
+
+			HttpBindManager.getInstance().removeJettyHandler(context);
+			HttpBindManager.getInstance().removeJettyHandler(context2);
+
 
         } catch (Exception e) {
 
