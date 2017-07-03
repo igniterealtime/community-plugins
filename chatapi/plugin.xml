@@ -6,7 +6,7 @@
     <description>Enables chat and groupchat over a RESTful API and Server Sent Events (SSE).</description>
     <author>Ignite Realtime</author>
     <version>0.0.2</version>
-    <date>02/14/2017</date>
+    <date>07/03/2017</date>
     <minServerVersion>4.1.0</minServerVersion>
     <adminconsole>
         <tab id="tab-chatview" name="Chat API" url="rest-api.jsp" description="Enables chat/groupchat over a RESTFul API and Sever Sent Events (SSE)">
