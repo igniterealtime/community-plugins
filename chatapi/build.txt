@@ -1,7 +1,9 @@
 Buildfile: C:\Projects\ignite\community-plugins\chatapi\build.xml
 
 clean:
-   [delete] Deleting directory C:\Projects\ignite\community-plugins\chatapi\build
+   [delete] Deleting: C:\Projects\ignite\community-plugins\chatapi\lib\plugin-chatapi-jspc.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins\chatapi\lib\plugin-chatapi.jar
+   [delete] Deleting: C:\Projects\ignite\community-plugins\openfire_4_1_5\target\openfire\plugins\chatapi.jar
 
 init:
     [mkdir] Created dir: C:\Projects\ignite\community-plugins\chatapi\build\classes
@@ -39,11 +41,11 @@ compile-jsps:
      [copy] Copying 1 file to C:\Projects\ignite\community-plugins\chatapi\src\web\WEB-INF
 
 jar:
-     [copy] Copying 113 files to C:\Projects\ignite\community-plugins\chatapi\build\jar
+     [copy] Copying 114 files to C:\Projects\ignite\community-plugins\chatapi\build\jar
      [copy] Copying 22 files to C:\Projects\ignite\community-plugins\chatapi\build\jar\lib
      [copy] Copying 28 files to C:\Projects\ignite\community-plugins\chatapi\build\jar
       [jar] Building jar: C:\Projects\ignite\community-plugins\openfire_4_1_5\target\openfire\plugins\chatapi.jar
    [delete] Deleting directory C:\Projects\ignite\community-plugins\chatapi\build
 
 BUILD SUCCESSFUL
-Total time: 13 seconds
+Total time: 10 seconds

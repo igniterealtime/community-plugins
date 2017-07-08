@@ -5,14 +5,14 @@
     <name>ChatAPI</name>
     <description>Enables chat and groupchat over a RESTful API and Server Sent Events (SSE).</description>
     <author>Ignite Realtime</author>
-    <version>0.0.2</version>
-    <date>07/03/2017</date>
-    <minServerVersion>4.1.0</minServerVersion>
+    <version>0.0.3</version>
+    <date>07/08/2017</date>
+    <minServerVersion>4.1.5</minServerVersion>
     <adminconsole>
-        <tab id="tab-chatview" name="Chat API" url="rest-api.jsp" description="Enables chat/groupchat over a RESTFul API and Sever Sent Events (SSE)">
-            <sidebar id="sidebar-chatview-settings" name="Settings">
-                <item id="rest-api" name="REST API" url="rest-api.jsp" description="Click to manage the service that enables chat/groupchat over a RESTFul API and Sever Sent Events (SSE)" />
-                <item id="swagger-ui" name="Sandbox" url="swagger-ui-sandbox.jsp" description="Swagger UI Sandbox to test REST API"/>                                      
+        <tab id="tab-webclients" name="${admin.sidebar.webclients.name}" description="${admin.sidebar.webclients.description}" url="rest-api.jsp">
+            <sidebar id="tab-chatapi" name="${admin.sidebar.webclients.item.chatapi.name}" description="${admin.sidebar.webclients.item.chatapi.description}">
+                <item url="rest-api.jsp" id="rest-api" name="${admin.sidebar.webclients.item.settings.name}" description="${admin.sidebar.webclients.item.settings.description}" />
+                <item url="swagger-ui-sandbox.jsp" id="swagger-ui" name="${admin.sidebar.webclients.item.swagger.name}" description="${admin.sidebar.webclients.item.swagger.description}" />                                                 
             </sidebar>
         </tab>
     </adminconsole>
